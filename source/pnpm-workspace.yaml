@@ -1,0 +1,22 @@
+packages:
+  - "packages/*"          # shared-utils, shared-api (future server-side packages)
+  - "backend"
+  - "frontend/hub"
+  - "frontend/game"
+  - "frontend/trade"
+  - "frontend/dating"
+  - "frontend/sports"
+  - "frontend/admin-dashboard"
+  - "frontend/shared-ui"
+  - "shared-types"
+  - "scripts"
+
+# Only run postinstall / build scripts for packages that actually need them.
+# This avoids triggering native compilation for packages that just ship JS.
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - esbuild
+  - msgpackr-extract
+  - prisma
+  - sharp

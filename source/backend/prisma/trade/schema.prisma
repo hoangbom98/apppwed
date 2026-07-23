@@ -1,0 +1,541 @@
+// =============================================================================
+// TRADE DATABASE SCHEMA — v2.1
+// Database: trade_db
+// Prisma Client output: node_modules/.prisma/trade-client
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/trade-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("TRADE_DATABASE_URL")
+}
+
+// =============================================================================
+// USER
+// =============================================================================
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique @db.VarChar(150)
+  password  String    @db.VarChar(255)
+  fullName  String?   @db.VarChar(100)
+  avatar    String?   @db.VarChar(500)
+  phone     String?   @db.VarChar(20)
+  // user | admin
+  role      String    @default("user") @db.VarChar(20)
+  // pending | verified | rejected
+  kycStatus String    @default("pending") @db.VarChar(20)
+  kycData   Json?
+  // active | suspended | banned
+  status    String    @default("active") @db.VarChar(20)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  orders        Order[]
+  positions     Position[]
+  wallets       Wallet[]
+  withdrawals   Withdrawal[]
+  kyc           Kyc?
+  transactions  Transaction[]
+  notifications Notification[]
+  alerts        PriceAlert[]
+  watchlists    Watchlist[]
+
+  @@index([email])
+  @@index([status])
+  @@index([role])
+  @@index([kycStatus])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// =============================================================================
+// MARKET & SYMBOL
+// =============================================================================
+
+model Market {
+  id        String   @id @default(cuid())
+  // US | HK | JP | UK | DE | CRYPTO | FOREX | COMMODITY
+  code      String   @unique @db.VarChar(20)
+  name      String   @db.VarChar(100)
+  // stock | forex | crypto | commodity | index
+  type      String   @db.VarChar(20)
+  timezone  String?  @db.VarChar(50)  // e.g. America/New_York
+  openTime  String?  @db.VarChar(10)  // e.g. 09:30
+  closeTime String?  @db.VarChar(10)  // e.g. 16:00
+  // active | closed | maintenance
+  status    String   @default("active") @db.VarChar(20)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  symbols   Symbol[]
+
+  @@map("markets")
+}
+
+model Symbol {
+  id         String   @id @default(cuid())
+  marketId   String   @db.VarChar(30)
+  market     Market   @relation(fields: [marketId], references: [id])
+  // AAPL | BTCUSDT | EURUSD
+  code       String   @unique @db.VarChar(30)
+  name       String   @db.VarChar(100)
+  baseAsset  String?  @db.VarChar(20)
+  quoteAsset String?  @db.VarChar(20)
+  minQty     Decimal  @default(0) @db.Decimal(18, 8)
+  maxQty     Decimal  @default(0) @db.Decimal(18, 8)
+  stepSize   Decimal  @default(0) @db.Decimal(18, 8)
+  tickSize   Decimal  @default(0) @db.Decimal(18, 8)
+  minLeverage Int     @default(1)
+  maxLeverage Int     @default(1)
+  // active | halted | delisted
+  status     String   @default("active") @db.VarChar(20)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orders       Order[]
+  positions    Position[]
+  priceHistory PriceHistory[]
+  alerts       PriceAlert[]
+  watchlistItems WatchlistItem[]
+
+  @@index([marketId, status])
+  @@map("symbols")
+}
+
+// =============================================================================
+// PRICE HISTORY (OHLCV candles)
+// =============================================================================
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  symbolId  String   @db.VarChar(30)
+  symbol    Symbol   @relation(fields: [symbolId], references: [id])
+  price     Decimal  @db.Decimal(18, 8)  // last/close price
+  high      Decimal  @db.Decimal(18, 8)
+  low       Decimal  @db.Decimal(18, 8)
+  open      Decimal  @db.Decimal(18, 8)
+  close     Decimal  @db.Decimal(18, 8)
+  volume    Decimal  @default(0) @db.Decimal(18, 8)
+  // 1m | 5m | 15m | 1h | 4h | 1d | 1w
+  interval  String   @db.VarChar(10)
+  timestamp DateTime
+
+  @@index([symbolId, timestamp])
+  @@index([symbolId, interval, timestamp])
+  @@map("price_history")
+}
+
+// =============================================================================
+// ORDER
+// =============================================================================
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  symbolId    String   @db.VarChar(30)
+  symbol      Symbol   @relation(fields: [symbolId], references: [id])
+  // buy | sell
+  side        String   @db.VarChar(10)
+  // market | limit | stop_loss | take_profit | trailing_stop
+  type        String   @db.VarChar(30)
+  price       Decimal  @db.Decimal(18, 8)
+  quantity    Decimal  @db.Decimal(18, 8)
+  executedQty Decimal  @default(0) @db.Decimal(18, 8)
+  avgPrice    Decimal? @db.Decimal(18, 8)
+  stopPrice   Decimal? @db.Decimal(18, 8)
+  leverage    Int      @default(1)
+  // pending | partial | filled | cancelled | expired | rejected
+  status      String   @default("pending") @db.VarChar(20)
+  note        String?  @db.VarChar(500)
+  filledAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([symbolId, status])
+  @@map("orders")
+}
+
+// =============================================================================
+// POSITION
+// =============================================================================
+
+model Position {
+  id           String    @id @default(cuid())
+  userId       String    @db.VarChar(30)
+  user         User      @relation(fields: [userId], references: [id])
+  symbolId     String    @db.VarChar(30)
+  symbol       Symbol    @relation(fields: [symbolId], references: [id])
+  // long | short
+  side         String    @db.VarChar(10)
+  quantity     Decimal   @db.Decimal(18, 8)
+  entryPrice   Decimal   @db.Decimal(18, 8)
+  currentPrice Decimal   @db.Decimal(18, 8)
+  stopLoss     Decimal?  @db.Decimal(18, 8)
+  takeProfit   Decimal?  @db.Decimal(18, 8)
+  pnl          Decimal   @default(0) @db.Decimal(18, 8)
+  pnlPercent   Decimal   @default(0) @db.Decimal(8, 2)
+  leverage     Int       @default(1)
+  margin       Decimal   @default(0) @db.Decimal(18, 2)    // reserved margin
+  // open | closed
+  status       String    @default("open") @db.VarChar(20)
+  closedPrice  Decimal?  @db.Decimal(18, 8)
+  closedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([symbolId, status])
+  @@map("positions")
+}
+
+// =============================================================================
+// WALLET
+// =============================================================================
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Decimal  @default(0) @db.Decimal(18, 2)
+  frozen    Decimal  @default(0) @db.Decimal(18, 2)   // locked in open orders/positions
+  currency  String   @default("USD") @db.VarChar(10)
+  updatedAt DateTime @updatedAt
+
+  @@map("wallets")
+}
+
+// =============================================================================
+// WITHDRAWAL
+// =============================================================================
+
+model Withdrawal {
+  id          String    @id @default(cuid())
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  amount      Decimal   @db.Decimal(18, 2)
+  fee         Decimal   @default(0) @db.Decimal(18, 2)
+  netAmount   Decimal   @db.Decimal(18, 2)
+  // bank | usdt | skrill | neteller | wire
+  method      String    @db.VarChar(30)
+  address     String?   @db.VarChar(200)
+  bankInfo    Json?
+  // pending | processing | completed | failed | cancelled
+  status      String    @default("pending") @db.VarChar(20)
+  txId        String?   @db.VarChar(200)
+  note        String?   @db.VarChar(500)
+  adminNote   String?   @db.VarChar(500)
+  processedBy String?   @db.VarChar(30)
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("withdrawals")
+}
+
+// =============================================================================
+// KYC
+// =============================================================================
+
+model Kyc {
+  id         String    @id @default(cuid())
+  userId     String    @unique @db.VarChar(30)
+  user       User      @relation(fields: [userId], references: [id])
+  fullName   String    @db.VarChar(100)
+  idNumber   String    @db.VarChar(30)
+  idFront    String    @db.VarChar(500)
+  idBack     String    @db.VarChar(500)
+  selfie     String    @db.VarChar(500)
+  address    String?   @db.VarChar(500)
+  // pending | approved | rejected
+  status     String    @default("pending") @db.VarChar(20)
+  note       String?   @db.VarChar(500)
+  reviewedBy String?   @db.VarChar(30)
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("kyc")
+}
+
+// =============================================================================
+// TRANSACTION (wallet ledger)
+// =============================================================================
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String   @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Decimal  @db.Decimal(18, 2)
+  // deposit | withdraw | trade_open | trade_close | fee | bonus | referral
+  type          String   @db.VarChar(30)
+  referenceId   String?  @db.VarChar(30)
+  referenceType String?  @db.VarChar(30)
+  note          String?  @db.VarChar(500)
+  balanceAfter  Decimal  @db.Decimal(18, 2)
+  createdAt     DateTime @default(now())
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@map("transactions")
+}
+
+// =============================================================================
+// NOTIFICATION
+// =============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  // order_filled | kyc_update | deposit | withdraw | price_alert | system | margin_call
+  type      String   @db.VarChar(30)
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  link      String?  @db.VarChar(500)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// =============================================================================
+// PRICE ALERT (user-defined triggers)
+// =============================================================================
+
+model PriceAlert {
+  id         String    @id @default(cuid())
+  userId     String    @db.VarChar(30)
+  user       User      @relation(fields: [userId], references: [id])
+  symbolId   String    @db.VarChar(30)
+  symbol     Symbol    @relation(fields: [symbolId], references: [id])
+  // above | below
+  condition  String    @db.VarChar(20)
+  price      Decimal   @db.Decimal(18, 8)
+  // active | triggered | cancelled
+  status     String    @default("active") @db.VarChar(20)
+  note       String?   @db.VarChar(255)
+  triggeredAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, status])
+  @@index([symbolId, status])
+  @@map("price_alerts")
+}
+
+// =============================================================================
+// WATCHLIST
+// =============================================================================
+
+model Watchlist {
+  id        String          @id @default(cuid())
+  userId    String          @db.VarChar(30)
+  user      User            @relation(fields: [userId], references: [id])
+  name      String          @db.VarChar(100)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  items     WatchlistItem[]
+
+  @@index([userId])
+  @@map("watchlists")
+}
+
+model WatchlistItem {
+  id          String    @id @default(cuid())
+  watchlistId String    @db.VarChar(30)
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id])
+  symbolId    String    @db.VarChar(30)
+  symbol      Symbol    @relation(fields: [symbolId], references: [id])
+  sortOrder   Int       @default(0)
+  addedAt     DateTime  @default(now())
+
+  @@unique([watchlistId, symbolId])
+  @@map("watchlist_items")
+}
+
+// =============================================================================
+// SHARED MODULES — Support Chat / Ticket / Knowledge / Translation / Files
+// =============================================================================
+
+model SupportRoom {
+  id            String    @id @default(cuid())
+  type          String    @default("private") @db.VarChar(20)
+  name          String?   @db.VarChar(100)
+  avatar        String?   @db.VarChar(500)
+  lastMessage   String?   @db.Text
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants  SupportParticipant[]
+  messages      SupportMessage[]
+  tickets       SupportTicket[]
+
+  @@map("support_rooms")
+}
+
+model SupportParticipant {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  userId     String      @db.VarChar(30)
+  isAgent    Boolean     @default(false)
+  lastReadAt DateTime    @default(now())
+  joinedAt   DateTime    @default(now())
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("support_participants")
+}
+
+model SupportMessage {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  senderId   String      @db.VarChar(30)
+  type       String      @default("text") @db.VarChar(20)
+  content    String      @db.Text
+  metadata   Json?
+  isRead     Boolean     @default(false)
+  readAt     DateTime?
+  isDeleted  Boolean     @default(false)
+  origLang   String?     @db.VarChar(10)
+  translated Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([roomId, createdAt])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String       @db.VarChar(30)
+  roomId      String?      @db.VarChar(30)
+  room        SupportRoom? @relation(fields: [roomId], references: [id])
+  subject     String       @db.VarChar(255)
+  description String?      @db.Text
+  category    String       @default("general") @db.VarChar(50)
+  priority    String       @default("medium") @db.VarChar(20)
+  status      String       @default("open") @db.VarChar(20)
+  assignedTo  String?      @db.VarChar(30)
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies     SupportTicketReply[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id          String        @id @default(cuid())
+  ticketId    String        @db.VarChar(30)
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId    String        @db.VarChar(30)
+  content     String        @db.Text
+  isInternal  Boolean       @default(false)
+  attachments Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_ticket_replies")
+}
+
+model KnowledgeArticle {
+  id          String    @id @default(cuid())
+  category    String    @default("general") @db.VarChar(50)
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.VarChar(500)
+  image       String?   @db.VarChar(500)
+  authorId    String?   @db.VarChar(30)
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  status      String    @default("published") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  translations KnowledgeTranslation[]
+
+  @@index([category, status])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeTranslation {
+  id        String           @id @default(cuid())
+  articleId String           @db.VarChar(30)
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id])
+  language  String           @db.VarChar(10)
+  title     String           @db.VarChar(255)
+  content   String           @db.LongText
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, language])
+  @@map("knowledge_translations")
+}
+
+model NotificationSetting {
+  id        String   @id @default(cuid())
+  userId    String   @unique @db.VarChar(30)
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  inApp     Boolean  @default(true)
+  types     Json?
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model TranslationLog {
+  id             String   @id @default(cuid())
+  sourceLang     String   @db.VarChar(10)
+  targetLang     String   @db.VarChar(10)
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  service        String   @default("deepseek") @db.VarChar(50)
+  tokenCount     Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("translation_logs")
+}
+
+model FileUpload {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  type         String   @default("general") @db.VarChar(30)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("file_uploads")
+}

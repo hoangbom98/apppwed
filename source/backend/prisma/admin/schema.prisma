@@ -1,0 +1,1070 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// prisma/admin/schema.prisma  —  Admin & Shared Database  v2.1
+// Database: admin_db  |  Charset: utf8mb4_unicode_ci
+// ═══════════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/admin-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("ADMIN_DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN USERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model AdminUser {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique @db.VarChar(100)
+  email       String    @unique @db.VarChar(191)
+  password    String    @db.VarChar(255)
+  fullName    String    @db.VarChar(150)
+  avatar      String?   @db.VarChar(500)
+  role        String    @default("admin")    @db.VarChar(30)   // super_admin | admin | finance | support | manager | tech | marketing | kyc
+  permissions Json?
+  status      String    @default("active")   @db.VarChar(20)
+  lastLogin   DateTime?
+  twoFaSecret String?   @db.VarChar(64)
+  twoFaEnabled Boolean  @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  logs        SystemLog[]
+  assignedTasks OpsTask[] @relation("AssignedTasks")
+
+  @@index([status])
+  @@index([role])
+  @@map("admin_users")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED USERS  (mirror — không chứa business data, chỉ identity + wallet)
+// ═══════════════════════════════════════════════════════════════════════════
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique @db.VarChar(191)
+  phone           String?   @unique @db.VarChar(20)
+  password        String    @db.VarChar(255)
+  fullName        String?   @db.VarChar(150)
+  avatar          String?   @db.VarChar(500)
+  status          String    @default("active")      @db.VarChar(20)   // active|suspended|banned
+  role            String    @default("user")        @db.VarChar(30)   // user|admin|super_admin|agent
+  kycLevel        String    @default("unverified")  @db.VarChar(20)   // unverified|basic|verified|enhanced
+  riskScore       Int       @default(0)
+  referrerId      String?   @db.VarChar(30)
+  referralCode    String?   @unique @db.VarChar(30)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  wallets                 Wallet[]
+  transactions            Transaction[]
+  kycDocuments            KycDocument[]
+  referrals               Referral[]             @relation("Referrer")
+  referredBy              Referral[]             @relation("Referee")
+  commissions             Commission[]
+  notifications           Notification[]
+  activities              UserActivity[]
+  projectMembers          ProjectMember[]
+  depositOrders           DepositOrder[]
+  withdrawOrders          WithdrawOrder[]
+  riskScores              RiskScore[]
+  riskAlerts              RiskAlert[]
+  loyaltyPoints           LoyaltyPoint[]
+  loyaltyTransactions     LoyaltyTransaction[]
+  rewardClaims            RewardClaim[]
+  aiInteractions          AiInteraction[]
+  notificationSetting     NotificationSetting?
+  auditLogs               AuditLog[]
+  userDevices             UserDevice[]
+  amlAlerts               AmlAlert[]
+  securityLogs            SecurityLog[]
+
+  @@index([email])
+  @@index([status])
+  @@index([role])
+  @@index([kycLevel])
+  @@index([createdAt])
+  @@index([referralCode])
+  @@map("users")
+}
+
+model ProjectMember {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id])
+  roleInProject String   @default("user")  @db.VarChar(30)
+  joinedAt      DateTime @default(now())
+  status        String   @default("active") @db.VarChar(20)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+  @@map("project_members")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  code        String   @unique @db.VarChar(20)   // hub|game|trade|dating|sports
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  domain      String?  @db.VarChar(255)
+  status      String   @default("active") @db.VarChar(20)
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     ProjectMember[]
+
+  @@map("projects")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SYSTEM CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(150)
+  value       String?  @db.Text
+  group       String   @default("general")  @db.VarChar(60)
+  description String?  @db.VarChar(500)
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([group])
+  @@map("system_configs")
+}
+
+/// Generic key-value system settings (single-level, flat)
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(150)
+  value       String?  @db.Text
+  group       String   @default("general")  @db.VarChar(60)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([group])
+  @@map("system_settings")
+}
+
+/// Per-project UI / feature config (grouped by module + group + key)
+model ProjectConfig {
+  id          String   @id @default(cuid())
+  projectCode String   @db.VarChar(20)
+  module      String   @db.VarChar(60)
+  group       String   @db.VarChar(60)
+  key         String   @db.VarChar(150)
+  value       Json?
+  type        String   @default("string")   @db.VarChar(20)   // string|number|boolean|json|image|password
+  options     Json?
+  validation  Json?
+  description String?  @db.VarChar(500)
+  isSecret    Boolean  @default(false)
+  editable    Boolean  @default(true)
+  status      String   @default("active")   @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectCode, module, group, key])
+  @@index([projectCode])
+  @@index([module])
+  @@map("project_configs")
+}
+
+model SystemLog {
+  id        Int        @id @default(autoincrement())
+  adminId   Int?
+  admin     AdminUser? @relation(fields: [adminId], references: [id])
+  action    String     @db.VarChar(100)
+  module    String?    @db.VarChar(30)
+  details   Json?
+  ip        String?    @db.VarChar(45)
+  userAgent String?    @db.VarChar(500)
+  status    String     @default("success") @db.VarChar(20)
+  createdAt DateTime   @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([action])
+  @@map("system_logs")
+}
+
+model Backup {
+  id          Int       @id @default(autoincrement())
+  filename    String    @db.VarChar(255)
+  size        Int?
+  type        String    @db.VarChar(20)   // full|incremental
+  status      String    @default("processing") @db.VarChar(20)
+  note        String?   @db.Text
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([status])
+  @@map("backups")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WALLET & FINANCE
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  currency  String   @default("VND") @db.VarChar(10)
+  balance   Decimal  @default(0)  @db.Decimal(18,2)
+  frozen    Decimal  @default(0)  @db.Decimal(18,2)
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@unique([userId, currency])
+  @@index([userId])
+  @@map("wallets")
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  walletId      String
+  wallet        Wallet   @relation(fields: [walletId], references: [id])
+  type          String   @db.VarChar(30)    // deposit|withdraw|transfer|bonus|commission|payment|refund
+  amount        Decimal  @db.Decimal(18,2)
+  fee           Decimal  @default(0) @db.Decimal(18,2)
+  status        String   @default("pending") @db.VarChar(20)
+  referenceId   String?  @db.VarChar(60)
+  referenceType String?  @db.VarChar(30)
+  description   String?  @db.VarChar(500)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, type, createdAt])
+  @@index([status, createdAt])
+  @@map("transactions")
+}
+
+model PaymentGateway {
+  id         String   @id @default(cuid())
+  code       String   @unique @db.VarChar(30)   // lkvip|usdt|momo|zalopay|vnpay|okpay
+  name       String   @db.VarChar(100)
+  type       String   @db.VarChar(20)            // bank|crypto|ewallet|card
+  status     String   @default("active") @db.VarChar(20)
+  config     Json?
+  fees       Json?    // { percentage, fixed, min, max }
+  limits     Json?    // { min, max, daily }
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  depositOrders  DepositOrder[]
+  withdrawOrders WithdrawOrder[]
+
+  @@index([status])
+  @@map("payment_gateways")
+}
+
+model DepositOrder {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  gatewayId   String
+  gateway     PaymentGateway @relation(fields: [gatewayId], references: [id])
+  amount      Decimal   @db.Decimal(18,2)
+  currency    String    @default("VND") @db.VarChar(10)
+  status      String    @default("pending") @db.VarChar(20)
+  txId        String?   @db.VarChar(255)
+  proof       String?   @db.VarChar(500)
+  note        String?   @db.Text
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([gatewayId])
+  @@index([status, createdAt])
+  @@map("deposit_orders")
+}
+
+model WithdrawOrder {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  gatewayId   String
+  gateway     PaymentGateway @relation(fields: [gatewayId], references: [id])
+  amount      Decimal   @db.Decimal(18,2)
+  currency    String    @default("VND") @db.VarChar(10)
+  address     String?   @db.VarChar(500)
+  bankInfo    Json?
+  status      String    @default("pending") @db.VarChar(20)
+  txId        String?   @db.VarChar(255)
+  note        String?   @db.Text
+  rejectionReason String? @db.Text
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([gatewayId])
+  @@index([status, createdAt])
+  @@map("withdraw_orders")
+}
+
+model InternalTransfer {
+  id         String   @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  fromWallet String
+  toWallet   String
+  amount     Decimal  @db.Decimal(18,2)
+  fee        Decimal  @default(0) @db.Decimal(18,2)
+  status     String   @default("pending") @db.VarChar(20)
+  note       String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@map("internal_transfers")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KYC & COMPLIANCE
+// ═══════════════════════════════════════════════════════════════════════════
+
+model KycDocument {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   @db.VarChar(30)    // passport|id_card|selfie|address_proof
+  frontImage  String   @db.VarChar(500)
+  backImage   String?  @db.VarChar(500)
+  selfieImage String?  @db.VarChar(500)
+  status      String   @default("pending") @db.VarChar(20)
+  reason      String?  @db.Text
+  reviewedBy  String?  @db.VarChar(60)
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("kyc_documents")
+}
+
+model RiskScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  score     Int      @default(0)
+  level     String   @default("low") @db.VarChar(20)
+  reason    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("risk_scores")
+}
+
+model RiskRule {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(150)
+  description String?  @db.Text
+  conditions  Json?
+  action      String   @db.VarChar(30)   // hold|block|notify|freeze
+  priority    Int      @default(1)
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  riskAlerts  RiskAlert[]
+
+  @@map("risk_rules")
+}
+
+model RiskAlert {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  ruleId     String
+  rule       RiskRule @relation(fields: [ruleId], references: [id])
+  details    Json?
+  status     String   @default("new") @db.VarChar(20)
+  resolvedBy String?  @db.VarChar(60)
+  resolvedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("risk_alerts")
+}
+
+model IpBlacklist {
+  id        String   @id @default(cuid())
+  ip        String   @unique @db.VarChar(45)
+  reason    String?  @db.Text
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([ip])
+  @@map("ip_blacklist")
+}
+
+model UserDevice {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  deviceId    String   @db.VarChar(255)
+  deviceType  String?  @db.VarChar(20)
+  userAgent   String?  @db.VarChar(500)
+  ip          String?  @db.VarChar(45)
+  trusted     Boolean  @default(false)
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@map("user_devices")
+}
+
+model AmlAlert {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   @db.VarChar(50)    // structuring|rapid_turnover|cross_project|large_deposit
+  severity    String   @default("medium") @db.VarChar(20)
+  details     Json?
+  status      String   @default("open")   @db.VarChar(20)
+  resolvedBy  String?  @db.VarChar(60)
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("aml_alerts")
+}
+
+model SecurityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  event     String   @db.VarChar(60)    // login_failed|2fa_failed|ip_blocked|password_changed
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(500)
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([event, createdAt])
+  @@map("security_logs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFERRAL & COMMISSION
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referrer      User     @relation("Referrer", fields: [referrerId], references: [id])
+  refereeId     String   @unique
+  referee       User     @relation("Referee",  fields: [refereeId],  references: [id])
+  sourceProject String?  @db.VarChar(20)
+  status        String   @default("active") @db.VarChar(20)
+  commission    Decimal  @default(0) @db.Decimal(18,2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+model Commission {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referrer      User     @relation(fields: [referrerId], references: [id])
+  refereeId     String
+  amount        Decimal  @db.Decimal(18,2)
+  type          String   @db.VarChar(40)
+  sourceProject String   @db.VarChar(20)
+  status        String   @default("pending") @db.VarChar(20)
+  note          String?  @db.Text
+  createdAt     DateTime @default(now())
+  paidAt        DateTime?
+
+  @@index([referrerId, status])
+  @@map("commissions")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOYALTY & REWARDS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model LoyaltyPoint {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  points      Int      @default(0)
+  totalEarned Int      @default(0)
+  totalSpent  Int      @default(0)
+  tier        String   @default("bronze") @db.VarChar(20)   // bronze|silver|gold|platinum|diamond
+  updatedAt   DateTime @updatedAt
+
+  @@map("loyalty_points")
+}
+
+model LoyaltyTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  points      Int
+  source      String   @db.VarChar(50)
+  project     String?  @db.VarChar(20)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("loyalty_transactions")
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(150)
+  description String?  @db.Text
+  type        String   @db.VarChar(30)    // free_spin|cashback|voucher|item
+  value       Json?
+  costPoints  Int
+  stock       Int      @default(0)
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rewardClaims RewardClaim[]
+
+  @@map("rewards")
+}
+
+model RewardClaim {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rewardId  String
+  reward    Reward   @relation(fields: [rewardId], references: [id])
+  status    String   @default("pending") @db.VarChar(20)
+  claimedAt DateTime @default(now())
+  usedAt    DateTime?
+
+  @@index([userId])
+  @@map("reward_claims")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AI & NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model AiInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  sessionId String?  @db.VarChar(60)
+  query     String   @db.Text
+  response  String   @db.Text
+  context   Json?
+  language  String   @default("vi") @db.VarChar(10)
+  status    String   @default("success") @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("ai_interactions")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @db.VarChar(30)    // system|promotion|transaction|security|event
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  link      String?  @db.VarChar(500)
+  project   String?  @db.VarChar(20)
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model NotificationSetting {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  inApp     Boolean  @default(true)
+  types     Json?
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIT & ACTIVITY
+// ═══════════════════════════════════════════════════════════════════════════
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  project     String?  @db.VarChar(20)
+  action      String   @db.VarChar(80)
+  targetType  String?  @db.VarChar(50)
+  targetId    String?  @db.VarChar(60)
+  details     Json?
+  ip          String?  @db.VarChar(45)
+  userAgent   String?  @db.VarChar(500)
+  status      String   @default("success") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([project, createdAt])
+  @@map("audit_logs")
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   @db.VarChar(80)
+  project   String?  @db.VarChar(20)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("user_activities")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CROSS-PROJECT BANNERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model CrossBanner {
+  id            String   @id @default(cuid())
+  title         String   @db.VarChar(255)
+  image         String   @db.VarChar(500)
+  link          String?  @db.VarChar(500)
+  targetProject String   @db.VarChar(20)
+  position      String   @db.VarChar(30)
+  conditions    Json?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        String   @default("active") @db.VarChar(20)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([targetProject, status])
+  @@map("cross_banners")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED SUPPORT & KNOWLEDGE
+// ═══════════════════════════════════════════════════════════════════════════
+
+model SupportRoom {
+  id            String   @id @default(cuid())
+  type          String   @default("private") @db.VarChar(20)
+  name          String?  @db.VarChar(150)
+  avatar        String?  @db.VarChar(500)
+  lastMessage   String?  @db.Text
+  lastMessageAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  participants  SupportParticipant[]
+  messages      SupportMessage[]
+  tickets       SupportTicket[]
+
+  @@map("support_rooms")
+}
+
+model SupportParticipant {
+  id         String      @id @default(cuid())
+  roomId     String
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  userId     String      @db.VarChar(30)
+  isAgent    Boolean     @default(false)
+  lastReadAt DateTime    @default(now())
+  joinedAt   DateTime    @default(now())
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("support_participants")
+}
+
+model SupportMessage {
+  id         String      @id @default(cuid())
+  roomId     String
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  senderId   String      @db.VarChar(30)
+  type       String      @default("text") @db.VarChar(20)
+  content    String      @db.Text
+  metadata   Json?
+  isRead     Boolean     @default(false)
+  readAt     DateTime?
+  isDeleted  Boolean     @default(false)
+  origLang   String?     @db.VarChar(10)
+  translated Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([roomId, createdAt])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String       @db.VarChar(30)
+  roomId      String?
+  room        SupportRoom? @relation(fields: [roomId], references: [id])
+  subject     String       @db.VarChar(255)
+  description String?      @db.Text
+  category    String       @default("general") @db.VarChar(50)
+  priority    String       @default("medium")  @db.VarChar(20)
+  status      String       @default("open")    @db.VarChar(20)
+  assignedTo  String?      @db.VarChar(30)
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies SupportTicketReply[]
+
+  @@index([userId, status])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id          String        @id @default(cuid())
+  ticketId    String
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId    String        @db.VarChar(30)
+  content     String        @db.Text
+  isInternal  Boolean       @default(false)
+  isAuto      Boolean       @default(false)
+  attachments Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_ticket_replies")
+}
+
+model KnowledgeArticle {
+  id          String   @id @default(cuid())
+  category    String   @default("general") @db.VarChar(50)
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  content     String   @db.Text
+  summary     String?  @db.Text
+  image       String?  @db.VarChar(500)
+  authorId    String?  @db.VarChar(30)
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  status      String   @default("published") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations KnowledgeTranslation[]
+
+  @@index([category, status])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeTranslation {
+  id        String           @id @default(cuid())
+  articleId String
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id])
+  language  String           @db.VarChar(10)
+  title     String           @db.VarChar(255)
+  content   String           @db.Text
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, language])
+  @@map("knowledge_translations")
+}
+
+model TranslationLog {
+  id             String   @id @default(cuid())
+  sourceLang     String   @db.VarChar(10)
+  targetLang     String   @db.VarChar(10)
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  service        String   @default("deepseek") @db.VarChar(30)
+  tokenCount     Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("translation_logs")
+}
+
+model FileUpload {
+  id           String   @id @default(cuid())
+  userId       String
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  type         String   @default("general") @db.VarChar(30)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("file_uploads")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTO-OPS PLATFORM
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// RFM segmentation + CLV store — one row per (project, userId) pair
+model OpsUserSegment {
+  id          Int      @id @default(autoincrement())
+  project     String   @default("game") @db.VarChar(20)   // hub|game|trade|dating|sports
+  userId      Int
+  segment     String   @default("bronze") @db.VarChar(20)   // champion|gold|silver|at_risk|bronze
+  rScore      Int      @default(1)
+  fScore      Int      @default(1)
+  mScore      Int      @default(1)
+  recencyDays Float    @default(999)
+  frequency   Int      @default(0)
+  monetary    Decimal  @default(0) @db.Decimal(18,2)
+  clv         Decimal  @default(0) @db.Decimal(18,2)
+  avgMonthly  Decimal  @default(0) @db.Decimal(18,2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@unique([project, userId])
+  @@index([project, segment])
+  @@index([clv])
+  @@map("ops_user_segments")
+}
+
+/// Churn risk alerts — populated by ChurnPredictor.scanAll()
+model OpsChurnAlert {
+  id           Int      @id @default(autoincrement())
+  project      String   @default("game") @db.VarChar(20)   // hub|game|trade|dating|sports
+  userId       Int
+  riskLevel    String   @db.VarChar(10)   // high | medium
+  reason       String   @db.VarChar(60)
+  score        Float    @default(0)
+  daysInactive Int      @default(0)
+  handled      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([project, userId])
+  @@index([project, riskLevel, createdAt])
+  @@map("ops_churn_alerts")
+}
+
+/// Operational task queue with auto-assignment
+model OpsTask {
+  id          Int       @id @default(autoincrement())
+  type        String    @db.VarChar(40)    // withdraw|deposit|kyc|support|bug|campaign|churn|expense_approval
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  userId      Int?                         // related user (if any)
+  assignedTo  Int?
+  agent       AdminUser? @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  priority    String    @default("medium") @db.VarChar(20)   // critical|high|medium|low
+  status      String    @default("pending") @db.VarChar(20)  // pending|in_progress|completed|cancelled
+  metadata    Json?
+  completedAt DateTime?
+  completedBy Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([assignedTo, status])
+  @@index([status, priority])
+  @@index([type])
+  @@map("ops_tasks")
+}
+
+/// Marketing / campaign fire log — deduplication + analytics
+model OpsCampaignLog {
+  id           Int      @id @default(autoincrement())
+  project      String   @default("game") @db.VarChar(20)   // hub|game|trade|dating|sports
+  userId       Int
+  campaignName String   @db.VarChar(100)
+  segment      String?  @db.VarChar(20)
+  action       String   @db.VarChar(40)
+  status       String   @default("sent") @db.VarChar(20)
+  createdAt    DateTime @default(now())
+
+  @@index([project, userId, campaignName])
+  @@index([project, createdAt])
+  @@map("ops_campaign_logs")
+}
+
+/// Daily operational reports
+model OpsDailyReport {
+  id        Int      @id @default(autoincrement())
+  date      String   @unique @db.VarChar(10)   // YYYY-MM-DD
+  payload   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([date])
+  @@map("ops_daily_reports")
+}
+
+/// Auto-ops platform alerts (cash reserve, anomalies, etc.)
+model OpsAlert {
+  id        Int      @id @default(autoincrement())
+  type      String   @db.VarChar(60)
+  message   String   @db.Text
+  severity  String   @default("medium") @db.VarChar(20)   // low|medium|high|critical
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([type, resolved])
+  @@map("ops_alerts")
+}
+
+/// Expense approval requests
+model OpsExpenseRequest {
+  id             Int       @id @default(autoincrement())
+  title          String    @db.VarChar(255)
+  amount         Decimal   @db.Decimal(18,2)
+  category       String    @db.VarChar(60)
+  note           String?   @db.Text
+  status         String    @default("pending") @db.VarChar(20)   // pending|approved|rejected
+  requestedBy    Int?
+  approvedBy     Int?
+  approvedAt     DateTime?
+  approvalMethod String?   @db.VarChar(20)   // auto|manual
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+  @@map("ops_expense_requests")
+}
+
+/// Knowledge base for ticket auto-reply
+model OpsKnowledgeBase {
+  id          Int      @id @default(autoincrement())
+  category    String   @db.VarChar(50)
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  priority    Int      @default(1)
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, status])
+  @@map("ops_knowledge_base")
+}
+
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(255)
+  content    String   @db.Text
+  type       String   @default("info")    @db.VarChar(20)   // info|warning|maintenance|promotion
+  projects   Json?    // null = all projects
+  startAt    DateTime
+  endAt      DateTime
+  status     String   @default("active")  @db.VarChar(20)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status, startAt, endAt])
+  @@map("announcements")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VIP SYSTEM  (shared — used by Mine page & game module)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// VIP tier configuration (admin-managed thresholds & rewards)
+model VipConfig {
+  id           Int      @id @default(autoincrement())
+  level        Int      @unique
+  name         String   @db.VarChar(50)    // Member | V1 | V2 ... V10
+  betRequired  Decimal  @default(0) @db.Decimal(18,2)   // cumulative bet to reach this level
+  rewardAmount Decimal  @default(0) @db.Decimal(18,2)   // one-time level-up bonus
+  color        String?  @db.VarChar(20)
+  iconUrl      String?  @db.VarChar(500)
+  benefits     Json?    // extra perks JSON
+  status       String   @default("active") @db.VarChar(20)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  vipHistories VipHistory[]
+
+  @@index([level])
+  @@map("vip_configs")
+}
+
+/// Audit trail every time a user levels up
+model VipHistory {
+  id           Int       @id @default(autoincrement())
+  userId       String    @db.VarChar(30)
+  oldLevel     Int
+  newLevel     Int
+  rewardAmount Decimal   @default(0) @db.Decimal(18,2)
+  project      String    @default("game") @db.VarChar(20)
+  configId     Int?
+  config       VipConfig? @relation(fields: [configId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([project])
+  @@map("vip_histories")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP CATALOG  — mobile app metadata & download links
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// One entry per downloadable sub-project app (game, dating, sports, trade)
+model AppCatalog {
+  id           Int      @id @default(autoincrement())
+  appId        String   @unique @db.VarChar(50)   // slug: 'game' | 'dating' | 'sports' | 'trade'
+  name         String   @db.VarChar(255)
+  developer    String?  @db.VarChar(255)
+  category     String?  @db.VarChar(60)           // e.g. 'Giải trí · 18+'
+  iconUrl      String?  @db.VarChar(500)
+  primaryColor String?  @db.VarChar(20)            // hex color for branding
+  rating       Decimal  @default(5.0) @db.Decimal(3,1)
+  reviewsCount String?  @db.VarChar(30)            // e.g. '12.5 N'
+  downloads    String?  @db.VarChar(30)            // e.g. '500 N+'
+  androidLink  String?  @db.VarChar(1000)
+  iosLink      String?  @db.VarChar(1000)
+  description  String?  @db.Text
+  features     Json?                                // string[]
+  isPublished  Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isPublished])
+  @@map("app_catalog")
+}

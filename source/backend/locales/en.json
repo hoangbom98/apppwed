@@ -1,0 +1,13 @@
+{
+  "user": {
+    "notFound": "User not found",
+    "notAllowedSelfAdjustment": "You are not allowed to adjust your own role or status",
+    "updated": "User information updated successfully",
+    "missingData": "Missing balance adjustment information",
+    "amountMustBePositive": "Adjustment amount must be greater than 0",
+    "insufficientBalance": "Insufficient account balance for deduction",
+    "invalidAdjustmentType": "Invalid adjustment type",
+    "balanceAdjusted": "Balance adjusted successfully for user",
+    "systemError": "System error"
+  }
+}

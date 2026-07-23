@@ -1,0 +1,21 @@
+{
+  "welcome": "Welcome to the system",
+  "error": {
+    "generic": "An error occurred, please try again later",
+    "unauthorized": "You are not logged in or your session has expired",
+    "forbidden": "You do not have permission to access this resource",
+    "not_found": "Requested resource not found",
+    "validation": "Invalid input data"
+  },
+  "success": "Success",
+  "user": {
+    "not_found": "User not found",
+    "email_exist": "Email already registered",
+    "invalid_credentials": "Incorrect email or password",
+    "balance_updated": "Balance updated successfully",
+    "status_updated": "User status changed successfully",
+    "not_allowed_self_adjustment": "You are not allowed to adjust your own role or status",
+    "updated": "User information updated successfully",
+    "insufficient_balance": "Insufficient account balance for deduction"
+  }
+}

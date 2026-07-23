@@ -1,0 +1,878 @@
+// =============================================================================
+// SPORTS DATABASE SCHEMA — v2.1
+// Database: sports_db
+// Prisma Client output: node_modules/.prisma/sports-client
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/sports-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("SPORTS_DATABASE_URL")
+}
+
+// =============================================================================
+// CORE USER
+// =============================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique @db.VarChar(150)
+  password      String   @db.VarChar(255)
+  username      String?  @unique @db.VarChar(50)
+  fullName      String?  @db.VarChar(100)
+  avatar        String?  @db.VarChar(500)
+  cover         String?  @db.VarChar(500)
+  bio           String?  @db.Text
+  // user | streamer | moderator | admin
+  role          String   @default("user") @db.VarChar(20)
+  // active | suspended | banned
+  status        String   @default("active") @db.VarChar(20)
+  isVerified    Boolean  @default(false)
+  isStreamer    Boolean  @default(false)
+  // vi | en | zh
+  preferredLang String   @default("vi") @db.VarChar(10)
+  // Wallet balance (direct on user, mirrors game_db pattern)
+  balance       Decimal  @default(0) @db.Decimal(18, 2)
+  frozen        Decimal  @default(0) @db.Decimal(18, 2)
+  totalDeposit  Decimal  @default(0) @db.Decimal(18, 2)
+  totalBet      Decimal  @default(0) @db.Decimal(18, 2)
+  totalWin      Decimal  @default(0) @db.Decimal(18, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  comments         Comment[]
+  newsComments     NewsComment[]
+  postComments     PostComment[]
+  favorites        Favorite[]
+  notifications    Notification[]
+  posts            Post[]
+  shortVideos      ShortVideo[]
+  news             News[]
+  liveChatMessages LiveChat[]
+  streamerProfile  StreamerProfile?
+  betSlips         BetSlip[]
+  transactions     Transaction[]
+  depositOrders    DepositOrder[]
+  withdrawOrders   WithdrawOrder[]
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model StreamerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  displayName String   @db.VarChar(100)
+  bio         String?  @db.Text
+  avatar      String?  @db.VarChar(500)
+  cover       String?  @db.VarChar(500)
+  isLive      Boolean  @default(false)
+  followers   Int      @default(0)
+  totalViews  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  streams     LiveStream[]
+  favorites   Favorite[]
+
+  @@map("streamer_profiles")
+}
+
+// =============================================================================
+// LEAGUE / TEAM / MATCH
+// =============================================================================
+
+model League {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(150)
+  slug      String   @unique @db.VarChar(150)
+  country   String?  @db.VarChar(60)
+  logo      String?  @db.VarChar(500)
+  // national | international | cup | friendly
+  type      String   @default("national") @db.VarChar(30)
+  // active | inactive | archived
+  status    String   @default("active") @db.VarChar(20)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teams      Team[]
+  matches    Match[]
+  standings  Standing[]
+  favorites  Favorite[]
+
+  @@index([status])
+  @@map("leagues")
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  leagueId  String   @db.VarChar(30)
+  league    League   @relation(fields: [leagueId], references: [id])
+  name      String   @db.VarChar(150)
+  slug      String   @unique @db.VarChar(150)
+  logo      String?  @db.VarChar(500)
+  country   String?  @db.VarChar(60)
+  stadium   String?  @db.VarChar(150)
+  coach     String?  @db.VarChar(100)
+  founded   Int?
+  // active | inactive
+  status    String   @default("active") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  homeMatches Match[]    @relation("HomeMatches")
+  awayMatches Match[]    @relation("AwayMatches")
+  standings   Standing[]
+  favorites   Favorite[]
+
+  @@index([leagueId])
+  @@map("teams")
+}
+
+model Match {
+  id         String   @id @default(cuid())
+  leagueId   String   @db.VarChar(30)
+  league     League   @relation(fields: [leagueId], references: [id])
+  homeTeamId String   @db.VarChar(30)
+  homeTeam   Team     @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  awayTeamId String   @db.VarChar(30)
+  awayTeam   Team     @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  startTime  DateTime
+  // scheduled | live | halftime | finished | cancelled | postponed
+  status     String   @default("scheduled") @db.VarChar(20)
+  homeScore  Int?
+  awayScore  Int?
+  halfHome   Int?
+  halfAway   Int?
+  // [{type:'goal', team:'home', player:'...', time:'45'}]
+  events     Json?
+  // {possession:{home:55,away:45}, shots:{home:10,away:7}}
+  stats      Json?
+  round      String?  @db.VarChar(50)
+  season     String?  @db.VarChar(20)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  highlights   Highlight[]
+  comments     Comment[]
+  liveScores   LiveScore[]
+  liveUpdates  LiveUpdate[]
+  streams      LiveStream[]
+  favorites    Favorite[]
+  betMarkets   BetMarket[]
+
+  @@index([status, startTime])
+  @@index([leagueId, status, startTime])
+  @@map("matches")
+}
+
+model LiveScore {
+  id          String   @id @default(cuid())
+  matchId     String   @db.VarChar(30)
+  match       Match    @relation(fields: [matchId], references: [id])
+  homeScore   Int
+  awayScore   Int
+  event       String?  @db.VarChar(100)
+  eventDetail String?  @db.VarChar(255)
+  timestamp   DateTime @default(now())
+
+  @@index([matchId])
+  @@map("live_scores")
+}
+
+model LiveUpdate {
+  id          String   @id @default(cuid())
+  matchId     String   @db.VarChar(30)
+  match       Match    @relation(fields: [matchId], references: [id])
+  // goal | card | substitution | var | penalty | kickoff | halftime | fulltime | injury
+  type        String   @db.VarChar(30)
+  // home | away
+  team        String?  @db.VarChar(10)
+  player      String?  @db.VarChar(100)
+  // "45", "90+3"
+  time        String?  @db.VarChar(10)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([matchId, createdAt])
+  @@map("live_updates")
+}
+
+model Standing {
+  id           String   @id @default(cuid())
+  leagueId     String   @db.VarChar(30)
+  league       League   @relation(fields: [leagueId], references: [id])
+  teamId       String   @db.VarChar(30)
+  team         Team     @relation(fields: [teamId], references: [id])
+  rank         Int
+  played       Int      @default(0)
+  wins         Int      @default(0)
+  draws        Int      @default(0)
+  losses       Int      @default(0)
+  goalsFor     Int      @default(0)
+  goalsAgainst Int      @default(0)
+  goalDiff     Int      @default(0)
+  points       Int      @default(0)
+  // "WWLDD"
+  form         String?  @db.VarChar(10)
+  season       String   @db.VarChar(20)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([leagueId, teamId, season])
+  @@index([leagueId, season, rank])
+  @@map("standings")
+}
+
+// =============================================================================
+// BETTING — Markets, Odds, Slips
+// =============================================================================
+
+model BetMarket {
+  id              String   @id @default(cuid())
+  matchId         String   @db.VarChar(30)
+  match           Match    @relation(fields: [matchId], references: [id])
+  // 1x2 | asian_handicap | over_under | both_teams_score | correct_score | halftime
+  marketType      String   @db.VarChar(50)
+  name            String   @db.VarChar(150)
+  // open | suspended | closed | settled
+  status          String   @default("open") @db.VarChar(20)
+  closesAt        DateTime?
+  result          String?  @db.VarChar(50)  // settled result (e.g. "home", "over", "2-1")
+  // Provider linkage — which game provider feeds this market (GSC | GOLDGATE | TCGAMING | null=internal)
+  providerCode    String?  @db.VarChar(30)
+  providerEventId String?  @db.VarChar(100) // external event/market ID from provider
+  providerData    Json?    // raw odds data snapshot from provider
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  odds        BetOdds[]
+  betItems    BetSlipItem[]
+
+  @@unique([providerCode, providerEventId])
+  @@index([matchId, status])
+  @@index([matchId, marketType])
+  @@map("bet_markets")
+}
+
+model BetOdds {
+  id          String    @id @default(cuid())
+  marketId    String    @db.VarChar(30)
+  market      BetMarket @relation(fields: [marketId], references: [id])
+  // home | away | draw | over | under | yes | no | handicap_home | handicap_away
+  selection   String    @db.VarChar(50)
+  label       String    @db.VarChar(100)   // display label e.g. "Man Utd -1.5"
+  odds        Decimal   @db.Decimal(8, 4)
+  handicap    Decimal?  @db.Decimal(5, 2)  // e.g. -1.5, +0.5
+  lineValue   Decimal?  @db.Decimal(5, 2)  // for over/under e.g. 2.5
+  // active | suspended | cancelled
+  status      String    @default("active") @db.VarChar(20)
+  result      String?   @db.VarChar(20)    // win | lose | void | half_win | half_lose
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([marketId, selection])
+  @@index([marketId, status])
+  @@map("bet_odds")
+}
+
+model BetSlip {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  user         User     @relation(fields: [userId], references: [id])
+  // single | accumulator | system
+  type         String   @default("single") @db.VarChar(20)
+  stake        Decimal  @db.Decimal(18, 2)
+  potentialWin Decimal  @db.Decimal(18, 2)
+  totalOdds    Decimal  @db.Decimal(10, 4)
+  // pending | won | lost | void | partial_void | cashout
+  status       String   @default("pending") @db.VarChar(20)
+  actualPayout Decimal  @default(0) @db.Decimal(18, 2)
+  cashoutValue Decimal? @db.Decimal(18, 2)
+  settledAt    DateTime?
+  note         String?  @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items        BetSlipItem[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("bet_slips")
+}
+
+model BetSlipItem {
+  id         String    @id @default(cuid())
+  slipId     String    @db.VarChar(30)
+  slip       BetSlip   @relation(fields: [slipId], references: [id])
+  marketId   String    @db.VarChar(30)
+  market     BetMarket @relation(fields: [marketId], references: [id])
+  selection  String    @db.VarChar(50)
+  label      String    @db.VarChar(100)
+  oddsValue  Decimal   @db.Decimal(8, 4)
+  handicap   Decimal?  @db.Decimal(5, 2)
+  lineValue  Decimal?  @db.Decimal(5, 2)
+  // pending | won | lost | void | half_win | half_lose
+  result     String    @default("pending") @db.VarChar(20)
+  settledAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([slipId])
+  @@index([marketId])
+  @@map("bet_slip_items")
+}
+
+// =============================================================================
+// HIGHLIGHTS & SHORT VIDEOS
+// =============================================================================
+
+model Highlight {
+  id          String    @id @default(cuid())
+  matchId     String?   @db.VarChar(30)
+  match       Match?    @relation(fields: [matchId], references: [id])
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  description String?   @db.Text
+  videoUrl    String    @db.VarChar(500)
+  thumbnail   String?   @db.VarChar(500)
+  duration    Int?      // seconds
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  // active | inactive
+  status      String    @default("active") @db.VarChar(20)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tags        HighlightTag[]
+
+  @@index([status, sortOrder])
+  @@map("highlights")
+}
+
+model HighlightTag {
+  id          String    @id @default(cuid())
+  highlightId String    @db.VarChar(30)
+  highlight   Highlight @relation(fields: [highlightId], references: [id])
+  name        String    @db.VarChar(50)
+  slug        String    @db.VarChar(50)
+
+  @@unique([highlightId, slug])
+  @@map("highlight_tags")
+}
+
+model ShortVideo {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  title       String?  @db.VarChar(255)
+  description String?  @db.Text
+  videoUrl    String   @db.VarChar(500)
+  thumbnail   String?  @db.VarChar(500)
+  duration    Int?     // seconds
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  comments    Int      @default(0)
+  shares      Int      @default(0)
+  // active | inactive | deleted
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("short_videos")
+}
+
+// =============================================================================
+// NEWS & ARTICLES
+// =============================================================================
+
+model News {
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.Text
+  image       String?   @db.VarChar(500)
+  video       String?   @db.VarChar(500)
+  authorId    String?   @db.VarChar(30)
+  author      User?     @relation(fields: [authorId], references: [id])
+  // news | transfer | analysis | interview | opinion | betting_tips
+  category    String    @default("news") @db.VarChar(30)
+  tags        Json?
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  // draft | published | archived
+  status      String    @default("draft") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  comments    NewsComment[]
+
+  @@index([category, status])
+  @@index([status, publishedAt])
+  @@map("news")
+}
+
+model NewsComment {
+  id        String       @id @default(cuid())
+  userId    String       @db.VarChar(30)
+  user      User         @relation(fields: [userId], references: [id])
+  newsId    String       @db.VarChar(30)
+  news      News         @relation(fields: [newsId], references: [id])
+  content   String       @db.Text
+  parentId  String?      @db.VarChar(30)
+  parent    NewsComment? @relation("NewsCommentParent", fields: [parentId], references: [id])
+  replies   NewsComment[] @relation("NewsCommentParent")
+  likes     Int          @default(0)
+  // active | deleted | hidden
+  status    String       @default("active") @db.VarChar(20)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([newsId, parentId, createdAt])
+  @@map("news_comments")
+}
+
+// =============================================================================
+// COMMUNITY POSTS
+// =============================================================================
+
+model Post {
+  id        String    @id @default(cuid())
+  userId    String    @db.VarChar(30)
+  user      User      @relation(fields: [userId], references: [id])
+  content   String?   @db.Text
+  images    Json?
+  video     String?   @db.VarChar(500)
+  // {question:"...", options:["A","B"], votes:[0,0]}
+  poll      Json?
+  // text | image | video | poll
+  type      String    @default("text") @db.VarChar(20)
+  hashtags  Json?
+  location  String?   @db.VarChar(150)
+  isPublic  Boolean   @default(true)
+  likes     Int       @default(0)
+  comments  Int       @default(0)
+  shares    Int       @default(0)
+  // active | deleted | hidden
+  status    String    @default("active") @db.VarChar(20)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  postComments PostComment[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("posts")
+}
+
+model PostComment {
+  id        String       @id @default(cuid())
+  userId    String       @db.VarChar(30)
+  user      User         @relation(fields: [userId], references: [id])
+  postId    String       @db.VarChar(30)
+  post      Post         @relation(fields: [postId], references: [id])
+  content   String       @db.Text
+  parentId  String?      @db.VarChar(30)
+  parent    PostComment? @relation("PostCommentParent", fields: [parentId], references: [id])
+  replies   PostComment[] @relation("PostCommentParent")
+  likes     Int          @default(0)
+  // active | deleted | hidden
+  status    String       @default("active") @db.VarChar(20)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+// =============================================================================
+// MATCH COMMENTS
+// =============================================================================
+
+model Comment {
+  id        String    @id @default(cuid())
+  userId    String    @db.VarChar(30)
+  user      User      @relation(fields: [userId], references: [id])
+  matchId   String    @db.VarChar(30)
+  match     Match     @relation(fields: [matchId], references: [id])
+  content   String    @db.Text
+  parentId  String?   @db.VarChar(30)
+  parent    Comment?  @relation("CommentParent", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentParent")
+  // active | deleted | hidden
+  status    String    @default("active") @db.VarChar(20)
+  likes     Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([matchId, createdAt])
+  @@map("comments")
+}
+
+// =============================================================================
+// LIVE STREAMING
+// =============================================================================
+
+model LiveStream {
+  id          String          @id @default(cuid())
+  streamerId  String          @db.VarChar(30)
+  streamer    StreamerProfile @relation(fields: [streamerId], references: [id])
+  matchId     String?         @db.VarChar(30)
+  match       Match?          @relation(fields: [matchId], references: [id])
+  title       String          @db.VarChar(255)
+  description String?         @db.Text
+  thumbnail   String?         @db.VarChar(500)
+  // scheduled | live | ended
+  status      String          @default("scheduled") @db.VarChar(20)
+  startTime   DateTime
+  endTime     DateTime?
+  viewers     Int             @default(0)
+  peakViewers Int             @default(0)
+  chatEnabled Boolean         @default(true)
+  recordUrl   String?         @db.VarChar(500)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  chatMessages LiveChat[]
+
+  @@index([streamerId, status])
+  @@index([status, startTime])
+  @@map("live_streams")
+}
+
+model LiveChat {
+  id        String     @id @default(cuid())
+  streamId  String     @db.VarChar(30)
+  stream    LiveStream @relation(fields: [streamId], references: [id])
+  userId    String     @db.VarChar(30)
+  user      User       @relation(fields: [userId], references: [id])
+  message   String     @db.Text
+  // text | sticker | emoji
+  type      String     @default("text") @db.VarChar(20)
+  createdAt DateTime   @default(now())
+
+  @@index([streamId, createdAt])
+  @@index([userId, createdAt])
+  @@map("live_chats")
+}
+
+// =============================================================================
+// FAVOURITES
+// =============================================================================
+
+model Favorite {
+  id         String          @id @default(cuid())
+  userId     String          @db.VarChar(30)
+  user       User            @relation(fields: [userId], references: [id])
+  teamId     String?         @db.VarChar(30)
+  team       Team?           @relation(fields: [teamId], references: [id])
+  leagueId   String?         @db.VarChar(30)
+  league     League?         @relation(fields: [leagueId], references: [id])
+  matchId    String?         @db.VarChar(30)
+  match      Match?          @relation(fields: [matchId], references: [id])
+  streamerId String?         @db.VarChar(30)
+  streamer   StreamerProfile? @relation(fields: [streamerId], references: [id])
+  createdAt  DateTime        @default(now())
+
+  @@unique([userId, teamId])
+  @@unique([userId, leagueId])
+  @@unique([userId, matchId])
+  @@unique([userId, streamerId])
+  @@map("favorites")
+}
+
+// =============================================================================
+// NOTIFICATIONS
+// =============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  // match_start | goal | score_update | news | community | bet_result | system
+  type      String   @db.VarChar(30)
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  link      String?  @db.VarChar(500)
+  matchId   String?  @db.VarChar(30)
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// =============================================================================
+// WALLET & TRANSACTIONS (mirrors game_db — sports users have their own wallet)
+// =============================================================================
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String   @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id])
+  // deposit | withdraw | withdraw_request | bet | win | refund | bonus | adjustment
+  // aggregator_transfer_out | aggregator_transfer_in | aggregator_transfer_rollback
+  type          String   @db.VarChar(50)
+  amount        Decimal  @db.Decimal(18, 2)
+  balanceBefore Decimal  @default(0) @db.Decimal(18, 2)
+  balanceAfter  Decimal  @default(0) @db.Decimal(18, 2)
+  referenceId   String?  @db.VarChar(100)
+  referenceType String?  @db.VarChar(50)
+  note          String?  @db.VarChar(500)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
+  @@map("transactions")
+}
+
+model DepositOrder {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  // bank | momo | zalopay | vnpay
+  method      String   @db.VarChar(30)
+  amount      Decimal  @db.Decimal(18, 2)
+  currency    String   @default("VND") @db.VarChar(10)
+  // pending | completed | rejected | expired
+  status      String   @default("pending") @db.VarChar(20)
+  gatewayRef  String?  @db.VarChar(255)
+  adminNote   String?  @db.VarChar(500)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("deposit_orders")
+}
+
+model WithdrawOrder {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Decimal  @db.Decimal(18, 2)
+  currency    String   @default("VND") @db.VarChar(10)
+  bankName    String?  @db.VarChar(100)
+  bankAccount String?  @db.VarChar(50)
+  accountName String?  @db.VarChar(100)
+  // pending | processing | completed | rejected
+  status      String   @default("pending") @db.VarChar(20)
+  adminNote   String?  @db.VarChar(500)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("withdraw_orders")
+}
+
+// =============================================================================
+// ADS & SPONSORS
+// =============================================================================
+
+model AdBanner {
+  id        String    @id @default(cuid())
+  title     String    @db.VarChar(255)
+  image     String    @db.VarChar(500)
+  link      String?   @db.VarChar(500)
+  // home_top | home_bottom | live_side | match_detail | news_side | betting
+  position  String    @db.VarChar(50)
+  sortOrder Int       @default(0)
+  // active | inactive
+  status    String    @default("active") @db.VarChar(20)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([position, status])
+  @@map("ad_banners")
+}
+
+// =============================================================================
+// SHARED MODULES — Support Chat / Ticket / Knowledge / Translation / Files
+// =============================================================================
+
+model SupportRoom {
+  id            String    @id @default(cuid())
+  type          String    @default("private") @db.VarChar(20)
+  name          String?   @db.VarChar(100)
+  avatar        String?   @db.VarChar(500)
+  lastMessage   String?   @db.Text
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants  SupportParticipant[]
+  messages      SupportMessage[]
+  tickets       SupportTicket[]
+
+  @@map("support_rooms")
+}
+
+model SupportParticipant {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  userId     String      @db.VarChar(30)
+  isAgent    Boolean     @default(false)
+  lastReadAt DateTime    @default(now())
+  joinedAt   DateTime    @default(now())
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("support_participants")
+}
+
+model SupportMessage {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  senderId   String      @db.VarChar(30)
+  type       String      @default("text") @db.VarChar(20)
+  content    String      @db.Text
+  metadata   Json?
+  isRead     Boolean     @default(false)
+  readAt     DateTime?
+  isDeleted  Boolean     @default(false)
+  origLang   String?     @db.VarChar(10)
+  translated Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([roomId, createdAt])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String       @db.VarChar(30)
+  roomId      String?      @db.VarChar(30)
+  room        SupportRoom? @relation(fields: [roomId], references: [id])
+  subject     String       @db.VarChar(255)
+  description String?      @db.Text
+  category    String       @default("general") @db.VarChar(50)
+  priority    String       @default("medium") @db.VarChar(20)
+  status      String       @default("open") @db.VarChar(20)
+  assignedTo  String?      @db.VarChar(30)
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies     SupportTicketReply[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id          String        @id @default(cuid())
+  ticketId    String        @db.VarChar(30)
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId    String        @db.VarChar(30)
+  content     String        @db.Text
+  isInternal  Boolean       @default(false)
+  attachments Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_ticket_replies")
+}
+
+model KnowledgeArticle {
+  id          String    @id @default(cuid())
+  category    String    @default("general") @db.VarChar(50)
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.VarChar(500)
+  image       String?   @db.VarChar(500)
+  authorId    String?   @db.VarChar(30)
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  status      String    @default("published") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  translations KnowledgeTranslation[]
+
+  @@index([category, status])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeTranslation {
+  id        String           @id @default(cuid())
+  articleId String           @db.VarChar(30)
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id])
+  language  String           @db.VarChar(10)
+  title     String           @db.VarChar(255)
+  content   String           @db.LongText
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, language])
+  @@map("knowledge_translations")
+}
+
+model NotificationSetting {
+  id        String   @id @default(cuid())
+  userId    String   @unique @db.VarChar(30)
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  inApp     Boolean  @default(true)
+  types     Json?
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model TranslationLog {
+  id             String   @id @default(cuid())
+  sourceLang     String   @db.VarChar(10)
+  targetLang     String   @db.VarChar(10)
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  service        String   @default("deepseek") @db.VarChar(50)
+  tokenCount     Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("translation_logs")
+}
+
+model FileUpload {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  type         String   @default("general") @db.VarChar(30)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("file_uploads")
+}

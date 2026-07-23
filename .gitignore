@@ -1,0 +1,65 @@
+﻿# ============================================================
+# Root .gitignore -- KJC Multi-Project Platform
+# ============================================================
+
+# --- Node.js dependencies ---
+node_modules/
+**/node_modules/
+
+# --- Build outputs ---
+dist/
+build/
+**/dist/
+**/build/
+.next/
+.nuxt/
+.output/
+
+# --- Environment / Secrets (NEVER commit real .env) ---
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+**/logs/*.log
+
+# --- Database backups & uploads ---
+source/backend/backups/
+source/backend/uploads/
+
+# --- Prisma generated clients ---
+source/backend/node_modules/.prisma/
+
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.sw?
+*.swp
+*.swo
+
+# --- Temp / Cache ---
+*.tmp
+*.cache
+*.pid
+.deploy_rollback
+
+# --- Archives ---
+_archive/
+docs/legacy/
+
+# --- Capacitor / Mobile ---
+android/
+ios/

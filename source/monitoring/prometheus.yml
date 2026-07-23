@@ -1,0 +1,42 @@
+# Prometheus scrape configuration — KJC Platform
+#
+# Scrapes:
+#   - KJC Backend /metrics  (Prometheus text format, built into server.js)
+#   - Node Exporter         (OS-level metrics: CPU, memory, disk, net)
+#   - Prometheus itself     (self-monitoring)
+#
+# Backend /metrics exposes:
+#   kjc_requests_total, kjc_errors_total, kjc_process_uptime_seconds,
+#   kjc_memory_rss_bytes, kjc_memory_heap_used_bytes, kjc_memory_heap_total_bytes
+
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    project: "kjc-platform"
+
+scrape_configs:
+
+  # ── KJC Backend API ──────────────────────────────────────────────────────────
+  - job_name: "kjc-backend"
+    static_configs:
+      - targets: ["host.docker.internal:5000"]
+        labels:
+          service: "api-server"
+          env:     "production"
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+
+  # ── Node Exporter (OS metrics) ──────────────────────────────────────────────
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+        labels:
+          service: "vps-host"
+    scrape_interval: 30s
+
+  # ── Prometheus self-monitoring ───────────────────────────────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+    scrape_interval: 60s

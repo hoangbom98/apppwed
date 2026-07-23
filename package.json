@@ -1,0 +1,37 @@
+{
+  "name": "website-admin",
+  "version": "2.0.0",
+  "description": "Multi-Project Ecosystem — Hub, Game, Trade, Dating, Sports, Admin",
+  "private": true,
+  "scripts": {
+      "dev:backend":    "cd source/backend && npm run dev",
+      "start:backend":  "cd source/backend && npm start",
+      "db:generate":    "cd source/backend && npm run prisma:generate",
+      "db:migrate":     "cd source/backend && npm run prisma:migrate:all",
+      "db:deploy":      "cd source/backend && npm run prisma:deploy:all",
+      "db:seed":        "cd source/backend && npm run seed:all",
+      "db:seed:demo":   "cd source/backend && node src/prisma/seeds/demo.seed.js",
+      "test":           "cd source/backend && npm test",
+      "lint":           "cd source/backend && npm run lint",
+      "type-check":     "cd source/backend && npm run type-check",
+      "type-check:all": "npm run type-check && cd source/frontend/hub && npx tsc --noEmit && cd ../game && npx tsc --noEmit",
+      "check-env":      "bash source/scripts/check-env.sh",
+      "health-check":   "node source/scripts/health-check.js",
+      "build:all":      "bash source/scripts/build-all.sh all",
+      "kjc":            "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts",
+      "kjc:build":      "cd source/scripts && npm run build",
+      "kjc:health":     "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts health",
+      "kjc:env":        "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts env",
+      "kjc:dev":        "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts dev"
+    },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm":  ">=10.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.15.0"
+  },
+  "dependencies": {
+    "module-alias": "^2.3.4"
+  }
+}

@@ -1,0 +1,11 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="48" height="48" rx="10" fill="#1e40af"/>
+  <!-- Playing card -->
+  <rect x="12" y="10" width="16" height="22" rx="3" fill="white"/>
+  <text x="20" y="22" text-anchor="middle" fill="#dc2626" font-size="12" font-weight="bold">A</text>
+  <text x="20" y="30" text-anchor="middle" fill="#dc2626" font-size="10">♥</text>
+  <!-- Second card -->
+  <rect x="20" y="14" width="16" height="22" rx="3" fill="#1e40af" stroke="white" stroke-width="1.5"/>
+  <text x="28" y="26" text-anchor="middle" fill="white" font-size="12" font-weight="bold">K</text>
+  <text x="28" y="34" text-anchor="middle" fill="#FACF20" font-size="10">♠</text>
+</svg>

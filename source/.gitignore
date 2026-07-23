@@ -1,0 +1,59 @@
+﻿# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+
+# ── Lock files (npm — SPA lock files are implementation detail, not tracked) ──
+# Root lock file is tracked. Ignore nested lock files to keep git clean.
+**/package-lock.json
+!package-lock.json
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+**/dist/
+build/
+**/build/
+
+# ── TypeScript build info ─────────────────────────────────────────────────────
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# ── Environment files ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+# Allow example files to be committed
+!**/.env.example
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/*.log
+**/logs/*.log
+*.log
+npm-debug.log*
+
+# ── Uploads (local dev copies) ────────────────────────────────────────────────
+uploads/*
+!uploads/.gitkeep
+
+# ── Backup dumps ─────────────────────────────────────────────────────────────
+backups/
+**/backups/
+
+# ── OS / Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sw?
+
+# ── Test / Coverage ───────────────────────────────────────────────────────────
+coverage/
+**/coverage/
+
+# ── Capacitor / Mobile ───────────────────────────────────────────────────────
+android/
+ios/
+*.apk
+*.ipa

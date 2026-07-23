@@ -1,0 +1,28 @@
+{
+  "name": "@kjc/ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KJC shared UI components, hooks, PWA utilities and stores. Source-direct — no build step required.",
+  "main": "./index.js",
+  "exports": {
+    ".":                    "./index.js",
+    "./pwa/serviceWorker":  "./pwa/serviceWorker/index.ts",
+    "./pwa/install":        "./pwa/install/index.ts",
+    "./pwa/autoComplete":   "./pwa/autoComplete/index.ts",
+    "./pwa/network":        "./pwa/network/index.ts",
+    "./pwa/update":         "./pwa/update/index.ts"
+  },
+  "peerDependencies": {
+    "react":         ">=18.0.0",
+    "react-dom":     ">=18.0.0",
+    "axios":         ">=1.0.0",
+    "zustand":       ">=4.0.0",
+    "@tanstack/react-query": ">=5.0.0"
+  },
+  "devDependencies": {
+    "@types/react":     "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "keywords": ["react", "components", "pwa", "kjc"],
+  "license": "UNLICENSED"
+}

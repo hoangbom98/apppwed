@@ -1,0 +1,110 @@
+/**
+ * gpu.css — shared-ui/styles
+ * ---------------------------
+ * GPU-composited animation utilities.
+ *
+ * Rule: Only animate `transform` and `opacity` — never width/height/top/left.
+ * These properties skip layout+paint and go straight to GPU composite.
+ *
+ * Usage (Tailwind class names work too, these are fallback/override classes):
+ *   <div class="gpu-card hover-lift">...</div>
+ *   <div class="gpu-slide-up">...</div>
+ */
+
+/* ── Base GPU layer promotion ───────────────────────────────────────────────── */
+.gpu {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Card hover lift (replaces top/box-shadow transitions) ─────────────────── */
+.hover-lift {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.hover-lift:hover {
+  transform: translateY(-3px) scale(1.01);
+}
+.hover-lift:active {
+  transform: translateY(0) scale(0.98);
+  opacity: 0.85;
+}
+
+/* ── Button press feedback ─────────────────────────────────────────────────── */
+.press-scale {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.press-scale:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* ── Slide-up entrance (replace height transitions) ────────────────────────── */
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.gpu-slide-up {
+  animation: slide-up 0.3s ease forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* ── Fade-in ─────────────────────────────────────────────────────────────────  */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.gpu-fade-in {
+  animation: fade-in 0.25s ease forwards;
+  will-change: opacity;
+}
+
+/* ── Modal/sheet slide from bottom ────────────────────────────────────────── */
+@keyframes sheet-in {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.gpu-sheet-in {
+  animation: sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Skeleton shimmer (GPU-safe: background-position only) ─────────────────── */
+@keyframes kjc-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Spinner rotation (transform only) ─────────────────────────────────────── */
+@keyframes spin-gpu {
+  to { transform: rotate(360deg); }
+}
+.gpu-spin {
+  animation: spin-gpu 0.7s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Pulse (opacity only, not scale) ──────────────────────────────────────── */
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+.gpu-pulse {
+  animation: pulse-opacity 1.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* ── Bottom safe area padding for PWA standalone mode ──────────────────────── */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}

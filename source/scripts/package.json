@@ -1,0 +1,32 @@
+{
+  "name": "@kjc/cli",
+  "version": "1.0.0",
+  "description": "KJC Platform — TypeScript CLI tool (orchestrates scripts, health checks, env validation)",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "kjc": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "scripts": {
+    "build":     "tsc --project tsconfig.json",
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "dev":       "ts-node --project tsconfig.json src/cli.ts",
+    "start":     "node dist/cli.js",
+    "type-check": "tsc --noEmit --project tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript":  "^5.5.0",
+    "ts-node":     "^10.9.2"
+  },
+  "dependencies": {
+    "chalk":       "^4.1.2",
+    "commander":   "^12.1.0",
+    "dotenv":      "^16.4.5",
+    "execa":       "^5.1.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
