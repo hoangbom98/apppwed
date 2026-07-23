@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="IE=9; IE=EDGE" http-equiv="X-UA-Compatible">
+    <title>产品详情</title>
+    <link rel="stylesheet" href="__ROOT__/static/theme/index/css/base.css?k={:rand(1,99999)}"/>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/yatongle.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/plugs/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/public.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css" />
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/iconfont.css" />
+    <script src="__ROOT__/static/theme/index/js/autorem.js"></script>
+<style>
+    .bar {
+        position: fixed;
+        width: 10rem;
+        z-index: 10;
+        height: 1.1rem;
+        /* padding: 0 0.5rem; */
+        color: #fff;
+        /* border: solid 1px #FF7F00; */
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .bar-nav {
+        top: 0;
+        width: 10rem;
+        left: 50%;
+        margin-left: -5rem;
+    }
+    #alltit {
+        position: absolute;
+        z-index: 19;
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        line-height: 1.1rem;
+        font-size: 0.4rem;
+        color: #fff;
+    }
+    .logo {
+        display: inline-block;
+        margin-left: 0.3rem;
+    }
+    .logo a {
+        display: block;
+        text-align: center;
+        line-height: 1.1rem;
+        color: #fff;
+    }
+    .logo a .iconfont {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .bar .iconfont {
+        position: relative;
+        z-index: 20;
+        color: #fff;
+        padding: 0.5rem 0.1rem;
+        font-size: 0.44rem;
+        line-height: 1.1rem;
+    }
+    .page, .page-group {
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: #efefed;
+        /* background: #efeff4; */
+        /* display: none; */
+        overflow: hidden;
+    }
+    #main_content {
+        padding-bottom: 2.5rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+    .list {
+        overflow: hidden;
+        width: 9.3rem;
+        margin: 0.25rem auto 0;
+    }
+    .list li {
+        color: #000000;
+        background-color: #fff;
+        padding: 0.3rem 0rem 0rem 0rem;
+        font-size: 0.35rem;
+        line-height: 0.48rem;
+        margin-bottom: 0.25rem;
+        border-radius: 0.2rem;
+    }
+
+    li {
+        list-style: outside none none;
+    }
+    .listtit {
+        float: left;
+        width: 33%;
+        text-align: center;
+        color: #fff;
+        border-right: 0.02rem solid #148EFF;
+    }
+    .listtit span {
+        display: block;
+        font-size: 0.35rem;
+        color: #000000;
+    }
+    .list li .left {
+        width: 26%;
+        display: inline-block;
+        color: #000000;
+        line-height: 0.54rem;
+    }
+    .list li .right {
+        width: 74%;
+        display: inline-block;
+    }
+    .contitle {
+        border-bottom: 0.02rem solid #148EFF;
+        font-size: 0.35rem;
+        padding-bottom: 0.18rem;
+    }
+    .sytit {
+        text-align: center;
+        color: #fff;
+        margin-bottom: 0.1rem;
+    }
+    .sytit img {
+        height: 0.2rem;
+        margin-top: -0.1rem;
+        width: auto;
+    }
+    .sytit span {
+        font-size: 0.4rem;
+        font-weight: bold;
+        padding: 0 0.2rem;
+        color: #0084FF;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+</style>
+</head>
+<body>
+<header class="bar bar-nav">
+    <a id="alltit">产品介绍</a>
+    <div class="logo">
+        <a id="cancle" href="javascript:history.go(-1)">
+            <i class="iconfont icon-arrow-left"></i>
+        </a>
+    </div>
+    <a class="icon pull-right open-panel"></a>
+</header>
+<div class="page">
+    <div class="content" id="main_content">
+        <div style="text-align: center;margin:0.7rem 0 0.4rem 0;overflow: hidden">
+            <div style="float: left;width: 50%;">
+                <div style="color: #333;font-size: 0.4rem;line-height: 0.42rem;margin-top: 0.8rem;">日化收益率</div>
+                <div style="color: #0678E7;font-size: 1.2rem;line-height: 1.6rem;">
+                    {:round($data['rate'],2)}%</div>
+            </div>
+            <div style="float: left;width: 50%;">
+                <div style="color: #333;font-size: 0.4rem;line-height: 0.42rem;margin-top: 0.8rem;;">合约期限</div>
+                <div style="color: #0678E7;font-size: 1.2rem;line-height: 1.6rem;">
+                    {$data.day}<font style="font-size: 1rem;position:relative;top: -0.1rem">天</font>
+                </div>
+            </div>
+        </div>
+
+        <ul class="list">
+            <li>
+                <div style="overflow: hidden;padding-bottom: 0.44rem">
+                    <div class="listtit">
+                        <span>本期总额(元)</span>
+                        <span style="font-size: 0.56rem;color: #0578E7;margin-top: 0.16rem;">{:round($data['total']*10000,2)}</span>
+                    </div>
+                    <div class="listtit">
+                        <span>剩余份额(元)</span>
+                        <span style="font-size: 0.56rem;color: #0578E7;margin-top: 0.16rem;">{:getProjectSurplus($data['id'])}</span>
+                    </div>
+                    <div class="listtit" style="border:none">
+                        <span>起购金额(元)</span>
+                        <span style="font-size: 0.56rem;color: #0578E7;margin-top: 0.16rem;">{:round($data['min'],2)}</span>
+                    </div>
+                </div>
+                <div style="border-top: 0.02rem solid #148EFF;width: 8.6rem;margin:0 auto;overflow: hidden">
+                    <span class="left" style="float: left;line-height: 0.74rem;width: 24%">
+                        已售{:round(getProjectPercent($data['id']),2)}%
+                    </span>
+                    <span class="right" style="width:76%;background-color: #999;height:0.14rem;border-radius: 0.07rem;position:relative;overflow: hidden">
+                        <span style="position: absolute;top: 0;left: 0;width:{:round(getProjectPercent($data['id']),2)}%;background: linear-gradient(45deg, #FF5756, #FF8C7B);height:0.14rem;border-radius: 0.07rem;"></span></span>
+                </div>
+            </li>
+        </ul>
+
+        <div class="content_l" style="display: block;">
+            <ul class="list">
+                <li style="padding:0.16rem 0.4rem 0.34rem 0.4rem" class="cont">
+                    <div class="contitle">产品介绍</div>
+                    <div style="margin-top: 0.14rem;"><span class="left">产品名称</span><span class="right">{$data.title}</span></div>
+                    <div>
+                        <span class="left">合约算力</span>
+                        <span class="right">{$data.hysl}Ghash</span>
+                    </div>
+                    <div>
+                        <span class="left">收益方式</span>
+                        <span class="right">{:getProjectType($data['type'])}</span>
+                    </div>
+                    <div>
+                        <span class="left">产品亮点</span>
+                        <span class="right">{$data.desc}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="content_r" style="display: block;">
+            <ul class="list">
+                <li style="padding:0.3rem 0.4rem 0.34rem 0.4rem;margin-bottom: 0;" class="cont contentext">
+                    <div class="sytit" style="">
+                        <img src="/static/theme/index/img/sytitl1.png" alt="">
+                        <span>产品详情</span>
+                        <img src="/static/theme/index/img/sytitr1.png" alt="">
+                    </div>
+                    {:htmlspecialchars_decode($data['fixedcontent'])}
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<a href="/index/index/form?id={$data.id}" style="display: block;position: fixed;bottom: 0;width: 100%;background: #fff;">
+    <div button="" id="confirm recharge" type="button" style="width: 9.3rem!important;text-align:center; color:#fff;margin:0.5rem auto; height: 1.2rem; border-radius: 0.2rem; line-height: 1.2rem; font-size: 0.4rem;font-weight: bold;width: 100%;background: #0578E7;">
+        马上抢购</div>
+</a>
+</html>
+</body>

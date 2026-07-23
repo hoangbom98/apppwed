@@ -1,17 +1,20 @@
 import { NavLink, Link } from 'react-router-dom';
 import {
   TrendingUp, ScrollText, Wallet, UserCheck, BarChart2,
-  LineChart, ShieldCheck, Settings, LogIn, Zap,
+  LineChart, ShieldCheck, Settings, LogIn, Zap, TrendingDown,
+  Share2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAppConfig } from '@ui/hooks/useAppConfig';
 
 const MENU_ITEMS = [
-  { to: '/',           icon: TrendingUp,  label: 'Thị trường',   end: true  },
-  { to: '/terminal',   icon: LineChart,   label: 'Giao dịch',    end: false },
-  { to: '/portfolio',  icon: BarChart2,   label: 'Danh mục',     end: false },
-  { to: '/orders',     icon: ScrollText,  label: 'Lịch sử lệnh', end: false },
-  { to: '/wallet',     icon: Wallet,      label: 'Ví',           end: false },
+  { to: '/',            icon: TrendingUp,   label: 'Thị trường',   end: true  },
+  { to: '/terminal',    icon: LineChart,    label: 'Giao dịch',    end: false },
+  { to: '/portfolio',   icon: BarChart2,    label: 'Danh mục',     end: false },
+  { to: '/orders',      icon: ScrollText,   label: 'Lịch sử lệnh', end: false },
+  { to: '/wallet',      icon: Wallet,       label: 'Ví',           end: false },
+  { to: '/investment',  icon: TrendingDown, label: 'Đầu tư',       end: false },
+  { to: '/referral',    icon: Share2,       label: 'Giới thiệu',   end: false },
 ];
 
 const BOTTOM_ITEMS = [
@@ -22,7 +25,7 @@ const BOTTOM_ITEMS = [
 
 export default function DesktopSidebar() {
   const { user, token } = useAuthStore();
-  const { data: brand } = useAppConfig('brand');
+  const { data: brand } = useAppConfig('brand') as { data: { site_name?: string; logo_url?: string } | undefined };
   const siteName = brand?.site_name ?? 'TradePro';
   const logoUrl  = brand?.logo_url  ?? '';
 

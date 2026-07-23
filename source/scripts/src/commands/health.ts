@@ -1,12 +1,12 @@
-/**
- * health.ts — HTTP health check for all KJC service endpoints
+﻿/**
+ * health.ts — HTTP health check for all lkvip service endpoints
  *
  * TypeScript rewrite of health-check.js
  *
  * Usage (via CLI):
- *   kjc health
- *   kjc health --url http://localhost:5000
- *   kjc health --timeout 3000
+ *   lkvip health
+ *   lkvip health --url http://localhost:5000
+ *   lkvip health --timeout 3000
  */
 
 import http  from 'http';
@@ -100,7 +100,7 @@ export async function runHealthCheck(baseUrl: string, timeout: number): Promise<
 export function registerHealthCommand(program: Command): void {
   program
     .command('health')
-    .description('HTTP health check for all KJC service endpoints')
+    .description('HTTP health check for all lkvip service endpoints')
     .option('--url <url>',     'Base API URL', process.env['APP_URL'] ?? 'http://localhost:5000')
     .option('--timeout <ms>',  'Request timeout in milliseconds', '5000')
     .action(async (options: { url: string; timeout: string }) => {

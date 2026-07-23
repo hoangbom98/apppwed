@@ -1,8 +1,8 @@
 {
-  "name": "@kjc/types",
+  "name": "@lkvip/types",
   "version": "1.0.0",
   "private": true,
-  "description": "Shared TypeScript types for KJC multi-project platform",
+  "description": "Shared TypeScript types for LKVIP GROUP multi-project platform",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

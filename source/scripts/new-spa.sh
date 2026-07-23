@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  new-spa.sh — Scaffold a new KJC frontend SPA from the _template
+#  new-spa.sh — Scaffold a new LKVIP frontend SPA from the _template
 #
 #  Usage:
 #    bash source/scripts/new-spa.sh <app-name> <project-id> <port>
@@ -64,8 +64,8 @@ echo "  1.  Add to pnpm-workspace.yaml:"
 echo "        - \"frontend/${APPNAME}\""
 echo ""
 echo "  2.  Add to source/package.json scripts:"
-echo "        \"dev:${APPNAME}\":   \"pnpm --filter @kjc/${APPNAME} run dev\","
-echo "        \"build:${APPNAME}\": \"pnpm --filter @kjc/${APPNAME} run build\","
+echo "        \"dev:${APPNAME}\":   \"pnpm --filter @lkvip/${APPNAME} run dev\","
+echo "        \"build:${APPNAME}\": \"pnpm --filter @lkvip/${APPNAME} run build\","
 echo ""
 echo "  3.  Add Nginx server block for ${APPNAME}.yourdomain.com"
 echo "      (copy any existing SPA block in source/nginx/nginx.conf and adapt)."

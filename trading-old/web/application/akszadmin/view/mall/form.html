@@ -1,0 +1,118 @@
+{extend name='akszadmin@main'}
+
+{block name="content"}
+
+
+<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+
+    <div class="layui-card-body think-box-shadow padding-left-40">
+
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs6 relative">
+                <span class="color-green">矿机名称</span>
+                <input name="title" required class="layui-input" placeholder="请输入矿机名称" value="{$vo.title|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">担保方</span>
+                <input name="guarantee" required class="layui-input" placeholder="请输入担保方" value="{$vo.guarantee|default='中国人民保险（香港）有限公司'}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">上架时间</span>
+                <input name="time" data-date-input="datetime" required class="layui-input" placeholder="请输入上架时间" value="{$vo.time|default=''}">
+            </label>
+        </div>
+
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">矿机总量/份</span>
+                <input name="total" required class="layui-input" placeholder="请输入矿机总量/份" value="{$vo.total|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">剩余矿机/份</span>
+                <input name="stock" required class="layui-input" placeholder="请输入剩余矿机/份" value="{$vo.stock|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">保证金元/份</span>
+                <input name="min" required class="layui-input" placeholder="请输入保证金/份" value="{$vo.min|default=''}">
+            </label>
+        </div>
+
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">使用期限/天</span>
+                <input name="day" required class="layui-input" placeholder="请输入使用期限/天" value="{$vo.day|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">日总产出 BTC/天</span>
+                <input name="day_income" required class="layui-input" placeholder="请输入日总产出 BTC/天" value="{$vo.day_income|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">算力 TH/s</span>
+                <input name="power" required class="layui-input" placeholder="请输入算力 TH/s" value="{$vo.power|default=''}">
+            </label>
+        </div>
+
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">日化收益率</span>
+                <input name="rate" required class="layui-input" placeholder="请输入日化收益率" value="{$vo.rate|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">日运维费 BTC/天</span>
+                <input name="cost" required class="layui-input" placeholder="请输入日运维费 BTC/天" value="{$vo.cost|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">限投次数</span>
+                <input name="num" required class="layui-input" placeholder="请输入限投次数" value="{$vo.num|default=''}">
+            </label>
+        </div>
+
+        <div class="layui-form-item">
+            <span class="color-green label-required-prev">矿机封面图片</span>
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th class="text-center">矿机封面</th>
+                </tr>
+                <tr>
+                    <td width="90px" class="text-center"><input name="img" type="hidden" value="{$vo.img|default=''}"></td>
+                </tr>
+                </thead>
+            </table>
+            <script>$('[name="img"]').uploadOneImage()</script>
+        </div>
+
+        <div class="layui-form-item block">
+            <span class="label-required-prev color-green">矿机详情</span>
+            <textarea name="fixedcontent">{$vo.fixedcontent|default=''|raw}</textarea>
+        </div>
+
+        <div class="layui-form-item text-center">
+            {notempty name='vo.id'}<input type="hidden" name="id" value="{$vo.id}">{/notempty}
+            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消编辑</button>
+            <button class="layui-btn" type="submit">保存项目</button>
+        </div>
+
+    </div>
+</form>
+{/block}
+
+{block name='script'}
+<script>
+    window.form.render();
+    require(['ckeditor', 'angular'], function () {
+        window.createEditor('[name="fixedcontent"]', {height: 500});
+        var app = angular.module("GoodsForm", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+
+        function callback($rootScope) {
+            $rootScope.hsitoryBack = function () {
+                $.msg.confirm('确定要取消编辑吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+        }
+
+    })
+</script>
+{/block}

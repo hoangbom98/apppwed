@@ -1,0 +1,47 @@
+<form onsubmit="return false;" action="{:request()->url()}" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+
+    <div class="layui-card-body">
+
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">会员等级</label>
+            <label class="layui-col-xs10">
+                <select name='member_id' required class='layui-select' lay-search>
+                    {foreach $member as $key=>$cate}
+                    {eq name='cate.id' value='$vo.member_id|default=0'}
+                    <option selected value='{$cate.id}'>{$cate.name}</option>
+                    {else}
+                    <option value='{$cate.id}'>{$cate.name}</option>
+                    {/eq}
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">分类名称</label>
+            <label class="layui-col-xs10">
+                <input name="name" required value='{$vo.name|default=""}' placeholder="请输入分类名称" class="layui-input">
+            </label>
+        </div>
+
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">分类备注</label>
+            <label class="layui-col-xs10">
+                <input name="note" value='{$vo.note|default=""}' placeholder="请输入分类备注" class="layui-input">
+            </label>
+        </div>
+
+    </div>
+
+    <div class="hr-line-dashed"></div>
+    <div class="layui-form-item text-center">
+        {notempty name='vo.id'}<input type='hidden' value='{$vo.id}' name='id'>{/notempty}
+        <button class="layui-btn" type='submit'>保存数据</button>
+        <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消编辑吗？" data-close>取消编辑</button>
+    </div>
+</form>
+{block name='script'}
+<script>
+    window.form.render();
+</script>
+{/block}

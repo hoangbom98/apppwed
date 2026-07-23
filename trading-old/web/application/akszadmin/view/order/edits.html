@@ -1,0 +1,95 @@
+<form onsubmit="return false;" action="{:request()->url()}" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+
+    <div class="layui-card-body">
+      <input type="hidden" name="id" required value="{$vo.id|default=''}" readonly class="layui-input">
+	  <input type="hidden" name="buytimes" required value="{$vo.buytime|default=''}" readonly class="layui-input">
+	   <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">会员ID</label>
+            <label class="layui-col-xs10">
+                <input name="uid" required value="{$vo.uid|default=''}" readonly class="layui-input">
+            </label>
+        </div>
+		<div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">订单编号</label>
+            <label class="layui-col-xs10">
+                <input name="orderno" required value="{$vo.orderno|default=''}" readonly class="layui-input">
+            </label>
+        </div>
+		
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">入仓时间</label>
+            <label class="layui-col-xs10">
+                <input name="buytime" required value="{:date('Y-m-d H:i:s',$vo.buytime)}" class="layui-input">
+            </label>
+        </div>
+
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">平仓时间：</label>
+            <label class="layui-col-xs10">
+                <input name="selltime" value="{:date('Y-m-d H:i:s',$vo.selltime)}"  class="layui-input">
+            </label>
+        </div>
+		<div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">产品名称：</label>
+            <label class="layui-col-xs10">
+			    <select name="pid"  class="layui-select"  required  lay-search  >
+			    {volist name="goods" id="r"}
+				{if isset($vo.type) and $vo.type eq $cate.id}
+				<option selected  value="{$r.id}" >{$r.title|default=''}</option>
+				 {else}
+                    <option value="{$r.id}">{$r.title|default=''}</option>
+                    {/if}
+				{/volist} 
+				</select>
+            
+            </label>
+        </div>
+		<div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">涨跌方向：</label>
+            <label class="layui-col-xs10">
+                <select name="ostyle" class="layui-select"  >
+				 {foreach ['1'=>'买跌','0'=>'买涨'] as $k=>$v}
+                    <!--{eq name='$vo.ostyle' value='$k.""'}-->
+                    <option selected value="{$k}">{$v}</option>
+                    <!--{else}-->
+                    <option value="{$k}">{$v}</option>
+                    <!--{/eq}-->
+                    {/foreach}
+				 
+				</select>
+            </label>
+        </div>
+        <div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">入仓价格：</label>
+            <label class="layui-col-xs10">
+                <input name="buyprice" value="{$vo.buyprice}"  class="layui-input">
+            </label>
+        </div>
+		<div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">平仓价格：</label>
+            <label class="layui-col-xs10">
+                <input name="sellprice" value="{$vo.sellprice}"  class="layui-input">
+            </label>
+        </div>
+		<div class="layui-row margin-bottom-15">
+            <label class="layui-col-xs2 think-form-label">本单盈亏：</label>
+            <label class="layui-col-xs10">
+                <input name="ploss" value="{$vo.ploss}"  class="layui-input">
+            </label>
+        </div>
+    </div>
+
+    <div class="hr-line-dashed"></div>
+    <div class="layui-form-item text-center">
+        {notempty name='vo.id'}<input type='hidden' value='{$vo.id}' name='id'>{/notempty}
+        <button class="layui-btn" type='submit'>保存数据</button>
+        <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消编辑吗？" data-close>取消编辑</button>
+    </div>
+</form>
+{block name='script'}
+<script>
+    window.form.render();
+</script>
+{/block}
+
+

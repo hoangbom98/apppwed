@@ -1,5 +1,5 @@
 packages:
-  - "packages/*"          # shared-utils, shared-api (future server-side packages)
+  - "packages/*" # shared-utils, constants (and any future server-side packages)
   - "backend"
   - "frontend/hub"
   - "frontend/game"
@@ -11,12 +11,14 @@ packages:
   - "shared-types"
   - "scripts"
 
-# Only run postinstall / build scripts for packages that actually need them.
-# This avoids triggering native compilation for packages that just ship JS.
-onlyBuiltDependencies:
-  - "@prisma/client"
-  - "@prisma/engines"
-  - esbuild
-  - msgpackr-extract
-  - prisma
-  - sharp
+allowBuilds:
+  '@firebase/util': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  core-js: set this to true or false
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
+  protobufjs: true
+  sharp: true

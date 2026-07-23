@@ -1,14 +1,14 @@
-/**
+﻿/**
  * dev.ts — Start all development servers in parallel
  *
  * On Linux/macOS with tmux: delegates to dev-all.sh.
  * On Windows / --no-shell:  spawns npm run dev for each app via Node child processes.
  *
  * Usage (via CLI):
- *   kjc dev
- *   kjc dev --no-shell
- *   kjc dev hub game
- *   kjc dev --install
+ *   lkvip dev
+ *   lkvip dev --no-shell
+ *   lkvip dev hub game
+ *   lkvip dev --install
  */
 
 import path from 'path';
@@ -31,7 +31,7 @@ function getDir(app: string): string {
 
 function printBanner(apps: string[]): void {
   console.log('\n' + '═'.repeat(55));
-  console.log('  KJC Platform — Dev Environment');
+  console.log('  LKVIP GROUP — Dev Environment');
   console.log('═'.repeat(55));
   for (const app of apps) {
     const port = APP_PORTS[app] ?? '?';
@@ -122,7 +122,7 @@ export function registerDevCommand(program: Command): void {
       }
 
       // ── Node-native background mode ────────────────────────────────────────
-      header('KJC Platform — Dev');
+      header('LKVIP GROUP — Dev');
       printBanner(targets);
       startBackground(targets, doInstall);
     });

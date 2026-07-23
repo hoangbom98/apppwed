@@ -1,0 +1,125 @@
+{include file="public/header1" nav="支付宝设置"}
+<style>
+    .container {
+        padding: 0 .4rem;
+    }
+
+    .cont {
+        padding: .4rem .6rem .6rem;
+        border-radius: 10px;
+        border: 1px solid #E9E9E9;
+        position: relative;
+        margin-top: .5rem;
+    }
+
+    .cont .name {
+        font-size: .34rem;
+        line-height: 1;
+        color: #4A4A4A;
+    }
+
+    .cont .nunber {
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #4A4A4A;
+        margin-top: .3rem;
+    }
+
+    .cont .img {
+        width: 1.02rem;
+        height: .76rem;
+        position: absolute;
+        right: .2rem;
+        bottom: .2rem;
+    }
+
+    .container {
+        padding: 0 .4rem .4rem;
+    }
+
+    .input-group {
+        width: 100%;
+        padding-top: .4rem;
+        border-bottom: 1px solid #E9E9E9;
+        position: relative;
+    }
+
+    .input-group .stitle {
+        font-size: .28rem;
+        line-height: .4rem;
+        color: #323232;
+    }
+
+    .input-group .in {
+        margin-top: .3rem;
+        padding-bottom: .1rem;
+    }
+
+    .input-group .in:after {
+        content: "";
+        clear: both;
+        display: block;
+    }
+
+    .input-group .in input {
+        width: 100%;
+        height: .5rem;
+        padding: 0;
+        border: 0;
+        font-size: .32rem;
+        line-height: .5rem;
+        float: left;
+        outline: none;
+    }
+
+    .input-group .in input::placeholder {
+        color: #9B9B9B;
+    }
+
+    .confirm {
+        width: 100%;
+        height: .86rem;
+        background-color: #EF6F6C;
+        border-radius: 4px;
+        font-size: .26rem;
+        color: #fff;
+        line-height: .86rem;
+        text-align: center;
+        margin-top: .8rem;
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <a class="left" href="/index/user/index">
+        <i class="iconfont icon-arrow-left"></i>
+    </a>
+    <div class="htitle">支付宝设置</div>
+</div>
+<div class="container">
+    <form action="/index/user/alipay" method="post" id="subform">
+        <div class="input-group">
+            <div class="stitle">真实姓名</div>
+            <div class="in"><input type="text" value="{$user.name}" class="name" name="name" disabled=""/></div>
+        </div>
+        <div class="input-group">
+            <div class="stitle">支付宝账号</div>
+            <div class="in"><input type="text" name="alipay" value="{$user.alipay}" placeholder="输入支付宝账号"/></div>
+        </div>
+        <p style="font-size:.22rem;padding:20px 0 10px 0">绑定的支付宝必须与实名一致，否则将无法成功提现</p>
+        {if condition="empty($user['alipay'])"}
+            <div class="confirm">确认</div>
+        {/if}
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/font.js"></script>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.confirm').click(function () {
+            $('#subform').submit();
+        });
+    })
+</script>
+</html>

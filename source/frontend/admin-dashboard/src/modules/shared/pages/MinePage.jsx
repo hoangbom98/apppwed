@@ -4,11 +4,14 @@ import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
-  User, RefreshCw, Copy, CheckCheck, ArrowUpCircle, ArrowDownCircle,
-  ArrowLeftRight, Users, Bell, HelpCircle, MessageSquare,
-  Info, Smartphone, Shield, ChevronRight, Star, Wallet,
-  FileText, LogOut, Settings,
-} from 'lucide-react';
+  UserOutlined, ReloadOutlined, CopyOutlined, CheckOutlined,
+  ArrowUpOutlined, ArrowDownOutlined, SwapOutlined,
+  TeamOutlined, BellOutlined, QuestionCircleOutlined, MessageOutlined,
+  InfoCircleOutlined, MobileOutlined, SafetyOutlined, RightOutlined,
+  StarOutlined, WalletOutlined, FileTextOutlined, LogoutOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import { Collapse, Form, Input, Select, Button } from 'antd';
 import * as mineApi from '../api/mineApi';
 import { useAuthStore } from '@admin/store/adminStore';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +41,10 @@ function CopyButton({ text }) {
       className="ml-1.5 text-gray-400 hover:text-blue-400 transition-colors"
       title="Sao chép"
     >
-      {copied ? <CheckCheck size={13} className="text-green-400" /> : <Copy size={13} />}
+      {copied
+        ? <CheckOutlined style={{ fontSize: 13 }} className="text-green-400" />
+        : <CopyOutlined  style={{ fontSize: 13 }} />
+      }
     </button>
   );
 }
@@ -66,7 +72,7 @@ function UserProfileCard({ data, onRefreshBalance }) {
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-            <User size={28} className="text-white" />
+            <UserOutlined style={{ fontSize: 28 }} className="text-white" />
           </div>
         )}
         <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-green-500 border-2 border-gray-800" />
@@ -99,7 +105,7 @@ function UserProfileCard({ data, onRefreshBalance }) {
 
         {/* Balance row */}
         <div className="flex items-center gap-2 mt-2.5 bg-gray-900/60 rounded-lg px-3 py-2">
-          <Wallet size={14} className="text-yellow-400 flex-shrink-0" />
+          <WalletOutlined style={{ fontSize: 14 }} className="text-yellow-400 flex-shrink-0" />
           <span className="text-yellow-300 font-bold text-base">
             {fmt(data?.balance)} <span className="text-xs font-normal text-gray-400">VND</span>
           </span>
@@ -109,7 +115,10 @@ function UserProfileCard({ data, onRefreshBalance }) {
             className="ml-auto text-gray-400 hover:text-blue-400 transition-colors disabled:opacity-50"
             title="Làm mới số dư"
           >
-            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
+            <ReloadOutlined
+              style={{ fontSize: 14 }}
+              spin={refreshing}
+            />
           </button>
         </div>
       </div>
@@ -183,7 +192,7 @@ function VIPProgressCard({ data }) {
         </div>
       ) : (
         <div className="text-center text-yellow-300 text-sm font-semibold py-1">
-          <Star size={14} className="inline mr-1" />
+          <StarOutlined style={{ fontSize: 14 }} className="inline mr-1" />
           Cấp VIP cao nhất
         </div>
       )}
@@ -196,10 +205,10 @@ function VIPProgressCard({ data }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function QuickActions() {
   const actions = [
-    { label: 'Rút tiền',    icon: ArrowUpCircle,    color: 'text-red-400',    href: '/finance' },
-    { label: 'Nạp tiền',    icon: ArrowDownCircle,  color: 'text-green-400',  href: '/finance' },
-    { label: 'Chuyển quỹ',  icon: ArrowLeftRight,   color: 'text-blue-400',   href: '/transactions' },
-    { label: 'Giao dịch',   icon: FileText,          color: 'text-purple-400', href: '/transactions' },
+    { label: 'Rút tiền',    icon: ArrowUpOutlined,   color: 'text-red-400',    href: '/finance' },
+    { label: 'Nạp tiền',    icon: ArrowDownOutlined, color: 'text-green-400',  href: '/finance' },
+    { label: 'Chuyển quỹ',  icon: SwapOutlined,      color: 'text-blue-400',   href: '/transactions' },
+    { label: 'Giao dịch',   icon: FileTextOutlined,  color: 'text-purple-400', href: '/transactions' },
   ];
 
   return (
@@ -210,7 +219,7 @@ function QuickActions() {
           to={href}
           className="flex flex-col items-center gap-1.5 bg-gray-800 hover:bg-gray-700 transition-colors rounded-xl py-3 px-1"
         >
-          <Icon size={20} className={color} />
+          <Icon style={{ fontSize: 20 }} className={color} />
           <span className="text-xs text-gray-300 text-center leading-tight">{label}</span>
         </Link>
       ))}
@@ -228,7 +237,7 @@ function MenuList({ items }) {
         const Inner = (
           <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-700/50 transition-colors cursor-pointer group">
             <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600/30 transition-colors">
-              <Icon size={16} className="text-blue-400" />
+              <Icon style={{ fontSize: 16 }} className="text-blue-400" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm text-white">{label}</div>
@@ -239,7 +248,7 @@ function MenuList({ items }) {
                 {badge}
               </span>
             )}
-            <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />
+            <RightOutlined style={{ fontSize: 14 }} className="text-gray-500 flex-shrink-0" />
           </div>
         );
 
@@ -392,7 +401,7 @@ function DeviceList() {
     <div className="space-y-2">
       {devices.map(d => (
         <div key={d.id} className="flex items-center gap-3 bg-gray-900/60 rounded-lg p-3">
-          <Smartphone size={16} className="text-blue-400 flex-shrink-0" />
+          <MobileOutlined style={{ fontSize: 16 }} className="text-blue-400 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="text-sm text-white">{d.deviceType || 'Web Browser'}</div>
             <div className="text-xs text-gray-400 truncate">{d.ip || '—'}</div>
@@ -436,49 +445,54 @@ function CreateTicketForm({ onSuccess }) {
 
   return (
     <div className="space-y-3">
-      <input
-        className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+      <Input
         placeholder="Tiêu đề yêu cầu"
         value={form.subject}
         onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
       />
-      <textarea
-        className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+      <Input.TextArea
         rows={3}
         placeholder="Mô tả chi tiết..."
         value={form.description}
         onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+        style={{ resize: 'none' }}
       />
       <div className="flex gap-2">
-        <select
-          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+        <Select
+          className="flex-1"
+          style={{ flex: 1 }}
           value={form.category}
-          onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-        >
-          <option value="general">Chung</option>
-          <option value="deposit">Nạp tiền</option>
-          <option value="withdraw">Rút tiền</option>
-          <option value="account">Tài khoản</option>
-          <option value="tech">Kỹ thuật</option>
-        </select>
-        <select
-          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+          onChange={v => setForm(p => ({ ...p, category: v }))}
+          options={[
+            { value: 'general',  label: 'Chung' },
+            { value: 'deposit',  label: 'Nạp tiền' },
+            { value: 'withdraw', label: 'Rút tiền' },
+            { value: 'account',  label: 'Tài khoản' },
+            { value: 'tech',     label: 'Kỹ thuật' },
+          ]}
+        />
+        <Select
+          className="flex-1"
+          style={{ flex: 1 }}
           value={form.priority}
-          onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}
-        >
-          <option value="low">Thấp</option>
-          <option value="medium">Trung bình</option>
-          <option value="high">Cao</option>
-          <option value="urgent">Khẩn cấp</option>
-        </select>
+          onChange={v => setForm(p => ({ ...p, priority: v }))}
+          options={[
+            { value: 'low',    label: 'Thấp' },
+            { value: 'medium', label: 'Trung bình' },
+            { value: 'high',   label: 'Cao' },
+            { value: 'urgent', label: 'Khẩn cấp' },
+          ]}
+        />
       </div>
-      <button
+      <Button
+        type="primary"
+        block
         onClick={() => mut.mutate()}
         disabled={!form.subject || mut.isPending}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm py-2 rounded-lg transition-colors font-medium"
+        loading={mut.isPending}
       >
         {mut.isPending ? 'Đang gửi...' : 'Gửi yêu cầu hỗ trợ'}
-      </button>
+      </Button>
       {mut.isError && (
         <p className="text-xs text-red-400">{mut.error?.response?.data?.message || 'Có lỗi xảy ra'}</p>
       )}
@@ -487,21 +501,23 @@ function CreateTicketForm({ onSuccess }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Section wrapper
+// Section wrapper — uses antd Collapse (ghost)
 // ─────────────────────────────────────────────────────────────────────────────
 function Section({ title, children, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="bg-gray-800 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-white hover:bg-gray-700/50 transition-colors"
-      >
-        <span>{title}</span>
-        <ChevronRight size={15} className={`text-gray-400 transition-transform ${open ? 'rotate-90' : ''}`} />
-      </button>
-      {open && <div className="px-4 pb-4">{children}</div>}
-    </div>
+    <Collapse
+      ghost
+      defaultActiveKey={defaultOpen ? ['panel'] : []}
+      className="bg-gray-800 rounded-xl overflow-hidden"
+      style={{ borderRadius: '0.75rem' }}
+      items={[
+        {
+          key:      'panel',
+          label:    <span className="text-sm font-semibold text-white">{title}</span>,
+          children: <div className="px-0 pb-2">{children}</div>,
+        },
+      ]}
+    />
   );
 }
 
@@ -532,31 +548,31 @@ export default function MinePage() {
   // Menu items
   const menuItems = [
     {
-      id: 'history', icon: FileText, label: 'Lịch sử giao dịch',
+      id: 'history', icon: FileTextOutlined, label: 'Lịch sử giao dịch',
       extra: 'Nạp, rút, cược, thưởng…', href: '/transactions',
     },
     {
-      id: 'finance', icon: ArrowDownCircle, label: 'Quản lý nạp/rút tiền',
+      id: 'finance', icon: ArrowDownOutlined, label: 'Quản lý nạp/rút tiền',
       href: '/finance',
     },
     {
-      id: 'members', icon: Users, label: 'Quản lý thành viên',
+      id: 'members', icon: TeamOutlined, label: 'Quản lý thành viên',
       href: '/members',
     },
     {
-      id: 'announcements', icon: Bell, label: 'Thông báo hệ thống',
+      id: 'announcements', icon: BellOutlined, label: 'Thông báo hệ thống',
       href: '/announcements',
     },
     {
-      id: 'risk', icon: Shield, label: 'Rủi ro & Audit',
+      id: 'risk', icon: SafetyOutlined, label: 'Rủi ro & Audit',
       href: '/risk',
     },
     {
-      id: 'settings', icon: Settings, label: 'Cài đặt hệ thống',
+      id: 'settings', icon: SettingOutlined, label: 'Cài đặt hệ thống',
       href: '/settings',
     },
     {
-      id: 'security', icon: Shield, label: 'Cài đặt bảo mật',
+      id: 'security', icon: SafetyOutlined, label: 'Cài đặt bảo mật',
       href: '/settings/security',
     },
   ];
@@ -612,7 +628,7 @@ export default function MinePage() {
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3.5 text-sm text-red-400 hover:bg-gray-700/50 transition-colors"
         >
-          <LogOut size={16} />
+          <LogoutOutlined style={{ fontSize: 16 }} />
           <span>Đăng xuất</span>
         </button>
       </div>
@@ -632,7 +648,7 @@ function ReferralPanel({ code }) {
 
   if (isLoading) return <div className="text-xs text-gray-400">Đang tải...</div>;
 
-  const referralCode   = code || data?.referralCode;
+  const referralCode    = code || data?.referralCode;
   const totalCommission = data?.totalCommission || 0;
   const referrals       = data?.referrals || [];
 
@@ -666,7 +682,7 @@ function ReferralPanel({ code }) {
         <div className="space-y-1 max-h-40 overflow-y-auto">
           {referrals.slice(0, 8).map(r => (
             <div key={r.id} className="flex items-center gap-2 text-xs text-gray-400 py-1 border-b border-gray-700/30">
-              <User size={11} className="flex-shrink-0" />
+              <UserOutlined style={{ fontSize: 11 }} className="flex-shrink-0" />
               <span className="truncate">{r.referee?.username || r.referee?.email || r.refereeId}</span>
               <span className="ml-auto text-yellow-300">+{fmt(r.bonus || 0)}</span>
             </div>

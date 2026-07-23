@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@':          path.resolve(__dirname, './src'),
       '@ui':        path.resolve(__dirname, '../shared-ui'),
-      '@kjc/types': path.resolve(__dirname, '../../shared-types/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
       // Force peer deps to resolve from game/node_modules (prevents duplicate instances)
       'react':            path.resolve(__dirname, './node_modules/react'),
       'react-dom':        path.resolve(__dirname, './node_modules/react-dom'),
@@ -34,10 +34,11 @@ export default defineConfig({
 
   build: {
     outDir: 'dist',
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 800,
     // Minify with esbuild (fastest, default in Vite 5+)
     minify: 'esbuild',
     rollupOptions: {
+      treeshake: true,
       output: {
         // Manual chunk splitting — keeps initial load small
         manualChunks: (id) => {

@@ -1,0 +1,43 @@
+实测环境：
+
+NG+php56+mysql5.7
+
+上传压缩包到根目录  
+
+设置伪静态 
+
+tinkphp伪静态：
+
+网站运行目录文件指向public
+
+配置数据库文件：config/database.php
+
+修改为自己的数据库信息，并且导入源码里面的数据库   
+
+后台登录连接为
+
+   域名/akszadmin    
+
+   admin     qwe12345
+
+
+
+nohup sh 1.sh &>/dev/null &
+
+php
+
+
+nohup sh 1.sh  &&
+
+
+               <div class="el-col el-col-6" id="i9">
+                                    <a onClick="window.open('{:getInfo('service')}','_blank');" class="">
+                                        <img src="/static/wap/images/icon_my_vouchers@2x.png" alt="" class="i9" data-src="/static/wap/images/icon_my_vouchers@2x.png" lazy="loaded">
+                                        <p>在线客服</p>
+                                    </a>
+                                </div>
+
+
+#1b232a  背景
+
+#202a33 小框框

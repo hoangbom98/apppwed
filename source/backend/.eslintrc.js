@@ -1,29 +1,43 @@
 'use strict';
 
+/**
+ * backend/.eslintrc.js
+ * ──────────────────────
+ * Extends source/.eslintrc.node.js (Node/CommonJS base).
+ * Adds TypeScript-aware overrides for all .ts files in the backend.
+ */
+
 module.exports = {
-  env: {
-    node:   true,
-    es2021: true,
-  },
-  extends: ['eslint:recommended'],
-  parserOptions: {
-    ecmaVersion: 2021,
-  },
+  extends: ['../.eslintrc.node.js'],
+
   rules: {
-    // Critical — always error (new and existing code)
-    'no-var':                'error',
-    'prefer-const':          'error',
-
-    // Warn only — pre-existing codebase has many violations; clean up incrementally
-    // TODO: change to 'error' once all violations are fixed
-    'no-unused-vars':        ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-    'no-console':            'warn',
-    'no-empty':              'warn',
-    'no-useless-escape':     'warn',
-    'no-extra-semi':         'warn',
-
-    // Off — too noisy on existing patterns
-    'no-prototype-builtins': 'off',
+    // Backend-specific JS overrides
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    'no-console':     ['warn', { allow: ['warn', 'error', 'info'] }],
   },
-  ignorePatterns: ['node_modules/', 'coverage/', 'dist/', 'prisma/', '**/*.d.ts'],
+
+  overrides: [
+    {
+      // TypeScript source files — use TS parser + plugin
+      files: ['**/*.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
+      plugins: ['@typescript-eslint'],
+      rules: {
+        // Let TypeScript compiler enforce these instead of ESLint
+        'no-undef':       'off',
+        'no-unused-vars': 'off',
+        // TypeScript-specific equivalents
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        ],
+        '@typescript-eslint/no-explicit-any': 'warn',
+        'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      },
+    },
+  ],
 };

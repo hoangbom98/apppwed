@@ -1,0 +1,42 @@
+{include file="public/header" nav="充值"}
+{if condition="$_GET['type'] eq 'wechat'"}
+    <div class="mobile" style="background-color: #00C800;">
+        <div class="othertop">
+            <a class="goback" href="/index/user/index">
+                <img src="__ROOT__/static/theme/index/img/goback.png" />
+            </a>
+            <div class="othertop-font">微信扫码充值</div>
+        </div>
+        <div class="header-nbsp"></div>
+        <div style="color:#fff;text-align: center;font-size: .4rem;padding: 20px 0;">
+            微信充值 {$money} 元
+        </div>
+        <div style="width: 96%;padding: 0 2%;">
+            <img src="{:getInfo('qr_wechat_img')}?k={:rand(1,99999)}" width="100%"/>
+        </div>
+        <div style="padding: .2rem .4rem .4rem;font-size: .32rem;color:#fff;line-height: .5rem;background-color: #00C800;">
+            {:getInfo('qr_wechat')}
+        </div>
+    </div>
+    {else/}
+    <div class="mobile" style="background-color: #00A0E9;">
+        <div class="othertop">
+            <a class="goback" href="/index/user/index">
+                <img src="__ROOT__/static/theme/index/img/goback.png" />
+            </a>
+            <div class="othertop-font">支付宝扫码充值</div>
+        </div>
+        <div class="header-nbsp"></div>
+        <div style="color:#fff;text-align: center;font-size: .4rem;padding: 20px 0;">
+            支付宝充值 {$money} 元
+        </div>
+        <div style="width: 96%;padding: 0 2%;">
+            <img src="{:getInfo('qr_alipay_img')}?k={:rand(1,99999)}" width="100%"/>
+        </div>
+        <div style="padding:.2rem .4rem .4rem;font-size: .32rem;color:#fff;line-height: .5rem;background-color: #00A0E9;">
+            {:getInfo('qr_alipay')}
+        </div>
+    </div>
+{/if}
+</body>
+</html>

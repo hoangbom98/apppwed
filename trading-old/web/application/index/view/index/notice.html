@@ -1,0 +1,42 @@
+{include file="public/header" nav="最新公告"}
+<link rel="stylesheet" type="text/css" href="/static/newstyle/css/notice.css">
+<div class="app">
+    <div class="header">
+       
+       
+           
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span>最新公告</span>
+                       <span></span>
+                       
+                </div>
+                <div class="line"></div>
+                <div class="listbox" style="">
+                    {if count($notice)}
+			
+						{volist name="notice" id="t"}
+                    
+                            <a href="/index/index/about_details?id={$t['id']}" class="item">
+                                <div class="title">{$t.title}</div>
+                               <div class="time">
+                    <!--<span>9</span>-->
+                    <span>最新公告</span>
+                    <span>{$t.time}</span>
+                </div>
+                            </a>
+                   
+			        	{/volist}
+			    
+			        {else/}
+			        <div class="dataNo">
+                        <h3>没有更多数据了</h3>
+                    </div>
+			        {/if}
+             
+
+
+    </div>
+</div>
+</body>
+
+</html>

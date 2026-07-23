@@ -1,0 +1,77 @@
+{extend name='akszadmin@main'}
+
+{block name="button"}
+{if auth("akszadmin/mall/add")}
+<button data-open='{:url(ADMIN_MODULE."/mall/add")}' data-title="添加矿机" class='layui-btn layui-btn-sm layui-btn-primary'>添加矿机</button>
+{/if}
+{if auth("akszadmin/mall/remove")}
+<button data-action='{:url(ADMIN_MODULE."/mall/remove")}' data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-primary'>删除矿机</button>
+{/if}
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='mall/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='list-table-sort-td'>
+                <button type="button" data-reload class="layui-btn layui-btn-xs">排序刷新</button>
+            </th>
+            <th class='text-left' width="30%">矿机信息</th>
+            <th class='text-left nowrap' width="30%">矿机配置</th>
+            <th class='text-left nowrap' width="30%">其他配置</th>
+            <th></th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'><input class="list-check-box" value='{$vo.id}' type='checkbox'></td>
+            <td class='list-table-sort-td'><input data-action-blur="{:request()->url()}" data-value="id#{$vo.id};action#sort;sort#{value}" data-loading="false" value="{$vo.sort}" class="list-sort-input"></td>
+            <td class='text-left'>
+                <span style="width: 300px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;display: inline-block;">{$vo.title|default='--'}</span><br>
+                添加时间：{$vo.time|default='--'}<br>
+                使用期限：{$vo.day|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                保证金：{$vo.min|default='--'}元<br>
+                日总产出：{$vo.day_income|default='--'} BTC/天<br>
+                日运维费：{$vo.cost|default='--'} BTC/天<br>
+            </td>
+            <td class='text-left nowrap'>
+                算力：{$vo.power|default='--'}TH/s<br>
+                矿机总量：{$vo.total|default='--'}份<br>
+                剩余矿机：{$vo.stock|default='--'}份<br>
+            </td>
+            <td class='text-left'>
+
+                <div class="nowrap margin-bottom-5">
+                    {if auth("akszadmin/mall/edit")}
+                    <a data-dbclick class="layui-btn layui-btn-sm" data-open='{:url(ADMIN_MODULE."/mall/edit")}?id={$vo.id}'>编 辑</a>
+                    {else}
+                    <a data-tips-text="您没有编辑矿机的权限哦！" class="layui-btn layui-btn-sm layui-btn-primary layui-disabled">编 辑</a>
+                    {/if}
+                    {if auth("akszadmin/mall/remove")}
+                    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除数据吗?" data-action="{:url(ADMIN_MODULE.'/mall/remove')}" data-value="id#{$vo.id}">删 除</a>
+                    {else}
+                    <a data-tips-text="您没有删除矿机的权限哦！" class="layui-btn layui-btn-sm layui-btn-primary layui-disabled">删 除</a>
+                    {/if}
+
+                </div>
+
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+{/block}

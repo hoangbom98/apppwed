@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>大转盘</title>
+    <link href="/static/theme/prize/mui.min.css" rel="stylesheet">
+    <link href="/static/theme/prize/component.css" rel="stylesheet" type="text/css">
+    <link href="/static/theme/prize/award.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        function msg(content, type, url) {
+            $(".xxcy_text").html(content);
+            $("#xxcy-main").fadeIn();
+            if (type == 2) {
+                window.location.href = url;
+            }
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/theme/prize/animate.min.css">
+    <script src="/static/theme/prize/award.js"></script>
+    <style>
+        .img_2_3 {
+            position: absolute;
+            animation-delay: 0.25s;
+            animation-duration: 1s;
+            z-index: 5;
+        }
+
+        .img_2_4 {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            right: 0px;
+            position: absolute;
+            animation-delay: 0.25s;
+            animation-duration: 1s;
+            z-index: 5;
+        }
+        .rule_text p{
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="mui-ios mui-ios-11 mui-ios-11-0">
+<!-------------抽奖页面-------------->
+<div class="ml-main" id="ml-main">
+    <img class="main_back" src="/static/theme/prize/back.png">
+    <img class="animated zoomIn img_2_1" src="/static/theme/prize/img_1.png">
+    <img class="animated bounceIn img_2_2" src="/static/theme/prize/img_2.png">
+    <img class="animated zoomIn img_2_3" onclick="window.location.href='/index/user/index'"
+         src="/static/theme/index/img/goback.png"/>
+    <img class="animated zoomIn img_2_4" onclick="window.location.href='/index/index/prize_list'"
+         src="/static/theme/index/img/user_prize.png"/>
+    <div class="kePublic">
+        <!--转盘效果开始-->
+        <div style="margin:0 auto">
+            <div class="banner">
+                <div class="turnplate"
+                     style="background-image:url(resource/img/turnplate-bg_2.png);background-size:100% 100%;font-size:24px !important;">
+                    <canvas class="item" id="wheelcanvas" width="516" height="516"></canvas>
+                    <img id="tupBtn" class="pointer" src="/static/theme/prize/turnplate-pointer_2.png">
+                </div>
+            </div>
+        </div>
+        <!--转盘效果结束-->
+        <div class="clear"></div>
+    </div>
+    <img class="bottom_shadow" src="/static/theme/prize/bottom_shadow.png">
+    <img class="animated zoomIn kePublic_back" src="/static/theme/prize/back1.png">
+
+    <!--------------滚动中奖纪录---------------->
+    <div class="record_line" id="Marquee">
+        {volist name="prize_list" id="vo"}
+        <div id="{$vo.id}">
+            {$vo.msg}
+        </div>
+        {/volist}
+
+
+    </div>
+    <!-------------底部声明-------------->
+    <img class="rule_title" src="/static/theme/prize/rule_title.png">
+    <div class="rule_text">
+        {:htmlspecialchars_decode($data['rule'])}
+    </div>
+</div>
+
+<!-------------中奖弹窗页面-------------->
+<div class="zj-main" id="zj-main">
+    <div class="txzl">
+        <div class="zj_text">
+            <!--中奖啦<br>恭喜获得<span id="jiangpin"></span>一份-->
+            中奖啦<br><span id="jiangpin"></span>
+        </div>
+        <div class="close_zj">关闭</div>
+    </div>
+</div>
+
+<!-------------谢谢参与弹窗-------------->
+<div class="xxcy-main" id="xxcy-main">
+    <div class="xxcy">
+        <div class="xxcy_text">
+            很遗憾<br>没有抽中礼品
+        </div>
+        <div class="close_xxcy">关闭</div>
+    </div>
+</div>
+
+<script src="/static/theme/prize/jquery-2.1.4.min.js"></script>
+<script src="/static/theme/prize/mui.min.js"></script>
+<script src="/static/theme/prize/awardRotate.js"></script>
+<!--<script type="text/javascript" src="/statics/css/resource/js/main.js"></script>-->
+<script type="text/javascript" src="/static/theme/prize/award.js"></script>
+
+<script>
+    $(function () {
+//        turnplate.restaraunts = ["奖励1元","奖励2元","奖励3元","奖励4元","奖励5元","奖励6元","奖励7元","奖励8元"];
+        turnplate.colors = ["#FAEBD7", "#FFFFFF", "#FAEBD7", "#FFFFFF", "#FAEBD7", "#FFFFFF", "#FAEBD7", "#FFFFFF"];
+        turnplate.randomRate = ["{$data.odds1}%", '{$data.odds2}%', '{$data.odds3}%', '{$data.odds4}%', '{$data.odds5}%', '{$data.odds6}%'];  //小心设置按100%分配
+        turnplate.restaraunts = ["{$data.name1}", "{$data.name2}", "{$data.name3}", "{$data.name4}", "{$data.name5}", "谢谢参与"];
+        $("img").on("click", function () {
+            return false;
+        });
+        document.addEventListener("WeixinJSBridgeReady", function () {
+            WeixinJSBridge.call('hideOptionMenu');
+        });
+    });
+</script>
+</body>
+</html>

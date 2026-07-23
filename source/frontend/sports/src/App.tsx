@@ -67,7 +67,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <InstallPrompt appName="KJC Sports" appIcon="/icons/app-icon.svg" />
+      <InstallPrompt appName="LKVIP Sports" appIcon="/icons/app-icon.svg" />
       <UpdateBanner />
       <Routes>
         {/* ── Standalone auth pages ── */}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" style="font-size: 56px;">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport"content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;"  />
+		<title>新闻</title>
+		<link rel="stylesheet" href="__ROOT__/static/theme/news/css/fake.css?at={:date('md')}">
+        <script type="text/javascript" src="__ROOT__/static/plugs/jquery/jquery.min.js?at={:date('md')}"></script>
+		<style>
+			.news[data-v-53bb5e9e] {
+			    position: fixed;
+			    width: 100%;
+			    height: 100%;
+			    -webkit-overflow-scrolling: touch;
+			    overflow-y: scroll;
+			}
+
+			.body{min-height:100%;}
+	        .body::after{background:#000 url(__ROOT__/static/theme/news/img/bg.jpg) no-repeat center center;background-size:100% auto;}
+		</style>
+
+		<script>
+			const baseSize = 28;
+			// 设置 rem 函数
+			function setRem() {
+				// 当前页面宽度相对于 750 宽的缩放比例，可根据自己需要修改。
+				const scale = document.documentElement.clientWidth / 375
+				// 设置页面根节点字体大小
+				document.documentElement.style.fontSize = baseSize * Math.min(scale, 2) + 'px'
+			}
+			// 初始化
+			setRem();
+			// 改变窗口大小时重新设置 rem
+			window.onresize = function() {
+				setRem()
+			}
+		</script>
+		<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/news/css/app.css"/>
+	</head>
+
+	<body>
+		<div data-v-5e045723="" id="app">
+			<div data-v-53bb5e9e="" data-v-5e045723="" class="news">
+				<iframe data-v-53bb5e9e="" src="https://cpu.baidu.com/1022/a93bcb0f/i?pu=2&promotion_media_channel=33272" width="100%" height="90%">
+				</iframe>
+			</div>
+			<!---->
+			<div data-v-faf68140="" data-v-5e045723="" class="footer_nav">
+				<a data-v-faf68140="" href="/index" style="width: 20%;">
+					<img data-v-faf68140="" src="__ROOT__/static/theme/news/img/bottom_1.png">
+				</a>
+				<a data-v-faf68140="" href="/index/login" style="width: 20%;">
+					<img data-v-faf68140="" src="__ROOT__/static/theme/news/img/bottom_2.png">
+				</a>
+				<a data-v-faf68140="" href="/index/login" style="width: 20%;">
+					<img data-v-faf68140="" src="{:getInfo('news_img')}">
+				</a>
+				<a data-v-faf68140="" href="/index/login" style="width: 20%;">
+					<img data-v-faf68140="" src="__ROOT__/static/theme/news/img/bottom_4.png">
+				</a>
+				<a data-v-faf68140="" href="/index/login" style="width: 20%;">
+					<img data-v-faf68140="" src="__ROOT__/static/theme/news/img/bottom_5.png">
+				</a>
+			</div>
+		</div>
+
+		{if getInfo("activity1_status")}
+		<div class="body">
+            <div class="crush"></div>
+            <dl class="main">
+                <a href="javascript:;" onclick="closelayer()" style="font-size:15px;width:110px;height:25px;line-height:25px;text-align: center;margin: 0 auto;display:block;position:relative;top:0;border: 1px solid #fff;color:#000;border-radius:5px;background-color:Gainsboro;top:-10px">关闭</a>
+            	<a href="{:getInfo('activity1_url')}">
+                <dd><img src="{:getInfo('activity1_img')}"/></dd>
+                </a>
+            </dl>
+        </div>
+		{/if}
+
+        <script type="text/javascript">
+        	function closelayer()
+        	{
+        		$('.body').hide();
+        	}
+        </script>
+	</body>
+
+</html>

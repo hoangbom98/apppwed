@@ -16,7 +16,7 @@ export { default as Card }          from './components/Card';
 export { default as Modal }         from './components/Modal';
 export { default as Toast }         from './components/Toast';
 export { default as Pagination }    from './components/Pagination';
-export { default as Skeleton }      from './components/Skeleton';
+// export { default as Skeleton }      from './components/Skeleton'; // <-- Đã xóa dòng trùng
 export { default as Badge }         from './components/Badge';
 export { default as Spinner }       from './components/Spinner';
 export { default as BackToTop }     from './components/BackToTop';
@@ -30,7 +30,6 @@ export { default as Breadcrumb }    from './components/Breadcrumb';
 export { default as Checkbox }      from './components/Checkbox';
 export { default as Switch }        from './components/Switch';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
-
 // ── Form Components ───────────────────────────────────────────────────────────
 export { default as Input }      from './components/Form/Input';
 export { default as Select }     from './components/Form/Select';
@@ -44,8 +43,8 @@ export { default as DataTable }   from './components/Layout/DataTable';
 export { default as H5Layout }    from './components/Layout/H5Layout';
 export { default as H5Header }    from './components/Layout/H5Header';
 export { default as H5BottomNav } from './components/Layout/H5BottomNav';
-export { default as MainLayout }  from './components/layout/MainLayout';
-export { default as AdminLayout } from './components/layout/AdminLayout';
+export { default as MainLayout }  from './components/Layout/MainLayout';
+export { default as AdminLayout } from './components/Layout/AdminLayout';
 
 // ── Auth Components ───────────────────────────────────────────────────────────
 export { default as LoginForm }    from './components/auth/LoginForm';

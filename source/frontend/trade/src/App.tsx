@@ -15,15 +15,17 @@ const DownloadPage       = lazy(() => import('@/pages/Download'));
 const TwoFactorPage      = lazy(() => import('@/pages/TwoFactor'));
 
 // Main app
-const MarketPage         = lazy(() => import('@/pages/Market'));
+const MarketPage          = lazy(() => import('@/pages/Market'));
 const TradingTerminalPage = lazy(() => import('@/pages/TradingTerminal'));
-const PortfolioPage      = lazy(() => import('@/pages/Portfolio'));
-const WalletPage         = lazy(() => import('@/pages/WalletPage'));
-const OrderHistoryPage   = lazy(() => import('@/pages/OrderHistory'));
-const NotificationsPage  = lazy(() => import('@/pages/Notifications'));
-const KYCPage            = lazy(() => import('@/pages/KYC'));
-const ProfilePage        = lazy(() => import('@/pages/Profile'));
-const SettingsPage       = lazy(() => import('@/pages/Settings'));
+const PortfolioPage       = lazy(() => import('@/pages/Portfolio'));
+const WalletPage          = lazy(() => import('@/pages/WalletPage'));
+const OrderHistoryPage    = lazy(() => import('@/pages/OrderHistory'));
+const NotificationsPage   = lazy(() => import('@/pages/Notifications'));
+const KYCPage             = lazy(() => import('@/pages/KYC'));
+const ProfilePage         = lazy(() => import('@/pages/Profile'));
+const SettingsPage        = lazy(() => import('@/pages/Settings'));
+const InvestmentPage      = lazy(() => import('@/pages/Investment'));
+const ReferralPage        = lazy(() => import('@/pages/Referral'));
 
 // ── Spinner ────────────────────────────────────────────────────────────────────
 function Spinner() {
@@ -55,7 +57,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<Spinner />}>
-      <InstallPrompt appName="KJC Trade" appIcon="/icons/app-icon.svg" />
+      <InstallPrompt appName="LKVIP Trade" appIcon="/icons/app-icon.svg" />
       <UpdateBanner />
       <Routes>
         {/* Auth & standalone pages — no layout */}
@@ -76,6 +78,8 @@ export default function App() {
           <Route path="notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="wallet"       element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
           <Route path="orders"       element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
+          <Route path="investment"   element={<ProtectedRoute><InvestmentPage /></ProtectedRoute>} />
+          <Route path="referral"     element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
           <Route path="kyc"          element={<ProtectedRoute><KYCPage /></ProtectedRoute>} />
           <Route path="profile"      element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="settings"     element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />

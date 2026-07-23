@@ -4,7 +4,14 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
 import api from '@admin/api/client';
-import { adminGameUsers, adminGameDeposits, adminGameWithdrawals, getGameStats } from '../api';
+import {
+  adminGameUsers,
+  adminGameDeposits,
+  adminGameWithdrawals,
+  adminGameRounds,
+  adminGameProviders,
+  getGameStats,
+} from '../api';
 
 const STATUS_OPTS = [
   { label: 'Active',    value: 'active' },
@@ -97,17 +104,11 @@ export function GameWithdrawalsPage() {
 }
 
 export function GameRoundsPage() {
-  const gameRoundsApi = {
-    list:   (params) => api.get('/game/admin/rounds', { params }),
-    create: () => Promise.reject(new Error('Not supported')),
-    update: (id, b) => api.patch(`/game/admin/rounds/${id}`, b),
-    remove: () => Promise.reject(new Error('Not supported')),
-  };
   return (
     <CrudPage
       title="Game — Rounds / Sessions"
       queryKey="game-rounds"
-      api={gameRoundsApi}
+      api={adminGameRounds}
       fields={[
         { key: 'id',         label: 'Round ID' },
         { key: 'gameType',   label: 'Game' },
@@ -127,17 +128,11 @@ export function GameRoundsPage() {
 }
 
 export function GameProvidersPage() {
-  const providersApi = {
-    list:   (params) => api.get('/game/admin/providers', { params }),
-    create: (body)   => api.post('/game/admin/providers', body),
-    update: (id, b)  => api.put(`/game/admin/providers/${id}`, b),
-    remove: (id)     => api.delete(`/game/admin/providers/${id}`),
-  };
   return (
     <CrudPage
       title="Game — Nhà cung cấp"
       queryKey="game-providers"
-      api={providersApi}
+      api={adminGameProviders}
       fields={[
         { key: 'name',        label: 'Tên',           required: true },
         { key: 'code',        label: 'Code',          required: true },

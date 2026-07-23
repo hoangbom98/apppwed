@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — strings.js
+ * @lkvip/utils — strings.js
  * Backend string helpers.
  */
 

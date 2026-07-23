@@ -1,6 +1,7 @@
--- Migration: add username field to hub users table
--- Adds unique username column (nullable, max 50 chars) + index
+-- Migration: add_username
+-- Applied to: hub_db
+-- Description: Add username column (unique, nullable) to users table if not present
 
 ALTER TABLE `users`
-  ADD COLUMN `username` VARCHAR(50) NULL AFTER `phone`,
-  ADD UNIQUE INDEX `users_username_key` (`username`);
+  ADD COLUMN IF NOT EXISTS `username` VARCHAR(50) NULL,
+  ADD UNIQUE INDEX IF NOT EXISTS `users_username_key` (`username`);

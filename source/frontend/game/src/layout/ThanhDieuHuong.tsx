@@ -47,7 +47,7 @@ const BottomNav: React.FC = () => {
       <DownloadModal
         open={dlOpen}
         onClose={() => setDlOpen(false)}
-        appName="KJC Game"
+        appName="LKVIP Game"
         appIcon="/logo.svg"
         androidLink={ANDROID_LINK}
         iosLink={IOS_LINK}

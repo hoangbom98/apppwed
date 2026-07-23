@@ -1,15 +1,15 @@
-/**
- * deploy.ts — Deploy the KJC Platform (git pull → build → pm2 reload)
+﻿/**
+ * deploy.ts — Deploy the LKVIP GROUP (git pull → build → pm2 reload)
  *
  * On Linux/macOS: delegates to deploy.sh (full VPS deploy with rollback support).
  * On Windows:    shows a helpful message (VPS operations require Linux).
  *
  * Usage (via CLI):
- *   kjc deploy
- *   kjc deploy --module backend
- *   kjc deploy --module hub --skip-build
- *   kjc deploy --rollback
- *   kjc deploy --branch develop
+ *   lkvip deploy
+ *   lkvip deploy --module backend
+ *   lkvip deploy --module hub --skip-build
+ *   lkvip deploy --rollback
+ *   lkvip deploy --branch develop
  */
 
 import { Command } from 'commander';
@@ -26,7 +26,7 @@ const VALID_MODULES: DeployModule[] = ['all', 'backend', 'hub', 'game', 'trade',
 export function registerDeployCommand(program: Command): void {
   program
     .command('deploy')
-    .description('Deploy the KJC Platform to the VPS (delegates to deploy.sh)')
+    .description('Deploy the LKVIP GROUP to the VPS (delegates to deploy.sh)')
     .option('--module <name>',  `Module to deploy: ${VALID_MODULES.join(', ')}`, 'all')
     .option('--branch <name>',  'Git branch to pull', 'main')
     .option('--skip-build',     'Skip frontend npm build (use existing dist/)')
@@ -45,7 +45,7 @@ export function registerDeployCommand(program: Command): void {
       }
 
       if (process.platform === 'win32') {
-        header('KJC Platform — Deploy');
+        header('LKVIP GROUP — Deploy');
         warn('Deploy must be run on the Linux VPS (not Windows).');
         log('SSH into your VPS and run:');
         log('  bash source/scripts/deploy.sh --module=' + options.module);

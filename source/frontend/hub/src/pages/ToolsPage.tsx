@@ -43,7 +43,7 @@ export default function ToolsPage() {
         </div>
       )}
 
-      <Pagination page={page} totalPages={data?.data?.totalPages || 1} onChange={setPage} />
+      <Pagination page={page} totalPages={data?.data?.totalPages || 1} onPageChange={setPage} />
     </div>
   );
 }

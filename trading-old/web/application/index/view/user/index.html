@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+{include file="public/header" nav="我的"}
+   
+        <link rel="stylesheet" type="text/css" href="/static/newstyle/css/my.css">
+
+    <body>
+        <div class="app">
+            <div class="top">
+                <a href="/index/user/msg.html">
+                    <div class="notice">
+                        <img src="/static/newstyle/img/xiaoxi.png" alt="">
+                        <div class="dian"></div>
+                    </div>
+                </a>
+            </div>
+            <div class="header" style="height:7rem">
+                <div class="left" style="margin-top:1rem">
+                    <img src="/4.png" style="height:98px;width:98px;margin-left:-8px;margin-top:-8px">
+                </div>
+                <div class="right">
+                    <p style="font-size:16px">{$user.phone}</p>
+                    <p style="font-size:16px">总余额：{$user.money}</p>
+                    <p style="font-size:16px">ID:{$user.id}</p>
+                    <p>
+                        <img src="/static/newstyle/img/vip.png" alt="VIP1">
+                    </p>
+                </div>
+            </div>
+            <div class="btns">
+                <a href="/index/user/recharge.html">
+                    <div class="sbtn btn1">
+                        <img src="/static/newstyle/img/cztx.png" alt="">
+                        <span>充值</span>
+                    </div>
+                </a>
+                <a href="/index/user/cash.html">
+                    <div class="sbtn btn2">
+                        <img src="/static/newstyle/img/tixian.png" alt="">
+                        <span>提现</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="listbox">
+            <a class="item" href="/index/user/cash_record.html">
+                <div>
+                    <img src="/static/newstyle/img/list.png" alt="">
+                    <span>提现记录</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+            <a class="item" href="/index/user/recharge_record.html">
+                <div>
+                    <img src="/static/newstyle/img/list.png" alt="">
+                    <span>充值记录</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+            <a class="item" href="/index/user/bank_card.html">
+                <div>
+                    <img src="/static/newstyle/img/zffs.png" alt="">
+                    <span>支付方式</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+            <a class="item" href="/index/user/recommend.html">
+                <div>
+                    <img src="/static/newstyle/img/tghb.png" alt="">
+                    <span>推广分享海报</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+            <a class="item" href="/index/index/notice.html">
+                <div>
+                    <img src="/static/newstyle/img/ptgg.png" alt="">
+                    <span>平台公告</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+            <a class="item" href="/index/user/logout">
+                <div>
+                    <img src="/static/newstyle/img/ptgg.png" alt="">
+                    <span>退出登录</span>
+                </div>
+                <img src="/static/newstyle/img/you.png" alt="">
+            </a>
+        </div>
+        <!-- tabbar -->
+ 
+         {include file="public/footer" menu='user'}
+ 
+        <!--<script src="/static/newstyle/js/jquery-1.9.1.min.js"></script>-->
+        <!--<script>-->
+        <!--</script>-->
+    </body>
+</html>

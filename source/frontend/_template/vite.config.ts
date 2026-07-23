@@ -14,7 +14,7 @@ export default defineConfig({
       // shared-ui — source-direct, no build step
       '@ui':        path.resolve(__dirname, '../shared-ui'),
       // shared TypeScript types — source-direct via tsconfig paths
-      '@kjc/types': path.resolve(__dirname, '../../shared-types/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
       // Force peer deps to resolve from THIS SPA's node_modules.
       // This prevents React/Zustand/Axios from being duplicated when
       // shared-ui imports them.

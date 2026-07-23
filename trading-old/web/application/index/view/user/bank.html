@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no"/>
+    <title>银行入款充值</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "微软雅黑";
+        }
+
+        ul, li {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        p {
+            padding: 0;
+            margin: 0;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .container {
+            padding: 0 .4rem .4rem;
+        }
+
+        .title {
+            font-size: .24rem;
+            line-height: 1;
+            color: #6E6E6E;
+        }
+
+        .input-group {
+            width: 100%;
+            padding-top: .4rem;
+            border-bottom: 1px solid #E9E9E9;
+        }
+
+        .input-group .stitle {
+            font-size: .24rem;
+            line-height: .34rem;
+            color: #BABABA;
+        }
+
+        .input-group .in {
+            margin-top: .38rem;
+            padding-bottom: .14rem;
+            border-bottom: 1px solid #E9E9E9;
+        }
+
+        .input-group .in input {
+            width: 100%;
+            height: .34rem;
+            padding: 0;
+            border: 0;
+            font-size: .24rem;
+            line-height: .34rem;
+            outline: none;
+            float: left;
+        }
+
+        .input-group .in input::placeholder {
+            color: #9B9B9B;
+        }
+
+        .input-group .in:after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+
+        /* payModes CSS */
+        .payModes {
+            margin-top: .3rem;
+        }
+
+        .payModes .pm-title {
+            font-size: .24rem;
+            line-height: .34rem;
+            color: #6E6E6E;
+        }
+
+        .payMode {
+            margin-top: .08rem;
+            padding-top: .36rem;
+            padding-bottom: .26rem;
+            border-bottom: 1px solid #E9E9E9;
+        }
+
+        .payModes .list .payMode:last-child {
+            border-bottom: 0;
+        }
+
+        .payMode .left {
+            width: .44rem;
+            height: .44rem;
+            margin-right: .2rem;
+            line-height: 0;
+            float: left;
+            vertical-align: middle;
+        }
+
+        .payMode img {
+            width: 100%;
+            height: auto;
+        }
+
+        .payMode .center {
+            font-size: .28rem;
+            line-height: .44rem;
+            color: #262626;
+            float: left;
+        }
+
+        .payMode .right {
+            float: right;
+            margin-top: .1rem;
+        }
+
+        .payMode .right .checkbox {
+            width: .4rem;
+            height: .4rem;
+            position: relative;
+            float: left;
+            margin-top: .02rem;
+        }
+
+        .payMode .right .checkbox input {
+            width: .4rem;
+            height: .4rem;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        .payMode .right .checkbox label {
+            width: .4rem;
+            height: .4rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .payMode .right .checkbox input + label {
+            background-image: url(../../img/icon/icon_untick.png);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+
+        .payMode .right .checkbox input:checked + label {
+            background-image: url(../../img/icon/icon_tick1.png);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+
+        .payMode:after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+
+        .confirm {
+            width: 100%;
+            height: .98rem;
+            background-color: #EF6F6C;
+            border-radius: 4px;
+            font-size: .32rem;
+            color: #fff;
+            line-height: .98rem;
+            text-align: center;
+            margin-top: .8rem;
+        }
+
+        .header {
+            display: none;
+            width: 100%;
+            height: .98rem;
+            background-color: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .header .back {
+            width: .54rem;
+            text-align: center;
+            line-height: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .header .back img {
+            width: .18rem;
+            height: .32rem;
+            margin-top: .35rem;
+        }
+
+        .header .h-title {
+            font-size: .34rem;
+            line-height: .98rem;
+            color: #030303;
+            text-align: center;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            font-family: "微软雅黑";
+            background-color: #fff;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        input {
+            outline: none;
+        }
+
+        .main {
+            padding-top: 0 !important;
+        }
+
+        .navlist {
+            top: 0 !important;
+        }
+
+        /* tipMask CSS */
+        .tipMask {
+            width: 100%;
+            height: 100%;
+            background: rgba(95, 95, 95, 0.3);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 3;
+        }
+
+        .tipMask .cont {
+            width: 5.1rem;
+            padding: .42rem .6rem .5rem;
+            border-radius: 5px;
+            background-color: #FFFFFF;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -3.15rem;
+            margin-top: -1.8rem;
+            text-align: center;
+        }
+
+        .tipMask .cont .title {
+            font-size: .34rem;
+            line-height: .48rem;
+            color: #191919;
+        }
+
+        .tipMask .cont .stitle {
+            font-size: .3rem;
+            line-height: .42rem;
+            color: #606060;
+            margin-top: .36rem;
+        }
+
+        .tipMask .cont .confirm {
+            width: 100%;
+            height: .88rem;
+            background-color: #EF6F6C;
+            border-radius: 4px;
+            font-size: .34rem;
+            color: #fff;
+            line-height: .88rem;
+            text-align: center;
+            margin-top: .5rem;
+        }
+
+        .wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+            flex-flow: column;
+        }
+
+        .main {
+            padding-top: .98rem;
+            background-color: #FAFAFA;
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+        }
+
+        .bg {
+            width: 100%;
+            height: 3rem;
+            background-color: #33B497;
+        }
+
+        .top {
+            width: 6.1rem;
+            padding: 0 .4rem .6rem;
+            border-radius: 10px;
+            background-color: #fff;
+            margin: 0 auto;
+            margin-top: -1.8rem;
+        }
+
+        .top .info {
+            border-bottom: 1px solid #E9E9E9;
+            padding-top: .4rem;
+        }
+
+        .top .info .item {
+            display: flex;
+            display: -webkit-flex;
+            font-size: .28rem;
+            line-height: 1;
+            color: #4A4A4A;
+            padding-bottom: .5rem;
+        }
+
+        .top .info .item .left {
+            width: 2rem;
+        }
+
+        .top .info .item .right {
+            width: 4.1rem;
+            text-align: right;
+        }
+
+        .top .info .item .right.money {
+            color: #33B497;
+        }
+
+        .top .imgBox {
+            width: 5.9rem;
+            height: 2.2rem;
+            border-radius: 10px;
+            line-height: 0;
+            margin: 0 auto;
+            margin-top: .4rem;
+            overflow-y: scroll;
+        }
+
+        .top .imgBox img {
+            width: 100%;
+            float: left;
+        }
+
+        .top .upload {
+            width: 3.54rem;
+            height: .84rem;
+            border-radius: 10px;
+            background-color: #33B497;
+            font-size: .28rem;
+            line-height: .84rem;
+            color: #fff;
+            text-align: center;
+            margin: 0 auto;
+            margin-top: .4rem;
+            position: relative;
+        }
+
+        .top .upload input {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0;
+        }
+
+        .notice {
+            padding: .34rem;
+        }
+
+        .notice .n-title {
+            font-size: .28rem;
+            line-height: 1;
+            color: #4A4A4A;
+        }
+
+        .notice .n-cont {
+            font-size: .24rem;
+            line-height: .4rem;
+            color: #999999;
+            margin-top: .2rem;
+        }
+
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="header" style="display: block;">
+        <div class="back">
+            <a href="/index/user/index"> <img src="__ROOT__/static/theme/index/img/goback.png"></a>
+        </div>
+        <div class="h-title">银行入款充值</div>
+    </div>
+    <div class="main">
+        <div class="bg" style="padding-top: .7rem;"></div>
+        <div class="top">
+            <div class="info">
+
+                <div class="item" style="padding-bottom: .3rem;">
+                    <div class="left"><b style="font-size: .4rem;">银行入款</b></div>
+                    <div class="right money" style="color:red;"><b style="font-size: .4rem;">{$money}元</b></div>
+
+                </div>
+                <div style="color:#f666;text-align:center;font-size:.3rem;padding-bottom: .3rem;">
+                    此为我公司财务，请放心充值
+                </div>
+                <div class="item">
+                    <div class="left">收款银行：</div>
+                    <div class="right">
+                        {if condition="$type eq 'gz_bank'"}
+                        {:getInfo('gz_bank_type')}
+                        {/if}
+                        {if condition="$type eq 'alipay_bank'"}
+                        {:getInfo('alipay_bank_type')}
+                        {/if}
+                        {if condition="$type eq 'wx_bank'"}
+                        {:getInfo('wx_bank_type')}
+                        {/if}
+                        {if condition="$type eq 'bank'"}
+                        {:getInfo('pay_bank_type')}
+                        {/if}
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="left">收款人：</div>
+                    <div class="right">
+                        {if condition="$type eq 'gz_bank'"}
+                        {:getInfo('gz_bank_name')}
+                        {/if}
+                        {if condition="$type eq 'wx_bank'"}
+                        {:getInfo('wx_bank_name')}
+                        {/if}
+                        {if condition="$type eq 'alipay_bank'"}
+                        {:getInfo('alipay_bank_name')}
+                        {/if}
+                        {if condition="$type eq 'bank'"}
+                        {:getInfo('pay_bank_name')}
+                        {/if}
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="left">收款账号：</div>
+                    <div class="right">
+                        {if condition="$type eq 'gz_bank'"}
+                        {:getInfo('gz_bank_account')}
+                        {/if}
+                        {if condition="$type eq 'wx_bank'"}
+                        {:getInfo('wx_bank_account')}
+                        {/if}
+                        {if condition="$type eq 'alipay_bank'"}
+                        {:getInfo('alipay_bank_account')}
+                        {/if}
+                        {if condition="$type eq 'bank'"}
+                        {:getInfo('pay_bank_account')}
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <form method="post" action="/index/user/bank" id="ifr">
+                <input type="hidden" value="{$orderid}" name="orderid"/>
+                <div class="info">
+                    <div class="item">
+                        <div class="left">付款人：</div>
+                        <div class="right"><input style="border: none;" type="text" name="name" id="name" value=""
+                                                  placeholder="请输入转账人姓名"/></div>
+                    </div>
+                    <div class="item">
+                        <div class="left">转账附言：</div>
+                        <div class="right"><input style="border: none;" type="text" name="reason" id="reason" value=""
+                                                  placeholder="请输入转账附言"/></div>
+                    </div>
+                </div>
+                <div class="upload">提交</div>
+            </form>
+        </div>
+        <div class="notice">
+            <div class="n-title">注意事项</div>
+            <div class="n-cont">
+                {if condition="$type eq 'gz_bank'"}
+                {:getInfo('gz_bank')}
+                {/if}
+                {if condition="$type eq 'wx_bank'"}
+                {:getInfo('wx_bank')}
+                {/if}
+                {if condition="$type eq 'alipay_bank'"}
+                {:getInfo('alipay_bank')}
+                {/if}
+                {if condition="$type eq 'bank'"}
+                {:getInfo('pay_bank')}
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tipMask hide">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi" style="background-color:#33B497;">确定</div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/font.js"></script>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('.upload').click(function () {
+            var name = $("#name").val();
+            var reason = $("#reason").val();
+            if (name.length < 2) {
+                msg("错误", "请输入付款人姓名！", 1);
+                return false;
+            }
+            $("#ifr").submit();
+        })
+    });
+
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi"  style="background-color:#33B497;" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi"  style="background-color:#33B497;" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+</script>
+</html>

@@ -1,5 +1,5 @@
 {
-  "name": "@kjc/__APPNAME__",
+  "name": "@lkvip/__APPNAME__",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,8 +7,9 @@
     "dev":      "vite --port __PORT__",
     "build":    "tsc -b && vite build",
     "preview":  "vite preview --port __PORT__",
-    "lint":     "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "lint":       "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck":  "tsc --noEmit",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "axios":                 "^1.7.2",

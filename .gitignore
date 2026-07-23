@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # Root .gitignore -- KJC Multi-Project Platform
 # ============================================================
 
@@ -63,3 +63,15 @@ docs/legacy/
 # --- Capacitor / Mobile ---
 android/
 ios/
+
+# --- Unrelated sub-projects (not part of this repo) ---
+hb88-main/
+
+# --- Obsolete plan/draft files (auto-generated, do not commit) ---
+*-plan.md
+*-cleanup-plan.md
+*-guide-draft.md
+
+
+# --- Large media files ---
+source/frontend/hub/public/assets/videos/

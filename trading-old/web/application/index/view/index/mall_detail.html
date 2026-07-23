@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="IE=9; IE=EDGE" http-equiv="X-UA-Compatible">
+    <title>矿机详情</title>
+    <link rel="stylesheet" href="__ROOT__/static/theme/index/css/base.css?k={:rand(1,99999)}"/>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/yatongle.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/plugs/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/public.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css" />
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/iconfont.css" />
+    <script src="__ROOT__/static/theme/index/js/autorem.js"></script>
+<style>
+    .bar {
+        position: fixed;
+        width: 10rem;
+        z-index: 10;
+        height: 1.1rem;
+        /* padding: 0 0.5rem; */
+        color: #fff;
+        /* border: solid 1px #FF7F00; */
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .bar-nav {
+        top: 0;
+        width: 10rem;
+        left: 50%;
+        margin-left: -5rem;
+    }
+    #alltit {
+        position: absolute;
+        z-index: 19;
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        line-height: 1.1rem;
+        font-size: 0.4rem;
+        color: #fff;
+    }
+    .logo {
+        display: inline-block;
+        margin-left: 0.3rem;
+    }
+    .logo a {
+        display: block;
+        text-align: center;
+        line-height: 1.1rem;
+        color: #fff;
+    }
+    .logo a .iconfont {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .bar .iconfont {
+        position: relative;
+        z-index: 20;
+        color: #fff;
+        padding: 0.5rem 0.1rem;
+        font-size: 0.44rem;
+        line-height: 1.1rem;
+    }
+    .page, .page-group {
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: #efefed;
+        /* background: #efeff4; */
+        /* display: none; */
+        overflow: hidden;
+    }
+    #main_content {
+        padding-bottom: 2.5rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+    .layui-table {
+        width: 100%;
+        background-color: #fff;
+        color: #666;
+    }
+
+    .layui-table, .layui-table-view {
+        margin: 10px 0;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    .layui-table td, .layui-table th {
+        position: relative;
+        padding: 9px 15px;
+        min-height: 20px;
+        line-height: 20px;
+        font-size: 14px;
+    }
+    .layui-table td, .layui-table th {
+        position: relative;
+        padding: 9px 15px;
+        min-height: 20px;
+        line-height: 20px;
+        font-size: 14px;
+    }
+    .layui-table td, .layui-table th, .layui-table-col-set, .layui-table-fixed-r, .layui-table-grid-down, .layui-table-header, .layui-table-page, .layui-table-tips-main, .layui-table-tool, .layui-table-total, .layui-table-view, .layui-table[lay-skin=line], .layui-table[lay-skin=row] {
+        border-width: 1px;
+        border-style: solid;
+        border-color: #e6e6e6;
+    }
+    .layui-table td {
+        border-color: #465686;
+        font-size: 0.35rem;
+        padding: 0.26rem 0.3rem;
+    }
+    .sytit {
+        text-align: center;
+        color: #fff;
+        margin-bottom: 0.1rem;
+    }
+    .sytit img {
+        height: 0.2rem;
+        margin-top: -0.1rem;
+        width: auto;
+    }
+    .sytit span {
+        font-size: 0.4rem;
+        font-weight: bold;
+        padding: 0 0.2rem;
+        color: #0084FF;
+    }
+
+    .list {
+        overflow: hidden;
+        width: 9.3rem;
+        margin: 0.25rem auto 0;
+    }
+    .list li {
+        color: #000000;
+        background-color: #fff;
+        padding: 0.3rem 0rem 0rem 0rem;
+        font-size: 0.35rem;
+        line-height: 0.48rem;
+        margin-bottom: 0.25rem;
+        border-radius: 0.2rem;
+    }
+
+    li {
+        list-style: outside none none;
+    }
+    .listtit {
+        float: left;
+        width: 33%;
+        text-align: center;
+        color: #fff;
+        border-right: 0.02rem solid #148EFF;
+    }
+    .listtit span {
+        display: block;
+        font-size: 0.35rem;
+        color: #000000;
+    }
+    .list li .left {
+        width: 26%;
+        display: inline-block;
+        color: #000000;
+        line-height: 0.54rem;
+    }
+    .list li .right {
+        width: 74%;
+        display: inline-block;
+    }
+    .contitle {
+        border-bottom: 0.02rem solid #148EFF;
+        font-size: 0.35rem;
+        padding-bottom: 0.18rem;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+</style>
+</head>
+<body>
+<header class="bar bar-nav">
+    <a id="alltit">{$data.title}</a>
+    <div class="logo">
+        <a id="cancle" href="javascript:history.go(-1)">
+            <i class="iconfont icon-arrow-left"></i>
+        </a>
+    </div>
+    <a class="icon pull-right open-panel"></a>
+</header>
+<div class="page">
+    <div class="content" id="main_content">
+        <img class="kjpic" src="/static/theme/index/img/detailico.jpg" style="width: 9.3rem;margin:0.25rem auto;display: block;margin-top: 1.5rem;" alt="">
+        <div class="tabcs" style="padding:0.3rem 0.4rem;border-radius: 0.2rem;margin: 0.25rem auto;width: 9.3rem;background-color: #fff;">
+            <div class="sytit" style="">
+                <img src="/static/theme/index/img/sytitl1.png" alt="">
+                <span>规格参数</span>
+                <img src="/static/theme/index/img/sytitr1.png" alt="">
+            </div>
+            <table class="layui-table" style="margin-top: 0.4rem;background-color: #fff;color: #000000">
+                <thead>
+                <tr style="background-color: #0084FF;color: #fff;">
+                    <th style="border-color: #0084FF;font-size: 0.4rem;padding: 0.26rem 0.3rem;width: 3.2rem">规格
+                    </th>
+                    <th style="border-color: #0084FF;font-size: 0.4rem;padding: 0.26rem 0.3rem;">参数</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>使用期限</td>
+                    <td>{$data.day} 天</td>
+                </tr>
+                <tr>
+                    <td>保证金</td>
+                    <td>{$data.min} 元/份</td>
+                </tr>
+                <tr>
+                    <td>算力</td>
+                    <td>{$data.power} TH/s</td>
+                </tr>
+                <tr>
+                    <td>日总产出</td>
+                    <td>{$data.day_income} BTC/天</td>
+                </tr>
+                <tr>
+                    <td>日运维费</td>
+                    <td>{$data.cost} BTC/天</td>
+                </tr>
+                <tr>
+                    <td>日净收益</td>
+                    <td>{:getProfit($data.day_income,$data.cost)} BTC/天</td>
+                </tr>
+                <tr>
+                    <td>日化收益率</td>
+                    <td>{$data.rate}</td>
+                </tr>
+                <tr>
+                    <td>上架时间</td>
+                    <td>{$data.time}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content_r" style="display: block;">
+            <ul class="list">
+                <li style="padding:0.3rem 0.4rem 0.34rem 0.4rem;margin-bottom: 0;" class="cont contentext">
+                    <div class="sytit" style="">
+                        <img src="/static/theme/index/img/sytitl1.png" alt="">
+                        <span>产品详情</span>
+                        <img src="/static/theme/index/img/sytitr1.png" alt="">
+                    </div>
+                    {:htmlspecialchars_decode($data['fixedcontent'])}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<a href="/index/index/mall_form?id={$data.id}" style="display: block;position: fixed;bottom: 0;width: 100%;background: #fff;">
+    <div button="" id="confirm recharge" type="button" style="width: 9.3rem!important;text-align:center; color:#fff;margin:0.5rem auto; height: 1.2rem; border-radius: 0.2rem; line-height: 1.2rem; font-size: 0.4rem;font-weight: bold;width: 100%;background: #0578E7;">
+        马上抢购</div>
+</a>
+</html>
+</body>

@@ -37,7 +37,7 @@ function Loading() {
 export default function App() {
   return (
     <>
-    <InstallPrompt appName="KJC Hub" appIcon="/logo-152-152.png" />
+    <InstallPrompt appName="LKVIP Hub" appIcon="/logo-152-152.png" />
     <UpdateBanner />
     <Suspense fallback={<Loading />}>
       <Routes>

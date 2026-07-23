@@ -1,0 +1,298 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>LKVIP Admin Dashboard — Architecture Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    background: #ffffff; color: #1f2328;
+    padding: 32px 16px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 800; color: #1f2328; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+  h2 { font-size: 15px; font-weight: 700; color: #1f2328; margin: 24px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+  h3 { font-size: 13px; font-weight: 600; color: #3b82d4; margin: 16px 0 6px; }
+  p { color: #1f2328; margin-bottom: 8px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-blue   { background: #dbeafe; color: #1e3a8a; }
+  .badge-purple { background: #ede9fe; color: #4c1d95; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-gray   { background: #f3f4f6; color: #374151; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  th { background: #f7f8fa; color: #57606a; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #e5e7eb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 7px 12px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:hover td { background: #f7f8fa; }
+  .card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .card-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .fix-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #22c55e; border-radius: 0 6px 6px 0; }
+  .fix-title { font-weight: 600; font-size: 13px; }
+  .fix-desc  { font-size: 12px; color: #57606a; margin-top: 2px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mono { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 12px; background: #f3f4f6; padding: 1px 5px; border-radius: 3px; }
+  .status-ok { color: #22c55e; font-weight: 700; }
+  .status-err { color: #ef4444; font-weight: 700; }
+  .build-box { background: #0f172a; border-radius: 8px; padding: 16px; margin-bottom: 16px; color: #e2e8f0; font-family: ui-monospace, monospace; font-size: 12px; line-height: 1.8; }
+  .build-ok  { color: #4ade80; }
+  .build-num { color: #94a3b8; }
+  .sep { height: 1px; background: #e5e7eb; margin: 28px 0; }
+  footer { border-top: 1px solid #e5e7eb; margin-top: 40px; padding-top: 12px; text-align: center; color: #57606a; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>🏗️ LKVIP Admin Dashboard</h1>
+  <div class="subtitle">Architecture Audit Report — <span class="mono">source/frontend/admin-dashboard/</span> — Build ✅ PASSED</div>
+
+  
+  <h2>✅ Build Status</h2>
+  <div class="build-box">
+<span class="build-ok">✓</span> <span class="build-num">1853 modules transformed</span><br />
+<span class="build-ok">✓</span> built in 6.36s — <span class="build-num">0 errors, 0 warnings</span><br />
+<span class="build-ok">✓</span> Output: <span class="build-num">dist/</span> — 69 chunks, max chunk 285 kB (react-vendor, gzip 92 kB)<br />
+<span class="build-ok">✓</span> tsc type-check passed (tsconfig extends frontend.base.json)
+  </div>
+
+  
+  <h2>🔧 Fixes Applied (4 files)</h2>
+  <div class="fix-item">
+    <div>
+      <div class="fix-title">1. UserDetailModal.jsx — Removed broken @/components/ui imports</div>
+      <div class="fix-desc">Was importing <span class="mono">Button</span> / <span class="mono">Input</span> from <span class="mono">@/components/ui</span> (shadcn alias) which doesn't exist in this project. Replaced with pure Tailwind inline HTML — added <span class="mono">reason</span> field and <span class="mono">onClose</span> prop support.</div>
+    </div>
+  </div>
+  <div class="fix-item">
+    <div>
+      <div class="fix-title">2. ProtectedRoute.jsx — Replaced stub with real auth guard</div>
+      <div class="fix-desc">The file had <span class="mono">export const ProtectedRoute</span> (named export) but <span class="mono">index.jsx</span> imported it as default. Replaced with <span class="mono">export default function ProtectedRoute</span> using the real <span class="mono">useAuthStore</span> token check → redirects to <span class="mono">/login</span> if unauthenticated.</div>
+    </div>
+  </div>
+  <div class="fix-item">
+    <div>
+      <div class="fix-title">3. vite.config.ts — Removed forced socket.io-client local alias</div>
+      <div class="fix-desc"><span class="mono">socket.io-client</span> was forced to resolve from <span class="mono">./node_modules/socket.io-client</span> which doesn't exist in admin-dashboard's local node_modules (it lives in the pnpm workspace). Removed the override; pnpm workspace resolution now handles it correctly.</div>
+    </div>
+  </div>
+  <div class="fix-item">
+    <div>
+      <div class="fix-title">4. main.tsx — Removed unused i18n import</div>
+      <div class="fix-desc"><span class="mono">i18next</span> and <span class="mono">react-i18next</span> are not installed in admin-dashboard. The admin UI is 100% hardcoded Vietnamese strings. Removed the <span class="mono">import './i18n'</span> line from <span class="mono">main.tsx</span>.</div>
+    </div>
+  </div>
+
+  
+  <h2>🧭 Architecture Overview</h2>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Tech Stack</div>
+      <table style="margin:0">
+        <tr><td>React</td><td><span class="badge badge-blue">v19</span></td></tr>
+        <tr><td>Routing</td><td><span class="badge badge-blue">react-router-dom v7</span></td></tr>
+        <tr><td>State</td><td><span class="badge badge-purple">Zustand v5 + persist</span></td></tr>
+        <tr><td>Data fetching</td><td><span class="badge badge-blue">TanStack Query v5</span></td></tr>
+        <tr><td>HTTP</td><td><span class="badge badge-gray">Axios (Bearer JWT)</span></td></tr>
+        <tr><td>CSS</td><td><span class="badge badge-blue">Tailwind CSS v4</span></td></tr>
+        <tr><td>Build</td><td><span class="badge badge-gray">Vite v8 + rolldown</span></td></tr>
+        <tr><td>Real-time</td><td><span class="badge badge-green">Socket.IO client v4</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Deployment</div>
+      <table style="margin:0">
+        <tr><td>Subdomain</td><td><span class="mono">admin.tc-gaming.live</span></td></tr>
+        <tr><td>Build output</td><td><span class="mono">dist/</span> (static SPA)</td></tr>
+        <tr><td>API base</td><td><span class="mono">VITE_API_URL</span></td></tr>
+        <tr><td>Port (dev)</td><td><span class="mono">5180</span></td></tr>
+        <tr><td>Backend port</td><td><span class="mono">5000</span></td></tr>
+        <tr><td>Auth storage</td><td><span class="mono">admin_token</span> (localStorage)</td></tr>
+        <tr><td>Auth storage</td><td>Isolated from user SPAs</td></tr>
+      </table>
+    </div>
+  </div>
+
+  
+  <h2>🗺️ Routing Structure</h2>
+  <table>
+    <thead><tr><th>Path</th><th>Component</th><th>Guard</th><th>Chunk</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">/login</span></td><td>Login.jsx</td><td>Public</td><td>eager</td></tr>
+      <tr><td><span class="mono">/</span></td><td>Dashboard.jsx</td><td>Auth</td><td>eager</td></tr>
+      <tr><td><span class="mono">/members</span></td><td>ProjectUsers.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/users</span></td><td>Users.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/finance</span></td><td>Finance.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/transactions</span></td><td>Transactions.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/risk</span></td><td>RiskAudit.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/announcements</span></td><td>Announcements.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/game/*</span></td><td>7 Game pages</td><td>Auth</td><td>chunk-admin-game</td></tr>
+      <tr><td><span class="mono">/hub/*</span></td><td>12 Hub pages</td><td>Auth</td><td>chunk-admin-hub</td></tr>
+      <tr><td><span class="mono">/dating/*</span></td><td>7 Dating pages</td><td>Auth</td><td>chunk-admin-dating</td></tr>
+      <tr><td><span class="mono">/sports/*</span></td><td>7 Sports pages</td><td>Auth</td><td>chunk-admin-sports</td></tr>
+      <tr><td><span class="mono">/trade/*</span></td><td>5 Trade pages</td><td>Auth</td><td>chunk-admin-trade</td></tr>
+      <tr><td><span class="mono">/ops/*</span></td><td>5 Ops pages</td><td>Auth</td><td>chunk-admin-ops</td></tr>
+      <tr><td><span class="mono">/settings/*</span></td><td>4 Settings pages</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/payment-gateways</span></td><td>PaymentGateways.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+      <tr><td><span class="mono">/mine</span></td><td>MinePage.jsx</td><td>Auth</td><td>chunk-admin-shared</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>📦 Module Map</h2>
+  <table>
+    <thead><tr><th>Module</th><th>Pages</th><th>API file</th><th>Backend prefix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-blue">auth</span></td>
+        <td>Login.jsx</td>
+        <td>adminStore.js (<span class="mono">/admin/auth/login</span>)</td>
+        <td><span class="mono">/api/admin/auth</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">game</span></td>
+        <td>Users, Deposits, Withdrawals, Rounds, Providers, Lottery, Config</td>
+        <td>game/api.js</td>
+        <td><span class="mono">/api/game/admin/*</span>, <span class="mono">/api/admin/finance/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">hub</span></td>
+        <td>Games, Categories, Websites, Tools, News, Pages, Banners, Menus, Feedbacks, SEO, AppCatalog, Config</td>
+        <td>hub/api.js</td>
+        <td><span class="mono">/api/hub/admin/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-purple">dating</span></td>
+        <td>Users, Profiles, Matches, Gifts, Moments, Reports, Config</td>
+        <td>dating/api.js</td>
+        <td><span class="mono">/api/dating/admin/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">sports</span></td>
+        <td>Users, Leagues, Teams, Matches, Bets, Articles, Config</td>
+        <td>sports/api.js</td>
+        <td><span class="mono">/api/sports/admin/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">trade</span></td>
+        <td>Users, KYC, Orders, Wallets, Config</td>
+        <td>trade/api.js</td>
+        <td><span class="mono">/api/trade/admin/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-gray">ops</span></td>
+        <td>Dashboard, Tasks, Segments, Reports, Campaigns</td>
+        <td>ops/api.js</td>
+        <td><span class="mono">/api/admin/ops/*</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-gray">shared</span></td>
+        <td>Dashboard, Users, Finance, Transactions, Announcements, RiskAudit, PaymentGateways, Settings, SystemPage, GeneralConfig, MinePage, AdminUserMgmt</td>
+        <td>shared/api/baseAdminApi.js</td>
+        <td><span class="mono">/api/admin/*</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>🔐 Auth &amp; State Flow</h2>
+  <div class="card">
+    <div class="card-title">Zustand Store — adminStore.js (persisted)</div>
+    <p>State: <span class="mono">user</span>, <span class="mono">token</span>, <span class="mono">isLoading</span></p>
+    <p>Actions: <span class="mono">login(credentials)</span> → POST <span class="mono">/admin/auth/login</span> → saves token to localStorage key <span class="mono">admin_token</span> → navigates to <span class="mono">/</span></p>
+    <p>Actions: <span class="mono">logout()</span> → clears token → navigates to <span class="mono">/login</span></p>
+    <p>Persistence: <span class="mono">zustand/middleware persist</span> — partializes <span class="mono">{ user, token }</span> only</p>
+  </div>
+  <div class="card">
+    <div class="card-title">API Client — api/client.js (Axios instance)</div>
+    <p>Base URL: <span class="mono">VITE_API_URL</span> (default: <span class="mono">http://localhost:5000/api</span>)</p>
+    <p>Request interceptor: attaches <span class="mono">Authorization: Bearer {token}</span> from <span class="mono">admin_token</span></p>
+    <p>Response interceptor: on 401 → clears token + redirect <span class="mono">/login</span></p>
+    <p>NOTE: No <span class="mono">X-Project</span> header in API client — admin routes use <span class="mono">adminGuard</span> (role-only) not <span class="mono">projectAccessGuard</span></p>
+  </div>
+
+  
+  <h2>⚡ Real-time (Socket.IO)</h2>
+  <table>
+    <thead><tr><th>Event</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">admin:stats_update</span></td><td>Invalidate <span class="mono">admin-dashboard</span> + <span class="mono">admin-finance-stats</span> queries</td></tr>
+      <tr><td><span class="mono">admin:finance_event</span></td><td>Invalidate deposit/withdrawal queries + browser Notification</td></tr>
+      <tr><td><span class="mono">admin:new_user</span></td><td>Invalidate <span class="mono">adminUsers</span> query</td></tr>
+      <tr><td><span class="mono">admin:risk_alert</span></td><td>Dispatch <span class="mono">admin:risk</span> CustomEvent</td></tr>
+      <tr><td><span class="mono">system:maintenance</span></td><td>Dispatch <span class="mono">admin:maintenance</span> CustomEvent</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>🧩 Shared Components</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">CrudPage.jsx</span></td><td>Generic CRUD table with modal — used by all 30+ module pages</td></tr>
+      <tr><td><span class="mono">ProjectConfigPanel.jsx</span></td><td>Dynamic config editor per project (reads <span class="mono">/admin/ui-config</span>)</td></tr>
+      <tr><td><span class="mono">Toast.jsx</span></td><td>Global toast provider + <span class="mono">useToast()</span> hook</td></tr>
+      <tr><td><span class="mono">Breadcrumb.jsx</span></td><td>Auto breadcrumbs from <span class="mono">useLocation()</span></td></tr>
+      <tr><td><span class="mono">Skeleton.jsx</span></td><td>SkeletonCard / SkeletonTable for loading states</td></tr>
+      <tr><td><span class="mono">UserDetailModal.jsx</span></td><td>User detail panel + balance adjustment form</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>📁 Source Directory Layout</h2>
+  <div class="card" style="font-family:ui-monospace, monospace;font-size:12px;line-height:1.9;color:#374151">
+src/<br />
+├── <strong>App.tsx</strong>                  — QueryClientProvider + RouterProvider<br />
+├── <strong>main.tsx</strong>                 — ReactDOM.createRoot + SW registration<br />
+├── <strong>index.css</strong>                — Tailwind directives<br />
+├── api/<br />
+│   └── <strong>client.js</strong>            — Axios instance (Bearer auth + 401 redirect)<br />
+├── store/<br />
+│   └── <strong>adminStore.js</strong>        — Zustand auth store (persisted)<br />
+├── core/<br />
+│   ├── layouts/<br />
+│   │   ├── <strong>AdminLayout.jsx</strong>  — Collapsible sidebar + sticky header + ToastProvider<br />
+│   │   └── <strong>AuthLayout.jsx</strong>   — Minimal wrapper for login<br />
+│   ├── routes/<br />
+│   │   ├── <strong>index.jsx</strong>        — createBrowserRouter — 50+ routes, all lazy-loaded<br />
+│   │   └── <strong>ProtectedRoute.jsx</strong> — JWT token guard → /login<br />
+│   └── hooks/<br />
+│       ├── <strong>useAdminSocket.js</strong> — Socket.IO lifecycle hook<br />
+│       └── <strong>useSiteConfig.js</strong>  — VITE_APP_NAME / VITE_API_URL helpers<br />
+├── modules/<br />
+│   ├── auth/pages/<strong>Login.jsx</strong><br />
+│   ├── game/  (api.js + 7 pages)<br />
+│   ├── hub/   (api.js + 12 pages)<br />
+│   ├── dating/(api.js + 7 pages)<br />
+│   ├── sports/(api.js + 7 pages)<br />
+│   ├── trade/ (api.js + 5 pages)<br />
+│   ├── ops/   (api.js + 5 pages)<br />
+│   └── shared/<br />
+│       ├── api/ (baseAdminApi.js, config.js, mineApi.js)<br />
+│       ├── components/ (CrudPage, ProjectConfigPanel, Toast, Breadcrumb, Skeleton, UserDetailModal)<br />
+│       └── pages/ (Dashboard, Users, Finance, Transactions, Announcements, RiskAudit, …)
+  </div>
+
+  
+  <h2>📐 Key Conventions</h2>
+  <table>
+    <thead><tr><th>Convention</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Import alias</td><td><span class="mono">@admin/*</span> → <span class="mono">src/*</span> (never <span class="mono">@/</span>)</td></tr>
+      <tr><td>Auth token key</td><td><span class="mono">admin_token</span> — isolated from user SPAs</td></tr>
+      <tr><td>Zustand persist key</td><td><span class="mono">admin-auth</span></td></tr>
+      <tr><td>All pages</td><td>Dark theme (<span class="mono">bg-gray-900</span> / <span class="mono">bg-gray-950</span>) — no @shadcn/ui</td></tr>
+      <tr><td>API pattern</td><td>Cross-project → <span class="mono">/admin/*</span>; Project-specific → <span class="mono">/{project}/admin/*</span></td></tr>
+      <tr><td>Lazy loading</td><td>All non-critical pages wrapped in <span class="mono">Suspense</span> + named chunks</td></tr>
+      <tr><td>Config editing</td><td>All project configs via <span class="mono">ProjectConfigPanel</span> → <span class="mono">GET/PUT /admin/ui-config</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sep"></div>
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

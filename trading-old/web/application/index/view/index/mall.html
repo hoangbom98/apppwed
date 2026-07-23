@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="IE=9; IE=EDGE" http-equiv="X-UA-Compatible">
+    <title>矿机商城</title>
+    <link rel="stylesheet" href="__ROOT__/static/theme/index/css/base.css?k={:rand(1,99999)}"/>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/yatongle.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/plugs/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/public.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css" />
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/iconfont.css" />
+    <script src="__ROOT__/static/theme/index/js/autorem.js"></script>
+<style>
+    .bar {
+        position: fixed;
+        width: 10rem;
+        z-index: 10;
+        height: 1.1rem;
+        /* padding: 0 0.5rem; */
+        color: #fff;
+        /* border: solid 1px #FF7F00; */
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .bar-nav {
+        top: 0;
+        width: 10rem;
+        left: 50%;
+        margin-left: -5rem;
+    }
+    #alltit {
+        position: absolute;
+        z-index: 19;
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        line-height: 1.1rem;
+        font-size: 0.4rem;
+        color: #fff;
+    }
+    .logo {
+        display: inline-block;
+        margin-left: 0.3rem;
+    }
+    .logo a {
+        display: block;
+        text-align: center;
+        line-height: 1.1rem;
+        color: #fff;
+    }
+    .logo a .iconfont {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .bar .iconfont {
+        position: relative;
+        z-index: 20;
+        color: #fff;
+        padding: 0.5rem 0.1rem;
+        font-size: 0.44rem;
+        line-height: 1.1rem;
+    }
+    .page, .page-group {
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: #efefed;
+        /* background: #efeff4; */
+        /* display: none; */
+        overflow: hidden;
+    }
+    #main_content {
+        padding-bottom: 1.5rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+    .row {
+        overflow: hidden;
+        /* margin-left: -4%; */
+        margin-top: 0.3rem;
+    }
+    .main_now_tab {
+        width: 100%;
+        height: auto;
+    }
+    .lobby-nav {
+        display: -webkit-flex;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .lobby-nav li {
+        width: 100%;
+        height: 2rem;
+        background: #fff;
+        text-align: center;
+        /* color: #ffffff; */
+    }
+    .lobby-nav li span {
+        display: block;
+        float: left;
+        width: 2rem;
+        line-height: 0.7rem;
+    }
+
+    .lobby-nav li .price_shop {
+        color: #333;
+        font-size: 0.36rem;
+        float: right;
+    }
+
+    .button-warning.button-fill {
+        color: white;
+        background-color: #ff7479;
+    }
+
+    .button.button-fill {
+        color: #fff;
+        background: #0e696d;
+        border: none;
+        line-height: 0.7rem;
+    }
+    .button-warning {
+        border-color: #f60;
+        color: #f60;
+    }
+    .button {
+        border: 1px solid #0e696d;
+        color: #0e696d;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+        border-radius: 0.15rem;
+        line-height: 0.7rem;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        appearance: none;
+        background: none;
+        padding: 0 0.2rem;
+        margin: 0;
+        /* height: 1.35rem; */
+        white-space: nowrap;
+        position: relative;
+        text-overflow: ellipsis;
+        font-size: 0.37rem;
+        font-family: inherit;
+        cursor: pointer;
+        /* right: 0.5rem; */
+    }
+
+    img {
+        vertical-align: middle;
+    }
+
+    li {
+        list-style: outside none none;
+    }
+</style>
+<header class="bar bar-nav">
+    <a id="alltit">矿机商城</a>
+    <div class="logo">
+        <a id="cancle" href="javascript:history.go(-1)">
+            <i class="iconfont icon-arrow-left"></i>
+        </a>
+    </div>
+    <a class="icon pull-right open-panel"></a>
+</header>
+<div class="page">
+    <div class="content" id="main_content">
+        <div class="row" style="margin-left:0px;width: 9.3rem;margin: 1.06rem auto 0">
+            <div class="main_now_tab">
+                <div class="content-padded lobby-nav" style="margin: 0.2rem 0;width: 100%;">
+                    {volist name="mall" id="i"}
+                    <li style="padding:0.3rem 0;height: auto;border-radius: 0.16rem;position: relative;overflow:hidden;width: 100%;margin-bottom: 0.25rem" data-out="0">
+                        <div style="float:left;margin-left: 0.1rem">
+                            <span style="position: relative;border-radius: 0.2rem;overflow:hidden;background-color: #f0f0f0;display: flex;align-items: center;width: 2.4rem;height:2.9rem;">
+                                <img src="{$i.img}" style="margin-top: 0rem;margin-left:0rem;width: 2.6rem;height: 2.6rem">
+                                <span class="zeng" style="position: absolute;color: #f1444a;font-size: 0.34rem;left: 0rem;top: -0.26rem;width:1rem"></span>
+                            </span>
+                        </div>
+                        <div style="float:left;padding-left: 0.3rem;width: 6.5rem;">
+                            <a href="/index/index/mall_detail?id={$i.id}">
+                                <div class="kjtit" style="font-size: 0.45rem;font-weight: bold;text-align: left">{$i.title}<img style="width: 0.4rem;height: 0.4rem;margin-left: 0.05rem;margin-top:-0.05rem;" src="/static/theme/index/img/hrefyou.png" alt=""></div>
+                            </a>
+                            <div style="overflow: hidden;font-size: 0.33rem;">
+                                <span style="float:left;width: auto;font-size: 0.35rem;text-align:left;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #000000;">净收益/天：{:getProfit($i.day_income,$i.cost)} BTC</span>
+                            </div>
+                            <div style="overflow: hidden;font-size: 0.33rem;">
+                                <span style="float:left;width: auto;font-size: 0.35rem;text-align:left;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #000000;">使用期限：{$i.day} 天</span>
+                            </div>
+                            <div style="overflow: hidden;text-align: left;font-size: 0.33rem;margin-top:0.1rem">
+                                <span style="float:left;font-size: 0.35rem;color: #000000;;width: auto;line-height:0.4rem">
+                                    保证金：<font style="font-size: 0.4rem;color: #F56867;">￥</font>
+                                    <font style="font-size: 0.4rem;color: #F56867;">{$i.min}</font>
+                                </span>
+                                <div class="price_shop" style="position: absolute;right: 0;bottom:0.33rem">
+                                    <a href="/index/index/mall_form?id={$i.id}" class="button button-fill button-warning buybtn" style="font-size: 0.35rem;padding:0 0.3rem;line-height: 0.7rem;margin-top:0.06rem;margin-right: 0.35rem;background-color: #F56867;border-radius: 0.1rem">支付</a>
+                                </div>
+                            </div>
+
+                            <div style="overflow: hidden;position: relative;margin-top:0.1rem;height: 0.3rem">
+                                <div style="width: 40%;position: relative;height: 0.22rem;float:left">
+                                    <div style="float:left;width: 100%;height: 0.22rem;background-color: #999;opacity: 0.4;position: absolute;border-radius:0.17rem;overflow: hidden;left: 0; ">
+                                    </div>
+                                    <span class="plan" style="position: absolute; height: 0.22rem; left: 0px; width: {:getMinerPercent($i.total,$i.stock)}%; border-radius: 0.17rem; background: linear-gradient(45deg, rgb(255, 87, 86), rgb(255, 140, 123)); font-size: 0.24rem; line-height: 0.22rem; text-align: right; z-index: 1;"></span>
+                                    <span style="position: absolute;height: 0.22rem;right: 0.1rem;width: 50%;border-radius:0.17rem;font-size: 0.3rem;line-height: 0.22rem;text-align: right;z-index: 1">{:getMinerPercent($i.total,$i.stock)}%</span>
+                                </div>
+                                <span style="float:left;padding-left: 0.2rem;font-size: 0.26rem;text-align: right;line-height:0.3rem;color:#FF5756;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;width: auto;margin-top:-0.02rem">仅剩{$i.stock}份</span>
+                            </div>
+                        </div>
+                    </li>
+                    {/volist}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
+</body>

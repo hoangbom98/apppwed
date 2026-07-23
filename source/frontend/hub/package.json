@@ -1,5 +1,5 @@
 {
-  "name": "@kjc/hub",
+  "name": "@lkvip/hub",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "cap:build": "cross-env CAPACITOR_BUILD=true tsc -b && cross-env CAPACITOR_BUILD=true vite build",
     "cap:sync": "npm run cap:build && npx cap sync",
@@ -17,8 +19,8 @@
     "cap:live:android": "npx cap run android --livereload --external"
   },
   "dependencies": {
-    "@kjc/ui":    "*",
-    "@kjc/types": "*",
+    "@lkvip/ui":    "workspace:*",
+    "@lkvip/types": "workspace:*",
     "@capacitor/android": "^7.0.0",
     "@capacitor/app": "^7.0.0",
     "@capacitor/core": "^7.0.0",

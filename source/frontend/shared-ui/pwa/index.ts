@@ -1,5 +1,5 @@
-/**
- * @ui/pwa — PWA utilities for all KJC frontend apps
+﻿/**
+ * @ui/pwa — PWA utilities for all LKVIP frontend apps
  *
  * Sub-modules:
  *   serviceWorker — SW registration, lifecycle, useServiceWorker hook

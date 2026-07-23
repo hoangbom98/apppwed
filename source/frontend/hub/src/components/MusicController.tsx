@@ -13,7 +13,7 @@ interface Props {
 
 export default function MusicController({ isOpen, onClose }: Props) {
   const audioRef             = useRef<HTMLAudioElement>(null);
-  const { data: media }      = useAppConfig('media');
+  const { data: media }      = useAppConfig('media') as { data: any };
   const musicUrl: string | undefined = media?.background_music_url;
 
   // Don't render if no URL configured or not open

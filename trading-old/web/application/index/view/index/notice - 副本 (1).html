@@ -1,0 +1,36 @@
+{include file="public/header" nav="最新公告"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_bank">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>最新公告</i></span>
+                </div>
+                <div class="f_content" style="overflow: auto;">
+                    {if count($notice)}
+					<ul class="list">
+						{volist name="notice" id="t"}
+                        <li class="item">
+                            <a href="/index/index/about_details?id={$t['id']}">
+                                <span>{$t.title}</span>
+                                <i class="iconfont icon-arrow-right"></i>
+                            </a>
+                        </li>
+			        	{/volist}
+			        </ul>
+			        {else/}
+			        <div class="dataNo">
+                        <h3>没有更多数据了</h3>
+                    </div>
+			        {/if}
+                </div>
+            </div>
+        </div>
+        {include file="public/footer"}
+    </div>
+</div>
+</body>
+
+</html>

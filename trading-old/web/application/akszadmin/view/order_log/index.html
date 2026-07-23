@@ -1,0 +1,53 @@
+{extend name='akszadmin@main'}
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='order_log/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='text-center nowrap'>编号</th>
+            <th class='text-center nowrap'>会员ID</th>
+            <th class="text-center nowrap">用户名</th>
+            <th class='text-center nowrap'>订单ID</th>
+            <th class="text-center nowrap">增加金额</th>
+            <th class="text-center nowrap">增加积分</th>
+            <th class="text-center nowrap">平仓后余额</th>
+            <th class="text-center nowrap">时间</th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr>
+            <td class='text-center nowrap'>
+                {$vo.id|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.uid|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.phone|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.oid|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.addprice|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.addpoint|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.user_money|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {:date('Y-m-d H:i:s',$vo.time)}
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+</div>
+{/block}

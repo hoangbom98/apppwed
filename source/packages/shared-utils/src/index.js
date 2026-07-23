@@ -1,17 +1,21 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — Entry point
+ * @lkvip/utils — Entry point
  * Barrel re-export for all shared backend utility modules.
  *
  * Usage:
- *   const { slugify, formatVND, isEmail, addDays } = require('@kjc/utils');
+ *   const { slugify, formatVND, isEmail, addDays, parsePaginationQuery, generateOTP, formatCompact, pick, groupBy } = require('@lkvip/utils');
  */
 
-const slugify   = require('./slugify');
-const strings   = require('./strings');
-const dates     = require('./dates');
-const validators = require('./validators');
-const numbers   = require('./numbers');
+const slugify     = require('./slugify');
+const strings     = require('./strings');
+const dates       = require('./dates');
+const validators  = require('./validators');
+const numbers     = require('./numbers');
+const pagination  = require('./pagination');
+const otp         = require('./otp');
+const format      = require('./format');
+const object      = require('./object');
 
 module.exports = {
   ...slugify,
@@ -19,4 +23,8 @@ module.exports = {
   ...dates,
   ...validators,
   ...numbers,
+  ...pagination,
+  ...otp,
+  ...format,
+  ...object,
 };

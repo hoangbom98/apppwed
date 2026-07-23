@@ -1,0 +1,71 @@
+{extend name='akszadmin@main'}
+
+{block name="content"}
+
+<div class="layui-card-body think-box-shadow padding-left-40">
+	<div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">会员ID：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.uid|default=''}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">订单编号：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.orderno|default=''}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">产品：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.ptitle|default=''}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">订单状态：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{if $vo.ostaus == 1}平仓{else/}建仓{/if}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">入仓价格：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.buyprice}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">平仓价格：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.sellprice}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">入仓金额：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.fee}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">入仓时间：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{:date('Y-m-d H:i:s',$vo.buytime)}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">平仓时间：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{:date('Y-m-d H:i:s',$vo.selltime)}</p>
+        </div>
+    </div>
+    <div class="layui-form-item layui-row layui-col-space15">
+        <label class="layui-col-xs2 control-label text-right">本单盈亏：</label>
+        <div class="layui-col-xs6">
+            <p class="control-label">{$vo.ploss}</p>
+        </div>
+    </div>
+</div>
+
+{/block}
+
+

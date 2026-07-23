@@ -1,5 +1,5 @@
 /**
- * types.ts — Shared TypeScript types for @kjc/cli
+ * types.ts — Shared TypeScript types for @lkvip/cli
  */
 
 export type ProjectId = 'hub' | 'game' | 'trade' | 'dating' | 'sports' | 'admin';

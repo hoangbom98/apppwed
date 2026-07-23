@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../api/trade';
+import api from '../api/client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface SetupData {
@@ -22,14 +22,14 @@ export default function TwoFactor() {
   // ── Profile query to know current 2FA status ────────────────────────────────
   const { data: profile } = useQuery({
     queryKey: ['tradeProfile'],
-    queryFn:  () => api.get('/auth/me').then(r => r.data?.data ?? r.data),
+    queryFn:  () => api.get('/trade/auth/me').then(r => r.data?.data ?? r.data),
   });
   const is2FAEnabled = profile?.twoFAEnabled ?? false;
 
   // ── Setup mutation (generates QR) ───────────────────────────────────────────
   const setupMutation = useMutation({
-    mutationFn: () => api.post('/auth/2fa/setup').then(r => r.data?.data ?? r.data),
-    onSuccess: (data) => {
+    mutationFn: () => api.post('/trade/auth/2fa/setup').then(r => r.data?.data ?? r.data),
+    onSuccess: (data: SetupData) => {
       setSData(data);
       setStep('setup');
       setError(null);
@@ -39,8 +39,8 @@ export default function TwoFactor() {
 
   // ── Enable mutation (verify token → enable) ─────────────────────────────────
   const enableMutation = useMutation({
-    mutationFn: (t: string) => api.post('/auth/2fa/enable', { token: t }).then(r => r.data?.data ?? r.data),
-    onSuccess: (data) => {
+    mutationFn: (t: string) => api.post('/trade/auth/2fa/enable', { token: t }).then(r => r.data?.data ?? r.data),
+    onSuccess: (data: { backupCodes?: string[] }) => {
       setCodes(data.backupCodes ?? []);
       setStep('done');
       qc.invalidateQueries({ queryKey: ['tradeProfile'] });
@@ -51,7 +51,7 @@ export default function TwoFactor() {
 
   // ── Disable mutation ─────────────────────────────────────────────────────────
   const disableMutation = useMutation({
-    mutationFn: (t: string) => api.post('/auth/2fa/disable', { token: t }),
+    mutationFn: (t: string) => api.post('/trade/auth/2fa/disable', { token: t }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tradeProfile'] });
       setStep('idle');

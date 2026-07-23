@@ -41,7 +41,7 @@ export default function NewsPage() {
       <Pagination
         page={page}
         totalPages={meta?.pages || meta?.totalPages || 1}
-        onChange={(p) => setPage(p)}
+        onPageChange={(p) => setPage(p)}
       />
     </div>
   );

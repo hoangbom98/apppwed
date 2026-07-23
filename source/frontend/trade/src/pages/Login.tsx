@@ -17,7 +17,7 @@ export default function LoginPage() {
     if (!email || !password) { setError('Vui lòng nhập đầy đủ thông tin'); return; }
     setLoading(true); setError('');
     try {
-      await login(email, password);
+      await login({ email, password });
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Email hoặc mật khẩu không đúng');

@@ -1,0 +1,153 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0 ;
+  padding: 0;
+  font-family: PingFangSC-Light;
+  background: radial-gradient(circle at 70% 40%, #1F484F, #1F262E);
+}
+.app {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+.app .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-family: PingFangSC;
+  font-size: 1.125rem;
+}
+.app .header img {
+  width: 0.5rem;
+}
+.app .header .jilv {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.875rem;
+  opacity: 0.5;
+  width: 3.4375rem;
+  height: 1.375rem;
+  border-radius: 16px;
+  text-align: center;
+  line-height: 1.375rem;
+  color: #fff;
+}
+.app .mymoney {
+  margin: 2rem 0;
+  background: rgba(216, 216, 216, 0.1);
+  border-radius: 1rem;
+  box-sizing: border-box;
+  padding: 0.5rem 1rem;
+}
+.app .mymoney .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  height: 2.5rem;
+  line-height: 2.5rem;
+}
+.app .mymoney .row span {
+  color: #fff;
+  opacity: 0.6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.app .mymoney .row span img {
+  width: 18px;
+  margin-right: 5px;
+}
+.app .mymoney .row span:last-child {
+  opacity: 1;
+  color: #fff;
+}
+.app .money {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  height: 3.25rem;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background: rgba(22, 28, 34, 0.1);
+  padding: 0 1rem;
+  width: 100%;
+}
+.app .money input {
+  border: none;
+  outline: none;
+  background: rgba(22, 28, 34, 0.1);
+  height: 3.25rem;
+  line-height: 3.25rem;
+  font-family: PingFangTC-Regular;
+  color: #FFFFFF;
+  opacity: 0.8;
+  font-size: 16px;
+  width: 100%;
+}
+.app .money ::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+.app .sxf {
+  color: #fff;
+  opacity: 0.4;
+  font-size: 0.75rem;
+  line-height: 2rem;
+}
+.app .paylist {
+  color: #A0A3A5;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(22, 28, 34, 0.1);
+  align-items: center;
+  height: 3rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.app .paylist .aimg {
+  position: absolute;
+  right: 1rem;
+  top: 1.125rem;
+  width: 0.5rem;
+}
+.app .paylist .selectlist {
+  display: none;
+  position: absolute;
+  top: 2.5rem;
+  left: 1rem;
+  background: #1F3A41;
+  z-index: 99999;
+  right: 1rem;
+  text-align: right;
+  padding: 0.5rem 1.2rem;
+  box-sizing: border-box;
+}
+.app .paylist .selectlist li {
+  line-height: 2rem;
+}
+.app .paylist #select {
+  color: #fff;
+}
+.app .rbtn {
+  background: linear-gradient(90deg, #5ED5A8, #2B4E4A);
+  border: 1px solid #445155;
+  border-radius: 16px;
+  height: 3.25rem;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 3.25rem;
+  color: #fff;
+  opacity: 0.8;
+  margin: 4rem 0 1rem 0;
+}
+.app .tips p {
+  font-size: 0.8125rem;
+  color: #fff;
+  opacity: 0.2;
+  line-height: 2rem;
+}

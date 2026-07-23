@@ -3,19 +3,19 @@ import React from 'react';
 
 // ── Base keyframe injected once ────────────────────────────────────────────────
 const SHIMMER_STYLE = `
-@keyframes kjc-shimmer {
+@keyframes lkvip-shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
-.kjc-skeleton {
+.lkvip-skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
   background-size: 400% 100%;
-  animation: kjc-shimmer 1.4s ease infinite;
+  animation: lkvip-shimmer 1.4s ease infinite;
   /* GPU-accelerated — only transform/opacity on animations */
   will-change: background-position;
   backface-visibility: hidden;
 }
-.dark .kjc-skeleton {
+.dark .lkvip-skeleton {
   background: linear-gradient(90deg, #1e293b 25%, #334155 37%, #1e293b 63%);
   background-size: 400% 100%;
 }
@@ -39,7 +39,7 @@ export function Skeleton({ className = 'h-4 w-full', rounded = false, style = {}
   injectStyles();
   return (
     <div
-      className={`kjc-skeleton ${rounded ? 'rounded-full' : 'rounded'} ${className}`}
+      className={`lkvip-skeleton ${rounded ? 'rounded-full' : 'rounded'} ${className}`}
       style={style}
       aria-hidden="true"
     />

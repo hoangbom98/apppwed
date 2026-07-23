@@ -1,4 +1,4 @@
-# MIGRATION GUIDE — v2.1
+﻿# MIGRATION GUIDE — v2.1
 # Hướng dẫn chạy migration cho toàn bộ hệ thống database
 
 > **Thứ tự bắt buộc:** admin → hub → game → dating → trade → sports  
@@ -72,19 +72,15 @@ FLUSH PRIVILEGES;
 ```bash
 cd source/backend
 
-# Generate tất cả clients
-npx prisma generate --schema=prisma/admin/schema.prisma
-npx prisma generate --schema=prisma/hub/schema.prisma
-npx prisma generate --schema=prisma/game/schema.prisma
-npx prisma generate --schema=prisma/dating/schema.prisma
-npx prisma generate --schema=prisma/trade/schema.prisma
-npx prisma generate --schema=prisma/sports/schema.prisma
-```
+# ✅ Cách mới — dùng prisma-run.ts (tham số hóa, TypeScript)
+tsx scripts/prisma-run.ts generate           # tất cả 6 module
+tsx scripts/prisma-run.ts generate hub       # chỉ 1 module
 
-Hoặc dùng script npm:
-
-```bash
-npm run prisma:generate
+# Hoặc dùng npm script shortcut
+npm run prisma:generate                       # tất cả
+npm run prisma:generate:hub                   # chỉ hub
+npm run prisma:generate:game                  # chỉ game
+# ...tương tự cho: trade, dating, sports, admin
 ```
 
 ---
@@ -96,35 +92,12 @@ npm run prisma:generate
 ```bash
 cd source/backend
 
-# 4.1 Admin DB (phải chạy trước tiên)
-npx prisma migrate dev \
-  --schema=prisma/admin/schema.prisma \
-  --name init_admin_v2
+# ✅ Cách mới — chạy tất cả theo thứ tự chuẩn (admin → hub → game → dating → trade → sports)
+tsx scripts/prisma-run.ts migrate             # tất cả 6 module
+npm run prisma:migrate:all                    # shortcut npm
 
-# 4.2 Hub DB
-npx prisma migrate dev \
-  --schema=prisma/hub/schema.prisma \
-  --name init_hub_v2
-
-# 4.3 Game DB
-npx prisma migrate dev \
-  --schema=prisma/game/schema.prisma \
-  --name init_game_v2
-
-# 4.4 Dating DB
-npx prisma migrate dev \
-  --schema=prisma/dating/schema.prisma \
-  --name init_dating_v2
-
-# 4.5 Trade DB
-npx prisma migrate dev \
-  --schema=prisma/trade/schema.prisma \
-  --name init_trade_v2
-
-# 4.6 Sports DB
-npx prisma migrate dev \
-  --schema=prisma/sports/schema.prisma \
-  --name init_sports_v2
+# Chỉ 1 module (khi schema thay đổi):
+tsx scripts/prisma-run.ts migrate dating
 ```
 
 ---
@@ -136,18 +109,12 @@ npx prisma migrate dev \
 ```bash
 cd source/backend
 
-npx prisma migrate deploy --schema=prisma/admin/schema.prisma
-npx prisma migrate deploy --schema=prisma/hub/schema.prisma
-npx prisma migrate deploy --schema=prisma/game/schema.prisma
-npx prisma migrate deploy --schema=prisma/dating/schema.prisma
-npx prisma migrate deploy --schema=prisma/trade/schema.prisma
-npx prisma migrate deploy --schema=prisma/sports/schema.prisma
-```
+# ✅ Cách mới — 1 lệnh cho tất cả
+tsx scripts/prisma-run.ts deploy              # tất cả 6 module
+npm run prisma:deploy:all                     # shortcut npm
 
-Hoặc dùng script npm:
-
-```bash
-npm run migrate:deploy
+# Chỉ 1 module:
+tsx scripts/prisma-run.ts deploy sports
 ```
 
 ---
@@ -157,29 +124,21 @@ npm run migrate:deploy
 ```bash
 cd source/backend
 
-# 6.1 Admin seed (users, payment gateways, project configs)
-node src/prisma/seeds/admin.seed.js
+# Chạy tất cả seeds theo thứ tự (khuyến nghị)
+npm run seed:all
 
-# 6.2 UI Config seed (brand, colors, social, features cho 5 sub-projects)
-node src/prisma/seeds/ui-config.seed.js
+# Hoặc chạy từng seed (TypeScript, dùng tsx)
+npm run seed:admin        # users, payment gateways, project configs
+npm run seed:ui-config    # brand, colors, social, features cho 5 sub-projects
+npm run seed:payment      # payment gateways
+npm run seed:hub          # categories, banners, pages
+npm run seed:game         # lottery types, odds settings
+npm run seed:lkvip        # bank accounts, payment settings
+npm run seed:dating       # gift catalog, VIP plans
+npm run seed:sports       # leagues, teams, markets
 
-# 6.3 Payment gateways seed
-npm run seed:payment
-
-# 6.4 Hub seed (categories, banners, pages)
-node src/prisma/seeds/hub.seed.js
-
-# 6.5 Game seed (lottery types, odds settings)
-node src/prisma/seeds/game.seed.js
-
-# 6.6 LKvip seed (bank accounts, payment settings)
-node src/prisma/seeds/lkvip.seed.js
-
-# 6.7 Dating seed (gift catalog, VIP plans)
-node src/prisma/seeds/dating.seed.js
-
-# 6.8 Sports seed (leagues, teams, markets)
-node src/prisma/seeds/sports.seed.js
+# Force re-seed (ghi đè data hiện có)
+npm run seed:all:force
 ```
 
 ---
@@ -248,13 +207,9 @@ node scripts/backfill-new-field.js
 ## 10. Kiểm tra migration status
 
 ```bash
-# Xem trạng thái migration của từng schema
-npx prisma migrate status --schema=prisma/admin/schema.prisma
-npx prisma migrate status --schema=prisma/hub/schema.prisma
-npx prisma migrate status --schema=prisma/game/schema.prisma
-npx prisma migrate status --schema=prisma/dating/schema.prisma
-npx prisma migrate status --schema=prisma/trade/schema.prisma
-npx prisma migrate status --schema=prisma/sports/schema.prisma
+# ✅ Cách mới — 1 lệnh cho tất cả
+tsx scripts/prisma-run.ts status              # tất cả 6 module
+npm run prisma:status:all                     # shortcut npm
 ```
 
 ---
@@ -262,32 +217,108 @@ npx prisma migrate status --schema=prisma/sports/schema.prisma
 ## 11. Prisma Studio (UI quản lý data)
 
 ```bash
-# Admin DB
-npx prisma studio --schema=prisma/admin/schema.prisma
+# ✅ Cách mới — dùng prisma-run.ts (phải chỉ định module)
+tsx scripts/prisma-run.ts studio admin        # Admin DB
+tsx scripts/prisma-run.ts studio hub          # Hub DB
+tsx scripts/prisma-run.ts studio game         # Game DB
+# ...tương tự cho: dating, trade, sports
 
-# Mỗi schema có thể mở trên port khác nhau (tự động)
+# Mỗi schema mở trên port riêng (tự động)
 ```
 
 ---
 
 ## 12. npm scripts reference
 
-```json
-// source/backend/package.json scripts:
+> Scripts đã được tham số hóa từ v2.1 — xem [`backend/scripts/README.md`](./backend/scripts/README.md)
 
-"prisma:generate":    "prisma generate --schema=prisma/admin/schema.prisma && ...",
-"migrate:dev:admin":  "prisma migrate dev --schema=prisma/admin/schema.prisma",
-"migrate:dev:hub":    "prisma migrate dev --schema=prisma/hub/schema.prisma",
-"migrate:dev:game":   "prisma migrate dev --schema=prisma/game/schema.prisma",
-"migrate:dev:dating": "prisma migrate dev --schema=prisma/dating/schema.prisma",
-"migrate:dev:trade":  "prisma migrate dev --schema=prisma/trade/schema.prisma",
-"migrate:dev:sports": "prisma migrate dev --schema=prisma/sports/schema.prisma",
-"migrate:deploy":     "prisma migrate deploy --schema=... (all 6)",
-"seed:admin":         "node src/prisma/seeds/admin.seed.js",
-"seed:ui-config":     "node src/prisma/seeds/ui-config.seed.js",
-"seed:payment":       "node src/prisma/seeds/payment-gateways.seed.js",
-"seed:all":           "npm run seed:admin && npm run seed:ui-config && npm run seed:payment && ..."
+```bash
+# ── Prisma ────────────────────────────────────────────────────────────────────
+npm run prisma:run -- generate          # tham số hóa: node scripts/prisma-run.js generate
+npm run prisma:generate                 # generate tất cả clients
+npm run prisma:generate:hub             # generate chỉ hub (tương tự :game :trade :dating :sports :admin)
+npm run prisma:migrate:all              # migrate dev tất cả
+npm run prisma:deploy:all               # deploy tất cả
+npm run prisma:status:all               # kiểm tra status tất cả
+
+# ── Seeds ─────────────────────────────────────────────────────────────────────
+npm run seed:all                        # chạy tất cả seeds (index.js)
+npm run seed:all:force                  # force re-seed (SEED_FORCE=true)
+npm run seed:admin                      # chỉ admin seed
+npm run seed:hub / seed:game / seed:dating / seed:trade / seed:sports / seed:lkvip
+npm run seed:payment / seed:flags / seed:ui-config / seed:aggregators / seed:game-products / seed:demo
 ```
+
+---
+
+## 13. Multi-DB Coordination (Thay đổi nhiều schema cùng lúc)
+
+> **Quy tắc:** Mỗi module chỉ migrate schema của chính mình — **không có cross-schema migration**.
+
+### Deployment order khi nhiều DB thay đổi
+
+```
+1. admin      ← Chạy trước (project_configs, payment_gateways)
+2. hub
+3. game
+4. dating     ← Ví dụ: v2.2 thêm DatingMission + DatingEvent
+5. trade
+6. sports
+```
+
+### Quy trình release an toàn
+
+```bash
+# Bước 1: Backup ALL databases trước
+bash source/scripts/backup-db.sh
+
+# Bước 2: Run migrations theo thứ tự
+cd source/backend
+tsx scripts/prisma-run.ts deploy admin
+tsx scripts/prisma-run.ts deploy hub
+tsx scripts/prisma-run.ts deploy game
+tsx scripts/prisma-run.ts deploy dating  # có thay đổi
+tsx scripts/prisma-run.ts deploy trade
+tsx scripts/prisma-run.ts deploy sports
+
+# Bước 3: Kiểm tra tất cả đã up-to-date
+npm run prisma:status:all
+# Mỗi dòng phải là: "Database schema is up to date"
+
+# Bước 4: Nếu có seed mới, chạy seed
+npm run seed:dating
+
+# Bước 5: PM2 reload (zero-downtime)
+pm2 reload lkvip-api --update-env
+```
+
+### Rollback nhanh nếu 1 migration thất bại
+
+```bash
+# Restore từ backup gần nhất
+gunzip -c /var/backups/lkvip-db/lkvip_backup_TIMESTAMP.sql.gz | mysql -u root -p
+# Không cần migrate reset — backup đã có schema cũ + data
+```
+
+### Convention đặt tên migration
+
+```
+YYYYMMDD_HHMMSS_<action>_<entity>
+  Ví dụ: 20260810_000000_add_dating_missions_events
+```
+
+### Bảng phụ thuộc schema
+
+| Schema  | Phụ thuộc | Ghi chú |
+|---------|-----------|---------|
+| admin   | Không     | Must run first |
+| hub     | admin (project_configs) | Via API call, không phải FK |
+| game    | admin (payment_gateways) | Via API call |
+| dating  | Không | Độc lập hoàn toàn |
+| trade   | Không | Độc lập hoàn toàn |
+| sports  | Không | Độc lập hoàn toàn |
+
+> 🚫 **Tuyệt đối không** có cross-DB foreign key giữa các project.
 
 ---
 

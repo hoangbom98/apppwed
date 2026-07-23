@@ -1,5 +1,5 @@
-/**
- * sw.js — KJC Platform Service Worker
+﻿/**
+ * sw.js — LKVIP GROUP Service Worker
  * ──────────────────────────────────────────────────────────────────────────────
  * Strategy overview:
  *
@@ -21,9 +21,9 @@
  */
 
 const CACHE_VERSION = 'v1';
-const PRECACHE      = `kjc-precache-${CACHE_VERSION}`;
-const RUNTIME       = `kjc-runtime-${CACHE_VERSION}`;
-const IMAGE_CACHE   = `kjc-images-${CACHE_VERSION}`;
+const PRECACHE      = `lkvip-precache-${CACHE_VERSION}`;
+const RUNTIME       = `lkvip-runtime-${CACHE_VERSION}`;
+const IMAGE_CACHE   = `lkvip-images-${CACHE_VERSION}`;
 
 // ── Files to precache on install ────────────────────────────────────────────
 // Vite injects hashed filenames at build time via workbox-window or similar.

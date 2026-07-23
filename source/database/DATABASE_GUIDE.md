@@ -1,4 +1,4 @@
-# 🗄️ DATABASE GUIDE — Vận hành & Tối ưu
+﻿# 🗄️ DATABASE GUIDE — Vận hành & Tối ưu
 
 > **Cập nhật lần cuối:** v2.1 — Schema đồng bộ với Prisma, xóa file thừa, chuẩn hóa shared config
 
@@ -53,7 +53,6 @@ Mỗi schema có **Prisma Client riêng** được generate vào `node_modules/.
 | `dating_schema.sql` | Backup reference schema cho `dating_db` |
 | `sports_schema.sql` | Backup reference schema cho `sports_db` |
 | `indexes.sql`       | Composite indexes bổ sung — chạy SAU `prisma migrate deploy` |
-| `docker-init.sql`   | Tạo 6 databases + grant quyền — dùng cho Docker dev container |
 | `DATABASE_GUIDE.md` | File này |
 
 ---
@@ -64,14 +63,16 @@ Mỗi schema có **Prisma Client riêng** được generate vào `node_modules/.
 
 ```bash
 # 1. Chỉnh sửa file .prisma tương ứng
-# 2. Tạo migration (dev)
-npm run prisma:migrate:hub     # hoặc :game, :trade, :dating, :sports, :admin
+# 2. Tạo migration (dev) — dùng script prisma:run
+npm run prisma:run -- migrate hub   # hoặc game, trade, dating, sports, admin
 
 # 3. Kiểm tra SQL được sinh ra
 # backend/prisma/hub/migrations/YYYYMMDDHHMMSS_<name>/migration.sql
 
 # 4. Deploy lên staging / production
-npm run prisma:deploy:hub      # hoặc :all để deploy tất cả
+npm run prisma:deploy:all           # deploy tất cả 6 DBs cùng lúc
+# hoặc chỉ 1 DB:
+npm run prisma:run -- deploy hub
 ```
 
 ### 2.2. Deploy toàn bộ (production)
@@ -381,12 +382,25 @@ cron.schedule('*/5 * * * *', checkDbHealth);
 
 ### 7.4. Prometheus + Grafana (Optional)
 
+Cài MySQL Exporter để expose MySQL metrics cho Prometheus:
+
 ```bash
-# MySQL Exporter
-docker run -d -p 9104:9104 \
-  -e DATA_SOURCE_NAME="root:password@(localhost:3306)/" \
-  prom/mysqld-exporter
+# Cài MySQL Exporter (bare-metal, Ubuntu/Debian)
+apt-get install -y prometheus-mysqld-exporter
+
+# Cấu hình DATA_SOURCE_NAME trong /etc/prometheus/mysql-exporter.conf:
+#   [client]
+#   user=lkvip_db
+#   password=YOUR_PASSWORD
+#   host=127.0.0.1
+#   port=3306
+
+systemctl enable prometheus-mysqld-exporter
+systemctl start  prometheus-mysqld-exporter
+# Metrics available at: http://localhost:9104/metrics
 ```
+
+> Xem [`source/monitoring/README.md`](../monitoring/README.md) để cài đầy đủ Prometheus + Grafana + Node Exporter trên VPS bare-metal.
 
 Các panel dashboard cần thiết:
 1. DB Connections vs Max

@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — numbers.js
+ * @lkvip/utils — numbers.js
  * Backend number formatting and math helpers.
  */
 

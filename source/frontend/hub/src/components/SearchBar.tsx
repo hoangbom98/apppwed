@@ -10,7 +10,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AutoComplete } from '@ui';
-import type { AutoCompleteItem } from '@ui';
+type AutoCompleteItem = { id: string; label: string; value?: any; image?: string; category?: string };
 
 // Map source → route prefix
 const SOURCE_ROUTES: Record<string, string> = {

@@ -1,0 +1,679 @@
+{include file="public/header" nav="交易中心"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/index/css/mine.css"/>
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/index/css/footer.css"/>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/font.js"></script>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/public.js"></script>
+<script src="__ROOT__/static/theme/index/js/autorem.js"></script>
+</head>
+<style type="text/css">
+    .bar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 10;
+        height: 45px;
+        color: #fff;
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    #alltit {
+        position: absolute;
+        z-index: 19;
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        line-height: 45px;
+        font-size: 16px;
+        color: #fff;
+    }
+    .page, .page-group {
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: #efefed;
+        overflow: hidden;
+    }
+    #main_content {
+        padding-bottom: 1rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+    img {
+        vertical-align: middle;
+    }
+    .btndlist {
+        overflow: hidden;
+        width: 94%;
+        margin: 0 auto;
+        background-color: #fff;
+    }
+    .btndlist .active {
+        color: #0084FF;
+    }
+    .btndlist li {
+        float: left;
+        margin: 0 0.2rem;
+        color: #000000;
+        font-size: 14px;
+        line-height: 0.8rem;
+        cursor: pointer;
+    }
+    .info-list {
+        overflow: hidden;
+        height: 90px;
+        width: 94%;
+        margin: 0 auto;
+        margin-bottom: 10px;
+        background-color: #4c586a;
+    }
+    #chart_line{
+        width: 94%!important;
+    }
+    .paybox {
+        position: fixed;
+        width: 10rem;
+        bottom: 0;
+        height: 9.6rem;
+        left: 50%;
+        margin-left: -5rem;
+        background-color: #f5f5f5;
+        z-index: 21;
+        border: 0.02666rem solid #dedede;
+        box-sizing: border-box;
+        display: none;
+    }
+
+    .paybox .title {
+        width: 100%;
+        height: 1.3rem;
+        border-bottom: 0.02666rem solid #dedede;
+        font: 0.44rem/1.3rem '微软雅黑';
+        color: #333;
+        text-align: center;
+        font-weight: bold;
+        position: relative;
+    }
+
+    .paybox .title .c_lose {
+        position: absolute;
+        font: 0.7rem/1rem '微软雅黑';
+        color: #000;
+        top: 0;
+        right: 0rem;
+        width: 1.3rem;
+    }
+
+    .paybox .passwordli {
+        width: 86%;
+        margin: 0.4rem auto;
+        border: 0.02666rem solid #cacaca;
+        overflow: hidden;
+    }
+
+    .paybox .passwordli li {
+        height: 1rem;
+        float: left;
+        width: 16.66666%;
+        box-sizing: border-box;
+        border-right: 0.02666rem solid #dedede;
+        text-align: center;
+        font: 0.6rem/1rem '微软雅黑';
+    }
+
+    .paybox .tit {
+        font: 0.3rem/0.3rem '微软雅黑';
+        color: #289c9c;
+        text-align: center;
+    }
+
+    .paybox .passwordbtn {
+        width: 100%;
+        margin: 0.5rem auto;
+        background-color: #fafafa;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .paybox .passwordbtn li {
+        width: 33.33333%;
+        float: left;
+        height: 1.4rem;
+        font: 0.5rem/1.4rem '微软雅黑';
+        text-align: center;
+        box-sizing: border-box;
+        border-right: 0.02666rem solid #c6c6c6;
+        border-bottom: 0.02666rem solid #c6c6c6;
+        font-weight: bold;
+    }
+
+    .paybox .passwordbtn li:nth-child(3n) {
+        border-right: none;
+    }
+
+    .paybox .passwordbtn li:nth-child(10),
+    .paybox .passwordbtn li:nth-child(11),
+    .paybox .passwordbtn li:nth-child(12) {
+        border-bottom: none;
+        background-color: #d2d5da;
+    }
+
+    .paybox .passwordbtn li:nth-child(11) {
+        background-color: #fafafa;
+    }
+
+    .paybox .passwordbtn li:nth-child(12) {
+        background: url("/static/theme/index/img/passdel.png") no-repeat center center/0.7rem 0.5rem;
+        background-color: #d2d5da;
+    }
+
+    .shade {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 20;
+        display: none;
+    }
+    /* tipMask CSS */
+    .tipMask {
+        width: 100%;
+        height: 100%;
+        background: rgba(95, 95, 95, 0.3);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 3;
+    }
+
+    .tipMask .cont {
+        width: 5.1rem;
+        padding: .42rem .6rem .5rem;
+        border-radius: 5px;
+        background-color: #FFFFFF;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -3.15rem;
+        margin-top: -1.8rem;
+        text-align: center;
+    }
+
+    .tipMask .cont .title {
+        font-size: .34rem;
+        line-height: .48rem;
+        color: #191919;
+    }
+
+    .tipMask .cont .stitle {
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #606060;
+        margin-top: .36rem;
+    }
+
+    .tipMask .cont .confirm {
+        width: 100%;
+        height: .88rem;
+        background-color: #EF6F6C;
+        border-radius: 4px;
+        font-size: .34rem;
+        color: #fff;
+        line-height: .88rem;
+        text-align: center;
+        margin-top: .5rem;
+    }
+    .hide {
+        display: none;
+    }
+</style>
+<body>
+<header class="bar bar-nav">
+    <a id="alltit">交易中心</a>
+    <a href="/index/user/fund" style="font-weight: normal!important;line-height:45px;padding: 0;padding-right: 0.4rem;font-size: 14px;float: right;position: relative;z-index:20;color: #fff;">交易明细</a>
+</header>
+<div class="page">
+    <div class="content" id="main_content">
+        <div style="width: 94%;margin: 1.2rem 3% 0 3%;background: #fff;padding-bottom:0;border-top-right-radius: 0.2rem;border-top-left-radius: 0.2rem">
+            <div style="color: #333;font-size:18px;font-weight: bold;padding: 0.3rem 0.3rem 0;">BTC</div>
+            <div style="font-size: 32px;color: #01BD8B;padding: 0 0.3rem;">
+                <font class="BTCprice" style="color: rgb(245, 104, 103);">0.00</font>
+                <span style="font-size:16px; color: rgb(245, 104, 103); margin-left: 0.3rem;" class="BTCudbfb">0.00%</span>
+            </div>
+        </div>
+        <ul class="btndlist">
+            <a href="/index/user/trade?per=1">
+                <li>分钟线</li>
+            </a>
+            <a href="/index/user/trade?per=60">
+                <li>小时线</li>
+            </a>
+            <a href="/index/user/trade?per=1440">
+                <li>日线</li>
+            </a>
+        </ul>
+        <div id="chart_line" class="info-list" style="margin: 0 auto;border-bottom-left-radius:  0.2rem;border-bottom-right-radius: 0.2rem;padding:0.2rem 0;background-color: #fff">
+        </div>
+        <div style="width: 90%;padding: 0.3rem 2%;background-color: #fff;margin:0.25rem auto;border-radius: 5px">
+            <span style="font-size: 14px;color: #000000;margin-left: 5px">BTC钱包</span>
+            <span style="float: right;color: #333;font-size:15px;" class="confye">{$user.btc}</span>
+        </div>
+        <div style="width: 90%;padding: 0.2rem 2%;background-color: #fff;margin:0.25rem auto;border-radius: 5px">
+            <input type="text"  style="background-color: transparent;text-indent: 0.2rem;border:1px solid rgba(0,0,0,0.3);width: 4rem;height: 0.7rem;line-height:0.7rem;border:none;color: #000000;font-size: 14px" oninput="bindinput($(this))" placeholder="请输入出售数量" />
+            <span button="" type="button" onclick="All($(this))" style="color: #0084FF;display:inline-block; border-radius:0.25rem ; text-align: center; float:right;font-size: 14px;font-weight: bold;margin-right: 0rem;line-height:0.6rem;cursor:pointer;font-weight: normal">&nbsp;&nbsp;全部出售&nbsp;&nbsp;</span>
+        </div>
+        <div button="" id="confirm recharge" type="button" onclick="ajaxinput()" style="width: 94%!important;text-align:center; color:#fff;margin:0.5rem auto; height: 1rem; border-radius: 5px; line-height: 1rem; font-size: 14px;font-weight: bold;width: 100%;background: #F56867;">确认出售</div>
+    </div>
+</div>
+<div class="tipMask hide" style="z-index:999999999999999999">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi">确定</div>
+        </div>
+    </div>
+</div>
+{include file="public/footer" menu='trade'}
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/echarts.min.js"></script>
+<script>
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+
+    var buynum = '';
+    function All(that) {
+        that.prev('input').val($('.confye').text())
+        buynum = $('.confye').text();
+    }
+
+    function bindinput(that) {
+        if (!that.val()) {
+            buynum = '';
+            return;
+        } else {
+            buynum = that.val().replace(/[^\d.]/g, '').replace(/\.{2,}/g, '.').replace('.', '$#$').replace(/\./g, '').replace('$#$', '.').replace(/^(\-)*(\d+)\.(\d\d\d\d\d\d\d\d).*$/, '$1$2.$3').replace(/^\./g, '');
+            that.val(buynum)
+        }
+
+    }
+
+    function ajaxinput(){
+        if (!buynum || buynum == 0) {
+            msg("提示", "请输入出售数量！", 1);
+            return
+        }
+
+        if (buynum < 0.000001) {
+            msg("提示", "BTC最小出售单位为0.00000100！", 1);
+            return
+        }
+        $.ajax({
+            url: "/index/user/tradeBTC",
+            type: "post",
+            data: { 'buynum': buynum},
+            success: function (data) {
+                if (data.code == 1) {
+                    msg("提示", "出售成功！", 1);
+                    window.location.href = '/index/user/index';
+                } else {
+                    msg("错误", data.info, 1);
+                }
+            },
+            error: function () {
+                msg("错误", "网络异常！", 1);
+            },
+            comptele: function () {
+                msg("错误", "网络异常！", 1);
+            }
+        })
+    }
+
+
+    var fontSize = $('html').attr('style').split(':')[1].split('px')[0];
+    var PerIod_BTCdt = window.location.href.split('=')[1];
+    var zoomStart = 94;
+    if (!PerIod_BTCdt) {
+        PerIod_BTCdt = 1;
+    }
+    if (PerIod_BTCdt == 1) {
+        $('.btndlist a li').eq(0).addClass('active')
+    }
+    if (PerIod_BTCdt == 60) {
+        $('.btndlist a li').eq(1).addClass('active')
+    }
+    if (PerIod_BTCdt == 1440) {
+        //zoomStart = 0;
+        $('.btndlist a li').eq(2).addClass('active')
+    }
+    // var PerIod_BTCdt = 60;
+    $('#chart_line').css({
+        width: fontSize * 9.3 + 'px',
+        height: fontSize * 6 + 'px'
+    });
+    var dom = document.getElementById("chart_line");
+    var KLineChart = echarts.init(dom);
+    var app = {};
+    var RiseColor = '#F56867';
+    var RiseBorderColor = '#C14E48';
+    var FallColor = '#01BD8B';
+    var FallBorderColor = '#2D8288';
+    var KLineTimes = {};
+    var KLineDates = {};
+    var KLineValues = {};
+    var option = {
+        tooltip: {
+            trigger: 'axis',
+            position: function(point, params, dom, rect, size) {
+                // 鼠标坐标和提示框位置的参考坐标系是：以外层div的左上角那一点为原点，x轴向右，y轴向下
+                // 提示框位置
+                var x = 0; // x坐标位置
+                var y = 0; // y坐标位置
+                // 当前鼠标位置
+                var pointX = point[0];
+                var pointY = point[1];
+                // 提示框大小
+                var boxWidth = size.contentSize[0];
+                var boxHeight = size.contentSize[1];
+                // boxWidth > pointX 说明鼠标左边放不下提示框
+                if (boxWidth > pointX) {
+                    x = 5;
+                } else { // 左边放的下
+                    x = pointX - boxWidth;
+                }
+                // boxHeight > pointY 说明鼠标上边放不下提示框
+                if (boxHeight > pointY) {
+                    y = 5;
+                } else { // 上边放得下
+                    y = pointY - boxHeight;
+                }
+                return [x, y];
+            },
+            axisPointer: {
+                type: 'cross'
+            },
+            formatter: function(params, ticket, callback) {
+                var result = '时间： ' + params[0].name + "<br/>";
+                params.forEach(function(item) {
+                    if (item.seriesName == "KLineValues") {
+                        result += item.marker + " " + '开盘价： ' + item.data[1] + '<br/>' +
+                            item.marker + " " + '最高价： ' + item.data[4] + '<br/>' +
+                            item.marker + " " + '最底价： ' + item.data[3] + '<br/>' +
+                            item.marker + " " + '收盘价： ' + item.data[2] + '<br/>';
+                    } else {
+                        result += item.marker + " " + item.seriesName + " ： " + item.value.toString().substring(0, 7) + "</br>"; //item.marker + " " +
+                    }
+                });
+                return result;
+            }
+        },
+        legend: {
+            data: ['MA5', 'MA10', 'MA20'],
+            textStyle: { //图例文字的样式
+                color: '#7886B0'
+            }
+        },
+        grid: {
+            left: '15%',
+            bottom: '12%',
+            top: '10%',
+            right: '6%'
+        },
+        xAxis: {
+            type: 'category',
+            data: KLineDates,
+            scale: true,
+            // boundaryGap: true,
+            axisLabel: { //label文字设置
+                color: '#7886B0'
+            },
+            axisLine: {
+                onZero: false,
+                lineStyle: {
+                    color: '#152451',
+                    width: 1, //这里是为了突出显示加上的
+                }
+            },
+            axisTick: {
+                //  length:25
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: ['#152451'],
+                    width: 1,
+                    type: 'solid'
+                }
+            },
+            //axisLabel:{interval: 10},
+            splitNumber: 10,
+            //min: 'dataMin',
+            //max: 'dataMax'
+        },
+        yAxis: {
+            scale: true,
+            axisLabel: { //label文字设置
+                color: '#7886B0',
+            },
+            axisLine: {
+                onZero: false,
+                lineStyle: {
+                    color: '#152451',
+                    width: 1, //这里是为了突出显示加上的
+                }
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: ['#152451'],
+                    width: 1,
+                    type: 'solid'
+                }
+            }
+        },
+        dataZoom: [{
+            type: 'inside',
+            // start: (720 - 36) / 720 * 100,
+            start: zoomStart,
+            end: 100
+        }, {
+            show: false,
+            type: 'slider',
+            y: '90%',
+            start: 98,
+            end: 100
+        }],
+        series: [{
+            name: 'KLineValues',
+            type: 'candlestick',
+            data: KLineValues,
+            itemStyle: {
+                normal: {
+                    color: RiseColor,
+                    color0: FallColor,
+                    borderColor: RiseBorderColor,
+                    borderColor0: FallBorderColor
+                }
+            },
+        }, {
+            name: 'MA5',
+            type: 'line',
+            data: [],
+            symbol: 'none',
+            smooth: true,
+            lineStyle: {
+                normal: {
+                    opacity: 1
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: "#F2E943",
+                    lineStyle: {
+                        width: 1, //设置线条粗细
+                        color: '#F2E943'
+                    }
+                }
+            }
+        }, {
+            name: 'MA10',
+            type: 'line',
+            data: [],
+            symbol: 'none',
+            smooth: true,
+            lineStyle: {
+                normal: {
+                    opacity: 1
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: "#A3D276", //图例的颜色
+                    lineStyle: {
+                        width: 1, //设置线条粗细
+                        color: '#A3D276' //线的颜色
+                    }
+                }
+            }
+        }, {
+            name: 'MA20',
+            type: 'line',
+            data: [],
+            symbol: 'none',
+            smooth: true,
+            lineStyle: {
+                normal: {
+                    opacity: 1
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: "#56AACC", //图例的颜色
+                    lineStyle: {
+                        width: 1, //设置线条粗细
+                        color: '#56AACC' //线的颜色
+                    }
+                }
+            }
+        },
+        ]
+    };
+    KLineChart.showLoading();
+    if (option && typeof option === "object") {
+        KLineChart.setOption(option, {
+            notMerge: false,
+            lazyUpdate: true,
+            silent: false
+        });
+    }
+    GetRealTimeDatas(720);
+    KLineChart.hideLoading();
+    $(function() {
+        setInterval(function() {
+            GetRealTimeDatas(2)
+        }, 10000);
+    });
+    function CallMa(dayCount) {
+        var result = [];
+        for (var i = 0, len = KLineValues.length; i < len; i++) {
+            if (i < dayCount) {
+                result.push('-');
+                continue;
+            }
+            var sum = 0;
+            for (var j = 0; j < dayCount; j++) {
+                sum += Number(KLineValues[i - j][1]);
+            }
+            sum = sum / dayCount;
+            result.push(sum.toFixed(4));
+        }
+        return result;
+    }
+    function GetRealTimeDatas(RequestNum) {
+        $.ajax({
+            url: "/index/index/MarketDatas",
+            type: 'post',
+            data: {
+                'coin_id': 1,
+                'period': PerIod_BTCdt,
+                'coin_nums': RequestNum
+            },
+            datatype: 'json',
+            success: function(data) {
+                if (data.data.data.length > 0) {
+                    var temp = data.data;
+                    console.log(temp)
+                    if (temp.chg > 0) {
+                        $('.BTCprice,.BTCudbfb').css('color', 'rgb(245,104,103)');
+                    } else if (temp.chg < 0) {
+                        $('.BTCprice,.BTCudbfb').css('color', '#01BD8B');
+                    } else {
+                        $('.BTCprice,.BTCudbfb').css('color', '#000000');
+                    }
+                    $('.BTCprice').text(temp.lastprice);
+                    $('.BTCudbfb').text(temp.chg + '%');
+                    if (KLineValues.length > 0) {
+                        var i = 0;
+                        var len = temp.time.length;
+                        var time_len = KLineTimes.length;
+                        for (; i < len; i++) {
+                            if (KLineTimes[time_len - 1] <= temp.time[i]) {
+                                if (KLineTimes[time_len - 1] == temp.time[i]) {
+                                    KLineTimes[time_len - 1] = temp.time[i];
+                                    KLineDates[time_len - 1] = temp.date[i];
+                                    KLineValues[time_len - 1] = temp.data[i];
+                                    i++;
+                                }
+                                break;
+                            }
+                        }
+                        for (; i < len; i++) {
+                            KLineTimes.push(temp.time[i]);
+                            KLineDates.push(temp.date[i]);
+                            KLineValues.push(temp.data[i]);
+                            KLineTimes.shift();
+                            KLineDates.shift();
+                            KLineValues.shift();
+                        }
+                    } else {
+                        KLineTimes = temp.time;
+                        KLineDates = temp.date;
+                        KLineValues = temp.data;
+                    }
+                    KLineChart.setOption({
+                        xAxis: {
+                            data: KLineDates
+                        },
+                        series: [{
+                            // 根据名字对应到相应的系列
+                            data: KLineValues
+                        }, {
+                            data: CallMa(5)
+                        }, {
+                            data: CallMa(10)
+                        }, {
+                            data: CallMa(20)
+                        }]
+                    });
+                } else {
+                    /*layer.msg('加载数据失败！', {
+                        icon: 5,
+                        time: 2000
+                    });*/
+                }
+            }
+        })
+    }
+</script>
+</body>
+</html>

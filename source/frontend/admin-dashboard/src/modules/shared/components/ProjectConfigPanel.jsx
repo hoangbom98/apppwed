@@ -1,19 +1,19 @@
 /**
- * ProjectConfigPanel.jsx
- *
- * Reusable admin panel for managing per-project dynamic config.
- * Renders config rows grouped by module → group in collapsible sections.
- * Supports type-aware inputs: boolean toggle, number, array (multi-select), string.
- *
- * Usage:
- *   <ProjectConfigPanel projectCode="game" moduleFilter="payment" title="Cấu hình thanh toán" />
- *   <ProjectConfigPanel projectCode="hub" />  // all modules
+ * ProjectConfigPanel.jsx — antd version
+ * Reusable admin panel for per-project dynamic config.
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Card, Switch, Input, InputNumber, Tag, Button, Collapse, Spin,
+  Typography, Space, Row, Col, Badge, App,
+} from 'antd';
+import { SaveOutlined, UndoOutlined } from '@ant-design/icons';
 import api from '@admin/api/client';
 
-// ── Labels ─────────────────────────────────────────────────────────────────────
+const { Text, Title } = Typography;
+const { TextArea } = Input;
+
 const MODULE_LABELS = {
   payment:      'Thanh toán',
   kyc:          'Xác minh danh tính (KYC)',
@@ -37,219 +37,99 @@ const GROUP_LABELS = {
   security:  'Bảo mật',
 };
 
-// ── Type-aware input ───────────────────────────────────────────────────────────
+// ── Type-aware input ──────────────────────────────────────────────────────────
 function ConfigInput({ item, value, onChange }) {
-  const base = 'w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-blue-500';
-
-  // Boolean toggle
   if (item.type === 'boolean') {
     const boolVal = value === true || value === 'true';
-    return (
-      <button
-        type="button"
-        onClick={() => onChange(!boolVal)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-          boolVal ? 'bg-blue-600' : 'bg-gray-600'
-        }`}
-        aria-label={boolVal ? 'Bật' : 'Tắt'}
-      >
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-          boolVal ? 'translate-x-6' : 'translate-x-1'
-        }`} />
-      </button>
-    );
+    return <Switch checked={boolVal} onChange={onChange} size="small" />;
   }
-
-  // Number
   if (item.type === 'number') {
     return (
-      <input
-        type="number"
+      <InputNumber
         value={value ?? 0}
-        onChange={e => onChange(Number(e.target.value))}
-        className={base}
+        onChange={v => onChange(v ?? 0)}
+        style={{ width: '100%' }}
+        size="small"
       />
     );
   }
-
-  // Array multi-select (options defined in item.options)
   if (item.type === 'array' && Array.isArray(item.options) && item.options.length) {
     const arr = Array.isArray(value) ? value : [];
     return (
-      <div className="flex flex-wrap gap-2">
-        {item.options.map(opt => {
-          const active = arr.includes(opt);
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => {
-                const next = active ? arr.filter(v => v !== opt) : [...arr, opt];
-                onChange(next);
-              }}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                active
-                  ? 'bg-blue-600 border-blue-500 text-white'
-                  : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-gray-500'
-              }`}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
+      <Space wrap size={4}>
+        {item.options.map(opt => (
+          <Tag.CheckableTag
+            key={opt}
+            checked={arr.includes(opt)}
+            onChange={checked => onChange(checked ? [...arr, opt] : arr.filter(v => v !== opt))}
+          >
+            {opt}
+          </Tag.CheckableTag>
+        ))}
+      </Space>
     );
   }
-
-  // Array — no options (free text, comma-separated)
   if (item.type === 'array') {
     const arr = Array.isArray(value) ? value : [];
     return (
-      <input
-        type="text"
+      <Input
+        size="small"
         value={arr.join(', ')}
         onChange={e => onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
         placeholder="Nhập giá trị cách nhau bằng dấu phẩy"
-        className={base}
       />
     );
   }
-
-  // Image URL with preview
   if (item.type === 'image') {
     return (
-      <div className="space-y-1.5">
-        <input
-          type="text"
+      <Space direction="vertical" style={{ width: '100%' }} size={4}>
+        <Input
+          size="small"
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
           placeholder="URL hoặc đường dẫn ảnh"
-          className={base}
         />
         {value && (
           <img
-            src={value}
-            alt="preview"
-            className="h-10 w-auto object-contain rounded border border-gray-700 opacity-80"
+            src={value} alt="preview"
+            style={{ height: 36, objectFit: 'contain', borderRadius: 4, opacity: 0.8 }}
             onError={e => { e.currentTarget.style.display = 'none'; }}
           />
         )}
-      </div>
+      </Space>
     );
   }
-
-  // Default: string
   return (
-    <input
-      type="text"
+    <Input
+      size="small"
       value={value ?? ''}
       onChange={e => onChange(e.target.value)}
-      className={base}
     />
   );
 }
 
-// ── Section card ───────────────────────────────────────────────────────────────
-function Section({ moduleKey, groupKey, items, changes, onChangeItem, hasAnyChange }) {
-  const [open, setOpen] = useState(true);
-  const moduleLabel = MODULE_LABELS[moduleKey] || moduleKey;
-  const groupLabel  = GROUP_LABELS[groupKey]   || groupKey;
-  const dirtyCount  = items.filter(i => changes[i.id] !== undefined).length;
-
-  return (
-    <div className="border border-gray-800 rounded-xl overflow-hidden mb-3">
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 py-3 bg-gray-800/70 text-left hover:bg-gray-800 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{moduleLabel}</span>
-          <span className="text-gray-600">›</span>
-          <span className="font-semibold text-gray-200 text-sm">{groupLabel}</span>
-          {dirtyCount > 0 && (
-            <span className="bg-yellow-500/20 text-yellow-400 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              {dirtyCount} thay đổi
-            </span>
-          )}
-        </div>
-        <span className="text-gray-600 text-xs ml-4">{open ? '▲' : '▼'}</span>
-      </button>
-
-      {open && (
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900/40">
-          {items.map(item => {
-            const currentValue = changes[item.id] !== undefined ? changes[item.id] : item.value;
-            const isDirty      = changes[item.id] !== undefined;
-            return (
-              <div key={item.id} className="space-y-1.5">
-                <label className="flex items-center gap-2 text-xs font-medium text-gray-300">
-                  <span>{item.description || item.key}</span>
-                  <span className="font-mono text-[10px] text-gray-600">[{item.key}]</span>
-                  {isDirty && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 flex-shrink-0" />}
-                </label>
-                <ConfigInput
-                  item={item}
-                  value={currentValue}
-                  onChange={val => onChangeItem(item.id, val)}
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Toast ──────────────────────────────────────────────────────────────────────
-function Toast({ msg, type }) {
-  if (!msg) return null;
-  return (
-    <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-lg text-sm font-medium shadow-xl ${
-      type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'
-    }`}>
-      {msg}
-    </div>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
 /**
- * @param {Object}      props
- * @param {string}      props.projectCode   – 'hub' | 'game' | 'dating' | 'trade' | 'sports'
- * @param {string|null} [props.moduleFilter] – restrict to one module (e.g. 'payment')
- * @param {string|null} [props.title]        – custom page title
+ * @param {{ projectCode: string, moduleFilter?: string|null, title?: string|null }} props
  */
 export default function ProjectConfigPanel({ projectCode, moduleFilter = null, title = null }) {
+  const { message } = App.useApp();
   const [changes, setChanges] = useState({});
-  const [toast,   setToast]   = useState(null);
   const qc = useQueryClient();
 
-  const showToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-
-  // ── Data fetch ──────────────────────────────────────────────────────────────
   const queryParams = { project: projectCode, ...(moduleFilter && { module: moduleFilter }) };
   const { data: configs = [], isLoading, isError } = useQuery({
     queryKey: ['projectConfig', projectCode, moduleFilter],
-    queryFn:  () =>
-      api.get('/admin/ui-config', { params: queryParams })
-         .then(r => r.data?.data ?? r.data ?? []),
+    queryFn:  () => api.get('/admin/ui-config', { params: queryParams })
+                       .then(r => r.data?.data ?? r.data ?? []),
   });
 
-  // ── Group by module → group ─────────────────────────────────────────────────
   const sections = useMemo(() => {
     const map = {};
-    (configs ?? [])
-      .filter(c => c.editable !== false)
-      .forEach(c => {
-        const k = `${c.module}||${c.group}`;
-        if (!map[k]) map[k] = { module: c.module, group: c.group, items: [] };
-        map[k].items.push(c);
-      });
+    (configs ?? []).filter(c => c.editable !== false).forEach(c => {
+      const k = `${c.module}||${c.group}`;
+      if (!map[k]) map[k] = { module: c.module, group: c.group, items: [] };
+      map[k].items.push(c);
+    });
     return Object.values(map);
   }, [configs]);
 
@@ -259,7 +139,6 @@ export default function ProjectConfigPanel({ projectCode, moduleFilter = null, t
 
   const hasChanges = Object.keys(changes).length > 0;
 
-  // ── Save mutation ───────────────────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: () => {
       if (!hasChanges) return Promise.resolve();
@@ -267,97 +146,126 @@ export default function ProjectConfigPanel({ projectCode, moduleFilter = null, t
       const updates = configs
         .filter(c => ids.includes(c.id))
         .map(c => ({
-          module:      c.module,
-          group:       c.group,
-          key:         c.key,
-          value:       changes[c.id],
-          type:        c.type,
-          description: c.description,
+          module: c.module, group: c.group, key: c.key,
+          value: changes[c.id], type: c.type, description: c.description,
         }));
       return api.put('/admin/ui-config', { project: projectCode, updates });
     },
     onSuccess: () => {
       setChanges({});
       qc.invalidateQueries({ queryKey: ['projectConfig', projectCode] });
-      showToast('Đã lưu cấu hình thành công');
+      message.success('Đã lưu cấu hình thành công');
     },
-    onError: (err) => showToast(err?.response?.data?.message || 'Lỗi khi lưu cấu hình', 'error'),
+    onError: (err) => message.error(err?.response?.data?.message ?? 'Lỗi khi lưu cấu hình'),
   });
 
-  const pageTitle = title || `Cấu hình ${moduleFilter ? MODULE_LABELS[moduleFilter] || moduleFilter : 'dự án'}`;
+  const pageTitle = title ?? `Cấu hình ${moduleFilter ? MODULE_LABELS[moduleFilter] ?? moduleFilter : 'dự án'}`;
+
+  const collapseItems = sections.map(sec => {
+    const moduleLabel = MODULE_LABELS[sec.module] ?? sec.module;
+    const groupLabel  = GROUP_LABELS[sec.group]   ?? sec.group;
+    const dirtyCount  = sec.items.filter(i => changes[i.id] !== undefined).length;
+    return {
+      key:   `${sec.module}||${sec.group}`,
+      label: (
+        <Space>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>{moduleLabel}</Text>
+          <Text>›</Text>
+          <Text strong style={{ fontSize: 13 }}>{groupLabel}</Text>
+          {dirtyCount > 0 && <Badge count={dirtyCount} color="gold" />}
+        </Space>
+      ),
+      children: (
+        <Row gutter={[16, 12]}>
+          {sec.items.map(item => {
+            const currentValue = changes[item.id] !== undefined ? changes[item.id] : item.value;
+            const isDirty      = changes[item.id] !== undefined;
+            return (
+              <Col key={item.id} xs={24} md={12}>
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Space size={4} align="center">
+                    <Text style={{ fontSize: 12 }}>{item.description ?? item.key}</Text>
+                    <Text type="secondary" style={{ fontSize: 10, fontFamily: 'monospace' }}>[{item.key}]</Text>
+                    {isDirty && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#facc15', display: 'inline-block' }} />}
+                  </Space>
+                  <ConfigInput item={item} value={currentValue} onChange={val => handleChange(item.id, val)} />
+                </Space>
+              </Col>
+            );
+          })}
+        </Row>
+      ),
+    };
+  });
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+    <div>
+      <Space style={{ marginBottom: 20 }} align="center">
         <div>
-          <h2 className="text-xl font-black text-white">{pageTitle}</h2>
-          <p className="text-xs text-gray-500 mt-0.5 font-mono">{projectCode}</p>
+          <Title level={4} style={{ margin: 0 }}>{pageTitle}</Title>
+          <Text type="secondary" style={{ fontSize: 11, fontFamily: 'monospace' }}>{projectCode}</Text>
         </div>
-      </div>
+      </Space>
 
-      {/* States */}
       {isLoading && (
-        <div className="py-16 text-center text-gray-500">
-          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          Đang tải cấu hình...
+        <div style={{ textAlign: 'center', padding: '64px 0' }}>
+          <Spin tip="Đang tải cấu hình..." />
         </div>
       )}
       {isError && !isLoading && (
-        <div className="py-12 text-center text-red-400 text-sm">Không thể tải cấu hình. Kiểm tra kết nối.</div>
+        <Text type="danger" style={{ display: 'block', textAlign: 'center', padding: '48px 0' }}>
+          Không thể tải cấu hình. Kiểm tra kết nối.
+        </Text>
       )}
       {!isLoading && !isError && sections.length === 0 && (
-        <div className="py-12 text-center text-gray-500 text-sm">
-          Chưa có cấu hình. Chạy:{' '}
-          <code className="text-blue-400 text-xs">node source/backend/prisma/seed-config.js</code>
-        </div>
+        <Text type="secondary" style={{ display: 'block', textAlign: 'center', padding: '48px 0' }}>
+          Chưa có cấu hình. Chạy: <Text code>node source/backend/prisma/seed-config.js</Text>
+        </Text>
       )}
 
-      {/* Sections */}
-      {!isLoading && sections.map(sec => (
-        <Section
-          key={`${sec.module}||${sec.group}`}
-          moduleKey={sec.module}
-          groupKey={sec.group}
-          items={sec.items}
-          changes={changes}
-          onChangeItem={handleChange}
-          hasAnyChange={hasChanges}
+      {!isLoading && sections.length > 0 && (
+        <Collapse
+          items={collapseItems}
+          defaultActiveKey={collapseItems.map(i => i.key)}
+          style={{ marginBottom: 80 }}
         />
-      ))}
+      )}
 
       {/* Sticky save bar */}
       {!isLoading && sections.length > 0 && (
-        <div className={`sticky bottom-4 flex items-center gap-3 p-4 rounded-xl border transition-colors ${
-          hasChanges ? 'bg-gray-900 border-blue-600/60' : 'bg-gray-900/60 border-gray-800'
-        }`}>
-          {hasChanges
-            ? <p className="flex-1 text-sm text-yellow-400"><strong>{Object.keys(changes).length}</strong> thay đổi chưa lưu</p>
-            : <p className="flex-1 text-sm text-gray-500">Mọi thay đổi đã được lưu</p>
-          }
-          <button
-            type="button"
-            onClick={() => setChanges({})}
-            disabled={!hasChanges || saveMutation.isPending}
-            className="px-4 py-2 rounded-lg bg-gray-800 text-gray-400 text-sm hover:bg-gray-700 disabled:opacity-40"
-          >
-            Huỷ
-          </button>
-          <button
-            type="button"
-            onClick={() => saveMutation.mutate()}
-            disabled={!hasChanges || saveMutation.isPending}
-            className="px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-40 flex items-center gap-2"
-          >
-            {saveMutation.isPending && (
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            )}
-            Lưu cấu hình
-          </button>
-        </div>
+        <Card
+          size="small"
+          style={{
+            position: 'sticky', bottom: 16, zIndex: 10,
+            borderColor: hasChanges ? '#3b82f6' : undefined,
+            background: '#1a1a1a',
+          }}
+        >
+          <Space justify="space-between" style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+            <Text type={hasChanges ? 'warning' : 'secondary'} style={{ fontSize: 13 }}>
+              {hasChanges ? `${Object.keys(changes).length} thay đổi chưa lưu` : 'Mọi thay đổi đã được lưu'}
+            </Text>
+            <Space>
+              <Button
+                icon={<UndoOutlined />}
+                disabled={!hasChanges || saveMutation.isPending}
+                onClick={() => setChanges({})}
+              >
+                Huỷ
+              </Button>
+              <Button
+                type="primary"
+                icon={<SaveOutlined />}
+                disabled={!hasChanges}
+                loading={saveMutation.isPending}
+                onClick={() => saveMutation.mutate()}
+              >
+                Lưu cấu hình
+              </Button>
+            </Space>
+          </Space>
+        </Card>
       )}
-
-      {toast && <Toast msg={toast.msg} type={toast.type} />}
     </div>
   );
 }

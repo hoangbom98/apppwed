@@ -1,8 +1,14 @@
 // frontend/admin-dashboard/src/modules/dating/pages/index.jsx
 import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
-import api from '@admin/api/client';
-import { adminDatingUsers } from '../api';
+import {
+  adminDatingUsers,
+  adminDatingProfiles,
+  adminDatingMatches,
+  adminDatingGifts,
+  adminDatingMoments,
+  adminDatingReports,
+} from '../api';
 
 const STATUS_OPTS = [
   { label: 'Active',    value: 'active' },
@@ -44,17 +50,11 @@ export function DatingUsersPage() {
 
 // ── Profiles ──────────────────────────────────────────────────────────────────
 export function DatingProfilesPage() {
-  const profilesApi = {
-    list:   (params) => api.get('/dating/admin/profiles', { params }),
-    create: () => Promise.reject(new Error('Not supported')),
-    update: (id, b) => api.patch(`/dating/admin/profiles/${id}`, b),
-    remove: (id)    => api.delete(`/dating/admin/profiles/${id}`),
-  };
   return (
     <CrudPage
       title="Dating — Profiles"
       queryKey="dating-profiles"
-      api={profilesApi}
+      api={adminDatingProfiles}
       fields={[
         { key: 'userId',    label: 'User ID' },
         { key: 'nickname',  label: 'Tên hiển thị' },
@@ -72,17 +72,11 @@ export function DatingProfilesPage() {
 
 // ── Matches ───────────────────────────────────────────────────────────────────
 export function DatingMatchesPage() {
-  const matchesApi = {
-    list:   (params) => api.get('/dating/admin/matches', { params }),
-    create: () => Promise.reject(new Error('Not supported')),
-    update: () => Promise.reject(new Error('Not supported')),
-    remove: (id) => api.delete(`/dating/admin/matches/${id}`),
-  };
   return (
     <CrudPage
       title="Dating — Matches"
       queryKey="dating-matches"
-      api={matchesApi}
+      api={adminDatingMatches}
       fields={[
         { key: 'user1Id',   label: 'User 1' },
         { key: 'user2Id',   label: 'User 2' },
@@ -99,17 +93,11 @@ export function DatingMatchesPage() {
 
 // ── Gifts ─────────────────────────────────────────────────────────────────────
 export function DatingGiftsPage() {
-  const giftsApi = {
-    list:   (params) => api.get('/dating/admin/gifts', { params }),
-    create: (body)   => api.post('/dating/admin/gifts', body),
-    update: (id, b)  => api.put(`/dating/admin/gifts/${id}`, b),
-    remove: (id)     => api.delete(`/dating/admin/gifts/${id}`),
-  };
   return (
     <CrudPage
       title="Dating — Quà tặng"
       queryKey="dating-gifts"
-      api={giftsApi}
+      api={adminDatingGifts}
       fields={[
         { key: 'name',      label: 'Tên quà',   required: true },
         { key: 'imageUrl',  label: 'Ảnh URL' },
@@ -126,17 +114,11 @@ export function DatingGiftsPage() {
 
 // ── Moments ───────────────────────────────────────────────────────────────────
 export function DatingMomentsPage() {
-  const momentsApi = {
-    list:   (params) => api.get('/dating/admin/moments', { params }),
-    create: () => Promise.reject(new Error('Not supported')),
-    update: (id, b)  => api.patch(`/dating/admin/moments/${id}`, b),
-    remove: (id)     => api.delete(`/dating/admin/moments/${id}`),
-  };
   return (
     <CrudPage
       title="Dating — Moments"
       queryKey="dating-moments"
-      api={momentsApi}
+      api={adminDatingMoments}
       fields={[
         { key: 'userId',    label: 'User ID' },
         { key: 'content',   label: 'Nội dung', type: 'textarea', listHide: true },
@@ -155,17 +137,11 @@ export function DatingMomentsPage() {
 
 // ── Reports ───────────────────────────────────────────────────────────────────
 export function DatingReportsPage() {
-  const reportsApi = {
-    list:   (params) => api.get('/dating/admin/reports', { params }),
-    create: () => Promise.reject(new Error('Not supported')),
-    update: (id, b)  => api.patch(`/dating/admin/reports/${id}`, b),
-    remove: () => Promise.reject(new Error('Not supported')),
-  };
   return (
     <CrudPage
       title="Dating — Báo cáo vi phạm"
       queryKey="dating-reports"
-      api={reportsApi}
+      api={adminDatingReports}
       fields={[
         { key: 'reporterId', label: 'Người báo cáo' },
         { key: 'targetId',   label: 'Người bị báo cáo' },

@@ -1,9 +1,9 @@
-import { CapacitorConfig } from '@capacitor/cli';
+﻿import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   // ─── App Identity ───────────────────────────────────────────────────────────
-  appId:   'com.kjc.game',
-  appName: 'KJC Game',
+  appId:   'com.lkvip.game',
+  appName: 'LKVIP Game',
 
   // ─── Web Build Output ───────────────────────────────────────────────────────
   webDir: 'dist',

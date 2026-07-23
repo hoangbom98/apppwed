@@ -1,0 +1,658 @@
+{include file="public/header1" nav="交易详情"}
+</head>
+<style type="text/css">
+    .container {
+        width: 100%;
+        min-height: 100%;
+        padding: 0;
+        background-color: #FAFAFA;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-flex-flow: column;
+        flex-flow: column;
+    }
+
+    .main {
+        flex: 1;
+        padding: .4rem;
+        background-color: #FAFAFA;
+    }
+
+    ul, li {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .top {
+        padding: 0 .4rem .3rem;
+        border-radius: 10px;
+        border: 1px solid #E9E9E9;
+        background-color: #FFF;
+        box-shadow: 0px 4px 8px 0px rgba(233, 233, 233, 1);
+        margin-bottom: .4rem;
+    }
+
+    .top .ttitle {
+        font-size: .36rem;
+        line-height: 1;
+        color: #747474;
+        padding-top: .35rem;
+    }
+
+    .top .cash {
+        font-size: .24rem;
+        line-height: .34rem;
+        color: #9B9B9B;
+        margin-top: .35rem;
+    }
+
+    .top .input-group {
+        width: 100%;
+        padding-top: .12rem;
+        padding-bottom: .3rem;
+        border-bottom: 1px solid #E9E9E9;
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .top .input-group span {
+        font-size: .5rem;
+        line-height: 1;
+        color: #4f5ffa;
+        padding-right: .18rem;
+    }
+
+    .top .input-group input {
+        width: 100%;
+        height: .5rem;
+        padding: 0;
+        border: 0;
+        font-size: .26rem;
+        line-height: .5rem;
+        float: left;
+        outline: none;
+    }
+
+    .top .input-group input::placeholder {
+        color: #999999;
+    }
+
+    .top .tip {
+        font-size: .24rem;
+        line-height: 1;
+        color: #fd5a21;
+        padding-top: .28rem;
+    }
+
+    .session {
+        padding: 0 .4rem;
+        border-radius: 10px;
+        border: 1px solid #E9E9E9;
+        background-color: #FFF;
+        box-shadow: 0px 4px 8px 0px rgba(233, 233, 233, 1);
+        margin-bottom: .4rem;
+    }
+
+    .session .item {
+        padding: .4rem 0;
+        border-bottom: 1px solid #E9E9E9;
+        font-size: .28rem;
+        line-height: 1;
+        color: #999999;
+    }
+
+    .session .item:last-child {
+        border-bottom: 0;
+    }
+
+    .session .item .right {
+        color: #747474;
+        float: right;
+    }
+
+    .session .item .progress-bar {
+        width: 100%;
+        height: .2rem;
+        border-radius: 10px;
+        background-color: #E9E9E9;
+        position: relative;
+        margin-top: .1rem;
+    }
+
+    .session .item .progress-bar .progress {
+        width: 0;
+        height: .2rem;
+        border-radius: 10px;
+        background-color: #FFDEDD;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .session .item .progress-bar .num {
+        font-size: .22rem;
+        line-height: 1;
+        color: #4f5ffa;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .confirm {
+        width: 100%;
+        height: .86rem;
+        background-color: #4f5ffa;
+        border-radius: 10px;
+        font-size: .28rem;
+        color: #fff;
+        line-height: .88rem;
+        text-align: center;
+        margin-top: .6rem;
+    }
+
+    /* inPayPwdMask CSS */
+    .inPayPwdMask {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(74, 74, 74, 0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .inPayPwdMask .mask {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0);
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .inPayPwd {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    .inPayPwd .srzfmm_box {
+        width: 5.5rem;
+        padding: 0 .34rem;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 10px;
+        padding-bottom: .4rem;
+    }
+
+    .inPayPwd .srzfmm_box .title {
+        font-size: .36rem;
+        line-height: 1;
+        color: #666666;
+        text-align: center;
+        padding-top: .76rem;
+    }
+
+    .inPayPwd .srzfmm_box .mm_box {
+        width: 100%;
+        height: .68rem;
+        display: flex;
+        display: -webkit-flex;
+        margin: 0 auto;
+        margin-top: .5rem;
+    }
+
+    .inPayPwd .srzfmm_box .mm_box li {
+        list-style: none;
+        flex: 1;
+        border-bottom: 1px solid #9B9B9B;
+        margin-right: .3rem;
+        text-align: center;
+        line-height: .68rem;
+        font-size: .36rem;
+    }
+
+    .inPayPwd .srzfmm_box .mm_box li:last-child {
+        margin-right: 0;
+    }
+
+    .inPayPwd .srzfmm_box .pay {
+        width: 100%;
+        height: .92rem;
+        background-color: #4f5ffa;
+        border-radius: 10px;
+        font-size: .36rem;
+        color: #fff;
+        line-height: .92rem;
+        text-align: center;
+        margin-top: .5rem;
+    }
+
+    .inPayPwd .nub_ggg {
+        padding: 0 .12rem;
+        background: rgba(210, 213, 219, 0.9);
+        margin-top: 1.5rem;
+    }
+
+    .inPayPwd .nub_ggg:after {
+        content: "";
+        clear: both;
+        display: block;
+    }
+
+    .inPayPwd .nub_ggg li {
+        width: 2.34rem;
+        height: .95rem;
+        float: left;
+        border-radius: .1rem;
+        background-color: #fff;
+        margin-right: .12rem;
+        margin-top: .12rem;
+        text-align: center;
+        box-shadow: 0 2px 4px #848688;
+    }
+
+    .inPayPwd .nub_ggg li:nth-child(3n) {
+        margin-right: 0;
+    }
+
+    .inPayPwd .nub_ggg li .num {
+        font-size: .5rem;
+        line-height: .6rem;
+        color: #000000;
+        margin-top: .02rem;
+    }
+
+    .inPayPwd .nub_ggg li .letter {
+        font-size: .2rem;
+        line-height: .24rem;
+        color: #000000;
+        font-weight: bold;
+        margin-top: .02rem;
+    }
+
+    .kong {
+        background-color: rgba(0, 0, 0, 0) !important;
+        padding-top: .06rem;
+        box-shadow: none !important;
+    }
+
+    .zero .num {
+        line-height: .95rem !important;
+    }
+
+    .inPayPwd .nub_ggg li.delete {
+        background-color: rgba(0, 0, 0, 0) !important;
+        text-align: center;
+        line-height: 0;
+        box-shadow: none;
+    }
+
+    .inPayPwd .nub_ggg li.delete img {
+        width: .45rem;
+        height: .36rem;
+        margin-top: .3rem;
+    }
+
+    /* tipMask CSS */
+    .tipMask {
+        width: 100%;
+        height: 100%;
+        background: rgba(95, 95, 95, 0.3);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 3;
+    }
+
+    .tipMask .cont {
+        width: 5.1rem;
+        padding: .42rem .6rem .5rem;
+        border-radius: 5px;
+        background-color: #FFFFFF;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -3.15rem;
+        margin-top: -1.8rem;
+        text-align: center;
+    }
+
+    .tipMask .cont .title {
+        font-size: .34rem;
+        line-height: .48rem;
+        color: #191919;
+    }
+
+    .tipMask .cont .stitle {
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #606060;
+        margin-top: .36rem;
+    }
+
+    .tipMask .cont .confirm {
+        width: 100%;
+        height: .88rem;
+        background-color: #EF6F6C;
+        border-radius: 4px;
+        font-size: .34rem;
+        color: #fff;
+        line-height: .88rem;
+        text-align: center;
+        margin-top: .5rem;
+    }
+
+    .next {
+        display: none;
+    }
+
+    .next_1 {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: #fff;
+        z-index: 99999999;
+
+    }
+
+    .title {
+        border-bottom: .01rem solid #e4e4e4;
+        height: .92rem;
+        line-height: .92rem;
+        padding: 0 .3rem;
+        color: rgba(102, 102, 102, 1);
+        font-size: .32rem;
+    }
+
+    .next_2 {
+        display: flex;
+        flex-direction: column;
+        padding: 0rem .3rem;
+        justify-content: center;
+    }
+
+    .next_3 {
+        height: .8rem;
+        color: rgba(102, 102, 102, 1);
+        font-size: .8rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-bottom: .01rem solid #E3E3E3;
+        font-size: .32rem;
+        justify-content: space-between;
+    }
+
+    .next_3 a {
+        color: #6E6E6E;
+        display: block;
+        width: 100%;
+
+    }
+
+    .next_3 img {
+        width: .54rem;
+        height: .54rem;
+        margin-right: .5rem;
+    }
+
+    .next_3 > div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .next_3:last-child img {
+        width: .54rem;
+        height: .54rem;
+    }
+
+    .next_3 img.jia {
+        width: .32rem;
+        height: .32rem;
+        margin-right: .6rem;
+        margin-left: .1rem;
+    }
+
+    #cover {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: rgba(0, 0, 0, 0.5);
+        width: 100%; /*宽度设置为100%，这样才能使隐藏背景层覆盖原页面*/
+        height: 100%;
+        filter: alpha(opacity=60); /*设置透明度为60%*/
+        opacity: 0.6; /*非IE浏览器下设置透明度为60%*/
+        display: none;
+        z-Index: 999999;
+    }
+
+    .next_2 input {
+        background: url("../img/wxz.png") no-repeat;
+        width: .32rem;
+        height: .32rem;
+        background-size: 100%;
+    }
+
+    .next_2 input[type="radio"]:checked:after {
+        content: '';
+        background: url("../img/xz.png") no-repeat;
+        width: .32rem;
+        height: .32rem;
+        background-size: 100%;
+        position: absolute;
+        left: -.02rem;
+        top: -.02rem;
+    }
+
+    .tx {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+</style>
+<body>
+<div class='container'>
+    <div class="header">
+        <div class="left" onclick="window.history.back()">
+            <i class="iconfont icon-arrow-left"></i>
+        </div>
+        <div class="htitle">交易详情</div>
+    </div>
+    <div class="main">
+        <form action="/index/index/form" method="post" id="ifr">
+            <div class="top">
+                <input type="hidden" value="{$data.id}" name="id"/>
+                <input type="hidden" value="{:round($data['max'],2)}" id="maxNum2"/>
+                <input type="hidden" value="{:round($user['money']/100)*100}" id="userMoney"/>
+                <input type="hidden" value="{:round($user['money'],2)}" id="userMoney2"/>
+                <div class="ttitle">{$data['title']}</div>
+                <div class="cash">购买金额</div>
+                <div class="input-group">
+                    <span>￥</span>
+                    <input type="number" class="" name="money" id="money" value="{:round($data['min'],2)}"
+                           placeholder="请输入购买金额"/>
+                </div>
+                <div class="tip">最低起投<b id="minNum">{:round($data['min'],2)}</b>元，加一次为100整数倍</div>
+
+                <div class="cash">支付密码</div>
+                <div class="input-group">
+                    <input type="text" class="" name="pwd" id="pwd" value="" placeholder="请输入支付密码"/>
+                </div>
+                <div class="tip">支付密码默认为登录密码</div>
+                {if condition="$data['offvoucher'] eq 1 and $voushow eq 1"}
+                    <div class="cash">投资抵用券</div>
+                    <div class="input-group">
+                        <span readonly="true" class="txd" style="font-size: .3rem;">请选择投资抵用券</span>
+                        <input type="hidden" value="" name="voucher" id="voucher">
+                    </div>
+                    <div class="tip">最多使用{$usevounum}张投资抵用券</div>
+                {/if}
+            </div>
+            <div class="session">
+                <div class="item">
+                    <span class="left">账户余额</span>
+                    <span class="right">￥{$user['money']}</span>
+                </div>
+                <div class="item">
+                    <span class="left">可购金额(元)</span>
+                    <span class="right"><b id="maxNum">{:getProjectSurplus($data['id'])}</b>元</span>
+                </div>
+                <div class="item">
+                    <span class="left">日化收益率</span>
+                    <span class="right">{:round($data['rate'],2)}%</span>
+                </div>
+                <div class="item">
+                    <span class="left">结息时间</span>
+                    <span class="right">满24小时自动发放收益</span>
+                </div>
+                <div class="item">
+                    <span class="left">起投金额</span>
+                    <span class="right">{:round($data['min'],2)}元</span>
+                </div>
+
+            </div>
+            <div class="confirm querens">确认</div>
+        </form>
+    </div>
+</div>
+
+<div id="cover"></div>
+<!--选择提现方式-->
+<div class="next">
+    <div class="next_1">
+        <div class="title">选择抵用券
+            <button style="margin-left: 4rem;background-color:#1B9AF7;border-radius: 9px;color:#FFF;border: none;width: 1rem;height: .4rem;"
+                    id="checkvou">确定
+            </button>
+        </div>
+        {volist name="vinfo" id="v"}
+            <div class="next_2">
+                <div class="next_3">
+                    <div>
+                        <img src="{:getInfo('app_img')}">
+                        {$v.money}元投资抵用券
+                    </div>
+                    <input type="checkbox" class="vouid" name="interest" data-money="{$v.money}" value="{$v.vid}">
+                </div>
+            </div>
+        {/volist}
+    </div>
+</div>
+
+<div class="tipMask hide" style="z-index:999999999999999999">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi">确定</div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/theme/index/js/jquery.js"></script>
+<script type="text/javascript" src="/static/theme/index/js/font.js"></script>
+<script type="text/javascript">
+
+    $(".txd").click(function () {
+        $("#cover").show();
+        $(".next").show()
+    });
+
+    $("#cover").click(function () {
+        $("#cover").hide();
+        $(".next").hide()
+    });
+
+    var chk_value = [];
+    var allvoumoney = 0;
+    $('#checkvou').click(function () {
+        $('input[name="interest"]:checked').each(function () {
+            chk_value.push($(this).val());
+            allvoumoney = allvoumoney * 1 + $(this).attr('data-money') * 1;
+        });
+        var checnum = $('.vouid:checked').length;
+        $('.txd').html('已选择' + checnum + '张投资抵用券，可抵扣' + allvoumoney + '元');
+        chk_value = chk_value.join(',');
+        $('#voucher').val(chk_value);
+        chk_value = [];
+        allvoumoney = 0;
+        $("#cover").hide();
+        $(".next").hide();
+    });
+    var num = '{$usevounum}';
+
+    $(".vouid").change(function () {
+        var _this = $(this);
+        if ($('.vouid:checked').length > num) {
+            if (_this.is(":checked")) {
+                _this[0].checked = false;
+                msg("错误", "最多只能选择" + num + "张投资抵用券", 1);
+                return false;
+            }
+        }
+    });
+
+    $().ready(function () {
+        var minNum = Number($("#minNum").text());
+        var maxNum = Number($("#maxNum").text());
+        var maxNum2 = Number($("#maxNum2").val());
+        var userMoney = Number($("#userMoney").val());
+        var chk_value = [];
+        var allvoumoney = 0;
+
+        $('.querens').click(function () {
+            var money = $("#money").val();
+            if (money > maxNum) {
+                msg("错误", "投资金额不能大于项目剩余投资额度！", 1);
+                return false;
+            }
+            if (money < minNum) {
+                msg("错误", "投资金额不能小于项目最小投资额度！", 1);
+                return false;
+            }
+
+            if (money > maxNum2) {
+                msg("错误", "投资金额不能大于项目最大投资额度！", 1);
+                return false;
+            }
+            $('input[name="interest"]:checked').each(function () {
+                chk_value.push($(this).val());
+                allvoumoney = allvoumoney * 1 + $(this).attr('data-money') * 1;
+            });
+            var userMoney2 = Number($("#userMoney2").val());
+
+            if (money - allvoumoney > userMoney2) {
+                msg("错误", "投资金额不能大于您的余额！", 1);
+                return false;
+            }
+            var pwd = $("#pwd").val();
+            if (pwd.length < 6 || pwd.length > 16) {
+                msg("错误", "请输入正确的交易密码！", 1);
+                return false;
+            }
+            $("#ifr").submit();
+        })
+    });
+
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+</script>
+</html>

@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@':          path.resolve(__dirname, './src'),
       '@ui':        path.resolve(__dirname, '../shared-ui'),
-      '@kjc/types': path.resolve(__dirname, '../../shared-types/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
       // Force shared-ui source files to resolve peer deps from hub/node_modules
       // (Vite 8 / rolldown resolves from source file location, not importer)
       'react':            path.resolve(__dirname, './node_modules/react'),
@@ -40,9 +40,10 @@ export default defineConfig({
 
   build: {
     outDir: 'dist',
-    // Tối ưu bundle size cho mobile (tăng warning threshold)
-    chunkSizeWarningLimit: 1500,
+    // Tối ưu bundle size cho mobile
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
+      treeshake: true,
       output: {
         // Code splitting thủ công để giảm chunk size (Vite 8: must be a function)
         manualChunks: (id) => {

@@ -13,7 +13,7 @@
  *   <DownloadModal
  *     open={open}
  *     onClose={() => setOpen(false)}
- *     appName="KJC Game"
+ *     appName="LKVIP Game"
  *     appIcon="/logo.svg"
  *     androidLink="https://..."
  *     iosLink="itms-services://..."

@@ -27,7 +27,7 @@ export function useInstallPrompt() {
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (iOS) {
       setIsIOS(true);
-      // @ts-expect-error — standalone is iOS-specific
+      // @ts-ignore — standalone is iOS-specific, not in standard TS types
       const alreadyInstalled = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
       setIsInstallable(!alreadyInstalled);
       return;

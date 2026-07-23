@@ -1,4 +1,4 @@
-# 📋 STANDARDIZATION.md — KJC Multi-Project Platform
+# 📋 STANDARDIZATION.md — LKVIP GROUP
 
 > Trạng thái: **Đã chuẩn hóa** · Cập nhật lần cuối: Dựa trên hướng dẫn chuẩn hóa framework
 
@@ -20,33 +20,45 @@
 
 ```
 source/
-├── packages/                 # ← MỚI: Server-side shared packages
-│   └── shared-utils/         #   @kjc/utils (slugify, validators, dates, numbers, strings)
-├── backend/                  # @kjc/backend (Express + Prisma multi-client)
+├── packages/                       # Server-side shared packages
+│   └── shared-utils/               #   @lkvip/utils (slugify, validators, dates, numbers, strings)
+├── backend/                        # lkvip-backend (Express + Prisma multi-client)
+│   ├── scripts/                    #   ← helper scripts nội bộ (prisma-run.js, ...)
+│   ├── prisma/                     #   6 schemas (admin/hub/game/dating/trade/sports)
+│   │   └── seeds/                  #   14 seed scripts
+│   ├── src/                        #   application source
+│   ├── uploads/                    #   runtime only (.gitkeep)
+│   └── backups/                    #   runtime only (.gitkeep)
 ├── frontend/
-│   ├── _template/            # ← MỚI: Template cho SPA mới
-│   ├── shared-ui/            # @kjc/ui (components, hooks, stores, API client)
-│   ├── admin-dashboard/      # @kjc/admin  (port 5180)
-│   ├── hub/                  # @kjc/hub    (port 5173)
-│   ├── game/                 # @kjc/game   (port 5174)
-│   ├── dating/               # @kjc/dating (port 5176)
-│   ├── trade/                # @kjc/trade  (port 5177)
-│   └── sports/               # @kjc/sports (port 5178)
-├── shared-types/             # @kjc/types (TypeScript interfaces)
-├── scripts/                  # @kjc/cli (Commander CLI)
-│   ├── new-module.sh         # ← MỚI: Scaffold backend module
-│   └── new-spa.sh            # ← MỚI: Scaffold frontend SPA
-└── pnpm-workspace.yaml       # Đã bao gồm packages/*
+│   ├── _template/                  #   Template cho SPA mới
+│   ├── shared-ui/                  #   @lkvip/ui (components, hooks, stores, API client)
+│   ├── admin-dashboard/            #   @lkvip/admin  (port 5180)
+│   ├── hub/                        #   @lkvip/hub    (port 5173)
+│   ├── game/                       #   @lkvip/game   (port 5174)
+│   ├── dating/                     #   @lkvip/dating (port 5176)
+│   ├── trade/                      #   @lkvip/trade  (port 5177)
+│   └── sports/                     #   @lkvip/sports (port 5178)
+├── shared-types/                   # @lkvip/types (TypeScript interfaces)
+├── scripts/                        # @lkvip/cli (Commander CLI)
+│   ├── new-module.sh               #   Scaffold backend module
+│   └── new-spa.sh                  #   Scaffold frontend SPA
+├── logs/                           # runtime only (.gitkeep — excluded from git)
+├── uploads/                        # runtime only (.gitkeep — excluded from git)
+├── tsconfig.base.json              # Base TS config cho backend/shared-types/@lkvip/cli
+├── tsconfig.frontend.base.json     # ← Base TS config dùng chung cho tất cả 6 SPAs
+├── .eslintrc.base.js               # ESLint base cho React/TypeScript (frontend)
+├── .eslintrc.node.js               # ← ESLint base cho Node.js/CommonJS (backend)
+└── pnpm-workspace.yaml             # Workspace packages
 ```
 
 ---
 
 ## 📦 Packages (`source/packages/`)
 
-### `@kjc/utils` — Backend utilities (CommonJS, source-direct)
+### `@lkvip/utils` — Backend utilities (CommonJS, source-direct)
 
 ```js
-const { slugify, isEmail, formatVND, addDays, truncate, mask, randomCode } = require('@kjc/utils');
+const { slugify, isEmail, formatVND, addDays, truncate, mask, randomCode } = require('@lkvip/utils');
 ```
 
 | Module | Exports |
@@ -113,7 +125,7 @@ resolve: {
   alias: {
     '@':          path.resolve(__dirname, './src'),
     '@ui':        path.resolve(__dirname, '../shared-ui'),      // source-direct
-    '@kjc/types': path.resolve(__dirname, '../../shared-types/src'), // source-direct
+    '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'), // source-direct
     // Force peer deps từ SPA's node_modules (ngăn duplicate React instances)
     'react':            path.resolve(__dirname, './node_modules/react'),
     'react-dom':        path.resolve(__dirname, './node_modules/react-dom'),
@@ -164,6 +176,24 @@ Sau đó thêm vào `pnpm-workspace.yaml`:
 
 ---
 
+## 🛠 Bộ công cụ CLI đa nền tảng (Node.js)
+
+Toàn bộ các script quản trị đã được chuyển đổi sang `.js` để chạy đồng nhất trên Windows/Linux/macOS.
+
+- **Chạy script:** Sử dụng lệnh `node scripts/<tên-script>.js`.
+- **Các cờ hỗ trợ (tùy chọn):**
+    - `--verbose`: In log chi tiết các lệnh hệ thống.
+    - `--dry-run`: Chạy thử, in lệnh sẽ thực hiện mà không làm thay đổi hệ thống.
+
+| Script cũ | Lệnh Node.js mới |
+| :--- | :--- |
+| `bash scripts/check-env.sh` | `node scripts/check-env.js` |
+| `bash scripts/migrate-all.sh` | `node scripts/migrate-all.js` |
+| `bash scripts/backup-db.sh` | `node scripts/backup-db.js` |
+| `bash scripts/deploy.sh` | `node scripts/deploy.js` |
+
+---
+
 ## 🗄️ Nginx Cache Strategy
 
 | Loại file | Cache | Lý do |
@@ -177,11 +207,11 @@ Sau đó thêm vào `pnpm-workspace.yaml`:
 
 ## ✅ Checklist chuẩn hóa
 
-### ✅ Đã hoàn thành
+### ✅ Đã hoàn thành — v2.0
 
 - [x] `pnpm-workspace.yaml` — thêm `packages/*`, fix `allowBuilds` lỗi
 - [x] `source/package.json` — thêm `build:utils`, `build:packages`
-- [x] `packages/shared-utils` (`@kjc/utils`) — slugify, strings, dates, validators, numbers
+- [x] `packages/shared-utils` (`@lkvip/utils`) — slugify, strings, dates, validators, numbers
 - [x] `backend/src/shared/middlewares/errorHandler.js` — fix import logger, log request context
 - [x] `backend/src/shared/utils/response.js` — thêm `timestamp`, `noContent`, `conflict`
 - [x] `backend/src/config/databases.js` — document connection pooling, thêm `disconnectAll()`
@@ -191,21 +221,132 @@ Sau đó thêm vào `pnpm-workspace.yaml`:
 - [x] `scripts/new-module.sh` — scaffold backend module tự động
 - [x] `scripts/new-spa.sh` — scaffold frontend SPA từ _template
 
+### ✅ Đã hoàn thành — v2.1 (Cleanup & Standardization)
+
+- [x] `backend/scripts/prisma-run.ts` — tham số hóa 18 Prisma scripts → 1 TypeScript script linh hoạt (tsx)
+- [x] `backend/package.json` — rút gọn từ ~50 → 33 scripts; seeds đổi sang `.ts` + `tsx`; thêm jest/ts-jest
+- [x] `backend/tsconfig.json` — thêm `scripts/**/*` vào include (bao gồm prisma-run.ts)
+- [x] `tsconfig.frontend.base.json` — base TS config dùng chung cho tất cả 7 React packages
+- [x] `frontend/{hub,game,dating,trade,sports,admin-dashboard,_template}/tsconfig.json` — đều extend `tsconfig.frontend.base.json`
+- [x] `frontend/{hub,game,dating,_template}/tsconfig.node.json` — chuẩn hóa thống nhất (ES2022/bundler/verbatimModuleSyntax)
+- [x] `frontend/shared-ui/tsconfig.json` — extend `tsconfig.frontend.base.json`, bỏ outDir/declaration (source-direct)
+- [x] `.eslintrc.node.js` — ESLint base riêng cho Node.js/CommonJS backend
+- [x] `backend/.eslintrc.js` — extend `.eslintrc.node.js` + TypeScript parser override cho `.ts` files
+- [x] `frontend/admin-dashboard/eslint.config.js` — ESLint v9 flat config
+- [x] `frontend/shared-ui/eslint.config.js` — ESLint v9 flat config
+- [x] `frontend/{hub,game,dating,trade,sports}/.oxlintrc.json` — oxlint config (react-hooks rules)
+- [x] `frontend/{game,dating,trade,sports}/package.json` — thêm `lint` + `typecheck` scripts + `oxlint` dep
+- [x] `frontend/shared-ui/package.json` — thêm `lint`, `typecheck`, `eslint`, `@eslint/js` deps
+- [x] `source/package.json` — thêm `prisma:generate`, `prisma:deploy`, `prisma:status`, `lint:frontend`, `typecheck:all`, `test`, `test:all` ở root
+- [x] `source/.gitignore` — thêm `**/seeds_backup/`, `**/uploads/*`, `.pnpm-store/`
+- [x] `logs/`, `uploads/`, `backend/uploads/`, `backend/backups/` — dọn files rác, chỉ giữ `.gitkeep`
+
+### ✅ Đã hoàn thành — v2.2 (Backend Hardening)
+
+- [x] `backend/src/shared/utils/response.ts` — chuyển từ ES Module `export` sang `module.exports` (CommonJS)
+- [x] `backend/src/shared/middlewares/projectResolver.ts` — sửa path `require('../config/databases')` → `../../config/databases`; dùng `ROUTE_PROJECT_MAP` + `PROJECT_IDS` từ `@lkvip/constants`
+- [x] `backend/src/shared/middlewares/projectAccessGuard.ts` — sửa path `require('../config/databases')` → `../../config/databases`
+- [x] `backend/src/shared/middlewares/configResolver.ts` — sửa path `require('../config/databases')` → `../../config/databases`
+- [x] `backend/src/shared/middlewares/adminGuard.ts` — dùng `ADMIN_ROLES` từ `@lkvip/constants`
+- [x] `backend/src/shared/middlewares/auth.ts` — dùng `PROJECT_IDS` từ `@lkvip/constants`; loại bỏ hardcode list
+- [x] `backend/src/shared/services/configService.ts` — bỏ `new Redis()` riêng, dùng shared redis singleton (`../../config/redis`)
+- [x] `backend/src/shared/services/notificationService.ts` — thêm `get _io()` getter để cron jobs có thể truy cập `notifSvc._io`
+- [x] `backend/src/shared/services/riskService.ts` — sửa path `require('../config/databases')` → `../../config/databases`
+- [x] `backend/src/shared/services/authService.ts` — dùng `PROJECT_IDS` từ `@lkvip/constants`; thêm TypeScript interfaces
+- [x] `backend/src/shared/utils/helpers.ts` — re-export từ `@lkvip/utils` + backend-only helpers (paginate, calcAge, …)
+- [x] `backend/src/shared/utils/constants.ts` — re-export từ `@lkvip/constants` + backend-only status enums
+- [x] `backend/src/shared/utils/validators.ts` — re-export từ `@lkvip/utils` + stricter backend validators
+- [x] `backend/src/shared/config/swagger.ts` — chuyển từ unsafe `swaggerJsdoc()` trực tiếp → re-export `../../config/swagger` (graceful fallback)
+- [x] `backend/src/shared/config/databases.ts` — cập nhật comment `.js` → `.ts`
+- [x] `backend/src/shared/types/index.d.ts` — xóa `export * from '@lkvip/types'` (package không tồn tại); viết inline `ProjectId`, `JwtPayload`, `IConfigService`
+- [x] `backend/src/config/index.ts` — thêm export `socket` (socketStore setIo/getIo singleton)
+- [x] `backend/src/server.ts` (shim) — sửa path `require('../../server')` → `require('../server')` (đúng relative path)
+- [x] `backend/server.ts` (root entry) — thêm i18n middleware, riskMiddleware pipeline, configResolver, socketStore.setIo, shared errorHandler, disconnectAll() trong graceful shutdown, gzip compression
+- [x] `backend/server.ts` — **CORS production guard**: throw `Error` nếu `CORS_ORIGINS` không được set trong production
+- [x] `backend/package.json` — thêm `@lkvip/constants: workspace:*`, `@lkvip/utils: workspace:*`; xác nhận `compression` đã có
+- [x] `backend/tsconfig.json` — thêm `paths` alias cho `@lkvip/constants` và `@lkvip/utils`
+- [x] `backend/jsconfig.json` — sửa `baseUrl` sai (`./backend/src` → `./src`), thêm `@lkvip/*` paths
+- [x] `source/.nvmrc` — tạo file chỉ định Node.js 20
+- [x] `source/packages/constants` (`@lkvip/constants`) — tạo package: `PROJECT_IDS`, `USER_ROLES`, `ADMIN_ROLES`, `ROLE_LEVEL`, `isAdminRole`, `roleAtLeast`, `HTTP_STATUS`, `ERROR_CODES`, `CURRENCY_CODES`, `GATEWAY_MIN_AMOUNT`
+- [x] `node_modules/@lkvip/{constants,utils}` — tạo junction symlinks để resolve workspace packages
+
+### ✅ Đã hoàn thành — v2.3 (Path Fix — Zero TSC Errors)
+
+- [x] `backend/src/risk/fraudDetector.ts` — sửa `'../config/databases'` → `'../../config/databases'`
+- [x] `backend/src/risk/deviceFingerprint.ts` — sửa path tương tự
+- [x] `backend/src/risk/bruteForceDetector.ts` — sửa path tương tự
+- [x] `backend/src/risk/botDetector.ts` — sửa path tương tự
+- [x] `backend/src/risk/securityMonitor.ts` — sửa path tương tự
+- [x] `backend/src/risk/contentModerator.ts` — sửa path tương tự
+- [x] `backend/src/risk/ddosDetector.ts` — sửa path tương tự
+- [x] `backend/src/shared/services/auditService.ts` — sửa `'../config/databases'` → `'../../config/databases'`
+- [x] `backend/src/shared/controllers/paymentController.ts` — sửa path tương tự
+- [x] `backend/src/shared/controllers/paymentMonitorController.ts` — sửa path tương tự
+- [x] `backend/src/shared/services/aggregators/index.ts` — sửa `'../../../config/databases'` → `'../../config/databases'`
+- [x] `backend/src/modules/admin/controllers/opsController.ts` — sửa `'../../../config/databases'` → `'../../../shared/config/databases'`
+- [x] `backend/src/modules/admin/controllers/appCatalogController.ts` — sửa path tương tự
+- [x] **`tsc --noEmit` PASS — zero errors** ✅
+- [x] `backend/src/app.ts` vs `backend/src/server.ts` — xác nhận 2 shims đúng, khác nhau ở comment; không trùng lặp logic
+
+### ✅ Đã hoàn thành — v2.4 (MySQL · Redis · Socket.IO Standardization)
+
+Dựa trên patterns từ egg-mysql, @eggjs/redis và egg-socket.io — áp dụng vào Express/Prisma/ioredis/Socket.IO stack.
+
+#### MySQL / Prisma
+
+- [x] `backend/src/shared/services/transactionService.ts` — **tạo mới**: Prisma `$transaction` helper với:
+  - `runTx(prisma, fn, options)` — chạy interactive transaction, retry tự động khi deadlock (P2034, tối đa 3 lần, exponential backoff 100 → 200 → 400ms)
+  - `runTxWith(project, fn, options)` — variant tiện lợi, resolve client từ tên project
+  - `creditBalance(prisma, userId, amount, type, note)` — credit + ledger entry nguyên tử
+  - `debitBalance(prisma, userId, amount, type, note)` — debit + ledger entry nguyên tử, throw `INSUFFICIENT_BALANCE` nếu thiếu tiền
+  - Options: `isolationLevel`, `maxWait` (5 000ms), `timeout` (15 000ms), `maxRetries`
+  - Log slow transactions (> 80% timeout), log mọi retry attempt
+- [x] `backend/src/modules/admin/controllers/monitorController.ts` — `getOnlineStats()` dùng `sessionService.countOnline()` (Redis sorted-set) thay vì heuristic từ Socket.IO room size; vẫn đính kèm `socketConnections` như secondary signal
+
+#### Redis / ioredis
+
+- [x] `backend/src/shared/middlewares/rateLimiter.ts` — **refactor**: loại bỏ 3rd Redis connection riêng; dùng shared singleton `require('../../config/redis').raw` cho `RateLimiterRedis`; check `redisStore.isConnected` để switch fallback; thêm `insuranceLimiter` (memory fallback khi Redis momentarily unavailable)
+- [x] `backend/src/shared/services/sessionService.ts` — **tạo mới**: Redis-backed session management với:
+  - Key schema: `session:{project}:{userId}` (TTL 2h), `sessions:online:{project}` (sorted-set, score = last seen), `session:refresh:{project}:{userId}` (TTL 30d)
+  - `create/touch/get/destroy` — CRUD phiên, tự động update sorted-set presence
+  - `bindRefreshToken / verifyRefreshToken / revokeRefreshToken` — refresh token binding (lưu SHA-256 hash, không lưu raw token)
+  - `isOnline / getOnlineUsers / countOnline` — presence queries từ Redis sorted-set (ONLINE_TTL = 5 phút)
+  - Graceful fallback: tất cả lỗi Redis được log + suppress, không crash request
+- [x] Process duy trì **đúng 1 Redis connection** (config/redis.ts); cả `rateLimiter`, `cacheService`, `configService`, `riskMiddleware`, `sessionService` đều dùng chung
+
+#### Socket.IO
+
+- [x] `backend/src/config/socket.ts` — thêm `emitAdminNsp(project, event, data)`: emit song song tới `/admin` namespace `project:{p}` + `admin:all` rooms; fallback về default ns khi `/admin` chưa mount
+- [x] `backend/src/shared/socket/handlers.ts` — **nâng cấp**:
+  - Tách `makeAuthMiddleware()` factory để tái sử dụng cho cả default `/` và `/admin` namespaces
+  - Mount **`/admin` namespace** (`io.of('/admin')`): auth-gate chỉ cho role `admin`/`super_admin`; auto-join rooms theo role; `admin:join_project` để switch project context; `admin:joined` ack event
+  - `heartbeat` event: `sessionSvc.touch(project, userId)` để refresh TTL và sorted-set score mà không cần DB round-trip
+  - `user:join`: lưu `socket._joinedProject` cho disconnect cleanup; gọi `sessionSvc.touch()` + emit `admin:online_count` update tới admin rooms
+  - `disconnect`: `sessionSvc.destroy(project, userId)` cho graceful logout; TTL-based expiry xử lý ungraceful disconnect
+  - Legacy `admin:join_project` trên default ns vẫn giữ (backwards compat)
+- [x] `backend/src/shared/socket/projectEmitter.ts` — `_adminBroadcast()` helper: fan-out mọi event tới cả default ns rooms (`emitAdminEvent`) **và** `/admin` ns rooms (`emitAdminNsp`); đảm bảo cả legacy lẫn new admin-dashboard clients đều nhận events
+
+#### Services index
+
+- [x] `backend/src/shared/services/index.ts` — thêm `sessionService` và `transactionService` vào barrel export
+
 ### ⬜ Còn lại (thực hiện khi cần)
 
 - [ ] Thêm `?connection_limit=N` vào DATABASE_URLs trong `.env` (production)
-- [ ] Thêm `disconnectAll()` vào PM2 SIGTERM handler trong `server.js`
 - [ ] Kiểm tra và bổ sung indexes trên các cột thường query (per-project Prisma schema)
 - [ ] CDN cho static assets (Cloudinary, S3) — cập nhật `CDN_BASE_URL` trong .env
 - [ ] Push Notifications (FCM/APNs) — hiện tại là stub
-- [ ] Fix `projectAccessGuard` để kiểm tra `req.user.project === req.project`
-- [ ] Fix `CORS_ORIGINS` fallback — throw nếu không có trong production
+- [ ] Docker: `Dockerfile` + `docker-compose.yml` cho local dev
+- [ ] CI/CD: `.github/workflows/` — GitHub Actions (lint → typecheck → test → build)
 
 ---
 
 ## 📚 Tài liệu liên quan
 
 - [`MIGRATION_GUIDE.md`](./MIGRATION_GUIDE.md) — Hướng dẫn Prisma migrations
+- [`backend/scripts/README.md`](./backend/scripts/README.md) — prisma-run.ts usage & cú pháp
 - [`backend/src/shared/README.md`](./backend/src/shared/README.md) — Shared middleware/service docs
-- [`packages/shared-utils/README.md`](./packages/shared-utils/README.md) — @kjc/utils API docs
+- [`packages/shared-utils/README.md`](./packages/shared-utils/README.md) — @lkvip/utils API docs
 - [`frontend/_template/`](./frontend/_template/) — Template cho SPA mới
+- [`tsconfig.frontend.base.json`](./tsconfig.frontend.base.json) — Base TS config cho React SPAs
+- [`.eslintrc.node.js`](./.eslintrc.node.js) — ESLint base cho Node.js/CommonJS projects

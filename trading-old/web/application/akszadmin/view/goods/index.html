@@ -1,0 +1,93 @@
+{extend name='akszadmin@main'}
+
+{block name="button"}
+{if auth("akszadmin/goods/add")}
+<button data-open='{:url(ADMIN_MODULE."/goods/add")}' data-title="添加产品" class='layui-btn layui-btn-sm layui-btn-primary'>添加产品</button>
+{/if}
+{if auth("akszadmin/goods/remove")}
+<button data-action='{:url(ADMIN_MODULE."/goods/remove")}' data-rule="id#{key}" data-csrf="{:systoken('remove')}" class='layui-btn layui-btn-sm layui-btn-primary'>删除产品</button>
+{/if}
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='goods/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='list-table-sort-td'>
+                <button type="button" data-reload class="layui-btn layui-btn-xs">刷 新</button>
+            </th>
+            <th class='text-left nowrap' width="20%">产品标题</th>
+            <th class='text-left nowrap' width="15%">产品代码</th>
+            <th class='text-left nowrap' width="15%">状态</th>
+            <th class='text-left nowrap' width="15%">随机值</th>
+            <th class='text-left nowrap' width="15%">风控最小值</th>
+            <th class='text-left nowrap' width="15%">风控最大值</th>
+            <th class='text-left nowrap' width="15%">操作</th>
+            <th></th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'>
+            </td>
+            <td class='list-table-sort-td'>
+                <input data-action-blur="{:request()->url()}" data-value="id#{$vo.id};action#sort;sort#{value}" data-loading="false" value="{$vo.sort}" class="list-sort-input">
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.title|default='--'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.code|default='--'}
+            </td>
+            <td class='text-left nowrap'>
+                {if $vo.isopen == 1} 开市 {else /} 休市 {/if}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.rands|default='--'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.point_low|default='--'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.point_top|default='--'}
+            </td>
+            <td class='text-left nowrap'>
+                <div class="nowrap margin-bottom-5">
+                    {if auth("akszadmin/goods/edit")}
+					{if $vo.iskq == 1}
+                    <a class="layui-btn layui-btn-sm layui-btn-success" data-confirm="确定要关闭吗?" data-action="{:url(ADMIN_MODULE.'/goods/iskqopen')}" data-value="id#{$vo.id};iskq#0" data-csrf="{:systoken('iskqopen')}">开启</a>
+                    {else /}
+                    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要开启吗?" data-action="{:url(ADMIN_MODULE.'/goods/iskqopen')}" data-value="id#{$vo.id};iskq#1" data-csrf="{:systoken('iskqopen')}">关闭</a>
+                    {/if}
+					
+                    {if $vo.isopen == 1}
+                    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要休市吗?" data-action="{:url(ADMIN_MODULE.'/goods/proisopen')}" data-value="id#{$vo.id};isopen#0" data-csrf="{:systoken('proisopen')}">点击休市</a>
+                    {else /}
+                    <a class="layui-btn layui-btn-sm layui-btn-success" data-confirm="确定要开市吗?" data-action="{:url(ADMIN_MODULE.'/goods/proisopen')}" data-value="id#{$vo.id};isopen#1" data-csrf="{:systoken('proisopen')}">点击开市</a>
+                    {/if}
+                    <a data-dbclick class="layui-btn layui-btn-sm" data-open='{:url(ADMIN_MODULE."/goods/edit")}?id={$vo.id}'>编 辑</a>
+                    {/if}
+                    {if auth("akszadmin/goods/remove")}
+                    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除数据吗?" data-action="{:url(ADMIN_MODULE.'/goods/remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
+                    {/if}
+                    <a class="layui-btn layui-btn-sm layui-btn-{$vo.showps==1?'warm':'black'}" data-confirm="确定要显示吗?" data-action="{:url(ADMIN_MODULE.'/goods/showps')}" data-value="id#{$vo.id};do#{$vo.showps==1?0:1}" data-csrf="{:systoken('showps')}">{$vo.showps==1?"隐盈":"显盈"}</a>
+                    <a class="layui-btn layui-btn-sm layui-btn-{$vo.showps2==1?'warm':'black'}" data-confirm="确定要显示吗?" data-action="{:url(ADMIN_MODULE.'/goods/showps2')}" data-value="id#{$vo.id};do#{$vo.showps2==1?0:1}" data-csrf="{:systoken('showps2')}">{$vo.showps2==1?"隐亏":"显亏"}</a>
+                </div>
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+{/block}

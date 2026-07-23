@@ -102,7 +102,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <InstallPrompt appName="KJC Dating" appIcon="/icons/app-icon.svg" />
+      <InstallPrompt appName="LKVIP Dating" appIcon="/icons/app-icon.svg" />
       <UpdateBanner />
       <IncomingCallOverlay />
       <Routes>

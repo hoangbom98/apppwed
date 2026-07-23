@@ -1,13 +1,13 @@
-/**
+﻿/**
  * build.ts — Build frontend apps
  *
  * Delegates to build-all.sh on Linux/macOS.
  * On Windows (dev machine) can also invoke npm run build directly via Node.
  *
  * Usage (via CLI):
- *   kjc build               # build all 6 frontends
- *   kjc build hub game      # build specific apps
- *   kjc build --ci          # fail fast on first error
+ *   lkvip build               # build all 6 frontends
+ *   lkvip build hub game      # build specific apps
+ *   lkvip build --ci          # fail fast on first error
  */
 
 import path from 'path';
@@ -107,7 +107,7 @@ export function registerBuildCommand(program: Command): void {
 
       // ── Node-native mode ───────────────────────────────────────────────────
       const targets = (apps.length > 0 ? apps : ALL_FRONTEND_APPS) as FrontendApp[];
-      header('KJC Platform — Build All Frontends');
+      header('LKVIP GROUP — Build All Frontends');
       info(`Target apps: ${targets.join(', ')}`);
 
       const results: BuildResult[] = [];

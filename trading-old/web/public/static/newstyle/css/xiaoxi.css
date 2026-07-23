@@ -1,0 +1,82 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0 ;
+  padding: 0;
+  font-family: PingFangSC-Light;
+  background: radial-gradient(circle at 70% 40%, #1F484F, #1F262E);
+}
+.app {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+.app .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-family: PingFangSC;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+.app .header img {
+  width: 0.5rem;
+}
+.line {
+  height: 0.0625rem;
+  width: 100%;
+  background: rgba(216, 216, 216, 0.1);
+}
+.items {
+  color: #fff;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+  margin: 0 1.5rem;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
+  display: block;
+}
+.items .title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  font-size: 1.125rem;
+  position: relative;
+}
+.items .title .text {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  word-break: break-all;
+  font-size: 0.875rem;
+  color: #fff;
+}
+.items .title .time {
+  font-size: 0.875rem;
+  opacity: 0.5;
+  color: #fff;
+  white-space: nowrap;
+  font-family: Gilroy;
+}
+.items .title .dian {
+  width: 6px;
+  height: 6px;
+  background: #5ed5a8;
+  position: absolute;
+  left: -5px;
+  top: 0;
+  border-radius: 10px;
+}
+.items .content {
+  color: #fff;
+  opacity: 0.5;
+  font-size: 0.875rem;
+  letter-spacing: 1px;
+  line-height: 1.5rem;
+  margin-top: 0.5rem;
+}

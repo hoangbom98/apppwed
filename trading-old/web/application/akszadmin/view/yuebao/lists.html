@@ -1,0 +1,157 @@
+{extend name='main'}
+
+{block name="button"}
+
+
+
+
+{/block}
+
+{block name="content"}
+<div class="layui-card-header layui-anim layui-anim-fadein notselect">
+	<span class="layui-icon layui-icon-next font-s10 color-desc margin-right-5">余额宝--用户购买记录</span>
+	<div class="pull-right">
+		
+		
+	</div>
+</div>
+<div class="think-box-shadow" style="text-align: center;height: 80px;line-height: 40px;">
+	<div style="display: inline-block;width: 200px;border-radius: 5px;margin: 0 20px;">
+		<span >进行中(记录数)</span><br><span style="font-size: 24px;">{$countdoing}</span>
+	</div>
+	<div style="display: inline-block;width: 200px;border-radius: 5px;margin: 0 20px;">
+		<span>资金池总额(元)</span><br><span style="font-size: 24px;">{$counttotalmoney}</span>
+	</div>
+	<div style="display: inline-block;width: 200px;border-radius: 5px;margin: 0 20px;">
+		<span>待分红金额(元)</span><br><span style="font-size: 24px;">{$countnosend}</span>
+	</div>
+	<div style="display: inline-block;width: 200px;border-radius: 5px;margin: 0 20px;">
+		<span>已分红金额(元)</span><br><span style="font-size: 24px;">{$countsended}</span>
+	</div>
+	<div style="display: inline-block;width: 200px;border-radius: 5px;margin: 0 20px;">
+		<span>总参加人次</span><br><span style="font-size: 24px;">{$counttotal}</span>
+	</div>
+</div>
+<div class="think-box-shadow">
+    
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <label><input data-auto-none data-check-target='.list-check-box' type='checkbox'></label>
+            </th>
+            <th class='text-left nowrap'>序号</th>
+            <th class='text-left nowrap'>用户账号</th>
+            <th class='text-left nowrap'>余额宝名称</th>
+            <th class='text-left nowrap'>年化收益率(%)</th>
+            <th class='text-left nowrap'>锁定天数</th>
+            <th class='text-left nowrap'>金额(元)</th>
+            <th class='text-left nowrap'>当前收益(元)</th>
+            <th class='text-left nowrap'>预期收益(元)</th>
+            <th class='text-left nowrap'>开始时间</th>
+            <th class='text-left nowrap'>结束时间</th>
+            <th class='text-left nowrap'>状态</th>
+            <th class='text-left nowrap'></th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick >
+            <td class='list-table-check-td think-checkbox'>
+                <label><input class="list-check-box" value='{$vo.id}' type='checkbox'></label>
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.id}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.username}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.yebtitle}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.lily}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.days}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.money}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.nowprofit}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.finishprofit}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.start_time}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.end_time}
+            </td>
+            <td class='text-left nowrap'>
+               {$vo.status==0?"未生效":""}
+               {$vo.status==1?"进行中":""}
+               {$vo.status==2?"已结束":""}
+               {$vo.status==9?"已删除":""}
+            </td>
+            <td class='text-left nowrap'>
+               <button onclick="listclear({$vo.id})">结算</button> / <button onclick="listkeep({$vo.id})">续期</button> / <button onclick="listdel({$vo.id})">删除</button>
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+</div>
+<script>
+	function listclear(id){
+		$.ajax({
+			type:'post',
+			url:'{:ADMIN_MODULE}/yuebao/listclear',
+			data:{id:id},
+			dataType: "json",
+		    success: function (res) {
+		    	console.log(res);
+		    	layer.msg(res);
+		    	setTimeout(location.reload(),1000);
+		    }
+			
+		});
+		
+	}
+	function listdel(id){
+		$.ajax({
+			type:'post',
+			url:'{:ADMIN_MODULE}/yuebao/listdel',
+			data:{id:id},
+			dataType: "json",
+		    success: function (res) {
+		    	console.log(res);
+		    	layer.msg(res);
+		    	setTimeout(location.reload(),1000);
+		    }
+			
+		});
+		
+	}
+	function listkeep(id){
+		$.ajax({
+			type:'post',
+			url:'{:ADMIN_MODULE}/yuebao/listkeep',
+			data:{id:id},
+			dataType: "json",
+		    success: function (res) {
+		    	console.log(res);
+		    	layer.msg(res);
+		    	setTimeout(location.reload(),1000);
+		    }
+			
+		});
+		
+	}
+</script>
+{/block}

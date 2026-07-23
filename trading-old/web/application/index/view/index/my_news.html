@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" style="font-size: 56px;">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="user-scalable=no,width=device-width"> 
+		<title>新闻</title>
+		<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/index/css/iconfont.css" />
+		<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/index/css/footer.css" />
+		<script type="text/javascript" src="__ROOT__/static/theme/index/js/font.js"></script>
+		<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+		
+		<style>
+			.news[data-v-53bb5e9e] {
+			    position: fixed;
+			    width: 100%;
+			    height: 100%;
+			    -webkit-overflow-scrolling: touch;
+			    overflow-y: scroll;
+			}
+			/* tipMask CSS */
+			.tipMask { width: 100%; height: 100%; background:rgba(95,95,95,0.3); position: fixed; top: 0; left: 0; z-index: 3;}
+			.tipMask .cont { width: 5.1rem; padding: .42rem .6rem .5rem; border-radius: 5px; background-color: #FFFFFF; position: absolute; top: 50%; left: 50%; margin-left: -2.7rem; margin-top: -1.8rem; text-align: center;}
+			.tipMask .cont .title { font-size: .34rem; line-height: .48rem; color: #191919;}
+			.tipMask .cont .stitle { font-size: .3rem; line-height: .42rem; color: #606060; margin-top: .36rem;}
+			.tipMask .cont .confirm { width: 100%; height: .88rem; background-color: #EF6F6C; border-radius: 4px; font-size: .34rem; color: #fff; line-height: .88rem; text-align: center; margin-top: .5rem; }
+			
+			#tipMasks .conts { width: 100%;height: 100%;  border-radius: 5px;position: absolute;text-align: center;}
+		</style>
+		<script>
+			const baseSize = 28;
+			// 设置 rem 函数
+			function setRem() {
+				// 当前页面宽度相对于 750 宽的缩放比例，可根据自己需要修改。
+				const scale = document.documentElement.clientWidth / 375
+				// 设置页面根节点字体大小
+				document.documentElement.style.fontSize = baseSize * Math.min(scale, 2) + 'px'
+			}
+
+			// 初始化
+			setRem();
+			// 改变窗口大小时重新设置 rem
+			window.onresize = function() {
+				setRem()
+			}
+		</script>
+		<link rel="stylesheet" type="text/css" href="__ROOT__/static/theme/index/css/new/app.css"/>
+	</head>
+	<body>
+		<div data-v-5e045723="" id="app" style="padding-bottom: 55px;">
+			<div data-v-53bb5e9e="" data-v-5e045723="" class="news">
+				<iframe data-v-53bb5e9e="" id="iframe" src="https://cpu.baidu.com/1022/a93bcb0f/i?pu=2&promotion_media_channel=33272" width="100%" height="90%"> 
+				</iframe> 
+			</div>
+			{include file="public/footer" menu='news'}
+		</div> 
+		
+		<div class="tipMask" id="tipMasks" style="display: none;">
+			<div class="conts" style="background-color: #FFF0;">
+				<img src="__ROOT__/static/theme/index/img/gold.gif" style="width: 100%;height:100%;">
+			</div> 
+		</div> 
+		
+		<div class="tipMask" id="tipMask" style="display: none;">
+			<div class="mask" onclick="$('#tipMask').hide();"></div>
+			<div class="cont">
+				<p class="title">温馨提示</p>
+				<p class="stitle contents">您已完成每日浏览任务，收益已发放至您账户余额中!</p>
+				<div id="msgBtn" ><div class="confirm guanbi"  onclick="$('#tipMask').hide();">确定</div></div>
+			</div> 
+		</div> 
+	</body>
+	<script type="text/javascript">
+	
+		function refresh(){
+			$('#iframe').attr('src', $('#iframe').attr('src'));
+		}
+	
+		var login = '{$login}';
+		var isobse = '{$conf.isobse}';
+		$(function(){  
+			if(login == 1){
+				msg("温馨提示","登录后可领取浏览奖励可提现",1);
+			}else{
+				if(isobse == 1){
+					fn();
+				}
+			}
+		});
+		function msg(title,content,type,url){
+            $(".contents").html(content);
+            if(type==1){
+                var btn = '<div class="confirm guanbi" onclick="$(\'#tipMask\').hide();">确定</div>';
+            }
+            else{
+                var btn = '<div class="confirm guanbi" onclick="window.location.href=\''+url+'\'">确定</div>';
+            }
+            $("#msgBtn").html(btn);
+            $("#tipMask").show();
+        }
+
+        var onlitime = '{$conf.seetime}';
+        function fn() {
+		    if (onlitime > 0) {
+		        onlitime--;
+		        
+		        setTimeout("fn()", 1000);
+		    } else {
+		    	
+		        $.post("/index/index/news_reward",function(e){
+	 				if(e.code == 1){
+	 					$('#tipMasks').show();
+	 					$('#tipMask').show();
+	 					setTimeout(function(){$('#tipMasks').hide();}, 5000);
+	 					if(e.data.more > 0){
+	 						onlitime = e.data.times;
+	 						setTimeout("fn()", 1000);
+	 					}
+	 				}
+	 			})
+		    }
+		}
+	</script>
+</html>

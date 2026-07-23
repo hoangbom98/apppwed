@@ -689,3 +689,68 @@ model FileUpload {
   @@index([userId, type])
   @@map("file_uploads")
 }
+
+// =============================================================================
+// DATING MISSION (Gamification tasks with DB persistence)
+// =============================================================================
+
+model DatingMission {
+  id          String   @id @default(cuid())
+  slug        String   @unique @db.VarChar(100)
+  title       String   @db.VarChar(255)
+  description String?  @db.VarChar(500)
+  reward      Decimal  @default(0) @db.Decimal(18, 2)
+  // daily | weekly | one_time
+  type        String   @default("daily") @db.VarChar(20)
+  targetCount Int      @default(1)
+  icon        String?  @db.VarChar(255)
+  sortOrder   Int      @default(0)
+  // active | inactive
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userProgress UserMissionProgress[]
+
+  @@index([status, type])
+  @@map("dating_missions")
+}
+
+model UserMissionProgress {
+  id          String        @id @default(cuid())
+  userId      String        @db.VarChar(30)
+  missionId   String        @db.VarChar(30)
+  mission     DatingMission @relation(fields: [missionId], references: [id])
+  progress    Int           @default(0)
+  completedAt DateTime?
+  claimedAt   DateTime?
+  resetAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([userId, missionId])
+  @@index([userId, completedAt])
+  @@map("user_mission_progress")
+}
+
+// =============================================================================
+// DATING EVENT (Timed events / special promotions)
+// =============================================================================
+
+model DatingEvent {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  // promotion | contest | holiday | special
+  type        String   @default("promotion") @db.VarChar(30)
+  banner      String?  @db.VarChar(500)
+  startsAt    DateTime
+  endsAt      DateTime
+  isActive    Boolean  @default(true)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, startsAt, endsAt])
+  @@map("dating_events")
+}

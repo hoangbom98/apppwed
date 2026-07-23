@@ -1,0 +1,213 @@
+{extend name='akszadmin@main'}
+{block name="content"}
+<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body think-box-shadow padding-left-40">
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs9 relative">
+                <span class="color-green">产品名称</span>
+                <input name="title" required class="layui-input" placeholder="请输入产品名称" value="{$vo.title|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">产品代码</span>
+                <input name="code" required class="layui-input" placeholder="请输入产品代码" value="{$vo.code|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <span class="color-green label-required-prev">产品图标</span>
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <td width="90px" class="text-center"><input name="img" type="hidden" value="{$vo.img|default=''}"></td>
+                    </tr>
+                </thead>
+            </table>
+            <script>$('[name="img"]').uploadOneImage()</script>
+        </div>
+        
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 客户订单在条件范围内时，会根据订单的涨或跌，自动减或加最小值与最大值之间的随机数，留空或者0则为不开启 </p>
+            </blockquote>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">风控波动最小值</span>
+                <input name="point_low" required class="layui-input" placeholder="请输入风控波动最小值" value="{$vo.point_low|default=''}">
+            </label>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">风控波动最大值</span>
+                <input name="point_top" required class="layui-input" placeholder="请输入风控波动最大值" value="{$vo.point_top|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 产品获取接口值后，会加上+-此处的值。如5，则在接口获取的数据中加上-5~5之间的随机数。 </p>
+            </blockquote>
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">随机波动范围</span>
+                <input name="rands" required class="layui-input" placeholder="请输入随机波动范围" value="{$vo.rands|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 填0表示不显示 </p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">时间玩法间隔【一】</span>
+                <input name="protime_1" class="layui-input" placeholder="请输入时间玩法间隔分钟" value="{$vo.protime_1|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">时间玩法间隔【二】</span>
+                <input name="protime_2" class="layui-input" placeholder="请输入时间玩法间隔分钟" value="{$vo.protime_2|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">时间玩法间隔【三】</span>
+                <input name="protime_3" class="layui-input" placeholder="请输入时间玩法间隔分钟" value="{$vo.protime_3|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">时间玩法间隔【四】</span>
+                <input name="protime_4" class="layui-input" placeholder="请输入时间玩法间隔分钟" value="{$vo.protime_4|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 填入比例区间，例如：2或者2.1-2.2 </p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">盈亏比例【一】</span>
+                <input name="proscale_1" class="layui-input" placeholder="请输入盈亏比例" value="{$vo.proscale_1|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">盈亏比例【二】</span>
+                <input name="proscale_2" class="layui-input" placeholder="请输入盈亏比例" value="{$vo.proscale_2|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">盈亏比例【三】</span>
+                <input name="proscale_3" class="layui-input" placeholder="请输入盈亏比例" value="{$vo.proscale_3|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">盈亏比例【四】</span>
+                <input name="proscale_4" class="layui-input" placeholder="请输入盈亏比例" value="{$vo.proscale_4|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 填入比例区间，例如：2或者2.1-2.2 </p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">亏损比例【一】</span>
+                <input name="lossrate_1" class="layui-input" placeholder="请输入亏损比例" value="{$vo.lossrate_1|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">亏损比例【二】</span>
+                <input name="lossrate_2" class="layui-input" placeholder="请输入亏损比例" value="{$vo.lossrate_2|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">亏损比例【三】</span>
+                <input name="lossrate_3" class="layui-input" placeholder="请输入亏损比例" value="{$vo.lossrate_3|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">亏损比例【四】</span>
+                <input name="lossrate_4" class="layui-input" placeholder="请输入亏损比例" value="{$vo.lossrate_4|default=''}">
+            </label>
+        </div>
+        
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 填入最低购买金额，例如：100 200  300  否则不生效</p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">限制购买【一】</span>
+                <input name="limit1" class="layui-input" placeholder="请输入限制购买区间" value="{$vo.limit1|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">限制购买【二】</span>
+                <input name="limit2" class="layui-input" placeholder="请输入限制购买区间" value="{$vo.limit2|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">限制购买【三】</span>
+                <input name="limit3" class="layui-input" placeholder="请输入限制购买区间" value="{$vo.limit3|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">限制购买【四】</span>
+                <input name="limit4" class="layui-input" placeholder="请输入限制购买区间买" value="{$vo.limit4|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p>注意： 填入比例区间，例如：0.01-0.10 </p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-red">盈利上浮动比例区间</span>
+                <input name="upps" class="layui-input" placeholder="不设置，请留空" value="{$vo.upps|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-red">亏损下浮动比例区间</span>
+                <input name="downps" class="layui-input" placeholder="不设置，请留空" value="{$vo.downps|default=''}">
+            </label>
+            
+        </div>
+        <div class="layui-form-item layui-row layui-col-space15">
+            <blockquote class="layui-elem-quote">
+                <p style="color:red">注意：开市时间，精准到秒，如：<b style="color:green;">00:00:00~03:00:00|08:00:00~23:59:59 </b>不得出现中文符号，全天不开市请留空</p>
+            </blockquote>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周一】</span>
+                <input name="opentime_1" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_1|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周二】</span>
+                <input name="opentime_2" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_2|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周三】</span>
+                <input name="opentime_3" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_3|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周四】</span>
+                <input name="opentime_4" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_4|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周五】</span>
+                <input name="opentime_5" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_5|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周六】</span>
+                <input name="opentime_6" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_6|default=''}">
+            </label>
+            <label class="layui-col-xs3 relative">
+                <span class="color-green">开市时间【周日】</span>
+                <input name="opentime_7" class="layui-input" placeholder="如：00:00:00~23:59:59" value="{$vo.opentime_7|default=''}">
+            </label>
+        </div>
+        <div class="layui-form-item block">
+            <span class="color-green">产品备注</span>
+            <textarea name="content">{$vo.content|default=''|raw}</textarea>
+        </div>
+        <div class="layui-form-item text-center">
+            {notempty name='vo.id'}<input type="hidden" name="id" value="{$vo.id}">{/notempty}
+            <button class="layui-btn" type="submit">保存产品</button>
+            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消编辑</button>
+        </div>
+    </div>
+</form>
+{/block}
+{block name='script'}
+<script>
+window.form.render();
+require(['ckeditor', 'angular'], function() {
+    window.createEditor('[name="content"]', { height: 500 });
+    var app = angular.module("GoodsForm", []).run(callback);
+    angular.bootstrap(document.getElementById(app.name), [app.name]);
+
+    function callback($rootScope) {
+        $rootScope.hsitoryBack = function() {
+            $.msg.confirm('确定要取消编辑吗？', function(index) {
+                history.back(), $.msg.close(index);
+            });
+        };
+    }
+
+})
+</script>
+{/block}

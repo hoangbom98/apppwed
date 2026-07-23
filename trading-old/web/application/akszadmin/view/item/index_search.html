@@ -1,0 +1,45 @@
+<fieldset>
+    <legend>条件搜索</legend>
+    <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">项目名称</label>
+            <div class="layui-input-inline">
+                <input name="title" value="{$Think.get.title|default=''}" placeholder="请输入项目名称" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">项目分类</label>
+            <div class="layui-input-inline">
+                <select class="layui-select" name="class" lay-search>
+                    <option value="">全部项目</option>
+                    {foreach $mlist as $v}
+                    <!--{eq name='Think.get.class' value='$v.id.""'}-->
+                    <option selected value="{$v.id}">{$v.name}</option>
+                    <!--{else}-->
+                    <option value="{$v.id}">{$v.name}</option>
+                    <!--{/eq}-->
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">还款方式</label>
+            <div class="layui-input-inline">
+                <select class="layui-select" name="type" lay-search>
+                    <option value="">全部方式</option>
+                    {foreach $tlist as $v}
+                    <!--{eq name='Think.get.type' value='$v.id.""'}-->
+                    <option selected value="{$v.id}">{$v.name}</option>
+                    <!--{else}-->
+                    <option value="{$v.id}">{$v.name}</option>
+                    <!--{/eq}-->
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
+            <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+        </div>
+    </form>
+    <script>form.render()</script>
+</fieldset>

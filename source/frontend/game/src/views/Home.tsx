@@ -1,3 +1,7 @@
+/**
+ * Game Home.tsx — antd-mini inspired UI
+ * Section indicators, token-based colours, shimmer skeletons, smooth cards
+ */
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -10,6 +14,120 @@ import { PromotionList } from '@/components/khuyen-mai/TheKhuyenMai';
 import { BannerSlider } from '@/components/trang-chu/BannerQuangCao';
 import { CATEGORY_ICON_MAP, PLACEHOLDER_BANNERS, GAME_PROVIDERS, HOME_IMGS } from '@/utils/tainguyen';
 
+/* ── antd-mini inspired section header ─────────────────────────────────── */
+function SectionHeader({ title, viewAllTo }: { title: string; viewAllTo?: string }) {
+  return (
+    <div className="flex items-center justify-between mb-2.5">
+      <div className="flex items-center gap-1.5">
+        {/* antd-mini style: left accent bar */}
+        <span className="game-section-indicator" aria-hidden="true" />
+        <h2 className="text-[13px] font-extrabold text-gray-800 dark:text-gray-100 uppercase tracking-wide">
+          {title}
+        </h2>
+      </div>
+      {viewAllTo && (
+        <Link
+          to={viewAllTo}
+          className="text-[11px] font-bold transition-opacity hover:opacity-80"
+          style={{ color: 'var(--game-accent)' }}
+        >
+          Xem tất cả →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/* ── Shimmer skeleton (antd-mini style) ─────────────────────────────────── */
+function GameSkeleton() {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="shimmer-bg rounded-xl" style={{ height: 110 }} />
+      ))}
+    </div>
+  );
+}
+
+/* ── Quick-link tile ────────────────────────────────────────────────────── */
+function QuickBtn({ to, img, label }: { to: string; img: string; label: string }) {
+  return (
+    <Link to={to} className="game-quick-btn">
+      <img
+        src={img} alt={label}
+        className="w-8 h-8 object-contain"
+        onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+      />
+      <span
+        className="text-[10px] font-semibold text-center leading-tight"
+        style={{ color: 'var(--game-text-secondary)' }}
+      >
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+/* ── Category chip ──────────────────────────────────────────────────────── */
+function CategoryChip({ cat }: { cat: any }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.88 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.22 }}
+    >
+      <Link
+        to={`/games?category=${cat.id}`}
+        className="flex flex-col items-center gap-1.5 p-2 rounded-xl
+          border border-gray-200 dark:border-gray-700
+          bg-white dark:bg-gray-800
+          hover:border-yellow-400 hover:bg-yellow-400/5
+          active:scale-95 transition-all group"
+      >
+        {CATEGORY_ICON_MAP[cat.slug] ? (
+          <img
+            src={CATEGORY_ICON_MAP[cat.slug]}
+            alt={cat.name}
+            className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          />
+        ) : (
+          <span className="text-2xl">{cat.icon || '🎮'}</span>
+        )}
+        <span
+          className="text-[10px] font-semibold text-center leading-tight"
+          style={{ color: 'var(--game-text-secondary)' }}
+        >
+          {cat.name}
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
+/* ── Provider logo item ─────────────────────────────────────────────────── */
+function ProviderItem({ provider }: { provider: { name: string; logo: string } }) {
+  return (
+    <div className="game-provider-item shrink-0">
+      <img
+        src={provider.logo}
+        alt={provider.name}
+        className="h-7 w-14 object-contain"
+        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+      />
+      <span
+        className="text-[9px] font-semibold text-center leading-tight"
+        style={{ color: 'var(--game-text-muted)' }}
+      >
+        {provider.name}
+      </span>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HOME PAGE
+   ══════════════════════════════════════════════════════════════════════════ */
 export default function Home() {
   const { user } = useAuthStore();
   const { setCategories } = useGameStore();
@@ -38,7 +156,6 @@ export default function Home() {
 
   const games = gamesData?.data || [];
 
-  // Build banners: try promotions first, fallback to placeholders
   const banners = (promos as any[]).length > 0
     ? (promos as any[]).slice(0, 3).map((p: any) => ({
         id: p.id,
@@ -46,157 +163,111 @@ export default function Home() {
         description: p.description,
         link: `/promotions/${p.id}`,
       }))
-    : PLACEHOLDER_BANNERS.map(b => ({ id: b.id, title: b.title, description: b.description, link: b.link }));
+    : PLACEHOLDER_BANNERS.map(b => ({
+        id: b.id, title: b.title,
+        description: b.description, link: b.link,
+      }));
 
   return (
-    <div className="space-y-4 pb-2">
-      {/* ── Hero Banner Slider ─────────────────────────────────────────── */}
+    <div className="space-y-0 pb-2">
+
+      {/* ── Hero banner slider ──────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
+        transition={{ duration: 0.3 }}
       >
         <BannerSlider banners={banners} showCta={!user} />
       </motion.div>
 
-      {/* ── Quick Links Row (WAP style) ────────────────────────────────── */}
-      <section>
+      {/* ── Quick links — antd-mini tile row ───────────────────── */}
+      <section className="px-3 pt-3">
         <div className="grid grid-cols-4 gap-2">
-          {[
-            { to: '/deposit',    img: HOME_IMGS.wallet,  label: 'Nạp tiền' },
-            { to: '/promotions', img: HOME_IMGS.gift,    label: 'Khuyến mãi' },
-            { to: '/vip',        img: HOME_IMGS.vip,     label: 'VIP' },
-            { to: '/download',   img: HOME_IMGS.service, label: 'Hỗ trợ' },
-          ].map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="flex flex-col items-center gap-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl py-2.5 px-1 active:scale-95 transition-all"
-            >
-              <img src={item.img} alt={item.label} className="w-8 h-8 object-contain"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
-              <span className="text-[10px] text-gray-700 dark:text-gray-300 font-semibold text-center leading-tight">
-                {item.label}
-              </span>
-            </Link>
-          ))}
+          <QuickBtn to="/deposit"    img={HOME_IMGS.wallet}  label="Nạp tiền" />
+          <QuickBtn to="/promotions" img={HOME_IMGS.gift}    label="Khuyến mãi" />
+          <QuickBtn to="/vip"        img={HOME_IMGS.vip}     label="VIP" />
+          <QuickBtn to="/download"   img={HOME_IMGS.service} label="Hỗ trợ" />
         </div>
       </section>
 
-      {/* ── Quick Categories ───────────────────────────────────────────── */}
-      {categories.length > 0 && (
-        <section>
-          <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2.5 uppercase tracking-wider">Thể loại</h2>
+      {/* ── Divider thick (antd-mini page section break) ────────── */}
+      <div className="h-2 bg-gray-100 dark:bg-gray-900/60 mt-3" />
+
+      {/* ── Game categories ─────────────────────────────────────── */}
+      {(categories as any[]).length > 0 && (
+        <section className="px-3 pt-3">
+          <SectionHeader title="Thể loại" />
           <div className="grid grid-cols-4 gap-2">
-            {(categories as any[]).slice(0, 8).map((c: any, i: number) => (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.25, delay: i * 0.04 }}
-              >
-                <Link
-                  to={`/games?category=${c.id}`}
-                  className="flex flex-col items-center gap-1.5 bg-white dark:bg-gray-800 hover:bg-primary/5 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl p-2 transition-all active:scale-95 group"
-                >
-                  {CATEGORY_ICON_MAP[c.slug] ? (
-                    <img
-                      src={CATEGORY_ICON_MAP[c.slug]}
-                      alt={c.name}
-                      className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
-                      onError={(e) => {
-                        const el = e.currentTarget as HTMLImageElement;
-                        el.style.display = 'none';
-                        const fb = el.nextElementSibling as HTMLElement | null;
-                        if (fb) fb.style.display = 'block';
-                      }}
-                    />
-                  ) : null}
-                  <span className="text-xl hidden">{c.icon || '🎮'}</span>
-                  {!CATEGORY_ICON_MAP[c.slug] && (
-                    <span className="text-2xl">{c.icon || '🎮'}</span>
-                  )}
-                  <span className="text-[10px] text-gray-700 dark:text-gray-300 font-semibold text-center leading-tight">{c.name}</span>
-                </Link>
-              </motion.div>
+            {(categories as any[]).slice(0, 8).map((c: any) => (
+              <CategoryChip key={c.id} cat={c} />
             ))}
           </div>
         </section>
       )}
 
-      {/* ── Hot Games ──────────────────────────────────────────────────── */}
-      <section>
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-1.5">
-            <img src={HOME_IMGS.hotsports} alt="hot" className="w-5 h-5 object-contain"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-            <h2 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Game Nổi Bật</h2>
-          </div>
-          <Link to="/games" className="text-xs text-primary hover:text-secondary font-semibold">Xem tất cả →</Link>
-        </div>
-        <GameGrid games={games} loading={gamesLoading} />
+      <div className="h-2 bg-gray-100 dark:bg-gray-900/60 mt-3" />
+
+      {/* ── Hot games ───────────────────────────────────────────── */}
+      <section className="px-3 pt-3">
+        <SectionHeader title="Game nổi bật" viewAllTo="/games" />
+        {gamesLoading ? <GameSkeleton /> : <GameGrid games={games} loading={false} />}
       </section>
 
-      {/* ── Promotions ─────────────────────────────────────────────────── */}
+      {/* ── Promotions ──────────────────────────────────────────── */}
       {(promos as any[]).length > 0 && (
-        <section className="pb-1">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-1.5">
-              <img src={HOME_IMGS.gift} alt="gift" className="w-5 h-5 object-contain"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-              <h2 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Khuyến Mãi</h2>
-            </div>
-            <Link to="/promotions" className="text-xs text-primary hover:text-secondary font-semibold">Xem tất cả →</Link>
-          </div>
-          <PromotionList promotions={(promos as any[]).slice(0, 3)} />
-        </section>
+        <>
+          <div className="h-2 bg-gray-100 dark:bg-gray-900/60 mt-3" />
+          <section className="px-3 pt-3 pb-1">
+            <SectionHeader title="Khuyến mãi" viewAllTo="/promotions" />
+            <PromotionList promotions={(promos as any[]).slice(0, 3)} />
+          </section>
+        </>
       )}
 
-      {/* ── Game Providers — WAP logo scroll ───────────────────────────── */}
-      <section className="pb-2">
-        <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2.5 uppercase tracking-wider">Nhà cung cấp</h2>
+      <div className="h-2 bg-gray-100 dark:bg-gray-900/60 mt-3" />
+
+      {/* ── Game providers — horizontal scroll ──────────────────── */}
+      <section className="px-3 pt-3 pb-1">
+        <SectionHeader title="Nhà cung cấp" />
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {GAME_PROVIDERS.map((p) => (
-            <div
-              key={p.name}
-              className="shrink-0 flex flex-col items-center gap-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl min-w-[64px]"
-            >
-              <img
-                src={p.logo}
-                alt={p.name}
-                className="h-7 w-14 object-contain"
-                onError={(e) => {
-                  const el = e.currentTarget as HTMLImageElement;
-                  el.style.display = 'none';
-                  const fb = el.nextElementSibling as HTMLElement | null;
-                  if (fb) fb.style.display = 'block';
-                }}
-              />
-              <span className="hidden text-[9px] text-gray-500 font-semibold text-center">{p.name}</span>
-              <span className="text-[9px] text-gray-500 dark:text-gray-400 font-semibold text-center leading-tight">{p.name}</span>
-            </div>
+          {GAME_PROVIDERS.map(p => (
+            <ProviderItem key={p.name} provider={p} />
           ))}
         </div>
       </section>
 
-      {/* ── Download App CTA ───────────────────────────────────────────── */}
+      {/* ── Download App CTA (antd-mini gradient card) ──────────── */}
       {!user && (
-        <section className="pb-4">
-          <Link
-            to="/download"
-            className="flex items-center justify-between p-4 bg-gradient-to-r from-primary to-secondary rounded-2xl text-white hover:opacity-90 transition-opacity active:scale-[0.99]"
-          >
-            <div>
-              <p className="text-sm font-black flex items-center gap-2">
-                <img src="/wap/img/home_service.png" alt="" className="w-4 h-4 object-contain" />
-                Tải App GAMEX
-              </p>
-              <p className="text-xs text-white/70 mt-0.5">Android APK · iOS Enterprise · Tự động nhận diện</p>
-            </div>
-            <span className="text-2xl shrink-0">→</span>
-          </Link>
-        </section>
+        <>
+          <div className="h-2 bg-gray-100 dark:bg-gray-900/60 mt-1" />
+          <section className="px-3 pt-3 pb-4">
+            <Link
+              to="/download"
+              className="flex items-center justify-between p-4 rounded-2xl text-white
+                transition-opacity hover:opacity-92 active:scale-[0.99]"
+              style={{
+                background: 'linear-gradient(135deg, var(--game-primary), var(--game-secondary))',
+              }}
+            >
+              <div>
+                <p className="text-sm font-black flex items-center gap-2">
+                  <span>📲</span> Tải App GAMEX
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  Android APK · iOS Enterprise · Tự động nhận diện
+                </p>
+              </div>
+              <span
+                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(255,255,255,0.2)' }}
+              >
+                →
+              </span>
+            </Link>
+          </section>
+        </>
       )}
+
     </div>
   );
 }

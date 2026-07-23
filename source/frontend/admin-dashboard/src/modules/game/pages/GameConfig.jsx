@@ -1,20 +1,19 @@
-/**
- * source/frontend/admin-dashboard/src/modules/game/pages/GameConfig.jsx
- *
- * Trang cấu hình động cho dự án Game.
- * Route: /game/config
- */
+// frontend/admin-dashboard/src/modules/game/pages/GameConfig.jsx
+// Route: /game/config
 import React, { useState } from 'react';
+import { Segmented, Typography, Flex } from 'antd';
 import ProjectConfigPanel from '@admin/modules/shared/components/ProjectConfigPanel';
 
+const { Text } = Typography;
+
 const TABS = [
-  { key: null,          label: 'Tất cả' },
-  { key: 'payment',     label: 'Thanh toán' },
-  { key: 'kyc',         label: 'KYC' },
-  { key: 'promotion',   label: 'Khuyến mãi' },
-  { key: 'notification',label: 'Thông báo' },
-  { key: 'general',     label: 'Giao diện' },
-  { key: 'system',      label: 'Hệ thống' },
+  { value: null,           label: 'Tất cả' },
+  { value: 'payment',      label: 'Thanh toán' },
+  { value: 'kyc',          label: 'KYC' },
+  { value: 'promotion',    label: 'Khuyến mãi' },
+  { value: 'notification', label: 'Thông báo' },
+  { value: 'general',      label: 'Giao diện' },
+  { value: 'system',       label: 'Hệ thống' },
 ];
 
 export default function GameConfig() {
@@ -22,28 +21,17 @@ export default function GameConfig() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <Flex align="flex-start" justify="space-between" wrap="wrap" gap={16}>
         <div>
-          <h1 className="text-2xl font-black text-white">Game — Cấu hình dự án</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Quản lý cấu hình thanh toán, KYC, khuyến mãi, thông báo của Game Center</p>
+          <div style={{ fontSize: 22, fontWeight: 900 }}>Game — Cấu hình dự án</div>
+          <Text type="secondary">Quản lý cấu hình thanh toán, KYC, khuyến mãi, thông báo của Game Center</Text>
         </div>
-        <div className="sm:ml-auto flex flex-wrap gap-2">
-          {TABS.map(t => (
-            <button
-              key={String(t.key)}
-              type="button"
-              onClick={() => setActiveModule(t.key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                activeModule === t.key
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
+        <Segmented
+          options={TABS.map(t => ({ value: String(t.value), label: t.label }))}
+          value={String(activeModule)}
+          onChange={v => setActiveModule(v === 'null' ? null : v)}
+        />
+      </Flex>
 
       <ProjectConfigPanel
         key={`game-${activeModule}`}

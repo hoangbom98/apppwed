@@ -1,0 +1,48 @@
+{include file="public/header" nav="站内信"}
+
+        <link rel="stylesheet" type="text/css" href="__ROOT__/static/newstyle/css/xiaoxi.css">
+<div class="app">
+                <div class="header">
+                    <img src="__ROOT__/static/newstyle/img/back.png" alt="" onClick="javascript:history.back()">
+                    <span>消息通知</span>
+                    <span></span>
+                </div>
+                <div class="line"></div>
+            
+                    {if count($msgtop) > 0 || count($msgfoot) > 0 }
+                    {volist name="msgtop" id="m"}
+                
+                        <div class="items">
+                            <a class="items" href="/index/user/msg_view?id={$m['id']}">
+                                <span  class="title ">{$m.title}
+                                <span class="text"  style="color: red;">未读</span></span>
+                                
+                                <span class="time" style="color: rgb(153, 153, 153); font-size:0.75rem">{$m.add_time}
+                                <span class="text"  style="color: rgb(153, 153, 153);">类别： {if condition="$m['status'] lt 1"}公示{else/}私聊{/if}</span></span>
+                            </a>
+                        </div>
+                  
+                    {/volist}
+                    {volist name="msgfoot" id="m"}
+                  
+                        <div class="banklist">
+                            <a class="items" href="/index/user/msg_view?id={$m['id']}">
+                                <span class="title ">{$m.title}
+                                <span class="text" style="color: green;">已读</span></span>
+                                 <span class="title" style="color: rgb(153, 153, 153);  font-size:0.75rem">{$m.add_time}
+                                <span class="text"  style="color: rgb(153, 153, 153);">类别： {if condition="$m['status'] lt 1"}公示{else/}私聊{/if}</span></span>
+                            </a>
+                        </div>
+              
+                    {/volist}
+                    {else/}
+                    <div class="dataNo" style="text-align:center;color:#fff;font-size:1rem">
+                        <h3>没有更多数据了</h3>
+                    </div>
+                    {/if}
+ 
+</div>
+</body>
+
+</html>
+

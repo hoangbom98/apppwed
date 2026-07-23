@@ -10,14 +10,17 @@ import { ASSET_UI } from '@/utils/constants';
 
 export default function Wallet() {
   const navigate = useNavigate();
-  const { coins, diamonds, setBalance } = useWalletStore();
+  const { coins, diamonds, setCoinsAndDiamonds } = useWalletStore() as unknown as {
+    coins: number; diamonds: number;
+    setCoinsAndDiamonds: (coins: number, diamonds: number) => void;
+  };
   const [showBankNum, setShowBankNum] = useState(false);
 
   useQuery({
     queryKey: ['wallet-balance'],
     queryFn: async () => {
       const data = await getBalance();
-      setBalance(data.coins, data.diamonds);
+      setCoinsAndDiamonds(data.coins, data.diamonds);
       return data;
     },
   });

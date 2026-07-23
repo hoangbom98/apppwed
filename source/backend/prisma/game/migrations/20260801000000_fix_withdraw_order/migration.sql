@@ -1,5 +1,8 @@
--- Migration: fix WithdrawOrder.netAmount to have a default of 0
--- Previously required (no default), now defaults to 0 so INSERT without netAmount works
+-- Migration: fix_withdraw_order
+-- Applied to: game_db
+-- Description: Add netAmount column to withdraw_orders table if not present
+--              (netAmount = amount - fee, computed by application layer)
 
 ALTER TABLE `withdraw_orders`
-  MODIFY COLUMN `netAmount` DECIMAL(18,2) NOT NULL DEFAULT 0;
+  ADD COLUMN IF NOT EXISTS `net_amount` DECIMAL(18,2) NOT NULL DEFAULT 0
+    COMMENT 'amount minus fee; set by application';

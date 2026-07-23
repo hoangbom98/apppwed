@@ -1,4 +1,4 @@
-# 🚀 Hướng dẫn Deploy Game Frontend lên Ubuntu + NGINX
+﻿# 🚀 Hướng dẫn Deploy Game Frontend lên Ubuntu + NGINX
 
 ## Yêu cầu
 - Ubuntu 20.04/22.04
@@ -35,7 +35,7 @@ sudo chown -R $USER:$USER /var/www/game
 
 ```bash
 # Trên máy local (Windows → Git Bash hoặc WSL)
-cd "D:\Dự án chuẩn\website-admin\frontend\game"
+cd "D:\Dự án chuẩn\lkvip-platform\frontend\game"
 
 # Tạo file .env.production
 cat > .env.production << EOF

@@ -2,6 +2,7 @@
  * HomePage — Trang chủ Hub
  * Banner video, activities, alliance members, tin tức, games
  */
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import * as hubApi from '@/api/hub';
@@ -46,7 +47,7 @@ const Skeleton = ({ cls }: { cls: string }) => (
 
 // ── Icon fallback cho activities ──────────────────────────────────────
 function ActivityIcon({ name }: { name: string }) {
-  const map: Record<string, JSX.Element> = {
+  const map: Record<string, React.ReactElement> = {
     OKlive:     <span className="hub-activity-svg">▶</span>,
     OKgift:     <Gift size={22} className="text-yellow-400" />,
     OKheart:    <Crown size={22} className="text-pink-400" />,

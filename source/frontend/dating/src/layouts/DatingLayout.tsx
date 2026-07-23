@@ -1,29 +1,57 @@
+/**
+ * DatingLayout — H5 shell for the Dating app
+ * antd-mini ConfigProvider pattern:
+ *   - useAppConfig('colors') → applyColorConfig() sets CSS vars on :root
+ *   - Theme tokens propagate to all child components via CSS variables
+ *   - Supports prefers-color-scheme auto-switch (defined in index.css)
+ *   - VITE_PRIMARY_COLOR env var can override at build time
+ */
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { H5Layout, useUnreadCount, useWalletStore, useAuthStore, useAppConfig, applyColorConfig } from '@ui';
 
 /**
- * DatingLayout — H5 shell for the Dating app.
- *
- * Uses the shared H5Layout (Header + main + BottomNav) from @ui.
- * bottomNavItems come from App.tsx and use PNG activeSrc/inactiveSrc icons.
- *
- * Colors: loaded dynamically from useAppConfig('colors') — falls back to pink theme.
- * Static fallback: VITE_PRIMARY_COLOR env var can override at build time.
+ * applyDatingTheme — maps server config colours to dating-specific CSS tokens.
+ * This is the "ConfigProvider" equivalent for the dating app:
+ * like <ant-config-provider themeVars={...}> in antd-mini.
  */
-export default function DatingLayout({ bottomNavItems }) {
+function applyDatingTheme(colors: any) {
+  if (!colors || typeof document === 'undefined') return;
+  const root = document.documentElement;
+
+  // Shared colour tokens (used by shared-ui components)
+  if (colors.primary_color) {
+    root.style.setProperty('--color-primary', colors.primary_color);
+    root.style.setProperty('--dating-primary', colors.primary_color);
+    root.style.setProperty('--dating-btn-primary-bg', colors.primary_color);
+  }
+  if (colors.secondary_color) {
+    root.style.setProperty('--color-secondary', colors.secondary_color);
+    root.style.setProperty('--dating-secondary', colors.secondary_color);
+  }
+  if (colors.accent_color) {
+    root.style.setProperty('--color-accent', colors.accent_color);
+    root.style.setProperty('--dating-accent', colors.accent_color);
+  }
+}
+
+export default function DatingLayout({ bottomNavItems }: { bottomNavItems: any[] }) {
   const { user }    = useAuthStore();
   const unreadCount = useUnreadCount();
   const { balance } = useWalletStore();
   const { data: colors } = useAppConfig('colors');
 
-  // Apply dynamic colors from config OR static VITE_PRIMARY_COLOR env var
+  // antd-mini ConfigProvider pattern: apply theme vars on config load
   useEffect(() => {
     if (colors) {
-      applyColorConfig(colors);
+      applyDatingTheme(colors);
     } else {
+      // Fallback: VITE_PRIMARY_COLOR build-time override
       const primary = (import.meta as any).env?.VITE_PRIMARY_COLOR;
-      if (primary) applyColorConfig({ primary_color: primary });
+      if (primary) {
+        applyColorConfig({ primary_color: primary });
+        document.documentElement.style.setProperty('--dating-primary', primary);
+      }
     }
   }, [colors]);
 
@@ -31,6 +59,7 @@ export default function DatingLayout({ bottomNavItems }) {
     <H5Layout
       bottomNavItems={bottomNavItems}
       headerProps={{
+        // antd-mini style: gradient class applies to site name text
         themeColor:   'from-pink-500 to-rose-400',
         unreadCount,
         showSearch:   true,

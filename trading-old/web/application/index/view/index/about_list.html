@@ -1,0 +1,79 @@
+{include file="public/header1" nav="$type_name"}
+<link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css"/>
+<script type="text/javascript" src="/static/theme/index/js/font.js"></script>
+<script type="text/javascript" src="/static/theme/index/js/jquery.js"></script>
+<style>
+	.htitle {
+		padding-left: .3rem;
+	}
+
+	.container {
+		padding-bottom: 1rem;
+	}
+
+	.list {
+		padding: 0 .4rem;
+	}
+
+	.list .item {
+		padding-top: .34rem;
+		padding-bottom: .28rem;
+		border-bottom: 1px solid #E9E9E9;
+	}
+
+	.list .item:last-child {
+		border-bottom: 0;
+	}
+
+	.list .item img {
+		width: .32rem;
+		height: .32rem;
+		float: left;
+		margin-left: .12rem;
+		margin-right: .18rem;
+	}
+
+	.list .item span {
+		font-size: .28rem;
+		line-height: .32rem;
+		color: #4A4A4A;
+		float: left;
+	}
+
+	.list .item .iconfont {
+		font-size: .34rem;
+		line-height: 1;
+		color: #9B9B9B;
+		float: right;
+	}
+
+	.list .item:after {
+		content: "";
+		clear: both;
+		display: block;
+	}
+</style>
+</head>
+<body>
+<div class="container">
+	<div class="header">
+		<div class="left" onclick="window.history.back()">
+			<i class="iconfont icon-arrow-left"></i>
+		</div>
+		<div class="htitle">{$type_name}</div>
+	</div>
+	<div class="list">
+		{volist name="about" id="t"}
+		<a href="/index/index/about_details?id={$t['id']}">
+			<div class="item" style="border-bottom: 1px solid #E9E9E9;">
+				<img src="/static/theme/index/img/icon_aboutus_notice.png" alt=""/>
+				<span>{$t.title}</span>
+				<i class="iconfont icon-arrow-right"></i>
+			</div>
+		</a>
+		{/volist}
+	</div>
+</div>
+{include file="public/footer" menu=""}
+</body>
+</html>

@@ -1,0 +1,80 @@
+{include file="public/header" nav="合同"}
+<div class="mobile">
+    <div class="othertop" style="background: #4f5ffa">
+        <a class="goback" href="/index/user/index">
+			<img src="__ROOT__/static/theme/index/img/goback.png" />
+		</a>
+        <div class="othertop-font">合同书</div>
+    </div>
+    <div class="header-nbsp"></div>
+    <!-- 合同 -->
+	<div class="contract_box">
+	    <h1 class="con_name">{:getInfo('webname')}投资合同书</h1>
+	    <p class="code">合同编号：{$invest['number']}</p>
+	    <p><label>甲方（投资方）</label>：{:getUserField($uid,'name')}</p>
+	    <p><label>乙方（管理方）</label>：{:getInfo('company')}</p>
+	    <p><label>丙方（担保方）</label>：{:getItemField($invest['pid'],'guarantee')}</p>
+	    <p>甲乙丙双方经友好协商，本着平等自愿、诚实信用的原则，就甲方使用乙方提供的本网站所有服务的</p>
+	    <p><label>有关事项达成如下协议：</label></p>
+	    <p>一、<label>理财投资明细</label></p>
+	    <table class="tablec">
+	        <tr>
+	            <td>产品名称</td>
+	            <td>{$invest.title}</td>
+	        </tr>
+	        <tr>
+	            <td>投资人姓名</td>
+	            <td>{:getUserField($uid,'name')}</td>
+	        </tr>
+	        <tr>
+	            <td>投资人身份证</td>
+	            <td>{:getUserField($uid,'idcard')}</td>
+	        </tr>
+	        <tr>
+	            <td>投入本金数额<br>(下称"甲方投资本金")</td>
+	            <td>{$invest.money}元</td>
+	        </tr>
+	        <tr>
+	            <td>协议期（天）</td>
+	            <td>{$invest.day}天</td>
+	        </tr>
+	        <tr>
+	            <td>预期收益率</td>
+	            <td>{$invest.rate}%</td>
+	        </tr>
+	        <tr>
+	            <td>起息日</td>
+	            <td>{:date('Y-m-d',strtotime($invest['time']))}</td>
+	        </tr>
+	        <tr>
+	            <td>到期日</td>
+	            <td>{:date('Y-m-d',strtotime('+'.$invest['day'].' day',strtotime($invest['time'])))}</td>
+	        </tr>
+	        <tr>
+	            <td>应收本息（元）</td>
+	            <td>{:getInvestMoney($invest['id'])+$invest['money']}元</td>
+	        </tr>
+	        <tr>
+	            <td>还款方式</td>
+	            <td>{$invest.type2}</td>
+	        </tr>
+	    </table>
+	    {:htmlspecialchars_decode(getInfo('contract'))}
+	    <div class="signature" style="margin:.5rem 0">
+	        <div class="Party">
+	            <p>甲方：{:getUserField($uid,'name')}</p>
+	            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+	        </div>
+	        <div class="Party" style="background:  url('{:getInfo('seal_img')}') no-repeat top left 6px ;background-size:100px 100px;padding:25px 0">
+	            <p>乙方：{:getInfo('company')}</p>
+	            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+	        </div>
+	    </div>
+        <div class="Party" style="background:  url('{:getInfo('safe_seal_img')}') no-repeat top left 36px ;background-size:100px 100px;padding:25px 0">
+            <p>丙方：{:getItemField($invest['pid'],'guarantee')}</p>
+            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+        </div>
+	</div>
+</div>
+</body>
+</html>

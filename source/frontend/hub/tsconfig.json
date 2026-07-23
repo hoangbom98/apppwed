@@ -1,28 +1,12 @@
 {
+  "extends": "../../tsconfig.frontend.base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "allowJs": true,
-    "checkJs": false,
-    "ignoreDeprecations": "5.0",
     "typeRoots": ["./node_modules/@types"],
     "paths": {
       "@/*":        ["./src/*"],
       "@ui":        ["../shared-ui/index.js"],
       "@ui/*":      ["../shared-ui/*"],
-      "@kjc/types": ["../../shared-types/src/index.ts"],
+      "@lkvip/types": ["../../shared-types/src/index.ts"],
       "react":      ["./node_modules/@types/react"],
       "react-dom":  ["./node_modules/@types/react-dom"]
     }

@@ -1,0 +1,68 @@
+{include file="public/header" nav="积分商城"}
+<style>
+    body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, form, input, button, textarea, p, blockquote {
+        margin: 0;
+        padding: 0;
+        font-family: "微软雅黑";
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -o-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .list_outer ul .goods:nth-child(2n) {
+        margin-right: 0;
+    }
+    .goods{
+        width: calc(50% - 5px);
+        /*float:left;*/
+        /*background-color: #fff;*/
+        /*margin:.1rem .1rem ;*/
+        /*box-shadow: 0 0 10px #ccc;*/
+        background: #fff;
+        padding: 10px;
+        margin-right: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        float: left;
+    }
+</style>
+<div class="mobile">
+    <div class="othertop" style="background: #4f5ffa">
+        <a class="goback" href="/index/user/index">
+            <img src="/static/theme/index/img/goback.png"/>
+        </a>
+        <div class="othertop-font">商品列表</div>
+        <a href="/index/index/shop_order" style="color:#fff;">记录</a>
+    </div>
+    <div class="header-nbsp"></div>
+
+    <!-- 商品项目 -->
+    <div class="list_outer">
+        <ul style="padding: 0 10px;">
+            {volist name="shop" id="i"}
+                <div class="goods">
+                    <a href="/index/index/shop_details?id={$i['id']}">
+                        <div style="width: 100%;">
+                            <img src="{$i.img}" style="width: 150px;height: 150px">
+                        </div>
+                        <div style="font-size: .28rem;padding: .1rem;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+                            [{if condition="$i['type'] eq 1"}现金{else/}实物{/if}] {$i.title}
+                        </div>
+                        <div style="padding: .1rem;color:#888;">
+                            <div style="float:left;">
+                                需<span style="color:#f00;">{$i.integral}</span>积分
+                            </div>
+                            <div style="float: right;">
+                                剩<span style="color:#f00;">{$i.num}</span>份
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+                    </a>
+                </div>
+            {/volist}
+        </ul>
+    </div>
+</div>
+</body>
+</html>

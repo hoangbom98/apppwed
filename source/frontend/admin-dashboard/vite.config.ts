@@ -1,3 +1,4 @@
+// frontend/admin-dashboard/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -7,12 +8,9 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      // @admin → internal admin-dashboard src (NEVER import @ui layout/admin here)
       '@admin':     path.resolve(__dirname, './src'),
-      // @ui    → shared-ui for common Button/Modal/Input/DataTable/Skeleton/etc.
       '@ui':        path.resolve(__dirname, '../shared-ui'),
-      // @kjc/types → shared TypeScript types (resolved from source, no build needed)
-      '@kjc/types': path.resolve(__dirname, '../../shared-types/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
       // Force peer deps to resolve from admin-dashboard/node_modules
       'react':            path.resolve(__dirname, './node_modules/react'),
       'react-dom':        path.resolve(__dirname, './node_modules/react-dom'),
@@ -24,6 +22,11 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', 'react-router-dom'],
   },
 
+  // ── Antd CSS-in-JS (v5+/v6) uses insertionPoint — no postcss import needed ──
+  css: {
+    preprocessorOptions: {},
+  },
+
   server: {
     port: 5180,
     proxy: {
@@ -33,17 +36,33 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'dist',
-    chunkSizeWarningLimit: 1500,
-    minify: 'esbuild',
+    outDir:    'dist',
+    minify:    'esbuild',
+    chunkSizeWarningLimit: 1200,  // antd bundle is larger than lucide
     rollupOptions: {
+      treeshake: true,
       output: {
         manualChunks: (id) => {
-          if (id.includes('/node_modules/react') || id.includes('/node_modules/react-dom') || id.includes('/node_modules/react-router-dom')) return 'react-vendor';
+          // ── Core React ───────────────────────────────────────────────────────
+          if (id.includes('/node_modules/react') ||
+              id.includes('/node_modules/react-dom') ||
+              id.includes('/node_modules/react-router-dom')) return 'react-vendor';
+          // ── Ant Design — split core from icons for better caching ────────────
+          if (id.includes('@ant-design/icons'))  return 'antd-icons';
+          if (id.includes('antd') || id.includes('@ant-design/cssinjs') || id.includes('rc-'))
+                                                 return 'antd-vendor';
+          // ── Other vendors ────────────────────────────────────────────────────
           if (id.includes('@tanstack/react-query')) return 'query-vendor';
-          if (id.includes('lucide-react'))           return 'ui-vendor';
-          if (id.includes('zustand'))                return 'state-vendor';
-          if (id.includes('axios'))                  return 'http-vendor';
+          if (id.includes('zustand'))               return 'state-vendor';
+          if (id.includes('axios'))                 return 'http-vendor';
+          if (id.includes('lucide-react'))          return 'lucide-vendor';
+          // ── Sub-project module chunks ─────────────────────────────────────────
+          if (id.includes('/modules/game'))    return 'chunk-game';
+          if (id.includes('/modules/dating'))  return 'chunk-dating';
+          if (id.includes('/modules/sports'))  return 'chunk-sports';
+          if (id.includes('/modules/trade'))   return 'chunk-trade';
+          if (id.includes('/modules/hub'))     return 'chunk-hub';
+          if (id.includes('/modules/ops'))     return 'chunk-ops';
         },
       },
     },

@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — dates.js
+ * @lkvip/utils — dates.js
  * Backend date/time helpers (no external dependencies).
  */
 

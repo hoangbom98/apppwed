@@ -1,5 +1,14 @@
 # 🌐 KJC Platform — Multi-Project Ecosystem v2.0
 
+[![Node.js](https://img.shields.io/badge/Node.js-20_LTS-339933?logo=nodedotjs)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express)](https://expressjs.com)
+[![Prisma](https://img.shields.io/badge/Prisma-5.x-2D3748?logo=prisma)](https://prisma.io)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)](https://mysql.com)
+[![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis)](https://redis.io)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/your-org/website-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/website-admin/actions/workflows/ci.yml)
+
 Hệ sinh thái giải trí trực tuyến gồm **5 sub-projects** độc lập và **1 Admin Portal**, chạy trên một Backend Express/Node.js duy nhất với 6 MySQL database riêng biệt.
 
 ---
@@ -14,7 +23,7 @@ website-admin/
 │       └── deploy.yml      # Auto-deploy khi push vào main
 ├── source/
 │   ├── backend/            ⭐ PRODUCTION BACKEND (duy nhất)
-│   │   ├── server.js       # Entrypoint
+│   │   ├── server.ts       # TypeScript entrypoint (compiled → dist/server.js)
 │   │   ├── package.json    # npm scripts (prisma, seed, test, backup)
 │   │   ├── prisma/         # 6 Prisma schemas (hub, game, trade, dating, sports, admin)
 │   │   ├── src/
@@ -37,7 +46,7 @@ website-admin/
 │   ├── plans/              # Architecture & planning documents
 │   └── legacy/             # Archived legacy deploy scripts
 ├── .env.example            # Template biến môi trường
-├── ecosystem.config.js     # PM2 config → source/backend/server.js
+├── ecosystem.config.js     # PM2 config → source/backend/dist/server.js
 └── package.json            # Root scripts tiện lợi
 ```
 
@@ -233,4 +242,4 @@ cd source/backend && npm test # Backend tests (Jest)
 
 ---
 
-*KJC Platform v2.0 — Backend: Node.js 20 + Prisma 5 + MySQL 8 | Frontend: React 18 + Vite + TailwindCSS*
+*KJC Platform v2.0 — Backend: Node.js 20 + TypeScript + Prisma 5 + MySQL 8 | Frontend: React 19 + Vite + TailwindCSS*

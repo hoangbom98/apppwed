@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — validators.js
+ * @lkvip/utils — validators.js
  * Simple pure-function validators for backend use (no Joi dependency).
  * Mirrors the frontend Yup schema rules for consistency.
  */

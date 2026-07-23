@@ -1,0 +1,100 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0 ;
+  padding: 0;
+  font-family: PingFangSC-Light;
+  background: radial-gradient(circle at 70% 40%, #1F484F, #1F262E);
+}
+.app {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+.app .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-family: PingFangSC;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+.app .header img {
+  width: 0.5rem;
+}
+.tabtitle {
+  color: #fff;
+  font-family: PingFangSC-Light;
+  font-size: 1rem;
+  width: 100%;
+  border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+  border-top: 1px solid rgba(216, 216, 216, 0.1);
+  height: 4rem;
+  line-height: 4rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+.tabtitle div {
+  position: relative;
+  text-align: center;
+  opacity: 1;
+  float: left;
+  margin-right: 2rem;
+}
+.tabtitle .active {
+  opacity: 1;
+}
+.tabtitle .active .line {
+  height: 2px;
+  background-color: #5ED5A8;
+  position: absolute;
+  bottom: 0;
+  border-radius: 2px;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+.listbox {
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+  margin-top: 2rem;
+  overflow: hidden;
+}
+.listbox .item {
+  display: block;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.listbox .item .title {
+  color: #fff;
+  font-size: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  word-break: break-all;
+}
+.listbox .item .time {
+  height: 2rem;
+  line-height: 2rem;
+  color: #fff;
+  margin-top: 0.5rem;
+}
+.listbox .item .time span:first-child {
+  background: linear-gradient(90deg, #5ED5A8 0%, rgba(94, 213, 168, 0.17) 100%);
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 10px;
+}
+.listbox .item .time span:last-child {
+  margin-left: 1rem;
+  color: #999999;
+  font-size: 0.75rem;
+  font-family: Gilroy;
+  letter-spacing: 1px;
+}

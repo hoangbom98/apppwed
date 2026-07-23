@@ -1,0 +1,81 @@
+{extend name='akszadmin@main'}
+
+{block name="button"}
+{if auth("akszadmin/item/add")}
+<button data-open='{:url(ADMIN_MODULE."/item/add")}' data-title="添加项目" class='layui-btn layui-btn-sm layui-btn-primary'>添加项目</button>
+{/if}
+{if auth("akszadmin/item/remove")}
+<button data-action='{:url(ADMIN_MODULE."/item/remove")}' data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-primary'>删除项目</button>
+{/if}
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='item/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='list-table-sort-td'>
+                <button type="button" data-reload class="layui-btn layui-btn-xs">排序刷新</button>
+            </th>
+            <th class='text-left' width="30%">项目信息</th>
+            <th class='text-left' width="15%">项目分类</th>
+            <th class='text-left' width="15%">项目配置</th>
+            <th class='text-left' width="15%">其他配置</th>
+            <th></th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'><input class="list-check-box" value='{$vo.id}' type='checkbox'></td>
+            <td class='list-table-sort-td'><input data-action-blur="{:request()->url()}" data-value="id#{$vo.id};action#sort;sort#{value}" data-loading="false" value="{$vo.sort}" class="list-sort-input"></td>
+            <td class='text-left'>
+                <span style="width: 300px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;display: inline-block;">{$vo.title|default='--'}</span><br>
+                开始时间：{$vo.time|default='--'}<br>
+            </td>
+            <td class='text-left'>
+                所属分类：{$vo.item_class.name|default='--'}<br>
+                还款方式：{$vo.pay_type.name|default='--'}<br>
+            </td>
+            <td class='text-left'>
+                项目金额：{$vo.total|default='--'}万元<br>
+                收益率：{$vo.rate|default='--'}%<br>
+                项目期限：{$vo.day|default='--'}天<br>
+            </td>
+            <td class='text-left'>
+                项目进度：{$vo.percent|default='--'}%<br>
+                起投金额：{$vo.min|default='--'}元<br>
+                投资次数：{$vo.num|default='--'}次<br>
+            </td>
+            <td class='text-left'>
+
+                <div class="nowrap margin-bottom-5">
+                    {if auth("akszadmin/item/edit")}
+                    <a data-dbclick class="layui-btn layui-btn-sm" data-open='{:url(ADMIN_MODULE."/item/edit")}?id={$vo.id}'>编 辑</a>
+                    {else}
+                    <a data-tips-text="您没有编辑项目的权限哦！" class="layui-btn layui-btn-sm layui-btn-primary layui-disabled">编 辑</a>
+                    {/if}
+                    {if auth("akszadmin/item/remove")}
+                    <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除数据吗?" data-action="{:url(ADMIN_MODULE.'/item/remove')}" data-value="id#{$vo.id}">删 除</a>
+                    {else}
+                    <a data-tips-text="您没有删除项目的权限哦！" class="layui-btn layui-btn-sm layui-btn-primary layui-disabled">删 除</a>
+                    {/if}
+
+                </div>
+
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+{/block}

@@ -1,7 +1,7 @@
-ï»¿{
-  "name":             "KJC Admin",
+{
+  "name":             "LKVIP Admin",
   "short_name":       "Admin",
-  "description":      "KJC Multi-Project Platform â€” Admin",
+  "description":      "LKVIP GROUP — Multi-Service Entertainment & Technology Platform — Admin",
   "start_url":        "/",
   "scope":            "/",
   "display":          "standalone",

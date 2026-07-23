@@ -1,4 +1,373 @@
-// shared-ui/styles/index.css
+/* ==========================================================================
+   shared-ui/styles/index.css
+   antd-mini inspired global base styles for all H5 frontends
+   - Import tokens first
+   - Reset + base typography
+   - Utility helpers
+   ========================================================================== */
+
+@import "./tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Base reset ─────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color:            var(--color-text);
+    font-family:      -apple-system, "Segoe UI", system-ui, "Helvetica Neue",
+                      Arial, "Noto Sans", sans-serif;
+    font-size:        var(--font-size-base);
+    line-height:      var(--line-height);
+    margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img  { display: block; max-width: 100%; }
+  a    { color: inherit; text-decoration: none; }
+  button {
+    cursor: pointer; border: none; background: none;
+    color: inherit; padding: 0; font: inherit;
+  }
+  input, select, textarea {
+    font: inherit; outline: none;
+  }
+}
+
+/* ── Shared utility classes ─────────────────────────────────────────────── */
+@layer utilities {
+  /* Scrollbar hide — used by all horizontal sliders */
+  .scrollbar-none::-webkit-scrollbar,
+  .no-scrollbar::-webkit-scrollbar   { display: none; }
+  .scrollbar-none, .no-scrollbar     { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Text clamp helpers */
+  .clamp-1 {
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+  }
+  .clamp-2 {
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .clamp-3 {
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+
+  /* Safe-area padding */
+  .safe-bottom { padding-bottom: max(var(--space-4), var(--safe-area-bottom)); }
+  .pb-safe      { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+}
+
+/* ── Shared H5 component base styles ──────────────────────────────────────
+
+   These are the "antd-mini style" shared primitives that all three frontends
+   rely on. Override by setting CSS variables in your app's root file.
+
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Page shell */
+.h5-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ── H5 Header ──────────────────────────────────────────────────────────── */
+.h5-header {
+  position: sticky; top: 0; z-index: var(--z-header);
+  height: var(--header-height);
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center;
+  padding: 0 var(--space-4);
+  gap: var(--space-2);
+  /* antd-mini style: subtle shadow on scroll */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.h5-header-logo  { display: flex; align-items: center; flex-shrink: 0; gap: var(--space-2); }
+.h5-header-logo img { height: 28px; width: auto; object-fit: contain; }
+.h5-header-logo-text {
+  font-size: var(--font-size-md);
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.3px;
+}
+
+.h5-header-title {
+  flex: 1;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.h5-header-actions {
+  display: flex; align-items: center;
+  gap: var(--space-1); flex-shrink: 0;
+}
+
+.h5-icon-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative;
+}
+.h5-icon-btn:hover,
+.h5-icon-btn:active { background: var(--color-bg-secondary); color: var(--color-text); }
+
+/* Notification badge */
+.h5-badge {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 16px; height: 16px;
+  background: var(--color-danger);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* ── H5 Bottom Nav ──────────────────────────────────────────────────────── */
+.h5-tabbar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: calc(var(--tabbar-height) + var(--safe-area-bottom));
+  padding-bottom: var(--safe-area-bottom);
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  z-index: var(--z-nav);
+}
+
+.h5-tab-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  position: relative;
+}
+
+.h5-tab-item--active { color: var(--color-primary); }
+
+/* Active indicator bar */
+.h5-tab-item--active::after {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 24px; height: 2px;
+  background: var(--color-primary);
+  border-radius: 0 0 2px 2px;
+}
+
+.h5-tab-icon {
+  width: 24px; height: 24px;
+  object-fit: contain;
+  transition: transform var(--transition-fast);
+}
+.h5-tab-item--active .h5-tab-icon { transform: scale(1.1); }
+.h5-tab-label { line-height: 1; }
+
+/* ── Shared Button (antd-mini tokens) ───────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-1);
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+  opacity: 1;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: var(--button-disabled-opacity); pointer-events: none; }
+
+/* Primary */
+.btn-primary {
+  background: var(--button-primary-background-color);
+  color:      var(--button-primary-color);
+  border-color: var(--button-primary-border-color);
+}
+.btn-primary:hover { opacity: 0.9; }
+
+/* Default */
+.btn-default {
+  background: var(--button-background-color);
+  color:      var(--button-color);
+  border-color: var(--button-border-color);
+}
+
+/* Danger */
+.btn-danger {
+  background: var(--button-primary-danger-background-color);
+  color:      var(--button-primary-danger-color);
+  border-color: var(--button-primary-danger-border-color);
+}
+
+/* Ghost / text */
+.btn-text {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: transparent;
+  padding-left: var(--space-2); padding-right: var(--space-2);
+}
+
+/* ── Card (antd-mini tokens) ────────────────────────────────────────────── */
+.card {
+  background:    var(--card-background-color);
+  border:        1px solid var(--card-border-color);
+  border-radius: var(--card-border-radius);
+  padding:       var(--card-padding);
+  box-shadow:    var(--card-shadow);
+  transition:    background var(--transition-fast), transform var(--transition-fast);
+}
+.card:active { background: var(--card-active-bg); }
+
+/* ── Section header ─────────────────────────────────────────────────────── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+.section-title {
+  display: flex; align-items: center; gap: var(--space-1);
+  font-size: var(--font-size-md);
+  font-weight: 800;
+  color: var(--color-text);
+}
+.section-indicator {
+  width: 3px; height: 16px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.section-view-all {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 2px;
+}
+
+/* ── Skeleton (antd-mini shimmer) ───────────────────────────────────────── */
+@keyframes ui-shimmer {
+  0%   { background-position: -300px 0; }
+  100% { background-position: 300px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 0%,
+    var(--color-border) 50%,
+    var(--color-bg-secondary) 100%
+  );
+  background-size: 600px 100%;
+  animation: ui-shimmer 1.4s linear infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Loading spinner ─────────────────────────────────────────────────────── */
+.spinner {
+  width: 32px; height: 32px;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-3) 0;
+}
+.divider-thick {
+  height: 8px;
+  background: var(--color-bg-secondary);
+  margin: var(--space-2) 0;
+}
+
+/* ── Tag / Badge ─────────────────────────────────────────────────────────── */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-light);
+}
+.tag-danger  { background: var(--color-danger-bg);  color: var(--color-danger);  border-color: var(--color-danger-bg); }
+.tag-success { background: var(--color-success-bg); color: var(--color-success); border-color: var(--color-success-bg); }
+.tag-warning { background: var(--color-warning-bg); color: var(--color-warning); border-color: var(--color-warning-bg); }
+
+/* ── Input ───────────────────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 9px var(--space-3);
+  background: var(--color-bg-elevated);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.input::placeholder { color: var(--color-text-disabled); }
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* ── Animation helpers ───────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.28s ease-out both; }
+.animate-slide-up   { animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-scale-in   { animation: scaleIn 0.22s ease-out both; }
+
+/* ── GPU-accelerated layer ───────────────────────────────────────────────── */
+.gpu { transform: translateZ(0); will-change: transform; }

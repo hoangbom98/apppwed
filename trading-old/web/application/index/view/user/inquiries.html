@@ -1,0 +1,45 @@
+{include file="public/header" nav="平仓查询"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_inquiries">
+                <div class="t_header">
+                    <span><i>平仓查询</i></span>
+                </div>
+                <ul class="f_th" style="">
+                    <li>商品名称</li>
+                    <li>金额</li>
+                    <li>方向</li>
+                    <li>盈亏</li>
+                </ul>
+                <div class="f_table">
+                    {if count($list)}
+                    <div role="tablist" aria-multiselectable="true" class="el-collapse">
+                        {volist name="list" id="vo"}
+                        <div class="el-collapse-item">
+                            <div role="tab" aria-controls="el-collapse-content-1057" aria-describedby="el-collapse-content-1057">
+                                <div role="button" id="el-collapse-head-1057" tabindex="0" class="el-collapse-item__header">
+                                    <i class="el-collapse-item__arrow el-icon-arrow-right"></i>
+                                    <span>{$vo.ptitle}</span> 
+                                    <span>￥{$vo.fee}</span>
+                                    <span>{$vo['ostyle']==0?'买涨':'买跌'}</span>
+                                    <span>{$vo.ploss}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {/volist}
+                    </div>
+                    {else/}
+                    <div class="dataNo">
+                        <h3>没有更多数据了</h3>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+        {include file="public/footer"}
+    </div>
+</div>
+</body>
+</html>

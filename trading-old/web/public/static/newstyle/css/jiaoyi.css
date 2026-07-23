@@ -1,0 +1,168 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0 ;
+  padding: 0;
+  font-family: PingFangSC-Light;
+  background: radial-gradient(circle at 70% 40%, #1F484F, #1F262E);
+}
+.app {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+  background: none;
+}
+.app .app_title {
+  color: #fff;
+  font-size: 1.875rem;
+  margin: 1rem 0 2rem 0;
+  font-family: PingFangSC-Semibold;
+}
+.app .title {
+  height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(22, 28, 34, 0.1);
+  box-sizing: border-box;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.app .title span {
+  width: 50%;
+  text-align: center;
+  color: #fff;
+  font-size: 1rem;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  opacity: 0.5;
+}
+.app .title .active {
+  background: rgba(165, 249, 223, 0.12);
+  border-radius: 0.75rem;
+  opacity: 1;
+}
+.app .orderlist .slider-left .item {
+  color: #ddd;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+.app .orderlist .slider-left .item div:first-child {
+  overflow: hidden;
+}
+.app .orderlist .slider-left .item .left {
+  width: 60%;
+  float: left;
+  overflow: hidden;
+}
+.app .orderlist .slider-left .item .left div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 2rem;
+  line-height: 2rem;
+}
+.app .orderlist .slider-left .item .left p {
+  font-size: 0.75rem;
+  height: 1rem;
+  line-height: 1rem;
+}
+.app .orderlist .slider-left .item .left .in_money {
+  color: #fa2e42;
+}
+.app .orderlist .slider-left .item .left .out_money {
+  color: #1fc65b;
+}
+.app .orderlist .slider-left .item .right {
+  width: 40%;
+  float: left;
+  overflow: hidden;
+  text-align: right;
+}
+.app .orderlist .slider-left .item .right p:first-child {
+  font-size: 1.5rem;
+  color: #fff;
+  height: 3rem;
+  line-height: 3rem;
+}
+.app .orderlist .slider-left .item .right p:last-child {
+  height: 1rem;
+  line-height: 1rem;
+}
+.app .orderlist .slider-left .item .line {
+  width: 100%;
+  clear: both;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.09);
+  margin-top: 0.4rem;
+}
+.app .orderlist .slider-left .item .line span {
+  display: block;
+  width: 80%;
+  background-color: #5ED5A8;
+  height: 100%;
+}
+.app .orderlist .slider-right .item {
+  color: #ddd;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+.app .orderlist .slider-right .item div:first-child {
+  overflow: hidden;
+}
+.app .orderlist .slider-right .item .left {
+  width: 60%;
+  float: left;
+  overflow: hidden;
+}
+.app .orderlist .slider-right .item .left div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 2rem;
+  line-height: 2rem;
+}
+.app .orderlist .slider-right .item .left p {
+  font-size: 0.75rem;
+  height: 1rem;
+  line-height: 1rem;
+}
+.app .orderlist .slider-right .item .left .in_money {
+  color: #fa2e42;
+}
+.app .orderlist .slider-right .item .left .out_money {
+  color: #1fc65b;
+}
+.app .orderlist .slider-right .item .right {
+  width: 40%;
+  float: left;
+  overflow: hidden;
+  text-align: right;
+}
+.app .orderlist .slider-right .item .right p:first-child {
+  font-size: 1.5rem;
+  color: #fff;
+  height: 3rem;
+  line-height: 3rem;
+}
+.app .orderlist .slider-right .item .right p:last-child {
+  height: 1rem;
+  line-height: 1rem;
+}
+.app .orderlist .slider-right .item .line {
+  width: 100%;
+  clear: both;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.09);
+  margin-top: 0.4rem;
+}
+.app .orderlist .slider-right .item .line span {
+  display: block;
+  width: 80%;
+  background-color: #5ED5A8;
+  height: 100%;
+}

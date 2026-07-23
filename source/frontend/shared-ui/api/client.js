@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { AUTH_KEYS, DEFAULT_PROJECT } from '../src/constants';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -6,8 +7,8 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const project = import.meta.env.VITE_PROJECT || 'hub';
-  const token = localStorage.getItem(`${project}_access_token`);
+  const project = import.meta.env.VITE_PROJECT || DEFAULT_PROJECT;
+  const token = localStorage.getItem(`${project}_${AUTH_KEYS.ACCESS_TOKEN}`);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -27,7 +28,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    const project = import.meta.env.VITE_PROJECT || 'hub';
+    const project = import.meta.env.VITE_PROJECT || DEFAULT_PROJECT;
     if (error.response?.status === 401 && !original._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -42,21 +43,21 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem(`${project}_refresh_token`);
+        const refreshToken = localStorage.getItem(`${project}_${AUTH_KEYS.REFRESH_TOKEN}`);
         if (!refreshToken) throw new Error('No refresh token');
 
         const { data } = await axios.post(
           `${api.defaults.baseURL}/${project}/auth/refresh-token`,
           { refresh_token: refreshToken }
         );
-        localStorage.setItem(`${project}_access_token`, data.access_token);
+        localStorage.setItem(`${project}_${AUTH_KEYS.ACCESS_TOKEN}`, data.access_token);
         processQueue(null, data.access_token);
         original.headers.Authorization = `Bearer ${data.access_token}`;
         return api(original);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem(`${project}_access_token`);
-        localStorage.removeItem(`${project}_refresh_token`);
+        localStorage.removeItem(`${project}_${AUTH_KEYS.ACCESS_TOKEN}`);
+        localStorage.removeItem(`${project}_${AUTH_KEYS.REFRESH_TOKEN}`);
         window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {

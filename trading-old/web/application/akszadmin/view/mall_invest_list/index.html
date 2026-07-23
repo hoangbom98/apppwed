@@ -1,0 +1,43 @@
+{extend name='akszadmin@main'}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='mall_invest_list/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='text-left nowrap' width="30%">投资信息</th>
+            <th class='text-left nowrap' width="20%">投资人</th>
+            <th class='text-left nowrap' width="20%">投资数据</th>
+            <th class="text-left nowrap" width="15%">投资时间</th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr>
+            <td class='text-left nowrap' style="max-width: 260px;overflow: hidden">
+                矿机名称：{$vo.title|default='--'}<br>
+                挖矿编号：{$vo.id|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                投资人ID：{$vo.uid|default='--'}<br>
+                投资人姓名：{$vo.name|default='--'}<br>
+                投资人电话：{$vo.phone|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                预计收益：{$vo.pay1|default='--'} BTC<br>
+                实际收益：{$vo.pay2|default='--'} BTC<br>
+            </td>
+            <td class='text-left nowrap'>
+                预计收益时间：{$vo.time1|default='--'}<br>
+                实际收益时间：{$vo.time2|default='--'}<br>
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+</div>
+{/block}

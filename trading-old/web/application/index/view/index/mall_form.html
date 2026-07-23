@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="IE=9; IE=EDGE" http-equiv="X-UA-Compatible">
+    <title>交易详情</title>
+    <link rel="stylesheet" href="__ROOT__/static/theme/index/css/base.css?k={:rand(1,99999)}"/>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/yatongle.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/plugs/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/static/theme/index/js/public.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css" />
+    <link rel="stylesheet" type="text/css" href="/static/theme/index/css/iconfont.css" />
+    <script src="__ROOT__/static/theme/index/js/autorem.js"></script>
+<style type="text/css">
+    .bar {
+        position: fixed;
+        width: 10rem;
+        z-index: 10;
+        height: 1.1rem;
+        /* padding: 0 0.5rem; */
+        color: #fff;
+        /* border: solid 1px #FF7F00; */
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .bar-nav {
+        top: 0;
+        width: 10rem;
+        left: 50%;
+        margin-left: -5rem;
+    }
+    #alltit {
+        position: absolute;
+        z-index: 19;
+        width: 100%;
+        text-align: center;
+        display: inline-block;
+        line-height: 1.1rem;
+        font-size: 0.4rem;
+        color: #fff;
+    }
+    .logo {
+        display: inline-block;
+        margin-left: 0.3rem;
+    }
+    .logo a {
+        display: block;
+        text-align: center;
+        line-height: 1.1rem;
+        color: #fff;
+    }
+    .logo a .iconfont {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .bar .iconfont {
+        position: relative;
+        z-index: 20;
+        color: #fff;
+        padding: 0.5rem 0.1rem;
+        font-size: 0.44rem;
+        line-height: 1.1rem;
+    }
+    .page, .page-group {
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: #efefed;
+        /* background: #efeff4; */
+        /* display: none; */
+        overflow: hidden;
+    }
+    #main_content {
+        padding-bottom: 2.5rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+    img {
+        vertical-align: middle;
+    }
+    .btns {
+        display: inline-block;
+        height: 0.6rem;
+        width: 1.5rem;
+        border-radius: 0.15rem;
+        background-color: #f0f9fd;
+        color: #148EFF;
+        border: 1px solid #148EFF;
+    }
+    .autoBtn {
+        background-color: #148EFF;
+        border: 1px solid #148EFF;
+        color: #fff;
+    }
+    .shade {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 20;
+        display: none;
+    }
+    .paybox {
+        position: fixed;
+        width: 10rem;
+        bottom: 0;
+        height: 9.6rem;
+        left: 50%;
+        margin-left: -5rem;
+        background-color: #f5f5f5;
+        z-index: 21;
+        border: 0.02666rem solid #dedede;
+        box-sizing: border-box;
+        display: none;
+    }
+
+    .paybox .title {
+        width: 100%;
+        height: 1.3rem;
+        border-bottom: 0.02666rem solid #dedede;
+        font: 0.44rem/1.3rem '微软雅黑';
+        color: #333;
+        text-align: center;
+        font-weight: bold;
+        position: relative;
+    }
+
+    .paybox .title .c_lose {
+        position: absolute;
+        font: 0.7rem/1rem '微软雅黑';
+        color: #000;
+        top: 0;
+        right: 0rem;
+        width: 1.3rem;
+    }
+
+    .paybox .passwordli {
+        width: 86%;
+        margin: 0.4rem auto;
+        border: 0.02666rem solid #cacaca;
+        overflow: hidden;
+    }
+
+    .paybox .passwordli li {
+        height: 1rem;
+        float: left;
+        width: 16.66666%;
+        box-sizing: border-box;
+        border-right: 0.02666rem solid #dedede;
+        text-align: center;
+        font: 0.6rem/1rem '微软雅黑';
+    }
+
+    .paybox .tit {
+        font: 0.3rem/0.3rem '微软雅黑';
+        color: #289c9c;
+        text-align: center;
+    }
+
+    .paybox .passwordbtn {
+        width: 100%;
+        margin: 0.5rem auto;
+        background-color: #fafafa;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .paybox .passwordbtn li {
+        width: 33.33333%;
+        float: left;
+        height: 1.4rem;
+        font: 0.5rem/1.4rem '微软雅黑';
+        text-align: center;
+        box-sizing: border-box;
+        border-right: 0.02666rem solid #c6c6c6;
+        border-bottom: 0.02666rem solid #c6c6c6;
+        font-weight: bold;
+    }
+
+    .paybox .passwordbtn li:nth-child(3n) {
+        border-right: none;
+    }
+
+    .paybox .passwordbtn li:nth-child(10),
+    .paybox .passwordbtn li:nth-child(11),
+    .paybox .passwordbtn li:nth-child(12) {
+        border-bottom: none;
+        background-color: #d2d5da;
+    }
+
+    .paybox .passwordbtn li:nth-child(11) {
+        background-color: #fafafa;
+    }
+
+    .paybox .passwordbtn li:nth-child(12) {
+        background: url("/static/theme/index/img/passdel.png") no-repeat center center/0.7rem 0.5rem;
+        background-color: #d2d5da;
+    }
+
+    /* tipMask CSS */
+    .tipMask {
+        width: 100%;
+        height: 100%;
+        background: rgba(95, 95, 95, 0.3);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 3;
+    }
+
+    .tipMask .cont {
+        width: 5.1rem;
+        padding: .42rem .6rem .5rem;
+        border-radius: 5px;
+        background-color: #FFFFFF;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -3.15rem;
+        margin-top: -1.8rem;
+        text-align: center;
+    }
+
+    .tipMask .cont .title {
+        font-size: .34rem;
+        line-height: .48rem;
+        color: #191919;
+    }
+
+    .tipMask .cont .stitle {
+        font-size: .3rem;
+        line-height: .42rem;
+        color: #606060;
+        margin-top: .36rem;
+    }
+
+    .tipMask .cont .confirm {
+        width: 100%;
+        height: .88rem;
+        background-color: #EF6F6C;
+        border-radius: 4px;
+        font-size: .34rem;
+        color: #fff;
+        line-height: .88rem;
+        text-align: center;
+        margin-top: .5rem;
+    }
+    .hide {
+        display: none;
+    }
+</style>
+<body>
+<header class="bar bar-nav">
+    <a id="alltit">交易详情</a>
+    <div class="logo">
+        <a id="cancle" href="javascript:history.go(-1)">
+            <i class="iconfont icon-arrow-left"></i>
+        </a>
+    </div>
+    <a class="icon pull-right open-panel"></a>
+</header>
+<div class="page">
+    <div class="content" id="main_content">
+        <div style="overflow: hidden;color: #148EFF;text-align: center;font-size:0.4rem;line-height: 1rem;padding:0.6rem  0 0.3rem 0;margin-top: 1.1rem;">
+            <div style="float: left;width:50%;">
+                <span style="display: block; color: #000000;">保证金(元)</span>
+                <span style="display: block;font-size:1.2rem;">{$data.min}</span>
+            </div>
+            <div style="float: left;width:50%;">
+                <span style="display: block;color: #000000;">租赁期限(天)</span>
+                <span style="display: block;font-size:1.2rem;">{$data.day}</span>
+            </div>
+        </div>
+        <div style="width: 8.8rem;padding: 0.3rem;background-color: #fff;margin:0.25rem auto;border-radius: 0.2rem;overflow: hidden;color: #333;">
+            <span style="display: inline-block;float: left;width: 0.6rem;height:0.6rem;border-radius: 50%;text-align: center;position:relative;top: 0rem;margin-right:0.16rem;"><img src="/static/theme/index/img/ykjico.png" style="width:0.4rem;position:relative;top: 0.04rem" alt=""></span>
+            <span style="font-size: 0.4rem;font-weight: bold;color: #000000;margin-left:0.1rem;position: relative;top: 0.05rem">{$data.title}</span>
+            <span style="float: right;color: #000000;font-size:0.35rem;margin-top:0.12rem;" class="confye">本批剩余{$data.stock}份</span>
+        </div>
+
+        <ul style="border-radius: 0.2rem;overflow:hidden;width: 9.3rem;margin:0.25rem auto;">
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">收益方式</span>
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="confye">每日分配收益，保证金到期全额返还</span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">日净收益</span>
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="daycl">{:getProfit($data.day_income,$data.cost)} BTC</span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">总净收益</span>
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="allcl">{:round(getProfit($data.day_income,$data.cost)*$data.day,8)} BTC</span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">总保证金</span>
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="summoney">￥{$data.min}</span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">BTC售出方式</span>
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="confye">
+                        <input type="button" value="手动出售" class="btns  btn1" style="margin-right: 0.3rem;">
+                        <input type="button" value="自动出售" class="btns btn2">
+                    </span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;border-bottom: 0.02rem solid #ccc">
+                <span style="font-size: 0.35rem;color: #000000;margin-left:0.1rem;position: relative;line-height: 0.6rem;">租赁份数</span>
+                <span style="float: right;color: #333;font-size:0.3rem;line-height: 0.6rem;" class="confye"><img onclick="sub()" style="width: 0.5rem;cursor: pointer" src="/static/theme/index/img/sub.png" alt=""><input placeholder="1" id="tzmoney" type="text" oninput="bindinput()" value="1" style="background-color: transparent;border:none;text-align: center;width:1.6rem;font-size:0.4rem;position:relative;top: 0.06rem"><img onclick="add()" style="width: 0.5rem;cursor: pointer" src="/static/theme/index/img/add.png" alt=""></span>
+            </li>
+            <li style="overflow: hidden;padding: 0.3rem;background-color: #fff;">
+                <span style="float: right;color: #000000;font-size:0.35rem;line-height: 0.6rem;" class="confye">每次加减1份，可自行输入份数</span>
+            </li>
+        </ul>
+
+        <div style="position: fixed;bottom: 0;width: 10rem;background-color: #fff;font-size: 0.4rem;font-weight: bold;overflow: hidden;color: #000000;line-height: 1.2rem;">
+            <span style="float: left;width: 65%;text-indent: 0.5rem;">实付：<font style="color: #F56867;font-size:0.6rem" class="newmoney">￥{$data.min}</font></span>
+            <span style="float: right;width: 35%;background-color: #F56867;text-align: center;font-weight: 500;cursor: pointer;font-size: 0.4rem;font-weight: bold;" onclick="ajaxinput()">确认支付</span>
+        </div>
+    </div>
+</div>
+<div class="shade"></div>
+<div class="paybox">
+    <div class="title" style="margin:0">请输入支付密码
+        <div class="c_lose" style="cursor:pointer;">×</div>
+    </div>
+    <ul class="passwordli">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li style="border: none;"></li>
+    </ul>
+    <div class="tit">安全支付环境，请放心使用</div>
+    <ul class="passwordbtn"></ul>
+</div>
+
+<div class="tipMask hide" style="z-index:999999999999999999">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi">确定</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+
+    $('#main_content').css('minHeight', user_sb_h);
+
+    for (var i = 1; i <= 12; i++) {
+        $("<li data-id=" + i + ">" + i + "</li>").appendTo('.passwordbtn');
+    };
+
+    var buydmoeys = parseFloat('{$data.min}'),
+        buynum = 1,
+        byid = '{$data.id}',
+        days = parseFloat('{$data.day}'),
+        tsy = parseFloat('{:getProfit($data.day_income,$data.cost)}');
+    jsmath();
+
+    function bindinput() {
+        if (!$('#tzmoney').val()) {
+            buynum = 1;
+            $(".allcl").text('0.00000000 BTC');
+            $(".newmoney").text('￥0');
+            $(".summoney").text('￥0');
+            return;
+        }
+        if (!/^\d+$/.test($('#tzmoney').val())) {
+            $('#tzmoney').val(buynum)
+            $('.buynum').html(buynum)
+            jsmath()
+            return
+        } else {
+            buynum = $('#tzmoney').val();
+            $('#tzmoney').val(buynum)
+            $('.buynum').html(buynum)
+            jsmath()
+        }
+    }
+
+    function jsmath() {
+        $(".allcl").text((buynum * days * tsy).toFixed(8)+" BTC")
+        $(".summoney").text('￥' + parseFloat(buynum * buydmoeys));
+        var yhhprice = parseFloat(buynum * buydmoeys);
+        if (yhhprice < 0) {
+            $(".newmoney").text('￥' + '0')
+        } else {
+            $(".newmoney").text('￥' + yhhprice)
+        }
+
+    }
+
+    function sub() {
+        var num = $('#tzmoney').val();
+        var newnum = parseFloat(num) - 1;
+        if (newnum < 1) {
+            return;
+        }
+        buynum = newnum;
+        $('#tzmoney').val(newnum)
+        $('.buynum').html(buynum)
+        bindinput()
+    }
+
+    function add() {
+        var num = $('#tzmoney').val();
+        var newnum = parseFloat(num) + 1;
+        $('#tzmoney').val(newnum)
+        $('.buynum').html(buynum)
+        bindinput()
+    }
+
+    // 点击按钮获取value值
+    var tran_type = -1;
+    $(".btn1").click(function () {
+        tran_type = 1;
+        $(this).toggleClass('autoBtn');
+        $(this).siblings('.btn2').removeClass('autoBtn');
+    });
+    $(".btn2").click(function () {
+        tran_type = 0;
+        $(this).toggleClass('autoBtn');
+        $(this).siblings('.btn1').removeClass('autoBtn');
+    });
+
+    function ajaxinput() {
+
+        if (tran_type != 0 && tran_type != 1)
+        {
+            msg("提示", "请选择售出方式！", 1);
+            return;
+        }
+
+        if (buynum == '' || buynum == 0) {
+            msg("提示", "请添加购买数量！", 1);
+            return;
+        }
+
+        $('.passwordbtn').off('click', 'li');
+        $('.shade').show();
+        $('.paybox').show();
+        var arry = [];
+        $('.passwordli li').html('');
+        $('.passwordbtn li').eq(9).html(' ');
+        $('.passwordbtn li').eq(11).html(' ');
+        $('.passwordbtn li').eq(10).html('0');
+        $('.passwordbtn').on('click', 'li', function () {
+            var val = $(this).html();
+            if ($(this).data('id') == 12) {
+                arry.pop();
+                $('.passwordli li').eq(arry.length).html(' ');
+                return;
+            };
+            if ($(this).data('id') <= 9 || $(this).data('id') == 11) {
+                var that = $(this);
+                $(this).css('background', '#289c9c');
+                setTimeout(function () {
+                    that.css('background', '#fafafa');
+                }, 100);
+            };
+            arry.push(val);
+            $('.passwordli li').eq(arry.length - 1).html('●');
+            if (arry.length == 6) {
+                var password = arry.join(''); //密码！！！！
+
+                $.ajax({
+                    url: "/index/index/mall_form",
+                    type: "post",
+                    data: { 'password': password, 'id': byid, 'buynum': buynum, 'tran_type':tran_type },
+                    success: function (data) {
+                        if (data.code == 1) {
+                            msg("提示", "租赁成功！", 1);
+                            window.location.href = '/index/user/index';
+                        } else {
+                            arry = [];
+                            $('.passwordli li').html(' ');
+                            msg("错误", data.info, 1);
+                        }
+                    },
+                    error: function () {
+                        // window.location.reload();
+                        msg("错误", "网络异常！", 1);
+                    },
+                    comptele: function () {
+                        // window.location.reload();
+                        msg("错误", "网络异常！", 1);
+                    }
+                })
+            };
+        });
+    }
+
+    $('.c_lose').click(function (event) {
+        $('.paybox,.shade').hide();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{include file="public/header" nav="账户安全"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_bank">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>账户安全</i></span>
+                </div>
+                <div class="f_content">
+                    <ul class="list">
+                        <li class="item">
+                            <span>用户名</span>
+                            <span class="right">{$user.phone}</span>
+                        </li>
+                        <li class="item">
+                            <a href="/index/user/pwd_login">
+                                <span>修改登录密码</span>
+                                <i class="iconfont icon-arrow-right"></i>
+                            </a>
+                        </li>
+                        <li class="item">
+                            <a href="/index/user/pwd_pay">
+                                <span>修改支付密码</span>
+                                <i class="iconfont icon-arrow-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+</body>
+
+</html>

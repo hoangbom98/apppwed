@@ -1,12 +1,12 @@
-/**
+﻿/**
  * env.ts — Validate required environment variables from a .env file
  *
  * TypeScript rewrite of check-env.sh (Node.js-native — no bash needed).
  * Reads the .env file with dotenv and validates each variable.
  *
  * Usage (via CLI):
- *   kjc env
- *   kjc env --file source/backend/.env
+ *   lkvip env
+ *   lkvip env --file source/backend/.env
  */
 
 import fs   from 'fs';
@@ -134,7 +134,7 @@ export function registerEnvCommand(program: Command): void {
         ? options.file
         : path.join(WORKSPACE_ROOT, options.file);
 
-      header('KJC Platform — Environment Check');
+      header('LKVIP GROUP — Environment Check');
       log(`Loading env from: ${envFile}`);
       console.log('');
 

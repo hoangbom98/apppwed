@@ -1,38 +1,70 @@
-# Prometheus scrape configuration — KJC Platform
+﻿# Prometheus scrape configuration — LKVIP GROUP
 #
 # Scrapes:
-#   - KJC Backend /metrics  (Prometheus text format, built into server.js)
+#   - LKVIP Backend /metrics  (Prometheus text format, built into server.js)
 #   - Node Exporter         (OS-level metrics: CPU, memory, disk, net)
 #   - Prometheus itself     (self-monitoring)
 #
 # Backend /metrics exposes:
-#   kjc_requests_total, kjc_errors_total, kjc_process_uptime_seconds,
-#   kjc_memory_rss_bytes, kjc_memory_heap_used_bytes, kjc_memory_heap_total_bytes
+#   lkvip_requests_total, lkvip_errors_total, lkvip_process_uptime_seconds,
+#   lkvip_memory_rss_bytes, lkvip_memory_heap_used_bytes, lkvip_memory_heap_total_bytes
+#
+# Installation (Ubuntu/Debian):
+#   apt install -y prometheus
+#   cp source/monitoring/prometheus.yml /etc/prometheus/prometheus.yml
+#   cp source/monitoring/prometheus/alerts.yml /etc/prometheus/alerts.yml
+#   systemctl restart prometheus
 
 global:
   scrape_interval:     15s
   evaluation_interval: 15s
   external_labels:
-    project: "kjc-platform"
+    project: "lkvip-platform"
+
+# ── Alert rules ─────────────────────────────────────────────────────────────
+rule_files:
+  - "alerts.yml"
+
+# ── Alertmanager (optional — configure if you want email/Slack alerts) ───────
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ["localhost:9093"]
 
 scrape_configs:
 
-  # ── KJC Backend API ──────────────────────────────────────────────────────────
-  - job_name: "kjc-backend"
+  # ── LKVIP Backend API ──────────────────────────────────────────────────────────
+  - job_name: "lkvip-backend"
     static_configs:
-      - targets: ["host.docker.internal:5000"]
+      - targets: ["localhost:5000"]
         labels:
-          service: "api-server"
+          service: "lkvip-api"
           env:     "production"
     metrics_path: "/metrics"
     scrape_interval: 15s
 
-  # ── Node Exporter (OS metrics) ──────────────────────────────────────────────
+  # ── Node Exporter (OS metrics: CPU, memory, disk, network) ──────────────────
   - job_name: "node-exporter"
     static_configs:
-      - targets: ["node-exporter:9100"]
+      - targets: ["localhost:9100"]
         labels:
           service: "vps-host"
+    scrape_interval: 30s
+
+  # ── MySQL Exporter (6 databases via single mysqld_exporter instance) ─────────
+  - job_name: "mysql"
+    static_configs:
+      - targets: ["localhost:9104"]
+        labels:
+          service: "mysql"
+    scrape_interval: 30s
+
+  # ── Redis Exporter ────────────────────────────────────────────────────────────
+  - job_name: "redis"
+    static_configs:
+      - targets: ["localhost:9121"]
+        labels:
+          service: "redis"
     scrape_interval: 30s
 
   # ── Prometheus self-monitoring ───────────────────────────────────────────────

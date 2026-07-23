@@ -1,0 +1,108 @@
+﻿# Prometheus Alert Rules — LKVIP GROUP
+#
+# Copy to /etc/prometheus/alerts.yml
+#
+# Reload after change:
+#   sudo systemctl reload prometheus
+#   # or: curl -X POST http://localhost:9090/-/reload
+
+groups:
+
+  # ── LKVIP Backend Alerts ──────────────────────────────────────────────────────
+  - name: lkvip_backend
+    rules:
+
+      # API server is completely unreachable (Prometheus cannot scrape /metrics)
+      - alert: LKVIPServiceDown
+        expr: up{job="lkvip-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LKVIP API server is DOWN"
+          description: >
+            Prometheus cannot reach the LKVIP backend at localhost:5000/metrics.
+            The API server has been unreachable for more than 2 minutes.
+            Check: pm2 status, pm2 logs lkvip-api
+
+      # High error rate — more than 5 errors/minute sustained for 5 minutes
+      - alert: LKVIPHighErrorRate
+        expr: rate(lkvip_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LKVIP API error rate is high"
+          description: >
+            Error rate is {{ humanize $value }} errors/sec
+            (> 0.1/sec = ~6/min) for the past 5 minutes.
+            Check logs: pm2 logs lkvip-api --err
+
+      # Memory usage is too high — RSS above 350MB per instance
+      - alert: LKVIPHighMemoryUsage
+        expr: lkvip_memory_rss_bytes > 367001600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LKVIP API memory usage is high"
+          description: >
+            RSS memory is {{ humanizeSI $value }}B (threshold: 350MB).
+            Consider restarting: pm2 reload lkvip-api
+            Or check for memory leaks in recent deployments.
+
+      # Heap usage above 80% of heap total (potential OOM approaching)
+      - alert: LKVIPHeapNearLimit
+        expr: >
+          lkvip_memory_heap_used_bytes / lkvip_memory_heap_total_bytes > 0.80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LKVIP API heap usage above 80%"
+          description: >
+            Heap used / total = {{ humanizePercentage $value }}.
+            Node.js may GC more aggressively or OOM soon.
+
+  # ── VPS Host Alerts (Node Exporter) ─────────────────────────────────────────
+  - name: vps_host
+    rules:
+
+      # Node Exporter is down — cannot collect OS metrics
+      - alert: NodeExporterDown
+        expr: up{job="node-exporter"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node Exporter is not reachable"
+          description: >
+            Cannot scrape OS metrics from Node Exporter at localhost:9100.
+            Check: systemctl status prometheus-node-exporter
+
+      # Disk space running low (< 15% free on root partition)
+      - alert: DiskSpaceLow
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint="/"} /
+           node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on VPS root partition"
+          description: >
+            Only {{ humanizePercentage $value }} disk space remaining on /.
+            Clean up logs or backups: /var/backups/lkvip-db, /var/log/pm2/
+
+      # High CPU load (> 85% for 15 minutes)
+      - alert: HighCPULoad
+        expr: >
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on VPS"
+          description: >
+            CPU usage is above 85% for 15 minutes.
+            Check: top, htop, or pm2 monit

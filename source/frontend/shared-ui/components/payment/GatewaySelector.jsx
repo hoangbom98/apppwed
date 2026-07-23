@@ -13,8 +13,8 @@
  */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../api/client';
-import Spinner from './Spinner';
+import api from '../../api/client';
+import Spinner from '../Spinner';
 
 // Icon map per gateway type
 const TYPE_ICON = {

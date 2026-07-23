@@ -1,0 +1,65 @@
+{include file="public/header" nav="-"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+
+<div id="app">
+    <div class="box"><!---->
+        <div class="jun-content">
+            <div class="f_box_accountrecord">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>充值记录</i></span>
+                </div>
+				<div class="t_box_accountrecord">
+					{if count($recharge) > 0}
+                    {volist name="recharge" id="r"}
+                    <ul>
+                        <li>
+                            <span>时间：</span>
+                            <p>{$r.time}</p>
+                        </li>
+                        <li>
+                            <span>金额：</span>
+                            <p>￥{$r.money}</p>
+                        </li>
+                        <li>
+                            <span>类型：</span>
+                            <p>{$r.type}</p>
+                        </li>                            
+                        <li>
+                            <span>状态：</span>
+                            <p>
+							{if condition="$r['status'] eq 0"}
+								<span style="color: orange;">审核中</span>
+							{/if}
+							{if condition="$r['status'] eq 1"}
+								<span style="color: green;">申请成功</span>
+							{/if}
+							{if condition="$r['status'] eq 2"}
+								<span style="color: red;">申请失败</span>
+							{/if}
+                            </p>
+                        </li>
+						{if condition="$r['reaolae'] "}
+						<li style="color:green">
+                            <span>拒绝原因：</span>
+                            <p>{$r.reaolae}</p>
+                        </li>   
+						{/if}
+                    </ul>
+                    {/volist}
+                    {else/}
+                    <div class="dataNo">
+                        <h3>没有更多数据了</h3>
+                    </div>
+                    {/if}
+				</div>
+			</div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+</body>
+</html>
+
+
+

@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@':          path.resolve(__dirname, './src'),
       '@ui':        path.resolve(__dirname, '../shared-ui'),
-      '@kjc/types': path.resolve(__dirname, '../../shared-types/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
       // Force peer deps to resolve from dating/node_modules (prevents duplicates with shared-ui)
       'react':            path.resolve(__dirname, './node_modules/react'),
       'react-dom':        path.resolve(__dirname, './node_modules/react-dom'),
@@ -36,9 +36,10 @@ export default defineConfig({
 
   build: {
     outDir: 'dist',
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 800,
     minify: 'esbuild',
     rollupOptions: {
+      treeshake: true,
       output: {
         // Use a function to allow dynamic resolution (Vite 5+ rolldown compatible)
         manualChunks: (id) => {

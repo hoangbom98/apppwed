@@ -1,0 +1,20 @@
+{
+  "common": {
+    "dashboard": "Bảng điều khiển",
+    "users": "Người dùng",
+    "balance": "Số dư",
+    "deposit": "Nạp tiền",
+    "withdraw": "Rút tiền",
+    "orders": "Đơn hàng",
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất"
+  },
+  "actions": {
+    "create": "Tạo mới",
+    "edit": "Chỉnh sửa",
+    "delete": "Xoá",
+    "save": "Lưu",
+    "cancel": "Huỷ",
+    "search": "Tìm kiếm"
+  }
+}

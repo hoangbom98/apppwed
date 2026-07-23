@@ -1,11 +1,11 @@
 {
-  "name": "@kjc/cli",
+  "name": "@lkvip/cli",
   "version": "1.0.0",
-  "description": "KJC Platform — TypeScript CLI tool (orchestrates scripts, health checks, env validation)",
+  "description": "LKVIP Platform — TypeScript CLI tool (orchestrates scripts, health checks, env validation)",
   "private": true,
   "type": "commonjs",
   "bin": {
-    "kjc": "./dist/cli.js"
+    "lkvip": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
   "scripts": {

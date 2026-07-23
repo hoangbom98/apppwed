@@ -69,7 +69,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <InstallPrompt appName="KJC Game" appIcon="/icons/icon-192.png" />
+      <InstallPrompt appName="LKVIP Game" appIcon="/icons/icon-192.png" />
       <UpdateBanner />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>

@@ -1,0 +1,98 @@
+{include file="public/header" nav="设置密码"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/tipmask.css">
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_addbank">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>修改支付密码</i></span>
+                </div>
+                <div class="f_content">
+                    <ul>    
+                        <li>
+                            <label>原支付密码</label> 
+                            <span><input type="password" name="oldpwd" id="oldpwd" value="" placeholder="输入原支付密码" onfocus="this.placeholder=''" onblur="this.placeholder='输入原支付密码'"></span>
+                        </li>
+                        <li>
+                            <label>新支付密码</label> 
+                            <span><input type="password" name="pwd" id="pwd" value="" placeholder="输入新支付密码" onfocus="this.placeholder=''" onblur="this.placeholder='输入新支付密码'"></span>
+                        </li>
+                        <li>
+                            <label>确认密码</label> 
+                            <span><input type="password" name="pwd2" id="pwd2" value="" placeholder="再次输入密码" onfocus="this.placeholder=''" onblur="this.placeholder='再次输入密码'"></span>
+                        </li>
+                    </ul>
+                    <div class="sure">
+                        <button id="sub_btn" type="button" class="el-button el-button--danger">确认 </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+<div class="tipMask hide">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi">确定</div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#sub_btn").on("click", function () {
+            var oldpwd = $("#oldpwd").val();
+            var pwd = $("#pwd").val();
+            var pwd2 = $("#pwd2").val();
+            if (oldpwd.length < 6 || oldpwd.length > 16) {
+                msg("错误", "请输入6-16个字符的原交易密码！", 1);
+                return false;
+            }
+            if (pwd.length < 6 || pwd.length > 16) {
+                msg("错误", "请输入6-16个字符的新交易密码！", 1);
+                return false;
+            }
+            if (pwd2.length < 6 || pwd2.length > 16) {
+                msg("错误", "请再次输入6-16个字符的新交易密码！", 1);
+                return false;
+            }
+            if (pwd != pwd2) {
+                msg("错误", "两次密码不一致！", 1);
+                return false;
+            }
+            var url = "/index/user/pwd_pay";
+            $.ajax({
+                type : "POST",
+                url : url,
+                data: {'pwd':pwd,'pwd2':pwd2,'oldpwd':oldpwd},
+                dataType : "json",
+                success : function(result){
+                    if(result.code == 1){
+                        window.location.href = "/index/user/index"
+                    }else{
+                        msg("提示",result.info,1);
+                    }
+                }
+            });
+        })
+    })
+
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+</script>
+</html>

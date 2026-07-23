@@ -1,0 +1,25 @@
+{include file="public/header" nav="消息详情"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="t_box_pay">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>消息详情</i></span>
+                </div>
+                <div class="t_con_pay">
+                    <div class="t_money" style="text-align: center;color: #fff;height: auto;margin-bottom: .333333rem;">{$msg.title}</div>
+                    <div style="background: #111723;border-top: .026667rem solid #000;color: #fff;padding: .333333rem;">
+                        {:htmlspecialchars_decode($msg['content'])}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+</body>
+
+</html>
+

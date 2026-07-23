@@ -23,7 +23,7 @@ export default function RegisterPage() {
     setLoading(true); setError('');
     try {
       await apiRegister({ fullName: form.fullName, email: form.email, phone: form.phone, password: form.password });
-      await login(form.email, form.password);
+      await login({ email: form.email, password: form.password });
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');

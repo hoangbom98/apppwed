@@ -1,0 +1,244 @@
+{include file="public/header" nav="利息宝"}
+	<script src="/static/plugs/layui/layui.all.js"></script>
+    <div id="app">
+        <div class="box">
+            <div class="jun-content" style="height:100%">
+                <div class="f_box_mine slide">
+                    <div class="t_header">
+                        <span><img src="/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                        <span><i>利息宝</i></span>
+                    </div>
+                    <div style="display:block;position: relative;margin-top: 10px;background:#fff;border-radius:5px;width:96%;left:50%;transform:translate(-50%);">
+						<div style="text-align:center;margin-top:30px;font-size:16px;color:gray;font-weight:700">总金额(元)</div>
+						<div style="text-align:center;margin-top:10px;font-size:40px;font-weight:700">{$yuebaouc.balance}</div>
+						<div style="text-align: center;"><small>可转出余额(元)：{$yuebaouc.trans_balance}</small></div>
+						<div style="margin-top:10px">
+							<div style="display:inline-block;width:33%;text-align:center;color:gray">
+								<div>昨天收益(元)</div>
+								<div>{$yuebaouc.preprofit}</div>
+							</div>
+							<div style="display:inline-block;width:33%;text-align:center;color:gray">
+								<div>累计收益(元)</div>
+								<div>{$yuebaouc.totalprofit}</div>
+							</div>
+							<div style="display:inline-block;width:33%;text-align:center;color:gray">
+								<div>昨天余额</div>
+								<div>{$yuebaouc.prebalance}</div>
+							</div>
+						</div>
+						<div style="margin-top:10px">
+							<div style="height:70px;text-align:center;line-height:70px">
+								<button style="height:40px;width:120px;margin-right:10px;color:#fff;font-size:16px;background:#90ee90" onclick="document.getElementById('trans').style.display='block'">转出</button>
+								<button style="height:40px;width:120px;margin-left:10px;font-size:16px;color:#fff;background:#f08080" onclick="document.getElementById('comformsaving').style.display='block'">转入</button>
+							</div>
+						</div>
+					</div>
+					<div style="display:block;position:relative;margin-top:10px;background:#fff;border-radius:5px;width:96%;left:50%;transform:translate(-50%);overflow-y: scroll;padding-bottom: 50px;">
+						<div style="height:35px;line-height:35px;padding:10px;text-align:center">
+							<span style="display:inline-block;width:30%;height:30px;background:gray;line-height:30px;text-align:center;color:#fff;border-radius:5px;margin:0 5px" onclick="change(1)" id="btnlist">方案明细</span>
+							<span style="display:inline-block;width:30%;height:30px;background:green;line-height:30px;text-align:center;color:#fff;border-radius:5px;margin:0 5px" onclick="change(2)" id="btndoing">进行中</span>
+							<span style="display:inline-block;width:30%;height:30px;background:gray;line-height:30px;text-align:center;color:#fff;border-radius:5px;margin:0 5px" onclick="change(3)" id="btnclosed">已结束</span>
+						</div>
+						<div style="padding:10px;text-align:center" id="inprocess"	>
+							{foreach $doinglist as $key=>$vo}
+							<div style="border-radius:5px;box-shadow:0 0 2px 1px;margin: 10px 0;">
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">产品名称：{$vo.yebtitle}:{$vo.money}元</span>
+									<span style="float:right;margin-right:10px">当前收益：{$vo.nowprofit}元</span></div>
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">办理时间：{$vo.start_time}</span>
+									<span style="float:right;margin-right:10px">状态：{$vo.status=='1'?'进行中':''}</span>
+								</div>
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">预计收益：{$vo.finishprofit}元</span>
+									<span style="float:right;margin-right:10px"><button onclick="yebstop({$vo.id})">终止</button> / <button onclick="yebkeep({$vo.id})">续期</button></span>
+								</div>
+							</div>
+							{/foreach}
+							{empty name='$doinglist'}<span class="notdata">没有记录哦</span>{/empty}
+						</div>
+						<div style="padding:10px;text-align:center;display:none;" id="yeblists">
+							{foreach $yuebao as $key=>$vo}
+							<div style="border-radius:5px;box-shadow:0 0 2px 1px;margin: 10px 0;">
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">产品名称：{$vo.title}</span>
+									<span style="float:right;margin-right:10px">最低存款：{$vo.lowmoney}元</span></div>
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">年化收益率：{$vo.lily}%</span>
+									<span style="float:right;margin-right:10px">预期收益：{$vo.finishprofit}元</span>
+								</div>
+							</div>
+							{/foreach}
+							{empty name='$yuebao'}<span class="notdata">暂无更多</span>{/empty}
+						</div>
+						<div style="padding:10px;text-align:center;display:none;" id="yebclosed">
+							{foreach $closedlist as $key=>$vo}
+							<div style="border-radius:5px;box-shadow:0 0 2px 1px;margin: 10px 0;">
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">产品名称：{$vo.yebtitle}:{$vo.money}元</span>
+									<span style="float:right;margin-right:10px">累计收益：{$vo.nowprofit}元</span></div>
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">办理时间：{$vo.start_time}</span>
+									<span style="float:right;margin-right:10px">状态：已到期结算</span></div>
+								<div style="display:block;height:30px;line-height:30px">
+									<span style="float:left;margin-left:10px">结束时间：{$vo.end_time}</span>
+									<span style="float:right;margin-right:10px"><button>重新购买</button></span></div>
+							</div>
+							{/foreach}
+							{empty name='$closedlist'}<span class="notdata">没有记录哦</span>{/empty}
+						</div>
+					</div>
+                </div>
+                
+                <div style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:auto;background:#fff;border-radius:10px;box-shadow:0 0 5px 2px grey" id="trans">
+                    <div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px solid #d3d3d3;background: lavender;">
+						利息宝转出</div>
+						<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">可转出余额:</span><span style="float:right;margin-right:10px"><span id="trans_money">{$yuebaouc.trans_balance}</span> 元</span></div>
+						<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">转出金额:</span>
+						<span style=""><input style="width:40%" name="trans_money" placeholder="请输入金额"><span onclick="$('input[name=trans_money]').val($('#trans_money').html())">全部转出</span></span></div>
+						<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						    <button style="line-height: 30px;width: 60px;margin: 0 5px;background: #e87f7f;color: white;border-radius: 5px;" onclick="document.getElementById('trans').style.display='none'">取消</button>
+						    <button onclick="trans()" style="line-height: 30px;width: 60px;margin: 0 5px;background: #2fb52f;border-radius: 5px;color: white;">提交</button>
+						</div>
+                </div>
+                <div style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:400px;background:#fff;border-radius:10px;box-shadow:0 0 5px 2px grey" id="comformsaving">
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px solid #d3d3d3;background: lavender;">
+						办理利息宝存入</div>
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">当前可用余额:</span><span style="float:right;margin-right:10px"><a id="mybalance" >{$userbalance}</a> 元</span></div>
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">利息宝方案:</span>
+						<span style="float:right;margin-right:10px;display:inline-block;width:150px;text-align:end">
+						<select id="chooseid" style="width:120px;border:none">
+							<option value="">请选择方案</option>
+							{foreach $yuebao as $key=>$vo}
+								<option id="op{$vo.id}" value="{$vo.id}" lily="{$vo.lily}" lowmoney="{$vo.lowmoney}" days="{$vo.days}">{$vo.title}</option>
+							{/foreach}	
+							</select>
+						</span>
+					</div>
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">年化收益率:</span>
+						<span id="hilily" style="float:right;margin-right:10px"></span></div>
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3">
+						<span style="float:left;margin-left:10px">存入金额:</span>
+						<span style=""><input style="width:40%" name="money" id="money" placeholder="请输入金额"><span onclick="allin()">全部转入</span></span></div>
+					<div style="text-align:center;height:50px;line-height:50px;font-size:16px;font-weight:700;color:gray;border-bottom:1px dotted #d3d3d3"><button style="line-height: 30px;width: 60px;margin: 0 5px;background: #e87f7f;color: white;border-radius: 5px;" onclick="document.getElementById('comformsaving').style.display='none'">取消</button><button onclick="joinnow()" style="line-height: 30px;width: 60px;margin: 0 5px;background: #2fb52f;border-radius: 5px;color: white;">提交</button>
+					</div>
+				</div>
+                {include file="public/footer" menu='yeb'}
+                <!--<script src="http://v.maku.fun/jquery.js"></script>-->
+                <script>
+                	function change(id){
+                		if(id==1){
+                			$('#btnlist').css('background','green');
+                			$('#btndoing').css('background','gray');
+                			$('#btnclosed').css('background','gray');
+                			$('#yeblists').css('display','block');
+                			$('#inprocess').css('display','none');
+                			$('#yebclosed').css('display','none');
+                		}
+                		if(id==2){
+                			$('#btnlist').css('background','gray');
+                			$('#btndoing').css('background','green');
+                			$('#btnclosed').css('background','gray');
+                			$('#yeblists').css('display','none');
+                			$('#inprocess').css('display','block');
+                			$('#yebclosed').css('display','none');
+                		}
+                		if(id==3){
+                			$('#btnlist').css('background','gray');
+                			$('#btndoing').css('background','gray');
+                			$('#btnclosed').css('background','green');
+                			$('#yeblists').css('display','none');
+                			$('#inprocess').css('display','none');
+                			$('#yebclosed').css('display','block');
+                		}
+                	}
+                	function trans() {
+                	    var money = $('input[name=trans_money]').val();
+                	    if (money == '') {
+                	        layer.msg('请填写转出金额!');
+                	        return;
+                	    }
+                	    $.ajax({
+                	        url: 'yebtrans',
+                	        type: 'post',
+                	        data: {money: money},
+                	        dataType: 'json',
+                	        success: function (res) {
+                	            layer.msg(res.msg);
+                	            if (res.code === 200) {
+                	                setTimeout('location.reload()', 1000);
+                	            }
+                	        }
+                	    });
+                	}
+                	function joinnow(){
+                		var yebid=$('#chooseid').val();
+                		var money=$('#money').val();
+                		if(yebid=="" || money==""){layer.msg("请选择方案和填写金额");return;}
+                		$.ajax({
+                			type:'post',
+                			url:'yebjoinnow',
+                			dataType: "json",
+						    data: { yebid: yebid, money: money },
+						    success: function (res) {
+						    	console.log(res);
+						    	layer.msg(res);
+		    					setTimeout(location.reload(),1000);
+						    }
+                		});
+                		
+                	}
+                	$(document).ready(function(){
+					   $("#chooseid").change(function(){
+					       var selected=$(this).children('option:selected').val()
+					      // alert(selected);
+					      var lily=$('#op'+selected).attr('lily');
+					      $('#hilily').text(lily+"%");
+					       
+					   });
+					}); 
+					
+					function yebstop(id){
+						$.ajax({
+							type:'post',
+							url:'yebstop',
+							data:{id:id},
+							dataType: "json",
+						    success: function (res) {
+						    	console.log(res);
+						    	layer.msg(res);
+						    	setTimeout(location.reload(),1000);
+						    }
+						});
+					}
+					function yebkeep(id){
+						$.ajax({
+							type:'post',
+							url:'yebkeep',
+							data:{id:id},
+							dataType: "json",
+						    success: function (res) {
+						    	console.log(res);
+						    	layer.msg(res);
+						    	setTimeout(location.reload(),1000);
+						    }
+							
+						});
+						
+					}
+					function allin(){
+						var mybalance=$('#mybalance').text();
+						$('#money').val(mybalance);
+					}
+
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+{include file="public/header" nav="合同"}
+<div class="mobile">
+    <div class="othertop" style="background: #4f5ffa">
+        <a class="goback" href="/index/user/index">
+			<img src="__ROOT__/static/theme/index/img/goback.png" />
+		</a>
+        <div class="othertop-font">合同书</div>
+    </div>
+    <div class="header-nbsp"></div>
+    <!-- 合同 -->
+	<div class="contract_box">
+	    <h1 class="con_name">{:getInfo('webname')}投资合同书</h1>
+	    <p class="code">合同编号：{$invest['number']}</p>
+	    <p><label>甲方（投资方）</label>：{:getUserField($uid,'name')}</p>
+	    <p><label>乙方（管理方）</label>：{:getInfo('company')}</p>
+	    <p><label>丙方（担保方）</label>：{:getMallItemField($invest['pid'],'guarantee')}</p>
+	    <p>根据中华人民共和国有关法律、法规规定，本着平等、自愿、公平、互惠互利和诚实守信的原则，就乙方使用甲方平台提供的矿机租赁服务的有关事项达成如下协议：</p>
+	    <p>一、<label>服务内容与方式</label></p>
+	    <p>1.矿机租赁明细</p>
+	    <table class="tablec">
+	        <tr>
+	            <td>矿机名称</td>
+	            <td>{$invest.title}</td>
+	        </tr>
+	        <tr>
+	            <td>租赁人姓名</td>
+	            <td>{:getUserField($uid,'name')}</td>
+	        </tr>
+	        <tr>
+	            <td>租赁人身份证</td>
+	            <td>{:getUserField($uid,'idcard')}</td>
+	        </tr>
+			<tr>
+				<td>租赁份数</td>
+				<td>{$invest.num}</td>
+			</tr>
+	        <tr>
+	            <td>租赁单份保证金</td>
+	            <td>{$invest.money/$invest.num}元</td>
+	        </tr>
+			<tr>
+				<td>租赁总保证金</td>
+				<td>{$invest.money}元</td>
+			</tr>
+	        <tr>
+	            <td>租赁期限</td>
+	            <td>{$invest.day}天</td>
+	        </tr>
+	        <tr>
+	            <td>租赁人日净收益</td>
+	            <td>{$invest.profit}</td>
+	        </tr>
+			<tr>
+				<td>租赁人总净收益</td>
+				<td>{$invest.profit*$invest.day}</td>
+			</tr>
+	        <tr>
+	            <td>矿机上线日期</td>
+	            <td>{:date('Y-m-d',strtotime($invest['time']))}</td>
+	        </tr>
+	        <tr>
+	            <td>矿机到期日期</td>
+	            <td>{:date('Y-m-d',strtotime('+'.$invest['day'].' day',strtotime($invest['time'])))}</td>
+	        </tr>
+	        <tr>
+	            <td>还款方式</td>
+	            <td>每日分配收益，保证金到期全额返还</td>
+	        </tr>
+	    </table>
+	    {:htmlspecialchars_decode(getInfo('contract_kj'))}
+	    <div class="signature" style="margin:.5rem 0">
+	        <div class="Party">
+	            <p>甲方：{:getUserField($uid,'name')}</p>
+	            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+	        </div>
+	        <div class="Party" style="background:  url('{:getInfo('seal_img')}') no-repeat top left 6px ;background-size:100px 100px;padding:25px 0">
+	            <p>乙方：{:getInfo('company')}</p>
+	            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+	        </div>
+	    </div>
+        <div class="Party" style="background:  url('{:getInfo('safe_seal_img')}') no-repeat top left 36px ;background-size:100px 100px;padding:25px 0">
+            <p>丙方：{:getMallItemField($invest['pid'],'guarantee')}</p>
+            <span>{:date('Y年m月d日',strtotime($invest['time']))}</span>
+        </div>
+	</div>
+</div>
+</body>
+</html>

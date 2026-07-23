@@ -1,100 +1,123 @@
 // frontend/admin-dashboard/src/modules/shared/pages/Transactions.jsx
+// Antd — Table, Tag, Button, DatePicker, Select, Space, Typography
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Table, Tag, Button, Select, Space, Typography, Flex, DatePicker,
+} from 'antd';
+import { DownloadOutlined, ClearOutlined } from '@ant-design/icons';
 import api from '@admin/api/client';
+import dayjs from 'dayjs';
 
-const STATUS_BADGE = {
-  completed: 'bg-green-900 text-green-400',
-  pending:   'bg-yellow-900 text-yellow-400',
-  failed:    'bg-red-900 text-red-400',
-};
+const { Title, Text } = Typography;
+
+const TYPE_COLOR  = { deposit: 'success', withdraw: 'error', adjustment: 'processing', refund: 'purple', bet: 'warning', win: 'cyan' };
+const TYPE_LABEL  = { deposit: 'Nạp', withdraw: 'Rút', adjustment: 'Điều chỉnh', refund: 'Hoàn', bet: 'Cược', win: 'Thắng' };
+const STATUS_COLOR= { completed: 'success', pending: 'warning', failed: 'error', success: 'success' };
+const STATUS_LABEL= { completed: 'Hoàn thành', pending: 'Chờ duyệt', failed: 'Thất bại', success: 'Thành công' };
+
+function exportCsv(rows) {
+  const headers = ['ID','User','Loại','Số tiền','Trước','Sau','Trạng thái','Ghi chú','Thời gian'];
+  const lines = rows.map(r => [
+    r.id, r.user?.username ?? r.userId, r.type,
+    r.amount, r.balanceBefore, r.balanceAfter,
+    r.status, r.note ?? '', new Date(r.createdAt).toLocaleString('vi'),
+  ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','));
+  const csv  = [headers.join(','), ...lines].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `transactions_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Transactions() {
-  const [page, setPage]     = useState(1);
-  const [filter, setFilter] = useState('');
+  const [page,   setPage]   = useState(1);
+  const [status, setStatus] = useState('');
+  const [type,   setType]   = useState('');
+  const [from,   setFrom]   = useState('');
+  const [to,     setTo]     = useState('');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminTransactions', page, filter],
-    queryFn:  () =>
-      api.get('/admin/transactions', { params: { page, limit: 20, status: filter || undefined } })
-         .then(r => r.data),
+    queryKey: ['adminTransactions', page, status, type, from, to],
+    queryFn:  () => api.get('/admin/finance/transactions', {
+      params: { page, limit: 20, status: status||undefined, type: type||undefined, from: from||undefined, to: to||undefined },
+    }).then(r => r.data),
   });
-
   const rows  = data?.data ?? [];
   const total = data?.total ?? 0;
 
   const columns = [
-    { key: 'id',        label: 'ID',         render: r => r.id },
-    { key: 'type',      label: 'Loại',       render: r => (
-      <span className={`px-2 py-0.5 rounded text-xs ${r.type === 'deposit' ? 'bg-green-900 text-green-400' : 'bg-blue-900 text-blue-400'}`}>
-        {r.type === 'deposit' ? 'Nạp' : 'Rút'}
-      </span>
-    )},
-    { key: 'amount',    label: 'Số tiền',    render: r => Number(r.amount).toLocaleString('vi') },
-    { key: 'status',    label: 'Trạng thái', render: r => (
-      <span className={`px-2 py-0.5 rounded text-xs ${STATUS_BADGE[r.status] || 'bg-gray-700 text-gray-300'}`}>
-        {{ completed: 'Hoàn thành', pending: 'Chờ duyệt', failed: 'Thất bại' }[r.status] || r.status}
-      </span>
-    )},
-    { key: 'user',      label: 'Người dùng', render: r => r.user?.username ?? '—' },
-    { key: 'createdAt', label: 'Thời gian',  render: r => new Date(r.createdAt).toLocaleString('vi') },
+    { title: 'ID',       dataIndex: 'id',     key: 'id',     width: 80,  render: v => <Text className="font-mono text-[11px]">{String(v).slice(0,8)}</Text> },
+    { title: 'User',     key: 'user',                                     render: (_,r) => r.user?.username ?? r.user?.email ?? r.userId },
+    { title: 'Loại',     dataIndex: 'type',   key: 'type',   width: 100, render: v => <Tag color={TYPE_COLOR[v]??'default'}>{TYPE_LABEL[v]??v}</Tag> },
+    { title: 'Số tiền',  dataIndex: 'amount', key: 'amount', width: 130,
+      render: v => <Text className={`font-mono font-bold ${Number(v)<0?'text-red-500':'text-emerald-500'}`}>
+        {Number(v)>0?'+':''}{Number(v).toLocaleString('vi')}₫</Text> },
+    { title: 'Số dư trước', dataIndex: 'balanceBefore', key: 'before', render: v => v!=null ? <Text type="secondary" className="text-[11px]">{Number(v).toLocaleString('vi')}</Text> : '—' },
+    { title: 'Số dư sau',   dataIndex: 'balanceAfter',  key: 'after',  render: v => v!=null ? <Text type="secondary" className="text-[11px]">{Number(v).toLocaleString('vi')}</Text> : '—' },
+    { title: 'Trạng thái', dataIndex: 'status', key: 'status', render: v => <Tag color={STATUS_COLOR[v]??'default'}>{STATUS_LABEL[v]??v??'—'}</Tag> },
+    { title: 'Ghi chú',  dataIndex: 'note', key: 'note', ellipsis: true, render: v => v ?? '—' },
+    { title: 'Thời gian',dataIndex: 'createdAt', key: 'time', render: v => <Text type="secondary" className="text-[11px]">{new Date(v).toLocaleString('vi')}</Text> },
   ];
+
+  const STATUS_BTNS = [['','Tất cả'],['pending','Chờ'],['completed','Xong'],['failed','Lỗi']];
 
   return (
     <div>
-      <h1 className="text-2xl font-black mb-4 text-white">Giao dịch</h1>
+      <Flex justify="space-between" align="center" wrap="wrap" gap={12} className="mb-4">
+        <Title level={4} className="m-0">Giao dịch (Ledger)</Title>
+        <Button icon={<DownloadOutlined />} disabled={!rows.length} onClick={() => exportCsv(rows)}>
+          Export CSV
+        </Button>
+      </Flex>
 
-      {/* Filter */}
-      <div className="mb-4 flex gap-2 flex-wrap">
-        {[['', 'Tất cả'], ['pending', 'Chờ duyệt'], ['completed', 'Hoàn thành'], ['failed', 'Thất bại']].map(([v, l]) => (
-          <button
-            key={v}
-            onClick={() => { setFilter(v); setPage(1); }}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === v ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="border border-gray-800 rounded-lg overflow-hidden">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-800 text-gray-400">
-            <tr>{columns.map(c => <th key={c.key} className="px-4 py-3">{c.label}</th>)}</tr>
-          </thead>
-          <tbody>
-            {isLoading
-              ? <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">Đang tải...</td></tr>
-              : rows.length === 0
-              ? <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">Không có dữ liệu</td></tr>
-              : rows.map(row => (
-                  <tr key={row.id} className="border-t border-gray-800 hover:bg-gray-800/40">
-                    {columns.map(c => <td key={c.key} className="px-4 py-3">{c.render(row)}</td>)}
-                  </tr>
-                ))
-            }
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="mt-4 flex justify-between items-center text-sm text-gray-400">
-        <span>Tổng: {total}</span>
-        <div className="flex gap-2">
-          <button
-            className="px-3 py-1 bg-gray-800 rounded disabled:opacity-40"
-            disabled={page <= 1}
-            onClick={() => setPage(p => p - 1)}
-          >Trước</button>
-          <span className="px-2 py-1">{page}</span>
-          <button
-            className="px-3 py-1 bg-gray-800 rounded disabled:opacity-40"
-            disabled={page >= Math.ceil(total / 20)}
-            onClick={() => setPage(p => p + 1)}
-          >Sau</button>
+      {/* Filters */}
+      <Flex gap={12} wrap="wrap" align="flex-end" className="mb-4">
+        <div>
+          <Text type="secondary" className="text-[11px] block mb-1">Trạng thái</Text>
+          <Space size={4}>
+            {STATUS_BTNS.map(([v,l]) => (
+              <Button key={v} size="small" type={status===v?'primary':'default'}
+                onClick={() => { setStatus(v); setPage(1); }}>{l}</Button>
+            ))}
+          </Space>
         </div>
-      </div>
+        <div>
+          <Text type="secondary" className="text-[11px] block mb-1">Loại</Text>
+          <Select size="small" className="w-[140px]" value={type} onChange={v => { setType(v); setPage(1); }}
+            options={[{ label: 'Tất cả', value: '' }, ...['deposit','withdraw','adjustment','refund','bet','win'].map(t => ({ label: TYPE_LABEL[t]??t, value: t }))]}
+          />
+        </div>
+        <div>
+          <Text type="secondary" className="text-[11px] block mb-1">Từ ngày</Text>
+          <DatePicker size="small" value={from ? dayjs(from) : null}
+            onChange={d => { setFrom(d?.format('YYYY-MM-DD') ?? ''); setPage(1); }}
+            placeholder="Từ ngày" className="w-[130px]" />
+        </div>
+        <div>
+          <Text type="secondary" className="text-[11px] block mb-1">Đến ngày</Text>
+          <DatePicker size="small" value={to ? dayjs(to) : null}
+            onChange={d => { setTo(d?.format('YYYY-MM-DD') ?? ''); setPage(1); }}
+            placeholder="Đến ngày" className="w-[130px]" />
+        </div>
+        {(status||type||from||to) && (
+          <Button size="small" icon={<ClearOutlined />} onClick={() => { setStatus(''); setType(''); setFrom(''); setTo(''); setPage(1); }}>
+            Xoá filter
+          </Button>
+        )}
+      </Flex>
+
+      <Table
+        dataSource={rows} columns={columns} rowKey="id"
+        loading={isLoading} size="small" scroll={{ x: 1000 }}
+        pagination={{
+          current: page, pageSize: 20, total,
+          showSizeChanger: false,
+          showTotal: t => `${t} giao dịch`,
+          onChange: p => setPage(p),
+        }}
+      />
     </div>
   );
 }

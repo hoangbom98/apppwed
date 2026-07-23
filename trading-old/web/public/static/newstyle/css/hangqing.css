@@ -1,0 +1,416 @@
+html {
+  background-color: #1E262E;
+}
+body {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: PingFangSC-Light;
+  background: radial-gradient(circle at 70% 40%, #1F484F, #1F262E);
+}
+.app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+.app .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-family: PingFangSC;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+.app .header div:first-child {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.app .header div:first-child img {
+  width: 0.5rem;
+}
+.app .header div:last-child {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 0.875rem;
+  height: 1.625rem;
+  width: 8.375rem;
+  box-sizing: border-box;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  padding: 2px;
+}
+.app .header div:last-child span {
+  width: 100%;
+  text-align: center;
+  opacity: 0.5;
+  font-family: PingFangSC-Light;
+}
+.app .header div:last-child .active {
+  opacity: 1;
+  border-radius: 12px;
+  background: rgba(165, 249, 223, 0.12);
+}
+.app .infobox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 5rem;
+  box-sizing: border-box;
+}
+.app .infobox .left {
+  color: #5ED5A8;
+}
+.app .infobox .left p:first-child {
+  font-size: 2rem;
+  font-family: Gilroy-Bold;
+}
+.app .infobox .left p:last-child {
+  font-size: 1.125rem;
+  font-family: GilroySC;
+  line-height: 2rem;
+}
+.app .infobox .right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #fff;
+  opacity: 0.8;
+}
+.app .infobox .right .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 1rem;
+  margin: 0.75rem 0;
+}
+.app .infobox .right .row .text {
+  width: 5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 1.5rem;
+}
+.kbox {
+  margin-top: 1rem;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: none;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  background: radial-gradient(circle at 70% 30%, #1D353C, #1D2831);
+}
+.kbox .times {
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  color: #fff;
+  font-family: Gilroy;
+  font-size: 0.875rem;
+  width: 100%;
+  border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+  border-top: 1px solid rgba(216, 216, 216, 0.1);
+  height: 2.5rem;
+  line-height: 2.5rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+.kbox .times div {
+  position: relative;
+  text-align: center;
+  opacity: 0.5;
+}
+.kbox .times .active {
+  opacity: 1;
+}
+.kbox .times .active .line {
+  height: 2px;
+  background-color: #5ED5A8;
+  position: absolute;
+  bottom: 0;
+  border-radius: 2px;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+.kbox .tips {
+  font-size: 0.625rem;
+  font-family: Gilroy;
+  font-weight: 200;
+  color: #fff;
+  height: 2rem;
+  line-height: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  box-sizing: border-box;
+  padding: 0 0.5rem;
+  letter-spacing: 1px;
+}
+.kbox .tips .a,
+.kbox .tips i {
+  display: inline-block;
+  opacity: 0.5;
+  color: #FFFFFF;
+  font-style: normal;
+}
+.kbox .tips .b {
+  display: inline-block;
+  color: #FF6B77;
+  margin-left: 3px;
+}
+.kbox .tips .c {
+  display: inline-block;
+  color: #158CFF;
+  margin-left: 3px;
+}
+.kbox .tips .d {
+  display: inline-block;
+  color: #5ED5A8;
+  margin-left: 3px;
+}
+.kbox .tips .e {
+  display: inline-block;
+  color: #FF76FD;
+  margin-left: 3px;
+}
+.kbox #echarts {
+  width: 100%;
+  height: 50vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+.kbox .btns {
+  position: fixed;
+  bottom: 0;
+  max-width: 750px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1rem;
+  font-size: 1rem;
+}
+.kbox .btns .btn1 {
+  background: #5ED5A8;
+  border-radius: 1rem;
+  height: 2.75rem;
+  min-width: 10.125rem;
+  width: 45%;
+  text-align: center;
+  line-height: 2.75rem;
+}
+.kbox .btns .btn2 {
+  background: #DD4B4B;
+  border-radius: 1rem;
+  height: 2.75rem;
+  min-width: 10.125rem;
+  width: 45%;
+  text-align: center;
+  line-height: 2.75rem;
+}
+.mark {
+  display: none;
+  height: 100%;
+  width: 100%;
+  max-width: 750px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  background-color: rgba(31, 33, 41, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+.mark .mbox {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color: #fff;
+  background: #1E282E;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 1rem;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.mark .mbox .mtitle {
+  position: relative;
+  text-align: center;
+  height: 3rem;
+  line-height: 3rem;
+  font-size: 1.125rem;
+}
+.mark .mbox .mtitle .close {
+  height: 3.75rem;
+  width: 3.75rem;
+  position: absolute;
+  top: -1.875rem;
+  left: 1.25rem;
+  background: #192228;
+  border-radius: 2rem;
+  text-align: center;
+  line-height: 3.75rem;
+}
+.mark .mbox .mtitle .close img {
+  width: 0.625rem;
+}
+.mark .mbox .topbox {
+  border-top: 1px solid #273136;
+  padding-left: 1rem;
+  overflow: hidden;
+}
+.mark .mbox .topbox .toptitle {
+  height: 4rem;
+  line-height: 4rem;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+.mark .mbox .topbox .times {
+  overflow-x: auto;
+}
+.mark .mbox .topbox .times div {
+  width: 500%;
+}
+.mark .mbox .topbox .times div span {
+  display: inline-block;
+  width: 7.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1rem;
+  text-align: center;
+  padding-top: 0.4rem;
+  font-family: Gilroy;
+  letter-spacing: 1px;
+  box-sizing: border-box;
+  margin-right: 0.5rem;
+}
+.mark .mbox .topbox .times div span p:first-child {
+  color: #fff;
+  opacity: 0.5;
+  font-size: 0.875rem;
+  line-height: 1.8rem;
+}
+.mark .mbox .topbox .times div span p:last-child {
+  color: #fff;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  text-overflow: '';
+  overflow: hidden;
+}
+.mark .mbox .topbox .times div span p:last-child i {
+  font-style: normal;
+  font-size: 1.5rem;
+  font-family: Gilroy-Bold;
+}
+.mark .mbox .topbox .times div .active {
+  border-color: #5ED5A8;
+}
+.mark .mbox .topbox .times::-webkit-scrollbar {
+  width: 0 !important;
+}
+.mark .mbox .topbox .moneys {
+  margin-top: 1rem;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+.mark .mbox .topbox .moneys div {
+  width: 500%;
+}
+.mark .mbox .topbox .moneys div span {
+  display: inline-block;
+  height: 2rem;
+  line-height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1rem;
+  text-align: center;
+  padding: 0 1rem;
+  font-family: Gilroy;
+  letter-spacing: 1px;
+  box-sizing: border-box;
+  margin-right: 0.5rem;
+  color: #fff;
+  opacity: 0.5;
+}
+.mark .mbox .topbox .moneys div .active {
+  opacity: 1;
+  border-color: #5ED5A8;
+}
+.mark .mbox .topbox .moneys::-webkit-scrollbar {
+  width: 0 !important;
+}
+.mark .mbox .mymoney {
+  font-size: 0.875rem;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  font-family: Gilroy;
+  opacity: 0.8;
+}
+.mark .mbox .mbody {
+  padding: 1rem;
+  position: relative;
+}
+.mark .mbox .mbody .info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  font-family: Gilroy;
+}
+.mark .mbox .mbody .info p:first-child {
+  opacity: 0.5;
+  line-height: 2rem;
+  text-align: center;
+}
+.mark .mbox .mbody .info p:last-child {
+  line-height: 2rem;
+  opacity: 1;
+  text-align: center;
+}
+/*.mark .mbox .mbody .info .rish {*/
+/*  color: #5ED5A8;*/
+/*}*/
+/*.mark .mbox .mbody .info .fail {*/
+/*  color: #DD4B4B;*/
+/*}*/
+.rish {
+  color: #5ED5A8;
+}
+.fail {
+  color: #DD4B4B;
+}
+
+.mark .mbox .mbody .tbtn {
+  height: 2.75rem;
+  width: 100%;
+  border-radius: 1rem;
+  background: #5ED5A8;
+  line-height: 2.75rem;
+  text-align: center;
+  color: #1A1A1A;
+}
+.mark .mbox .mbody .yqsy {
+  color: #5ED5A8;
+  font-size: 0.875rem;
+  text-align: center;
+  line-height: 4rem;
+}
+.mark .mbox .mbody .yqsy i {
+  font-style: normal;
+}

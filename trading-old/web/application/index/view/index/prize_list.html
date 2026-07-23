@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="font-size: 16px">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽奖记录</title>
+    <!--<link href="__PUBLIC__/mobile/choujiang/css/lists.css" rel="stylesheet" type="text/css">-->
+    <script type="text/javascript" src="/static/theme/index/js/jquery.js"></script>
+    <script type="text/javascript">
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 1280*100 + 'px';
+    </script>
+    <style type="text/css">
+        body,ul,ol,li,p,h1,h2,h3,h4,h5,h6,form,fieldset,table,td,img,div{margin:0;padding:0;border:0;}
+        body{color:#333; font-size:12px;font-family:"Microsoft YaHei"}
+        ul,ol{list-style-type:none;}
+        select,input,img,select{vertical-align:middle;}
+        input{ font-size:12px;}
+        a{ text-decoration:none; color:#000;}
+        a:hover{color:#c00; text-decoration:none;}
+        .clear{clear:both;}
+        .way{
+            padding: 10px 10px;
+            color: #FEEEEE;
+        }
+        .title{
+            font-size: 20px;
+        }
+        .rule{
+            font-variant-numeric: inherit;
+            font-variant-east-asian: inherit;
+            font-stretch: inherit;
+            /*line-height: 20px;*/
+            font-size: 16px;
+        }
+        .goback {
+            font-size: 0.7rem;
+            height: 2rem;
+            float: left;
+            /*margin-left: .4rem;*/
+        }
+        .prize-win-panel{
+            color: #FEEEEE;
+            font-size: 3.5vw;
+            /*border-top: 1px solid #e2e2e2;*/
+            /*border-right: 1px solid #e2e2e2;*/
+            /*margin-top: 20px;*/
+            /*margin-left: -5px;*/
+            padding: 40px 20px;
+        }
+        .prize-win-list{
+            width: 100%;
+        }
+        .prize-win-panel tr{
+            width: 100%;
+        }
+        .prize-win-panel th{
+            font-size: 4.5vw;
+        }
+        .prize-win-panel th,  .prize-win-panel td {
+            width: 33.333%;
+            text-align: center;
+            padding: 3px 5px;
+        }
+        .img_2_3 {
+            position: absolute;
+            animation-delay: 0.25s;
+            animation-duration: 1s;
+            z-index: 5;
+        }
+    </style>
+</head>
+
+<body style="background:#FA3D3E ;background-size: 100% 100%;background-attachment: fixed;background-position: center;">
+<div id="app">
+    <img class="animated zoomIn img_2_3" onclick="window.location.href='/index/index/prize'"  src="/static/theme/index/img/goback.png" />
+
+    <div class="prize-win-panel">
+        <table class="prize-win-list">
+            <thead>
+            <tr>
+                <th>奖品</th>
+                <th>类型</th>
+                <th>日期</th>
+            </tr>
+            </thead>
+            <tbody>
+            {volist name="prize" id="p"}
+                <tr>
+                    <td>{$p.name}</td>
+                    <td>
+                        {if condition="$p['type'] eq 1"}
+                            现金
+                            {else/}
+                            实物
+                        {/if}
+                    </td>
+                    <td>{:date('m-d H:i',strtotime($p['time']))}</td>
+                </tr>
+            {/volist}
+            </tbody>
+        </table>
+    <div class="way">
+    </div>
+</div>
+</body>
+</html>

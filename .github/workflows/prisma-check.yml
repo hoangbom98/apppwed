@@ -1,0 +1,74 @@
+name: Prisma Schema Validation
+
+on:
+  push:
+    paths:
+      - 'source/backend/prisma/**'
+      - 'source/backend/package.json'
+  pull_request:
+    paths:
+      - 'source/backend/prisma/**'
+      - 'source/backend/package.json'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  validate-schemas:
+    name: Validate Prisma Schemas (6 DBs)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate admin schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/admin/schema.prisma
+
+      - name: Validate hub schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/hub/schema.prisma
+
+      - name: Validate game schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/game/schema.prisma
+
+      - name: Validate trade schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/trade/schema.prisma
+
+      - name: Validate dating schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/dating/schema.prisma
+
+      - name: Validate sports schema
+        working-directory: source/backend
+        run: npx prisma validate --schema prisma/sports/schema.prisma
+
+      - name: Generate all Prisma clients (dry-run check)
+        working-directory: source/backend
+        run: pnpm run prisma:generate
+        env:
+          # Dummy DATABASE_URLs for generate-only (no actual DB needed)
+          HUB_DATABASE_URL: "mysql://user:pass@localhost:3306/hub_db"
+          GAME_DATABASE_URL: "mysql://user:pass@localhost:3306/game_db"
+          TRADE_DATABASE_URL: "mysql://user:pass@localhost:3306/trade_db"
+          DATING_DATABASE_URL: "mysql://user:pass@localhost:3306/dating_db"
+          SPORTS_DATABASE_URL: "mysql://user:pass@localhost:3306/sports_db"
+          ADMIN_DATABASE_URL: "mysql://user:pass@localhost:3306/admin_db"

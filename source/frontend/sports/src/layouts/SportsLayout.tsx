@@ -30,7 +30,7 @@ const SECONDARY_NAV = [
 
 // ── Desktop Sidebar ────────────────────────────────────────────────────────────
 function DesktopSidebar() {
-  const { data: brand } = useAppConfig('brand');
+  const { data: brand } = useAppConfig('brand') as { data: { site_name?: string; logo_url?: string } | undefined };
   const siteName = brand?.site_name ?? 'Sports Live';
   const logoUrl  = brand?.logo_url  ?? '';
   const { user, token, logout } = useAuthStore();

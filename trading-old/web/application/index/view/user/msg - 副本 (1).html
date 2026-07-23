@@ -1,0 +1,48 @@
+{include file="public/header" nav="站内信"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_bank">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>站内信</i></span>
+                </div>
+                <div class="f_content">
+                    {if count($msgtop) > 0 || count($msgfoot) > 0 }
+                    {volist name="msgtop" id="m"}
+                    <ul class="f_withdraw">
+                        <li class="banklist">
+                            <a class="item_box" href="/index/user/msg_view?id={$m['id']}">
+                                <span>{$m.title}</span>
+                                <span style="color: red;">未读</span>
+                                <span style="color: rgb(153, 153, 153);">类别： {if condition="$m['status'] lt 1"}公示{else/}私聊{/if}</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {/volist}
+                    {volist name="msgfoot" id="m"}
+                    <ul class="f_withdraw">
+                        <li class="banklist">
+                            <a class="item_box" href="/index/user/msg_view?id={$m['id']}">
+                                <span>{$m.title}</span>
+                                <span style="color: green;">已读</span>
+                                <span style="color: rgb(153, 153, 153);">类别： {if condition="$m['status'] lt 1"}公示{else/}私聊{/if}</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {/volist}
+                    {else/}
+                    <div class="dataNo">
+                        <h3>没有更多数据了</h3>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+</body>
+
+</html>

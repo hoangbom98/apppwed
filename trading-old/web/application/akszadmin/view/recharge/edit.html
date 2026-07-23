@@ -1,0 +1,57 @@
+{extend name='akszadmin@main'}
+{block name="content"}
+<form onsubmit="return false;" action="{:request()->url()}" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body think-box-shadow padding-left-40">
+      
+        <div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">订单号</span>
+                <input   class="layui-input"  value="{$vo.orderid|default=''}" style="border:none">
+            </label>
+        </div>
+		<div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">充值金额</span>
+                <input   class="layui-input"  value="{$vo.money|default=''}" style="border:none">
+            </label>
+        </div>
+		<div class="layui-form-item layui-row layui-col-space15">
+            <label class="layui-col-xs4 relative">
+                <span class="color-green">充值摘要</span>
+                <input   class="layui-input"   value="{$vo.reason|default=''}" style="border:none">
+            </label>
+        </div>
+	 
+
+        <div class="layui-form-item block">
+            <span class="color-green">拒绝理由</span>
+			<input name="reaolae"  class="layui-input"      >
+           
+        </div>
+        <div class="layui-form-item text-center">
+            {notempty name='vo.id'}<input type="hidden" name="id" value="{$vo.id}">{/notempty}
+            <button class="layui-btn" type="submit">立即拒绝</button>
+           
+        </div>
+    </div>
+</form>
+{/block}
+{block name='script'}
+<script>
+window.form.render();
+require(['ckeditor', 'angular'], function() {
+    window.createEditor('[name="content"]', { height: 500 });
+    var app = angular.module("GoodsForm", []).run(callback);
+    angular.bootstrap(document.getElementById(app.name), [app.name]);
+
+    function callback($rootScope) {
+        $rootScope.hsitoryBack = function() {
+            $.msg.confirm('确定要取消编辑吗？', function(index) {
+                history.back(), $.msg.close(index);
+            });
+        };
+    }
+
+})
+</script>
+{/block}

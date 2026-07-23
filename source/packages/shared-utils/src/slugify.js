@@ -1,6 +1,6 @@
-'use strict';
+﻿'use strict';
 /**
- * @kjc/utils — slugify.js
+ * @lkvip/utils — slugify.js
  * Convert a string to a URL-safe slug.
  *
  * @example

@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { TrendingUp, LineChart, BarChart2, Wallet, UserCheck } from 'lucide-react';
+import { TrendingUp, LineChart, Wallet, UserCheck, TrendingDown } from 'lucide-react';
 
 const ITEMS = [
-  { to: '/',          icon: TrendingUp, label: 'Thị trường', end: true  },
-  { to: '/terminal',  icon: LineChart,  label: 'Giao dịch',  end: false },
-  { to: '/portfolio', icon: BarChart2,  label: 'Danh mục',   end: false },
-  { to: '/wallet',    icon: Wallet,     label: 'Ví',         end: false },
-  { to: '/profile',   icon: UserCheck,  label: 'Tôi',        end: false },
+  { to: '/',           icon: TrendingUp,   label: 'Thị trường', end: true  },
+  { to: '/terminal',   icon: LineChart,    label: 'Giao dịch',  end: false },
+  { to: '/investment', icon: TrendingDown, label: 'Đầu tư',     end: false },
+  { to: '/wallet',     icon: Wallet,       label: 'Ví',         end: false },
+  { to: '/profile',    icon: UserCheck,    label: 'Tôi',        end: false },
 ];
 
 export default function MobileBottomNav() {

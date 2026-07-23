@@ -1,4 +1,4 @@
-# KJC Multi-Project Platform — Backend
+﻿# LKVIP GROUP — Backend
 
 > Node.js 20 · Express 4 · Prisma 5 · MySQL 8 · Redis 7 · Socket.IO 4 · PM2 cluster
 
@@ -66,8 +66,8 @@ Nginx (443/80)
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/website-admin.git
-cd website-admin/source/backend
+git clone https://github.com/your-org/lkvip-platform.git
+cd lkvip-platform/source/backend
 
 # Install dependencies
 npm install
@@ -268,20 +268,20 @@ Registered at startup by `src/config/cron.js`:
 
 ```bash
 # Upload scripts to VPS
-scp -r source/scripts/ root@YOUR_VPS_IP:/tmp/kjc-scripts/
+scp -r source/scripts/ root@YOUR_VPS_IP:/tmp/lkvip-scripts/
 
 # SSH into VPS
 ssh root@YOUR_VPS_IP
 
 # Run setup (installs Node 20, MySQL 8, Redis, Nginx, UFW, PM2)
-bash /tmp/kjc-scripts/setup.sh
+bash /tmp/lkvip-scripts/setup.sh
 # → saves DB credentials to /root/CREDENTIALS.txt
 ```
 
 What `setup.sh` does:
 - Installs Node.js 20 via NodeSource
 - Installs MySQL 8, Redis 7, Nginx, UFW, git, PM2
-- Creates 6 MySQL databases + `webadmin` user with grants
+- Creates 6 MySQL databases + `lkvip_db` user with grants
 - Configures UFW (allows 22, 80, 443)
 - Saves generated DB password to `/root/CREDENTIALS.txt`
 
@@ -290,8 +290,8 @@ What `setup.sh` does:
 ```bash
 # On the VPS, as the deploy user (or root)
 cd /var/www
-git clone https://github.com/your-org/website-admin.git
-cd website-admin
+git clone https://github.com/your-org/lkvip-platform.git
+cd lkvip-platform
 
 # Create .env from example, fill in values
 cp source/backend/.env.example source/backend/.env
@@ -349,7 +349,7 @@ Deploy steps (`deploy.sh`):
 5. `prisma generate` (all 6 schemas)
 6. `prisma migrate deploy` (all 6 schemas)
 7. Frontend `npm ci && npm run build` (per selected module)
-8. `pm2 reload api-server --update-env` (zero-downtime)
+8. `pm2 reload lkvip-api --update-env` (zero-downtime)
 9. `nginx -t && systemctl reload nginx`
 10. Health check → `GET /health/ready`
 
@@ -363,25 +363,25 @@ pm2 status
 pm2 monit
 
 # Logs
-pm2 logs api-server --lines 100
-pm2 logs api-server --err --lines 50
+pm2 logs lkvip-api --lines 100
+pm2 logs lkvip-api --err --lines 50
 
 # Reload (zero-downtime, preserves connections)
-pm2 reload api-server --update-env
+pm2 reload lkvip-api --update-env
 
 # Restart (hard restart, brief downtime)
-pm2 restart api-server
+pm2 restart lkvip-api
 
 # Stop / Delete
-pm2 stop api-server
-pm2 delete api-server
+pm2 stop lkvip-api
+pm2 delete lkvip-api
 
 # Persist across reboots
 pm2 save
 pm2 startup   # follow the printed systemd command
 
 # Memory info
-pm2 show api-server
+pm2 show lkvip-api
 ```
 
 The production config (`ecosystem.config.js`) uses:
@@ -439,17 +439,17 @@ certbot renew --dry-run
 ## 16. Backup & Recovery
 
 ```bash
-# Manual backup — dumps all 6 DBs to /var/backups/kjc-db/
+# Manual backup — dumps all 6 DBs to /var/backups/lkvip-db/
 bash source/scripts/backup-db.sh
 
 # Install automated daily backup at 02:00
 bash source/scripts/cron-setup.sh
 
 # List backups
-ls -lh /var/backups/kjc-db/
+ls -lh /var/backups/lkvip-db/
 
 # Restore a specific DB
-gunzip < /var/backups/kjc-db/game_db_2025-01-15.sql.gz | mysql -u webadmin -p game_db
+gunzip < /var/backups/lkvip-db/game_db_2025-01-15.sql.gz | mysql -u lkvip_db -p game_db
 ```
 
 Backup retention is controlled by `BACKUP_RETENTION_DAYS` in `.env` (default `30`).
@@ -471,21 +471,21 @@ Backup retention is controlled by `BACKUP_RETENTION_DAYS` in `.env` (default `30
 
 | Location | Contents |
 |----------|----------|
-| `/var/log/pm2/api-server-out.log` | stdout (Winston info/debug) |
-| `/var/log/pm2/api-server-err.log` | stderr (Winston error/warn) |
+| `/var/log/pm2/lkvip-api-out.log` | stdout (Winston info/debug) |
+| `/var/log/pm2/lkvip-api-err.log` | stderr (Winston error/warn) |
 | `source/backend/logs/` | Local development logs |
 
 ### Viewing Logs
 
 ```bash
 # Real-time PM2 logs
-pm2 logs api-server
+pm2 logs lkvip-api
 
 # Last 200 lines of errors only
-pm2 logs api-server --err --lines 200
+pm2 logs lkvip-api --err --lines 200
 
 # Winston log files (if configured)
-tail -f /var/log/pm2/api-server-out.log | grep ERROR
+tail -f /var/log/pm2/lkvip-api-out.log | grep ERROR
 ```
 
 ---
@@ -499,7 +499,7 @@ tail -f /var/log/pm2/api-server-out.log | grep ERROR
 node source/backend/server.js
 
 # Check PM2 error log
-pm2 logs api-server --err --lines 50
+pm2 logs lkvip-api --err --lines 50
 
 # Verify .env is present and readable
 cat source/backend/.env | head -5
@@ -509,7 +509,7 @@ cat source/backend/.env | head -5
 
 ```bash
 # Test MySQL connectivity
-mysql -u webadmin -p -e "SHOW DATABASES;"
+mysql -u lkvip_db -p -e "SHOW DATABASES;"
 
 # Verify DATABASE_URL in .env
 grep DATABASE_URL source/backend/.env
@@ -600,4 +600,4 @@ source/backend/
 
 ---
 
-*KJC Platform v2.0 — Single VPS, 6 Projects, 1 Backend*
+*LKVIP GROUP v2.0 — Single VPS, 6 Projects, 1 Backend*

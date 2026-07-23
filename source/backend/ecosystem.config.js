@@ -1,67 +1,45 @@
-// PM2 Ecosystem Configuration — Production VPS
-// ─────────────────────────────────────────────────────────────────────────────
-// Usage:
-//   cd /var/www/website-admin/source/backend
-//   pm2 start ecosystem.config.js --env production
-//   pm2 save
+'use strict';
+// PM2 Ecosystem — LKVIP GROUP Production
 //
-// Reload (zero-downtime):
-//   pm2 reload api-server --update-env
+// Usage:
+//   cd /var/www/lkvip/source/backend
+//   pm2 start ecosystem.config.js --env production
+//   pm2 reload lkvip-api --update-env   ← zero-downtime
+//   pm2 save && pm2 startup              ← persist across reboots
 //
 // Monitor:
-//   pm2 status
-//   pm2 logs api-server --lines 100
-//   pm2 monit
-
-'use strict';
-
-const path = require('path');
-// __dirname is the directory of this file — works both locally and on the VPS
-// without hardcoding /var/www/website-admin.
-const BASE = __dirname;
+//   pm2 status | pm2 logs lkvip-api | pm2 monit
 
 module.exports = {
   apps: [
     {
-      // ── Identity ──────────────────────────────────────────────────────────
-      name:        'api-server',
-      script:      'server.js',
-      cwd:         BASE,
+      name:      'lkvip-api',
+      script:    'dist/server.js',   // built by: npm run build (tsc)
+      cwd:       __dirname,
 
-      // ── Cluster mode — use all CPU cores ──────────────────────────────────
-      instances:   'max',          // or a number, e.g. 2 for a 2-vCPU VPS
-      exec_mode:   'cluster',
+      instances:  'max',             // one worker per CPU core
+      exec_mode:  'cluster',
 
-      // ── Process management ────────────────────────────────────────────────
       watch:              false,
-      max_memory_restart: '400M',  // restart if RSS > 400MB per instance
-      restart_delay:      3000,    // ms between restarts
+      max_memory_restart: '400M',    // restart if RSS > 400MB per instance
+      kill_timeout:       30000,     // 30s for graceful Socket.IO shutdown
+      restart_delay:      3000,
       max_restarts:       10,
       min_uptime:         '10s',
 
-      // ── Logging ───────────────────────────────────────────────────────────
-      out_file:        '/var/log/pm2/api-server-out.log',
-      err_file:        '/var/log/pm2/api-server-err.log',
+      out_file:        '/var/log/pm2/lkvip-api-out.log',
+      err_file:        '/var/log/pm2/lkvip-api-err.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      time:            true,
-      merge_logs:      true,       // combine cluster instance logs
+      merge_logs:      true,
 
-      // ── Environment — production ──────────────────────────────────────────
-      // Real secrets come from .env file loaded by dotenv in server.js.
-      // Only override process-level vars here.
       env_production: {
         NODE_ENV: 'production',
         PORT:     5000,
       },
-
-      // ── Environment — development (pm2 start ... --env development) ───────
       env_development: {
         NODE_ENV: 'development',
         PORT:     5000,
       },
-
-      // ── Kill timeout (graceful shutdown) ──────────────────────────────────
-      kill_timeout: 30000,          // ms to wait for server.close() before SIGKILL
     },
   ],
 };

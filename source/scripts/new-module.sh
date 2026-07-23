@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  new-module.sh — Scaffold a new KJC backend module
+#  new-module.sh — Scaffold a new LKVIP backend module
 #
 #  Usage:
 #    bash source/scripts/new-module.sh <module-name>
@@ -130,4 +130,4 @@ echo "      app.use('/api/${MODULE}', require('./src/modules/${MODULE}'));"
 echo ""
 echo "  3.  If new DB: add ${MODULE^^}_DATABASE_URL to .env and databases.js PATH_MAP."
 echo ""
-echo "  4.  Run: pnpm --filter group-backend run dev"
+echo "  4.  Run: pnpm --filter lkvip-backend run dev"

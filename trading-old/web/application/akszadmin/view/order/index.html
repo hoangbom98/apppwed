@@ -1,0 +1,176 @@
+{:die(print_r($list))}
+{extend name='akszadmin@main'}
+{block name="content"}
+<style>
+	.layui-table td, .layui-table th{
+		padding: 9px 0;
+	}
+ 
+	.color_red {
+	 color:red;
+	}
+	.color_green{
+	  color:green
+	}
+</style>
+<div class="think-box-shadow">
+    {include file='order/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='text-center nowrap'>订单编号</th>
+            <th class='text-center nowrap'>会员ID</th>
+            <th class="text-center nowrap">用户名</th>
+            <th class="text-center nowrap">姓名</th>
+            <th class="text-center nowrap">订单时间</th>
+            <th class="text-center nowrap">产品信息</th>
+            <th class="text-center nowrap">状态</th>
+            <th class="text-center nowrap">方向</th>
+            <th class="text-center nowrap">时间/点数</th>
+            <th class="text-center nowrap">建仓点位</th>
+            <th class="text-center nowrap">平仓点位</th>
+            <th class="text-center nowrap">委托余额</th>
+            <th class="text-center nowrap">无效委托余额</th>
+            <th class="text-center nowrap">有效委托余额</th>             
+            <th class="text-center nowrap">实际盈亏</th>
+            <th class="text-center nowrap">买后余额</th>
+			 <th class="text-center nowrap">单控操作</th>
+            <th class="text-center nowrap">详情</th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>&$vo}
+        {assign name='vo.b_name' value=":db('lc_bank')->where('uid',$vo.uid)->order('id','desc')->value('name')"}
+        <tr>
+            <td class='text-center nowrap'>
+                {$vo.id|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.uid|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.phone|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.b_name|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                 <a data-dbclick class="layui-btn layui-btn-sm" data-title="编辑下单时间" data-modal='{:url(ADMIN_MODULE."/order/edits")}?id={$vo.id}'>{:date('Y-m-d H:i:s',$vo.buytime)}</a>
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.ptitle|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                {if $vo.ostaus==1}平仓{else/}建仓{/if}
+            </td>
+            {if $vo.ostyle == 0}
+            <td class="color_red text-center nowrap">买涨</td>
+            {elseif $vo.ostyle == 1/}
+            <td class="color_green text-center nowrap">买跌</td>
+            {/if}
+            <td class='text-center nowrap'>
+                {$vo.endprofit|default='--'}{if $vo.eid==1}点{else/}秒{/if}
+            </td>
+            <td class='text-center nowrap'>
+                {$vo.buyprice|default='--'}
+            </td>
+            <td class='text-center nowrap'>
+                <input type="text" oid="{$vo.id}" value="{$vo.sellprice}" class="select_gaipingcang layui-input" style="width: 100px;">
+            </td>
+            <td class="color_red text-center nowrap">
+                ¥{$vo.fee}
+            </td>
+            {if $vo.ploss == 0}
+            <td class="color_red text-center nowrap">
+                ¥{$vo.fee}
+            </td>
+            {else /}
+            <td class="color_red text-center nowrap">
+                ¥0
+            </td>
+            {/if}
+
+            {if $vo.ploss != 0}
+            <td class="color_red text-center nowrap">
+                ¥{$vo.fee}
+            </td>
+            {else /}
+            <td class="color_red text-center nowrap">
+                ¥0
+            </td>
+            {/if}
+            <td {if $vo.ploss > 0} class="color_red text-center nowrap" {else /} class="color_green text-center nowrap" {/if}>
+                ¥{$vo.ploss}
+            </td>
+            <td class="color_red text-center nowrap">
+                ¥{$vo.commission}
+            </td>
+			<td class="color_red text-center nowrap">
+                {if $vo.ostaus!=1}
+					<select name="ostyle" id="" class="selectpicker select_change show-tick form-control">
+						<option {if $vo.kong_type == 0 } selected="selected" {/if} value="{$vo.id}_0">默认</option>
+						<option {if $vo.kong_type == 1 } selected="selected" {/if}  value="{$vo.id}_1">盈</option>
+						<option {if $vo.kong_type == 2 } selected="selected" {/if}  value="{$vo.id}_2">亏</option>
+						<option {if $vo.kong_type == 3 } selected="selected" {/if}  value="{$vo.id}_3">全盈</option>
+						<option {if $vo.kong_type == 4 } selected="selected" {/if}  value="{$vo.id}_4">全亏</option>
+					</select>
+                 {else/}已平仓{/if}
+            </td>
+								
+            <td class='text-center nowrap'>
+                <a data-dbclick class="layui-btn layui-btn-sm" data-title="查看详情" data-modal='{:url(ADMIN_MODULE."/order/edit")}?id={$vo.id}'>查 看</a>
+                {if $vo.ostaus==1}
+					<a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除该订单吗?" data-action="{:url(ADMIN_MODULE.'/order/remove')}" data-value="id#{$vo.id}">删 除</a>
+			    {/if}
+			</td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+</div>
+
+{/block}
+{block name='script'}
+<script>
+$(".select_gaipingcang").change(function(){
+    var oid = $(this).attr("oid");
+    var sellprice = $(this).val();
+    var postdata = 'id='+oid+"&sellprice="+sellprice;
+    var posturl = "{:url(ADMIN_MODULE.'/order/gaipingcang')}";
+    $.post(posturl,postdata,function(res){
+        if(res.code == 1){
+            layer.msg(res.info);
+        }
+    })
+})  
+$(".select_change").change(function(){
+  var kong_id = $(this).val();
+  if(kong_id){
+    var kong_arr = kong_id.split('_');
+  }
+  var oid = kong_arr[0];
+  var kong_type = kong_arr[1];
+  var postdata = 'id='+oid+"&kong_type="+kong_type;
+  var posturl = "{:url(ADMIN_MODULE.'/order/dankong')}";
+  $.post(posturl,postdata,function(res){
+     if(res.code == 1){
+            layer.msg(res.info);
+        }
+  })
+  
+})
+
+{if $Think.get.type==1}
+	setInterval('shuaxin()', 5000);
+{/if}
+
+function shuaxin(){
+	history.go(0)
+}
+</script>
+{/block}
+
+</style>

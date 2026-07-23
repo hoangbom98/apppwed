@@ -1,0 +1,93 @@
+{include file="public/header1" nav="关于我们"}
+<link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css"/>
+<script type="text/javascript" src="/static/theme/index/js/font.js"></script>
+<script type="text/javascript" src="/static/theme/index/js/jquery.js"></script>
+<style>
+    .htitle {
+        padding-left: .3rem;
+    }
+
+    .container {
+        padding-bottom: 1rem;
+    }
+
+    .list {
+        padding: 0 .4rem;
+    }
+
+    .list .item {
+        padding-top: .34rem;
+        padding-bottom: .28rem;
+        border-bottom: 1px solid #E9E9E9;
+    }
+
+    .list .item:last-child {
+        border-bottom: 0;
+    }
+
+    .list .item img {
+        width: .32rem;
+        height: .32rem;
+        float: left;
+        margin-left: .12rem;
+        margin-right: .18rem;
+    }
+
+    .list .item span {
+        font-size: .28rem;
+        line-height: .32rem;
+        color: #4A4A4A;
+        float: left;
+    }
+
+    .list .item .iconfont {
+        font-size: .34rem;
+        line-height: 1;
+        color: #9B9B9B;
+        float: right;
+    }
+
+    .list .item:after {
+        content: "";
+        clear: both;
+        display: block;
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="left" onclick="window.history.back()">
+        <i class="iconfont icon-arrow-left"></i>
+    </div>
+    <div class="htitle">关于我们</div>
+</div>
+<div class="container">
+    <div class="list">
+
+        {volist name="abour_type" id="t"}
+        <a href="/index/index/about_list?id={$t['id']}">
+            <div class="item" style="border-bottom: 1px solid #E9E9E9;">
+                <img src="/static/theme/index/img/icon_aboutus_notice.png" alt=""/>
+                <span>{$t.name}</span>
+                <i class="iconfont icon-arrow-right"></i>
+            </div>
+        </a>
+        {/volist}
+        <!--<a href="{:getInfo('service')}">
+        <div class="item">
+            <img src="/static/theme/index/img/icon_aboutus_kf.png" alt="" />
+            <span>在线客服</span>
+            <i class="iconfont icon-arrow-right"></i>
+        </div>
+        </a>-->
+        <!--<div class="item">
+            <span>服务热线：<a href="tel:{:getInfo('tel')}"><strong>{:getInfo('tel')}</strong></a></span>
+        </div>
+        <div class="item">
+            <span>在线客服QQ：<strong style="color: red;">{:getInfo('qq')}</strong></span>
+        </div>-->
+    </div>
+</div>
+{include file="public/footer" menu="about"}
+</body>
+</html>

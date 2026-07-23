@@ -1,0 +1,50 @@
+{extend name='akszadmin@main'}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='mall_invest/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='text-left nowrap' width="30%">租赁信息</th>
+            <th class='text-left nowrap' width="20%">投资人</th>
+            <th class='text-left nowrap' width="20%">投资数据</th>
+            <th class="text-left nowrap" width="15%">时间</th>
+            <th></th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr>
+            <td class='text-left nowrap' style="max-width: 260px;overflow: hidden">
+                矿机名称：{$vo.title|default='--'}<br>
+                日运维费：{$vo.cost|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                投资人ID：{$vo.uid|default='--'}<br>
+                投资人姓名：{$vo.name|default='--'}<br>
+                投资人电话：{$vo.phone|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                保证金：{$vo.money|default='--'} 元<br>
+                日净收益：{$vo.profit|default='--'} BTC<br>
+                使用期限：{$vo.day|default='--'} 天<br>
+            </td>
+            <td class='text-left nowrap'>
+                租赁时间：{$vo.time|default='--'}<br>
+                结束时间：{$vo.time2|default='--'}<br>
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("akszadmin/invest_list/detail")}
+                <a data-title="查看详情" class="layui-btn layui-btn-sm" data-open='{:url(ADMIN_MODULE."/mall_invest_list/index")}?i_iid={$vo.id}'>查看详情</a>
+                {/if}
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+</div>
+{/block}

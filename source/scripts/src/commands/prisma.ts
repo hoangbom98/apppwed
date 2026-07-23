@@ -1,13 +1,13 @@
-/**
+﻿/**
  * prisma.ts — Prisma schema utilities
  *
  * TypeScript rewrite of standardize-prisma.js
  *
  * Commands:
- *   kjc prisma standardize   — add @map() snake_case annotations to all schema fields
- *   kjc prisma generate      — run prisma generate for all 6 schemas
- *   kjc prisma migrate       — run prisma migrate deploy for all 6 schemas
- *   kjc prisma status        — show migration status for all 6 schemas
+ *   lkvip prisma standardize   — add @map() snake_case annotations to all schema fields
+ *   lkvip prisma generate      — run prisma generate for all 6 schemas
+ *   lkvip prisma migrate       — run prisma migrate deploy for all 6 schemas
+ *   lkvip prisma status        — show migration status for all 6 schemas
  */
 
 import fs   from 'fs';
@@ -116,7 +116,7 @@ export function registerPrismaCommand(program: Command): void {
     .command('standardize')
     .description('Add @map() snake_case annotations to all Prisma schema fields')
     .action(() => {
-      header('KJC Platform — Prisma Standardize');
+      header('LKVIP GROUP — Prisma Standardize');
       standardizeSchemas();
     });
 
@@ -124,7 +124,7 @@ export function registerPrismaCommand(program: Command): void {
     .command('generate')
     .description('Run prisma generate for all 6 schemas')
     .action(async () => {
-      header('KJC Platform — Prisma Generate');
+      header('LKVIP GROUP — Prisma Generate');
       await forEachSchema('generate', [], 'Generate');
     });
 
@@ -132,7 +132,7 @@ export function registerPrismaCommand(program: Command): void {
     .command('migrate')
     .description('Run prisma migrate deploy for all 6 schemas (production)')
     .action(async () => {
-      header('KJC Platform — Prisma Migrate Deploy');
+      header('LKVIP GROUP — Prisma Migrate Deploy');
       await forEachSchema('migrate', ['deploy'], 'Migrate deploy');
     });
 
@@ -140,7 +140,7 @@ export function registerPrismaCommand(program: Command): void {
     .command('status')
     .description('Show migration status for all 6 schemas')
     .action(async () => {
-      header('KJC Platform — Prisma Status');
+      header('LKVIP GROUP — Prisma Status');
       await forEachSchema('migrate', ['status'], 'Migrate status');
     });
 }

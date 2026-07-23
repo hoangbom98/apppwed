@@ -1,0 +1,55 @@
+{include file="public/header" nav="投资详情"}
+<div class="mobile">
+	<div class="othertop" style="background: #4f5ffa">
+        <a class="goback" href="javascript:history.back();">
+            <img src="__ROOT__/static/theme/index/img/goback.png" />
+        </a>
+        <div class="othertop-font">投资详情</div>
+    </div>
+    <div class="header-nbsp"></div>
+	<div class="contract_box deta">
+	    <div class="data_name">
+	        <span style="display: inline-block;width: 3rem;">投资金额：{$invest.money}元</span>
+	        <span style="display: inline-block;width: 3rem;">预期效益：{:getInvestMoney($invest['id'])}元</span><br/>
+	        <span style="display: inline-block;width: 3rem;">投资时间：{:date('Y-m-d',strtotime($invest['time']))}</span>
+	        <span style="display: inline-block;width: 3rem;">到期时间：{:date('Y-m-d',strtotime('+'.$invest['day'].' day',strtotime($invest['time'])))}</span><br/>
+	        <span>收益方式：{$invest.type2}</span>
+	    </div>
+	    <div class="table_auto">
+		    <table class="tablec">
+		        <tr>
+		            <th>期号</th>
+		            <th>应收本金</th>
+		            <th>应收利息</th>
+		            <th>应收时间</th>
+		            <th>收益时间</th>
+		            <th>应收总额</th>
+		            <th>已支付</th>
+		            <th>状态</th>
+		        </tr>
+                {volist name="list" id="l"}
+                    <tr>
+                        <td>第{$l.num}期</td>
+                        <td>{$l.money2}</td>
+                        <td>{$l.money1}</td>
+                        <td>{$l.time1}</td>
+                        <td>
+							<?php if($l['time2'] != '0000-00-00 00:00:00'){ echo $l['time1'];}else{echo '未完成';}?>
+                        </td>
+                        <td>{$l.pay1}</td>
+                        <td>{$l.pay2}</td>
+                        <td>
+                            {if condition="$l['status'] eq 1"}
+							已完成
+							{else/}
+							未完成
+                            {/if}
+                        </td>
+                    </tr>
+                {/volist}
+		    </table>
+	    </div>
+	</div>
+</div>
+</body>
+</html>

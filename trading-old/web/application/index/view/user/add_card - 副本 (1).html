@@ -1,0 +1,100 @@
+{include file="public/header" nav="添加银行卡"}
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/tipmask.css">
+<link rel="stylesheet" type="text/css" href="__ROOT__/static/wap/css/box_pay.css">
+<div id="app">
+    <div class="box">
+        <div class="jun-content">
+            <div class="f_box_addbank">
+                <div class="t_header">
+                    <span><img src="__ROOT__/static/wap/images/goback.png" alt="" onClick="javascript:history.back()"></span> 
+                    <span><i>添加银行卡</i></span>
+                </div>
+                <div class="f_content">
+                    <ul>    
+                        <li>
+                            <label>姓名</label> 
+                            <span><input type="text" name="name" id="name" value="" placeholder="输入姓名" onfocus="this.placeholder=''" onblur="this.placeholder='输入姓名'"></span>
+                        </li>  
+                        {if condition="getInfo('bank') eq 0"}                  
+                        <li>
+                            <label>银行名称</label> 
+                            <span><input type="text" name="bank" id="bank" value="" placeholder="输入银行名称" onfocus="this.placeholder=''" onblur="this.placeholder='输入银行名称'"></span>
+                        </li>
+                        <li>
+                            <label>开户行</label> 
+                            <span><input type="text" name="area" id="area" value="" placeholder="输入银行卡开户行" onfocus="this.placeholder=''" onblur="this.placeholder='输入银行卡开户行'"></span>
+                        </li>
+                        {else/}
+                            <input type="hidden" name="bank" id="bank" value="">
+                            <input type="hidden" name="area" id="area" value="">
+                        {/if}
+                        <li>
+                            <label>银行卡号</label> 
+                            <span><input type="text" name="account" id="account" value="" placeholder="输入银行卡号" onfocus="this.placeholder=''" onblur="this.placeholder='输入银行卡号'"></span>
+                        </li>
+                    </ul>
+                    <div class="sure">
+                        <button id="sub_btn" type="button" class="el-button el-button--danger">确认绑定 </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {include file="public/footer" menu='user'}
+    </div>
+</div>
+<div class="tipMask hide">
+    <div class="cont">
+        <p class="title">温馨提示</p>
+        <p class="stitle contents"></p>
+        <div id="msgBtn">
+            <div class="confirm guanbi">确定</div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="__ROOT__/static/theme/index/js/jquery.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#sub_btn").on("click", function () {
+            var bank = $('#bank').val();
+            var area = $('#area').val();
+            var account = $('#account').val();
+            if (account.length < 10) {
+                msg("错误", "输入银行卡号", 1);
+                return false;
+            }
+            var name = $('#name').val();
+            if (name.length < 2) {
+                msg("错误", "输入姓名", 1);
+                return false;
+            }
+            var url = "/index/user/add_card";
+            $.ajax({
+                type : "POST",
+                url : url,
+                data: {'bank':bank,'area':area,'account':account,'name':name},
+                dataType : "json",
+                success : function(result){
+                    if(result.code == 1){
+                        window.location.href = "/index/user/bank_card"
+                    }else{
+                        msg("提示",result.info,1);
+                    }
+                }
+            });
+        })
+    })
+
+    function msg(title, content, type, url) {
+        $(".contents").html(content);
+        if (type == 1) {
+            var btn = '<div class="confirm guanbi" onclick="$(\'.tipMask\').hide();">确定</div>';
+        }
+        else {
+            var btn = '<div class="confirm guanbi" onclick="window.location.href=\'' + url + '\'">确定</div>';
+        }
+        $("#msgBtn").html(btn);
+        $(".tipMask").show();
+    }
+</script>
+</html>

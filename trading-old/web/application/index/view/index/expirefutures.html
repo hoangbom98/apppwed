@@ -1,0 +1,285 @@
+{include file="public/header" nav="我的合约"}
+<link rel="stylesheet" type="text/css" href="/static/theme/index/css/footer.css" />
+<link rel="stylesheet" type="text/css" href="/static/theme/index/css/iconfont.css" />
+<style>
+	.footer p{
+		font-weight: normal!important;
+	}
+	.list_outer ul li .list_lab span{
+	    color: #fd5a21!important;
+	}
+	.progressBox .progress{
+	    background: #fd5a21!important;
+	}
+	.progressNum{
+	    color: #fd5a21!important;
+	}
+
+    .bar {
+        position: fixed;
+        width: 10rem;
+        z-index: 10;
+        height: 1.1rem;
+        /* padding: 0 0.5rem; */
+        color: #fff;
+        /* border: solid 1px #FF7F00; */
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    .bar-nav {
+        top: 0;
+        width: 100%
+        /*left: 50%;
+        margin-left: -5rem;*/
+    }
+    #main_content {
+        padding-bottom: 1.5rem;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .bar-nav ~ .content {
+        padding-top: 0.9rem;
+    }
+
+    .buttons-row, .buttons-tab {
+        -ms-flex-item-align: center;
+        -webkit-align-self: center;
+        align-self: center;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-lines: single;
+        -moz-box-lines: single;
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: none;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+
+    .buttons-tab {
+        background: linear-gradient(to right, #3476fe, #34c7fe) !important;
+        position: relative;
+    }
+
+    .buttons-tab span {
+        /*width: 3rem;*/
+        margin-left: 1.3rem;
+    }
+
+    .button {
+        border: 1px solid #0e696d;
+        color: #0e696d;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+        border-radius: 0.15rem;
+        line-height: 0.7rem;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        appearance: none;
+        background: none;
+        padding: 0 0.2rem;
+        margin: 0;
+        /* height: 1.35rem; */
+        white-space: nowrap;
+        position: relative;
+        text-overflow: ellipsis;
+        font-size: 0.37rem;
+        font-family: inherit;
+        cursor: pointer;
+        /* right: 0.5rem; */
+    }
+
+    .buttons-tab .button {
+        color: #fff;
+        font-size: 0.4rem;
+        width: 100%;
+        height: 1rem;
+        line-height: 1rem;
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+    }
+
+    .lobby-nav {
+        display: -webkit-flex;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .lobby-nav li {
+        width: 100%;
+        height: 2rem;
+        background: #fff;
+        text-align: center;
+        /* color: #ffffff; */
+    }
+    .listbox {
+        overflow: hidden;
+    }
+    .listbox li {
+        float: left;
+        text-align: left;
+        height: 1.2rem !important;
+    }
+
+    .lobby-nav li span {
+        display: block;
+        float: left;
+        width: 3rem;
+        line-height: 0.7rem;
+    }.lobby-nav li span {
+         line-height: 0.6rem !important;
+     }
+    .listbox li .tit {
+        font-size: 0.35rem;
+        color: #000000;
+        margin-top: 0.2rem;
+        line-height: 0.5rem !important;
+    }
+    li {
+        list-style: outside none none;
+    }
+    img {
+        vertical-align: middle;
+    }
+
+    .footer{
+        height: .98rem;
+    }
+
+    .footer .item .iconfont {
+        font-size: .4rem;
+        /*line-height: 1.3;*/
+    }
+
+    .footer .item p {
+        width: 100%;
+        font-size: 12px;
+        /* line-height: .28rem;
+         margin: .2rem 0 0.1rem;*/
+    }
+
+</style>
+<header class="bar bar-nav">
+    <div style="width: 4rem;height:0.7rem;overflow:hidden;margin:0.2rem auto;border-radius: 0.35rem;border:0.03rem solid #0084FF;line-height: 0.7rem;z-index: 15">
+        <a href="/index/index/lists">
+            <div style="float: left;text-align: center;font-size: 16px;width:50%;height:100%;color: #fff;">
+                矿机</div>
+        </a>
+        <a href="/index/index//normalfutures">
+            <div style="float: right;text-align: center;font-size: 16px;color: #f68b3d;background-color: #0084FF;width:50%;height:100%;">合约
+            </div>
+        </a>
+    </div>
+</header>
+<div class="content" id="main_content">
+    <div class="page" style="min-height: 667px;">
+        <div class="buttons-tab background" style="padding-top: 0.2rem;width: 100%;position:fixed;z-index: 1">
+            <span style="position: relative">
+                <a style="font-size: 14px;" href="/index/index/normalfutures" class=" button">在期合约</a>
+            </span>
+            <span style="position: relative"><a href="/index/index/expirehashrate" style="color: #f68b3d;font-size: 14px;" class=" button">到期合约</a><span style="position: absolute;width: 1.8rem;height: 0.05rem;background-color: #f68b3d;bottom: 0.05rem;left:50%;margin-left:-0.9rem"></span></span>
+        </div>
+        <div style="width: 100%;height: 1.8rem;background-color: transparent"></div>
+        <div style="width:96%;left:2%;background-color: #0084FF;overflow:hidden;height: 2.8rem;position:absolute;top: 2.6rem;padding-top: 0.4rem;border-radius: 0.2rem">
+            <div style="font-size: 16px;color: #fff;margin-left: 0.4rem">累计收益</div>
+            <div style="font-size: 28px;color: #fff;margin-left: 0.4rem;margin-top:0.1rem;">
+                {:round($ljsy,2)} 元</div>
+            <a href="/index/user/fund">
+                <div style="position:absolute;font-size: 14px;color: #fff;padding: 0.08rem 0.26rem;border-radius: 0.12rem;border:1px solid rgba(255,255,255,0.6);right: 0.4rem;top: 0.6rem">收益明细</div>
+            </a>
+            <div style="width: 100%;overflow:hidden;position:absolute;bottom: 0;background-color: #148EFF;line-height:0.9rem">
+                <div style="float: left;text-align:center;font-size: 0.4rem;color: #fff;padding-left: 0.4rem;">
+                    在期合约：<font style="font-size: 16px;position:relative;">{$yxkj}</font>
+                    &nbsp;&nbsp;到期合约：<font style="font-size: 16px;position:relative;">{$dqkj}</font>
+                </div>
+            </div>
+        </div>
+        <div class="content-padded lobby-nav" style="margin: 3.2rem 0 0 0;padding:0 0.35rem">
+            {volist name="invest" id="i"}
+            <li style="margin-top: 0.25rem;padding:0.3rem ;height: auto;border-radius: 0.16rem;position: relative;overflow:hidden;width:9.4rem;">
+                <!--<div style="position: absolute;width: 2rem;height: 0.8rem;right: 0;top: 0;line-height:0.8rem;font-size: 0.35rem;background: #03ad90;border-radius: 0 0.16rem 0 0.16rem;color: #fff;">
+                    运行中
+                </div>-->
+                <div style="text-align: left;font-size:0.4rem;font-weight: bold;">
+                    <img src="/static/theme/index/img/ykjico.png" style="width: 0.4rem;margin-right:0.1rem;margin-top:-0.05rem;color: #000000;" alt="">
+                    {$i.title}
+                </div>
+                <div style="height: 1.2rem;overflow:hidden;">
+                    <ul class="listbox">
+                        <li style="width: 31%;">
+                            <span class="tit">合约金额</span>
+                            <span class="text">{$i.money}元</span>
+                        </li>
+                        <li style="width: 41%;">
+                            <span class="tit">净收益率</span>
+                            <span class="text">{$i.rate}%</span>
+                        </li>
+                        <li style="width: 28%">
+                            <span class="tit">已收益</span>
+                            <span class="text">0</span>
+                        </li>
+                        <li style="width: 31%;">
+                            <span class="tit">合约天数</span>
+                            <span class="text">{$i.day}</span>
+                        </li>
+                        <li style="width: 41%;">
+                            <span class="tit">订单号</span>
+                            <span class="text">{$i.number}</span>
+                        </li>
+                        <li style="width: 28%">
+                            <span class="tit">到期时间</span>
+                            <span class="text">{:date("Y-m-d",strtotime($i.time2))}</span>
+                        </li>
+                    </ul>
+                    <a href="/index/user/contract?id={$i.id}">
+                        <div style="width:99%;text-align:center;border:1px solid #000000;border-radius: 0.1rem;line-height:0.7rem;font-size: 0.35rem;margin-top:0.3rem">
+                            查看矿机租赁合同
+                        </div>
+                    </a>
+                </div>
+                <div style="font-size: 0.35rem;color: #333333;cursor: pointer;margin-top:0.2rem;background-color: #fff" class="morebtn">
+                    <font>展开更多</font><img style="width: 0.4rem;margin-left:0.06rem" src="/static/theme/index/img/xia.png" alt="">
+                </div>
+            </li>
+            {/volist}
+        </div>
+    </div>
+</div>
+{include file="public/footer" menu="list"}
+<script>
+    $('.morebtn').click(function () {
+        var that = $(this)
+        if (that.hasClass('cur')) {
+            that.removeClass('cur').prev('div').animate({
+                    height: '1.2rem'
+                },
+                200,
+                function () {
+                    that.find('img').attr('src', '/static/theme/index/img/xia.png');
+                    that.find('font').text('展开更多')
+                });
+        } else {
+            that.addClass('cur').prev('div').animate({
+                    height: '3.5rem'
+                },
+                200,
+                function () {
+                    that.find('img').attr('src', '/static/theme/index/img/shang.png');
+                    that.find('font').text('收起更多')
+                });
+        }
+    });
+</script>
+</html>
+</body>

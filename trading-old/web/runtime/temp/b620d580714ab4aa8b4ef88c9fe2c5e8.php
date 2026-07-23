@@ -1,0 +1,17 @@
+<?php /*a:2:{s:71:"/www/wwwroot/cs.shangxiang.vip/application/akszadmin/view/msg/form.html";i:1621010368;s:67:"/www/wwwroot/cs.shangxiang.vip/application/akszadmin/view/main.html";i:1619939640;}*/ ?>
+<div class="layui-card layui-bg-gray"><?php if(!(empty($title) || (($title instanceof \think\Collection || $title instanceof \think\Paginator ) && $title->isEmpty()))): ?><div class="layui-card-header layui-anim layui-anim-fadein notselect"><span class="layui-icon layui-icon-next font-s10 color-desc margin-right-5"></span><?php echo htmlentities((isset($title) && ($title !== '')?$title:'')); ?><div class="pull-right"></div></div><?php endif; ?><div class="layui-card-body layui-anim layui-anim-upbit"><form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off"><div class="layui-card-body think-box-shadow padding-left-40"><div class="layui-form-item layui-row layui-col-space15"><label class="layui-col-xs3 relative"><span class="color-green">是否置顶</span><select class="layui-select" name="top"><?php foreach(['0'=>'否','1'=>'是'] as $k=>$v): ?><!--<?php if($vo['top'] == $k.""): ?>--><option selected value="<?php echo htmlentities($k); ?>"><?php echo htmlentities($v); ?></option><!--<?php else: ?>--><option value="<?php echo htmlentities($k); ?>"><?php echo htmlentities($v); ?></option><!--<?php endif; ?>--><?php endforeach; ?></select></label><label class="layui-col-xs9 relative"><span class="color-green">站内信标题</span><input name="title" required class="layui-input" placeholder="请输入站内信标题" value="<?php echo htmlentities((isset($vo['title']) && ($vo['title'] !== '')?$vo['title']:'')); ?>"></label></div><div class="layui-form-item layui-row layui-col-space15"><label class="layui-col-xs3 relative"><span class="color-green">排序</span><input name="sort" class="layui-input" placeholder="请输入排序" value="<?php echo htmlentities((isset($vo['sort']) && ($vo['sort'] !== '')?$vo['sort']:'')); ?>"></label><label class="layui-col-xs9 relative"><span class="color-green">接收账号</span><input name="phone" class="layui-input" placeholder="请输入接收账号（选填）" value="<?php echo htmlentities((isset($vo['phone']) && ($vo['phone'] !== '')?$vo['phone']:'')); ?>"></label></div><div class="layui-form-item block"><span class="label-required-prev color-green">站内信内容</span><textarea name="content"><?php echo (isset($vo['content']) && ($vo['content'] !== '')?$vo['content']:''); ?></textarea></div><div class="layui-form-item text-center"><?php if(!(empty($vo['id']) || (($vo['id'] instanceof \think\Collection || $vo['id'] instanceof \think\Paginator ) && $vo['id']->isEmpty()))): ?><input type="hidden" name="id" value="<?php echo htmlentities($vo['id']); ?>"><?php endif; ?><button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消编辑</button><button class="layui-btn" type="submit">保存站内信</button></div></div></form></div><script>    window.form.render();
+    require(['ckeditor', 'angular'], function () {
+        window.createEditor('[name="content"]', {height: 500});
+        var app = angular.module("GoodsForm", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+
+        function callback($rootScope) {
+            $rootScope.hsitoryBack = function () {
+                $.msg.confirm('确定要取消编辑吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+        }
+
+    })
+</script></div>
