@@ -105,6 +105,9 @@ export { useUnreadCount }           from './hooks/useUnreadCount';
 export { useOptimisticMutation }    from './hooks/useOptimisticMutation';
 export { useImageSrc }              from './hooks/useImageSrc';
 export { usePrefetch, prefetchOnHover } from './hooks/usePrefetch';
+// ── Tầng 6: New shared hooks ─────────────────────────────────────────────────
+export { useWebSocket }             from './hooks/useWebSocket';
+export { useBalance }               from './hooks/useBalance';
 
 // Config context (ConfigProvider wraps app root; useConfig reads per-project flat map)
 export { ConfigProvider, useConfig } from './contexts/ConfigContext';
