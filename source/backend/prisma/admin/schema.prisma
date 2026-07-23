@@ -1150,3 +1150,26 @@ model AppCatalog {
   @@index([isPublished])
   @@map("app_catalog")
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLD STORAGE — ARCHIVE LOG
+// Records every monthly archive operation (Tầng 2: Cold Storage)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Tracks every cold-storage archive run so admin can audit or restore data
+model ArchiveLog {
+  id           Int      @id @default(autoincrement())
+  tableName    String   @db.VarChar(60)   // e.g. "transactions"
+  project      String   @db.VarChar(20)   // game|hub|trade|dating|sports|admin
+  archiveKey   String   @db.VarChar(500)  // S3/R2 object key
+  recordCount  Int      @default(0)
+  sizeBytes    BigInt?                    // compressed file size in bytes
+  cutoffDate   DateTime                   // data older than this was archived
+  status       String   @default("completed") @db.VarChar(20)
+  error        String?  @db.Text
+  archivedAt   DateTime @default(now())
+
+  @@index([project])
+  @@index([tableName, archivedAt])
+  @@map("archive_logs")
+}

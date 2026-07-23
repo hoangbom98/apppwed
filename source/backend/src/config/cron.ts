@@ -319,6 +319,60 @@ async function tradeDailyProfitDistribution() {
   }
 }
 
+// ── Job: Monthly cold-storage archive — 1st of month, 01:00 (Tầng 2) ────────
+async function monthlyArchiveJob() {
+  if (process.env.ARCHIVE_ENABLED !== 'true') return;
+  try {
+    const { getPrismaClient } = require('./databases');
+    const { ARCHIVE_TARGETS, archiveTarget } = require('../shared/services/archiveService');
+    const adminPrisma = getPrismaClient('admin');
+
+    let totalRows = 0;
+    for (const target of ARCHIVE_TARGETS) {
+      try {
+        const projectPrisma = getPrismaClient(target.project);
+        const count = await archiveTarget(target, projectPrisma, adminPrisma);
+        totalRows += count;
+      } catch (err) {
+        logger.error(`[ArchiveCron] Failed ${target.project}.${target.model}`, { err: err.message });
+      }
+    }
+    logger.info(`[ArchiveCron] Monthly archive complete — ${totalRows} total rows archived`);
+  } catch (err) {
+    logger.error('monthlyArchiveJob failed', { err: err.message });
+  }
+}
+
+// ── Job: MySQL OPTIMIZE TABLE — Sunday 05:00 (Tầng 1) ───────────────────────
+// Reclaims space from deleted rows and rebuilds indexes (equivalent to VACUUM).
+// Safe on InnoDB with --single-transaction; keep the window short on production.
+async function optimizeDatabaseTables() {
+  try {
+    const { getPrismaClient } = require('./databases');
+
+    const optimizePlan: Array<{ project: string; tables: string[] }> = [
+      { project: 'game',   tables: ['transactions', 'game_sessions', 'deposit_orders', 'withdraw_orders'] },
+      { project: 'admin',  tables: ['audit_logs', 'security_logs', 'user_activities', 'ops_campaign_logs'] },
+      { project: 'trade',  tables: ['price_history', 'orders'] },
+      { project: 'sports', tables: ['live_scores', 'live_updates'] },
+    ];
+
+    for (const { project, tables } of optimizePlan) {
+      const prisma = getPrismaClient(project);
+      for (const table of tables) {
+        try {
+          await prisma.$executeRawUnsafe(`OPTIMIZE TABLE \`${table}\``);
+          logger.info(`[OptimizeCron] OPTIMIZE TABLE ${project}.${table} ✓`);
+        } catch (err) {
+          logger.warn(`[OptimizeCron] OPTIMIZE TABLE ${project}.${table} skipped: ${err.message}`);
+        }
+      }
+    }
+  } catch (err) {
+    logger.error('optimizeDatabaseTables failed', { err: err.message });
+  }
+}
+
 // ── Register all jobs ────────────────────────────────────────────────────────
 function register() {
   schedule('*/14 * * * *',   'keep-alive',                    keepAlive);
@@ -332,11 +386,15 @@ function register() {
   schedule('0 4 * * *',      'clean-security-logs',           cleanSecurityLogs);
   schedule('0 0 * * *',      'reset-daily-flags',             resetDailyFlags);
   schedule('5 0 * * *',      'trade-profit-distribution',     tradeDailyProfitDistribution);
+  // Tầng 1: DB maintenance
+  schedule('0 5 * * 0',      'optimize-db-tables',            optimizeDatabaseTables);
+  // Tầng 2: Cold storage archive (runs 1st of every month at 01:00)
+  schedule('0 1 1 * *',      'monthly-archive',               monthlyArchiveJob);
   // 6-part expression (node-cron ≥ 3): seconds-level scheduling
   schedule('*/10 * * * * *', 'trade-liquidation',             tradeLiquidationScan);
   schedule('*/30 * * * * *', 'trade-price-feed',              syncTradePrices);
   schedule('* * * * *',      'sports-live-scores',            syncSportsLiveScores);
-  logger.info('All cron jobs registered (risk + price-feed + live-scores + trade-liquidation + trade-profit)');
+  logger.info('All cron jobs registered (risk + price-feed + live-scores + trade-liquidation + trade-profit + archive + optimize)');
 }
 
 module.exports = { register };

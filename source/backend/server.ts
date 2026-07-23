@@ -203,8 +203,33 @@ app.get('/health', async (_req: Request, res: Response) => {
 app.get('/health/ready', (_req: Request, res: Response) => res.json({ ready: true }));
 app.get('/health/live',  (_req: Request, res: Response) => res.json({ alive: true }));
 
-// ── Prometheus-compatible metrics (protected by METRICS_API_KEY) ─────────
-app.get('/metrics', (req: Request, res: Response) => {
+// ── Prometheus-compatible metrics (Tầng 8: expanded) ─────────────────────
+// Track per-DB latency + cache stats + queue depths
+let dbLatencies: Record<string, number> = {};
+
+async function collectDbLatencies(): Promise<void> {
+  const DB_PROJECTS = ['hub', 'game', 'trade', 'dating', 'sports', 'admin'] as const;
+  const { getPrismaClient: _getPC } = require('./src/config/databases');
+  await Promise.all(
+    DB_PROJECTS.map(async (name) => {
+      const t0 = Date.now();
+      try {
+        await Promise.race([
+          _getPC(name).$queryRaw`SELECT 1`,
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3_000)),
+        ]);
+        dbLatencies[name] = Date.now() - t0;
+      } catch {
+        dbLatencies[name] = -1; // -1 = unreachable
+      }
+    }),
+  );
+}
+
+// Refresh DB latencies every 30 seconds in background
+setInterval(() => collectDbLatencies().catch(() => {}), 30_000);
+
+app.get('/metrics', async (req: Request, res: Response) => {
   const apiKey = process.env.METRICS_API_KEY;
   if (apiKey) {
     const provided = req.headers['x-metrics-key'] ?? req.query['key'];
@@ -213,16 +238,17 @@ app.get('/metrics', (req: Request, res: Response) => {
       return;
     }
   }
-  // original metrics handler below
-  ((_req: Request, _res: Response) => {
-  const mem    = process.memoryUsage();
-  const uptime = process.uptime();
+
+  const mem         = process.memoryUsage();
+  const uptime      = process.uptime();
+  const cacheMetrics = cache.getMetrics ? cache.getMetrics() : { hits: 0, misses: 0, errors: 0, hitRate: '0%' };
+
   const lines: string[] = [
-    '# HELP lkvip_requests_total Total number of HTTP requests received',
+    '# HELP lkvip_requests_total Total HTTP requests received',
     '# TYPE lkvip_requests_total counter',
     `lkvip_requests_total ${requestCount}`,
     '',
-    '# HELP lkvip_errors_total Total number of HTTP errors (5xx)',
+    '# HELP lkvip_errors_total Total HTTP 5xx errors',
     '# TYPE lkvip_errors_total counter',
     `lkvip_errors_total ${errorCount}`,
     '',
@@ -241,10 +267,29 @@ app.get('/metrics', (req: Request, res: Response) => {
     '# HELP lkvip_memory_heap_total_bytes Heap total in bytes',
     '# TYPE lkvip_memory_heap_total_bytes gauge',
     `lkvip_memory_heap_total_bytes ${mem.heapTotal}`,
+    '',
+    '# HELP lkvip_cache_hits_total Redis/memory cache hits',
+    '# TYPE lkvip_cache_hits_total counter',
+    `lkvip_cache_hits_total ${cacheMetrics.hits}`,
+    '',
+    '# HELP lkvip_cache_misses_total Redis/memory cache misses',
+    '# TYPE lkvip_cache_misses_total counter',
+    `lkvip_cache_misses_total ${cacheMetrics.misses}`,
+    '',
+    '# HELP lkvip_cache_errors_total Redis cache errors',
+    '# TYPE lkvip_cache_errors_total counter',
+    `lkvip_cache_errors_total ${cacheMetrics.errors}`,
+    '',
+    // Per-DB latency in milliseconds (-1 = unreachable)
+    '# HELP lkvip_db_query_latency_ms Last SELECT 1 latency per database (ms, -1=down)',
+    '# TYPE lkvip_db_query_latency_ms gauge',
+    ...Object.entries(dbLatencies).map(
+      ([name, ms]) => `lkvip_db_query_latency_ms{database="${name}"} ${ms}`,
+    ),
   ];
-  _res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
-  _res.send(lines.join('\n') + '\n');
-  })(req, res);
+
+  res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+  res.send(lines.join('\n') + '\n');
 });
 
 // ── 404 ────────────────────────────────────────────────────────────────────
