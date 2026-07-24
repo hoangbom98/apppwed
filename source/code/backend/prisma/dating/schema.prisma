@@ -1,0 +1,756 @@
+// =============================================================================
+// DATING DATABASE SCHEMA — v2.1
+// Database: dating_db
+// Prisma Client output: node_modules/.prisma/dating-client
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/dating-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATING_DATABASE_URL")
+}
+
+// =============================================================================
+// USER
+// =============================================================================
+
+model User {
+  id         String    @id @default(cuid())
+  email      String    @unique @db.VarChar(150)
+  password   String    @db.VarChar(255)
+  username   String?   @unique @db.VarChar(50)
+  fullName   String?   @db.VarChar(100)
+  avatar     String?   @db.VarChar(500)
+  bio        String?   @db.Text
+  gender     String?   @db.VarChar(20)   // male | female | other | prefer_not
+  birthDate  DateTime?
+  location   String?   @db.VarChar(150)
+  lat        Decimal?  @db.Decimal(10, 7)
+  lng        Decimal?  @db.Decimal(10, 7)
+  coins      Decimal   @default(0) @db.Decimal(18, 2)
+  isVerified Boolean   @default(false)
+  isVip      Boolean   @default(false)
+  // user | moderator | admin
+  role       String    @default("user") @db.VarChar(20)
+  // active | suspended | banned | deleted
+  status     String    @default("active") @db.VarChar(20)
+  lastSeen   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  transactions     Transaction[]
+  vipMemberships   VipMembership[]
+  callsSent        Call[]           @relation("Caller")
+  callsReceived    Call[]           @relation("Callee")
+  sentLikes        Like[]           @relation("LikeSender")
+  receivedLikes    Like[]           @relation("LikeReceiver")
+  matchesSent      Match[]          @relation("MatchUser1")
+  matchesReceived  Match[]          @relation("MatchUser2")
+  followingList    Follow[]         @relation("Follower")
+  followerList     Follow[]         @relation("Following")
+  chatRoomMembers  ChatRoomMember[]
+  messages         Message[]
+  posts            Post[]
+  postLikes        PostLike[]
+  stories          Story[]
+  albums           Album[]
+  liveStreams       LiveStream[]
+  sentGifts        GiftSend[]       @relation("GiftSender")
+  receivedGifts    GiftSend[]       @relation("GiftReceiver")
+  notifications    Notification[]
+  streamers        Streamer[]
+
+  @@index([email])
+  @@index([status])
+  @@index([gender, status])
+  @@index([isVip, status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// =============================================================================
+// FOLLOW
+// =============================================================================
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String   @db.VarChar(30)
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  followingId String   @db.VarChar(30)
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+// =============================================================================
+// STREAMER
+// =============================================================================
+
+model Streamer {
+  id             String   @id @default(cuid())
+  userId         String   @db.VarChar(30)
+  user           User     @relation(fields: [userId], references: [id])
+  pricePerMinute Decimal  @db.Decimal(18, 2)
+  bio            String?  @db.Text
+  avatarUrl      String?  @db.VarChar(500)
+  // active | paused | suspended
+  status         String   @default("active") @db.VarChar(20)
+  totalEarnings  Decimal  @default(0) @db.Decimal(18, 2)
+  rating         Decimal  @default(5.0) @db.Decimal(3, 1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  videos         Video[]
+
+  @@index([status])
+  @@map("streamers")
+}
+
+// =============================================================================
+// VIDEO (Paid / Free)
+// =============================================================================
+
+model Video {
+  id          String   @id @default(cuid())
+  streamerId  String   @db.VarChar(30)
+  streamer    Streamer @relation(fields: [streamerId], references: [id])
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  isPaid      Boolean  @default(false)
+  price       Decimal? @db.Decimal(18, 2)
+  url         String   @db.VarChar(500)
+  thumbnail   String?  @db.VarChar(500)
+  duration    Int?     // seconds
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  // active | processing | deleted
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([streamerId, status])
+  @@map("videos")
+}
+
+// =============================================================================
+// ALBUM (Photo album per user)
+// =============================================================================
+
+model Album {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(500)
+  cover       String?  @db.VarChar(500)
+  // public | friends | private
+  visibility  String   @default("public") @db.VarChar(20)
+  photoCount  Int      @default(0)
+  // active | deleted
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos      AlbumPhoto[]
+
+  @@index([userId, status])
+  @@map("albums")
+}
+
+model AlbumPhoto {
+  id        String   @id @default(cuid())
+  albumId   String   @db.VarChar(30)
+  album     Album    @relation(fields: [albumId], references: [id])
+  url       String   @db.VarChar(500)
+  caption   String?  @db.VarChar(255)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([albumId])
+  @@map("album_photos")
+}
+
+// =============================================================================
+// LIKE / MATCH
+// =============================================================================
+
+model Like {
+  id         String   @id @default(cuid())
+  senderId   String   @db.VarChar(30)
+  sender     User     @relation("LikeSender", fields: [senderId], references: [id])
+  receiverId String   @db.VarChar(30)
+  receiver   User     @relation("LikeReceiver", fields: [receiverId], references: [id])
+  // like | super_like | dislike
+  type       String   @default("like") @db.VarChar(20)
+  createdAt  DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, createdAt])
+  @@map("likes")
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  user1Id   String   @db.VarChar(30)
+  user1     User     @relation("MatchUser1", fields: [user1Id], references: [id])
+  user2Id   String   @db.VarChar(30)
+  user2     User     @relation("MatchUser2", fields: [user2Id], references: [id])
+  // pending | matched | unmatched | blocked
+  status    String   @default("pending") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatRoom  ChatRoom?
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id, status])
+  @@index([user2Id, status])
+  @@map("matches")
+}
+
+// =============================================================================
+// CHAT — Rooms, Members, Messages
+// =============================================================================
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  matchId   String?  @unique @db.VarChar(30)
+  match     Match?   @relation(fields: [matchId], references: [id])
+  // direct | group
+  type      String   @default("direct") @db.VarChar(20)
+  name      String?  @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   ChatRoomMember[]
+  messages  Message[]
+
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id         String    @id @default(cuid())
+  roomId     String    @db.VarChar(30)
+  room       ChatRoom  @relation(fields: [roomId], references: [id])
+  userId     String    @db.VarChar(30)
+  user       User      @relation(fields: [userId], references: [id])
+  lastReadAt DateTime?
+  joinedAt   DateTime  @default(now())
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("chat_room_members")
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  roomId    String    @db.VarChar(30)
+  room      ChatRoom  @relation(fields: [roomId], references: [id])
+  senderId  String    @db.VarChar(30)
+  sender    User      @relation(fields: [senderId], references: [id])
+  content   String    @db.Text
+  // text | image | video | audio | file | sticker | gift
+  type      String    @default("text") @db.VarChar(20)
+  fileUrl   String?   @db.VarChar(500)
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([roomId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+// =============================================================================
+// CALL
+// =============================================================================
+
+model Call {
+  id          String    @id @default(cuid())
+  callerId    String    @db.VarChar(30)
+  caller      User      @relation("Caller", fields: [callerId], references: [id])
+  calleeId    String    @db.VarChar(30)
+  callee      User      @relation("Callee", fields: [calleeId], references: [id])
+  // video | audio
+  type        String    @default("video") @db.VarChar(20)
+  // ringing | ongoing | ended | missed | rejected
+  status      String    @default("ringing") @db.VarChar(20)
+  durationMin Decimal?  @db.Decimal(8, 2)
+  cost        Decimal?  @db.Decimal(18, 2)
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+
+  @@index([callerId, startedAt])
+  @@index([calleeId])
+  @@map("calls")
+}
+
+// =============================================================================
+// LIVE STREAM
+// =============================================================================
+
+model LiveStream {
+  id          String    @id @default(cuid())
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  title       String    @db.VarChar(255)
+  thumbnail   String?   @db.VarChar(500)
+  streamKey   String?   @db.VarChar(100)
+  // scheduled | live | ended | cancelled
+  status      String    @default("scheduled") @db.VarChar(20)
+  viewerCount Int       @default(0)
+  peakViewers Int       @default(0)
+  coinsEarned Decimal   @default(0) @db.Decimal(18, 2)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gifts       GiftSend[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("live_streams")
+}
+
+// =============================================================================
+// POST (Social Feed)
+// =============================================================================
+
+model Post {
+  id         String    @id @default(cuid())
+  userId     String    @db.VarChar(30)
+  user       User      @relation(fields: [userId], references: [id])
+  content    String    @db.Text
+  images     Json?
+  // public | friends | private
+  visibility String    @default("public") @db.VarChar(20)
+  likes      Int       @default(0)
+  comments   Int       @default(0)
+  // active | deleted | hidden
+  status     String    @default("active") @db.VarChar(20)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  postLikes    PostLike[]
+  postComments PostComment[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String   @db.VarChar(30)
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String   @db.VarChar(30)
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String   @db.VarChar(30)
+  content   String   @db.Text
+  likes     Int      @default(0)
+  // active | deleted
+  status    String   @default("active") @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+// =============================================================================
+// STORY
+// =============================================================================
+
+model Story {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  mediaUrl  String   @db.VarChar(500)
+  // image | video
+  mediaType String   @default("image") @db.VarChar(20)
+  duration  Int      @default(5)       // seconds visible
+  expiresAt DateTime
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+  @@map("stories")
+}
+
+// =============================================================================
+// GIFTS
+// =============================================================================
+
+model Gift {
+  id        String     @id @default(cuid())
+  name      String     @db.VarChar(100)
+  icon      String?    @db.VarChar(500)
+  coinCost  Decimal    @db.Decimal(18, 2)
+  // normal | rare | epic | legendary
+  category  String     @default("normal") @db.VarChar(30)
+  // active | inactive
+  status    String     @default("active") @db.VarChar(20)
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  sends     GiftSend[]
+
+  @@map("gifts")
+}
+
+model GiftSend {
+  id           String      @id @default(cuid())
+  giftId       String      @db.VarChar(30)
+  gift         Gift        @relation(fields: [giftId], references: [id])
+  senderId     String      @db.VarChar(30)
+  sender       User        @relation("GiftSender", fields: [senderId], references: [id])
+  receiverId   String      @db.VarChar(30)
+  receiver     User        @relation("GiftReceiver", fields: [receiverId], references: [id])
+  liveStreamId String?     @db.VarChar(30)
+  liveStream   LiveStream? @relation(fields: [liveStreamId], references: [id])
+  quantity     Int         @default(1)
+  coinValue    Decimal     @db.Decimal(18, 2)
+  createdAt    DateTime    @default(now())
+
+  @@index([senderId])
+  @@index([receiverId, createdAt])
+  @@map("gift_sends")
+}
+
+// =============================================================================
+// VIP MEMBERSHIP
+// =============================================================================
+
+model VipPlan {
+  id          String    @id @default(cuid())
+  name        String    @db.VarChar(100)
+  // duration in days
+  duration    Int
+  price       Decimal   @db.Decimal(18, 2)
+  coinBonus   Decimal   @default(0) @db.Decimal(18, 2)
+  features    Json?
+  sortOrder   Int       @default(0)
+  // active | inactive
+  status      String    @default("active") @db.VarChar(20)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  memberships VipMembership[]
+
+  @@map("vip_plans")
+}
+
+model VipMembership {
+  id        String    @id @default(cuid())
+  userId    String    @db.VarChar(30)
+  user      User      @relation(fields: [userId], references: [id])
+  planId    String    @db.VarChar(30)
+  plan      VipPlan   @relation(fields: [planId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  // active | expired | cancelled
+  status    String    @default("active") @db.VarChar(20)
+  createdAt DateTime  @default(now())
+
+  @@index([userId, status])
+  @@index([userId, endDate])
+  @@map("vip_memberships")
+}
+
+// =============================================================================
+// TRANSACTION
+// =============================================================================
+
+model Transaction {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Decimal  @db.Decimal(18, 2)
+  coins     Decimal? @db.Decimal(18, 2)
+  // deposit | withdraw | coin_purchase | coin_gift | vip_purchase | call_fee
+  type      String   @db.VarChar(30)
+  // pending | success | failed | cancelled
+  status    String   @default("success") @db.VarChar(20)
+  note      String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  @@index([userId, type])
+  @@index([userId, status, createdAt])
+  @@map("transactions")
+}
+
+// =============================================================================
+// NOTIFICATION
+// =============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  // like | match | message | gift | follow | system | vip
+  type      String   @db.VarChar(30)
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  link      String?  @db.VarChar(500)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// =============================================================================
+// SHARED MODULES — Support Chat / Ticket / Knowledge / Translation / Files
+// =============================================================================
+
+model SupportRoom {
+  id            String    @id @default(cuid())
+  type          String    @default("private") @db.VarChar(20)
+  name          String?   @db.VarChar(100)
+  avatar        String?   @db.VarChar(500)
+  lastMessage   String?   @db.Text
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants  SupportParticipant[]
+  messages      SupportMessage[]
+  tickets       SupportTicket[]
+
+  @@map("support_rooms")
+}
+
+model SupportParticipant {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  userId     String      @db.VarChar(30)
+  isAgent    Boolean     @default(false)
+  lastReadAt DateTime    @default(now())
+  joinedAt   DateTime    @default(now())
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("support_participants")
+}
+
+model SupportMessage {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  senderId   String      @db.VarChar(30)
+  type       String      @default("text") @db.VarChar(20)
+  content    String      @db.Text
+  metadata   Json?
+  isRead     Boolean     @default(false)
+  readAt     DateTime?
+  isDeleted  Boolean     @default(false)
+  origLang   String?     @db.VarChar(10)
+  translated Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([roomId, createdAt])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String       @db.VarChar(30)
+  roomId      String?      @db.VarChar(30)
+  room        SupportRoom? @relation(fields: [roomId], references: [id])
+  subject     String       @db.VarChar(255)
+  description String?      @db.Text
+  category    String       @default("general") @db.VarChar(50)
+  priority    String       @default("medium") @db.VarChar(20)
+  status      String       @default("open") @db.VarChar(20)
+  assignedTo  String?      @db.VarChar(30)
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies     SupportTicketReply[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id          String        @id @default(cuid())
+  ticketId    String        @db.VarChar(30)
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId    String        @db.VarChar(30)
+  content     String        @db.Text
+  isInternal  Boolean       @default(false)
+  attachments Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_ticket_replies")
+}
+
+model KnowledgeArticle {
+  id          String    @id @default(cuid())
+  category    String    @default("general") @db.VarChar(50)
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.VarChar(500)
+  image       String?   @db.VarChar(500)
+  authorId    String?   @db.VarChar(30)
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  status      String    @default("published") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  translations KnowledgeTranslation[]
+
+  @@index([category, status])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeTranslation {
+  id        String           @id @default(cuid())
+  articleId String           @db.VarChar(30)
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id])
+  language  String           @db.VarChar(10)
+  title     String           @db.VarChar(255)
+  content   String           @db.LongText
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, language])
+  @@map("knowledge_translations")
+}
+
+model NotificationSetting {
+  id        String   @id @default(cuid())
+  userId    String   @unique @db.VarChar(30)
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  inApp     Boolean  @default(true)
+  types     Json?
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model TranslationLog {
+  id             String   @id @default(cuid())
+  sourceLang     String   @db.VarChar(10)
+  targetLang     String   @db.VarChar(10)
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  service        String   @default("deepseek") @db.VarChar(50)
+  tokenCount     Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("translation_logs")
+}
+
+model FileUpload {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  type         String   @default("general") @db.VarChar(30)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("file_uploads")
+}
+
+// =============================================================================
+// DATING MISSION (Gamification tasks with DB persistence)
+// =============================================================================
+
+model DatingMission {
+  id          String   @id @default(cuid())
+  slug        String   @unique @db.VarChar(100)
+  title       String   @db.VarChar(255)
+  description String?  @db.VarChar(500)
+  reward      Decimal  @default(0) @db.Decimal(18, 2)
+  // daily | weekly | one_time
+  type        String   @default("daily") @db.VarChar(20)
+  targetCount Int      @default(1)
+  icon        String?  @db.VarChar(255)
+  sortOrder   Int      @default(0)
+  // active | inactive
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userProgress UserMissionProgress[]
+
+  @@index([status, type])
+  @@map("dating_missions")
+}
+
+model UserMissionProgress {
+  id          String        @id @default(cuid())
+  userId      String        @db.VarChar(30)
+  missionId   String        @db.VarChar(30)
+  mission     DatingMission @relation(fields: [missionId], references: [id])
+  progress    Int           @default(0)
+  completedAt DateTime?
+  claimedAt   DateTime?
+  resetAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([userId, missionId])
+  @@index([userId, completedAt])
+  @@map("user_mission_progress")
+}
+
+// =============================================================================
+// DATING EVENT (Timed events / special promotions)
+// =============================================================================
+
+model DatingEvent {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  // promotion | contest | holiday | special
+  type        String   @default("promotion") @db.VarChar(30)
+  banner      String?  @db.VarChar(500)
+  startsAt    DateTime
+  endsAt      DateTime
+  isActive    Boolean  @default(true)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, startsAt, endsAt])
+  @@map("dating_events")
+}

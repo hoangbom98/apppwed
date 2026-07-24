@@ -1,0 +1,221 @@
+// code/backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ===== CORE TABLES =====
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(50)
+  domain      String?  @unique @db.VarChar(255)
+  status      ProjectStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserProject[]
+  configs     Config[]
+  wallets     Wallet[]
+  transactions Transaction[]
+  
+  @@index([slug])
+}
+
+enum ProjectStatus { ACTIVE INACTIVE MAINTENANCE }
+
+model User {
+  id              String   @id @default(cuid())
+  username        String   @unique @db.VarChar(50)
+  email           String   @unique @db.VarChar(255)
+  password        String   @db.VarChar(255)
+  createdAt       DateTime @default(now())
+  
+  projects        UserProject[]
+  wallets         Wallet[]
+}
+
+model UserProject {
+  userId      String
+  projectId   String
+  role        String   @default("USER")
+  
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@id([userId, projectId])
+  @@index([projectId])
+}
+
+// ===== WALLET =====
+
+model Wallet {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  main        Float    @default(0)
+  
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  amount      Float
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ===== CONFIG =====
+
+model Config {
+  id          String   @id @default(cuid())
+  key         String   @db.VarChar(100)
+  value       Json
+  projectId   String
+  
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@unique([key, projectId])
+  @@index([projectId])
+}
+
+// ===== SETTINGS & SYSTEM =====
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique @db.VarChar(100)
+  value       Json
+  group       String   @db.VarChar(50)
+  type        String   @db.VarChar(20)
+  label       String   @db.VarChar(100)
+  description String?  @db.Text
+  options     Json?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([group])
+}
+
+model NotificationTemplate {
+  id          String   @id @default(cuid())
+  type        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  subject     String?  @db.VarChar(255)
+  content     String   @db.Text
+  channel     String   @db.VarChar(20) // 'email', 'telegram'
+  variables   Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model NotificationLog {
+  id          String   @id @default(cuid())
+  templateId  String?
+  channel     String   @db.VarChar(20)
+  recipient   String   @db.VarChar(255)
+  subject     String?  @db.VarChar(255)
+  content     String   @db.Text
+  status      String   @db.VarChar(20)
+  error       String?  @db.Text
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model CronJob {
+  id          String   @id @default(cuid())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  command     String   @db.VarChar(255)
+  schedule    String   @db.VarChar(50)
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  status      String   @db.VarChar(20)
+  executedBy  String?  @db.VarChar(50)
+  log         String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Provider {
+  id          String   @id @default(cuid())
+  name        String   @unique @db.VarChar(50)
+  displayName String   @db.VarChar(100)
+  description String?  @db.Text
+  baseUrl     String?  @db.VarChar(255)
+  isActive    Boolean  @default(true)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  services    Service[]
+  credentials ProviderCredential[]
+  integrations ProviderIntegration[]
+}
+
+model Service {
+  id          String      @id @default(cuid())
+  providerId  String
+  provider    Provider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  type        String      // ServiceType enum mapped to string
+  name        String      @db.VarChar(100)
+  description String?     @db.Text
+  endpoint    String?     @db.VarChar(255)
+  config      Json?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  integrations ProviderIntegration[]
+}
+
+model ProviderCredential {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  key         String   @db.VarChar(100)
+  value       String   @db.Text // Encrypted
+  environment String   @db.VarChar(20) // 'sandbox' | 'production'
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([providerId, environment, key])
+}
+
+model ProviderIntegration {
+  id          String    @id @default(cuid())
+  providerId  String
+  provider    Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  serviceId   String?
+  service     Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  request     Json
+  response    Json?
+  status      Int
+  error       String?   @db.Text
+  duration    Int
+  userId      String?
+  createdAt   DateTime  @default(now())
+
+  @@index([providerId])
+  @@index([createdAt])
+}

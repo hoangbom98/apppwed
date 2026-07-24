@@ -1,0 +1,1160 @@
+// =============================================================================
+// GAME DATABASE SCHEMA — v3.0
+// Database: game_db
+// Prisma Client output: node_modules/.prisma/game-client
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/game-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("GAME_DATABASE_URL")
+}
+
+// =============================================================================
+// USER  (game_db local user — tracks balance, frozen, vip, agent)
+// =============================================================================
+
+model User {
+  id           String    @id @default(cuid())
+  email        String?   @unique @db.VarChar(191)
+  phone        String?   @unique @db.VarChar(20)
+  username     String?   @unique @db.VarChar(50)
+  password     String    @db.VarChar(255)
+  fullName     String?   @db.VarChar(100)
+  avatar       String?   @db.VarChar(500)
+  // user | agent | admin
+  role         String    @default("user") @db.VarChar(20)
+  // active | suspended | banned
+  status       String    @default("active") @db.VarChar(20)
+  balance      Decimal   @default(0) @db.Decimal(18, 2)
+  frozen       Decimal   @default(0) @db.Decimal(18, 2)   // locked in pending withdrawals
+  totalDeposit Decimal   @default(0) @db.Decimal(18, 2)
+  totalBet     Decimal   @default(0) @db.Decimal(18, 2)
+  totalWin     Decimal   @default(0) @db.Decimal(18, 2)
+  vipLevel     Int       @default(1)
+  referralCode        String?   @unique @db.VarChar(30)
+  referredBy          String?   @db.VarChar(30)
+  agentId             String?   @db.VarChar(30)                   // FK-style ref (same table)
+  lastLogin           DateTime?
+  lastDailyClaimAt    DateTime?                               // VIP daily reward last claimed
+  lastMonthlyClaimAt  DateTime?                               // VIP monthly reward last claimed
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  depositOrders      DepositOrder[]
+  withdrawOrders     WithdrawOrder[]
+  transactions       Transaction[]
+  lkvipTransactions  LkvipTransaction[]
+  withdrawalRequests WithdrawalRequest[]
+  virtualAccounts    VirtualAccount[]
+  gameSessions       GameSession[]
+  lotteryBets        LotteryBet[]
+  userVip            UserVip?
+  cashbackHistory    CashbackHistory[]
+  interestHistory    InterestHistory[]
+  promotionClaims    PromotionClaim[]
+  notifications      Notification[]
+  referrals          Referral[]        @relation("Referrer")
+  referredByUser     Referral[]        @relation("Referee")
+  agentProfile       Agent?
+
+  @@index([email])
+  @@index([status])
+  @@index([vipLevel])
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// =============================================================================
+// REFERRAL
+// =============================================================================
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String   @db.VarChar(30)
+  referrer   User     @relation("Referrer", fields: [referrerId], references: [id])
+  refereeId  String   @unique @db.VarChar(30)
+  referee    User     @relation("Referee", fields: [refereeId], references: [id])
+  bonus      Decimal  @default(0) @db.Decimal(18, 2)
+  status     String   @default("active") @db.VarChar(20)  // active | expired
+  createdAt  DateTime @default(now())
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+// =============================================================================
+// AGENT & COMMISSION
+// =============================================================================
+
+model Agent {
+  id             String    @id @default(cuid())
+  userId         String    @unique @db.VarChar(30)
+  user           User      @relation(fields: [userId], references: [id])
+  // Referential parent agent — stored as plain string to avoid circular Prisma FK issues
+  parentAgentId  String?   @db.VarChar(30)
+  // 1 | 2 | 3 (nesting level)
+  level          Int       @default(1)
+  commissionRate Decimal   @default(0) @db.Decimal(5, 4)   // e.g. 0.0500 = 5%
+  totalCommission Decimal  @default(0) @db.Decimal(18, 2)
+  // active | suspended
+  status         String    @default("active") @db.VarChar(20)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  commissions    Commission[]
+
+  @@index([parentAgentId])
+  @@index([status])
+  @@map("agents")
+}
+
+model Commission {
+  id           String   @id @default(cuid())
+  agentId      String   @db.VarChar(30)
+  agent        Agent    @relation(fields: [agentId], references: [id])
+  // e.g. "2025-06" monthly or "2025-01-15" daily
+  period       String   @db.VarChar(20)
+  totalBet     Decimal  @default(0) @db.Decimal(18, 2)
+  netProfit    Decimal  @default(0) @db.Decimal(18, 2)
+  rate         Decimal  @db.Decimal(5, 4)
+  amount       Decimal  @default(0) @db.Decimal(18, 2)
+  // pending | paid | cancelled
+  status       String   @default("pending") @db.VarChar(20)
+  settledAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([agentId, period])
+  @@index([agentId, status])
+  @@map("commissions")
+}
+
+// =============================================================================
+// VIP LEVELS & USER VIP
+// =============================================================================
+
+model VipLevel {
+  id             String   @id @default(cuid())
+  level          Int      @unique
+  name           String   @db.VarChar(50)             // Bronze | Silver | Gold | Platinum | Diamond
+  icon           String?  @db.VarChar(500)
+  minTotalDeposit Decimal @default(0) @db.Decimal(18, 2)
+  cashbackRate   Decimal  @default(0) @db.Decimal(5, 4)  // weekly cashback %
+  interestRate   Decimal  @default(0) @db.Decimal(5, 4)  // daily balance interest %
+  withdrawLimit  Decimal  @default(0) @db.Decimal(18, 2) // daily withdraw cap
+  freeSpins      Int      @default(0)
+  benefits       Json?
+  // active | inactive
+  status         String   @default("active") @db.VarChar(20)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userVips       UserVip[]
+
+  @@map("vip_levels")
+}
+
+model UserVip {
+  id          String   @id @default(cuid())
+  userId      String   @unique @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  levelId     String   @db.VarChar(30)
+  level       VipLevel @relation(fields: [levelId], references: [id])
+  totalDeposit Decimal @default(0) @db.Decimal(18, 2)
+  totalBet    Decimal  @default(0) @db.Decimal(18, 2)
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_vips")
+}
+
+model CashbackHistory {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Decimal  @db.Decimal(18, 2)
+  rate      Decimal  @db.Decimal(5, 4)
+  period    String   @db.VarChar(20)            // e.g. "2025-W01" weekly
+  status    String   @default("paid") @db.VarChar(20)
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("cashback_history")
+}
+
+model InterestHistory {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Decimal  @db.Decimal(18, 2)
+  rate      Decimal  @db.Decimal(5, 4)
+  balance   Decimal  @db.Decimal(18, 2)         // balance at time of calc
+  date      String   @db.VarChar(10)             // "2025-01-15"
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+  @@map("interest_history")
+}
+
+// =============================================================================
+// PROMOTIONS
+// =============================================================================
+
+model Promotion {
+  id          String   @id @default(cuid())
+  // welcome | deposit | cashback | free_spin | event | referral
+  type        String   @db.VarChar(30)
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  description String?  @db.Text
+  image       String?  @db.VarChar(500)
+  // bonus_percent | bonus_fixed | free_spin | cashback
+  bonusType   String   @db.VarChar(30)
+  bonusValue  Decimal  @db.Decimal(10, 2)
+  minDeposit  Decimal  @default(0) @db.Decimal(18, 2)
+  maxBonus    Decimal? @db.Decimal(18, 2)
+  wagerMultiplier Decimal @default(1) @db.Decimal(5, 2)  // rollover requirement
+  maxUses     Int?                                         // null = unlimited
+  usedCount   Int      @default(0)
+  maxUsesPerUser Int   @default(1)
+  // active | inactive | expired
+  status      String   @default("active") @db.VarChar(20)
+  startDate   DateTime?
+  endDate     DateTime?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  claims      PromotionClaim[]
+
+  @@index([status, startDate, endDate])
+  @@map("promotions")
+}
+
+model PromotionClaim {
+  id          String    @id @default(cuid())
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  promotionId String    @db.VarChar(30)
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  bonusAmount Decimal   @db.Decimal(18, 2)
+  wagered     Decimal   @default(0) @db.Decimal(18, 2)
+  wagerNeeded Decimal   @default(0) @db.Decimal(18, 2)
+  // pending | active | completed | expired | cancelled
+  status      String    @default("pending") @db.VarChar(20)
+  claimedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, promotionId])
+  @@index([userId, status])
+  @@map("promotion_claims")
+}
+
+// =============================================================================
+// DEPOSIT ORDER
+// =============================================================================
+
+model DepositOrder {
+  id          String    @id @default(cuid())
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  // bank | usdt | momo | zalopay | vnpay | vietqr
+  method      String    @db.VarChar(30)
+  amount      Decimal   @db.Decimal(18, 2)
+  currency    String    @default("VND") @db.VarChar(10)
+  fee         Decimal   @default(0) @db.Decimal(18, 2)
+  txRef       String?   @db.VarChar(100)         // payment provider ref
+  proof       String?   @db.VarChar(500)         // uploaded proof image
+  note        String?   @db.VarChar(500)
+  adminNote   String?   @db.VarChar(500)
+  // pending | success | failed | expired | cancelled
+  status      String    @default("pending") @db.VarChar(20)
+  processedBy String?   @db.VarChar(30)
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("deposit_orders")
+}
+
+// =============================================================================
+// WITHDRAW ORDER
+// =============================================================================
+
+model WithdrawOrder {
+  id          String    @id @default(cuid())
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  amount      Decimal   @db.Decimal(18, 2)
+  fee         Decimal   @default(0) @db.Decimal(18, 2)
+  netAmount   Decimal   @default(0) @db.Decimal(18, 2)  // amount - fee; set by application
+  // bank | usdt | momo | okpay
+  method      String    @db.VarChar(30)
+  address     String?   @db.VarChar(200)
+  bankInfo    Json?     // { bankName, accountNumber, accountName }
+  txHash      String?   @db.VarChar(200)
+  note        String?   @db.VarChar(500)
+  adminNote   String?   @db.VarChar(500)
+  // pending | processing | success | failed | cancelled
+  status      String    @default("pending") @db.VarChar(20)
+  processedBy String?   @db.VarChar(30)
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("withdraw_orders")
+}
+
+// =============================================================================
+// TRANSACTION (wallet ledger)
+// =============================================================================
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String   @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id])
+  // deposit | withdraw | bet | win | refund | bonus | cashback | interest | commission | adjustment
+  type          String   @db.VarChar(30)
+  amount        Decimal  @db.Decimal(18, 2)
+  balanceBefore Decimal  @db.Decimal(18, 2)
+  balanceAfter  Decimal  @db.Decimal(18, 2)
+  referenceId   String?  @db.VarChar(30)    // deposit_order.id / session.id / etc.
+  referenceType String?  @db.VarChar(30)    // deposit_order | withdraw_order | game_session | lottery_bet
+  note          String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
+  @@map("transactions")
+}
+
+// =============================================================================
+// NOTIFICATION
+// =============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  // deposit | withdraw | win | promo | system | vip | cashback | commission
+  type      String   @db.VarChar(30)
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  link      String?  @db.VarChar(500)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// =============================================================================
+// GAME AGGREGATOR (GSC / Goldgate / TC Gaming)
+//
+// An Aggregator is an API gateway that connects to many underlying game Vendors/Products.
+// Each Aggregator has its own auth method, signing algorithm, and product catalog.
+//
+// Aggregator  →  Products (Vendors)  →  Games
+//   GSC            CQ9 (1009)           CQ9-SLOT-001
+//   GSC            PG Soft (1007)       PG-BIG-BASS-001
+//   Goldgate       casino-evolution     lobby / live-speed-roulette
+//   TCGaming       CQ9 (16)             RNG games
+//   TCGaming       SBO (54)             SPORTS lobby
+//   TCGaming       BTI (47)             SPORTS lobby
+// =============================================================================
+
+model GameAggregator {
+  id          String   @id @default(cuid())
+  // GSC | GOLDGATE | TCGAMING
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  // API base URL (e.g. https://api.gscplus.com)
+  baseUrl     String   @db.VarChar(255)
+  // apiKey = agentCode (GSC) | clientId (Goldgate) | merchant_code (TCGaming)
+  apiKey      String   @db.VarChar(255)
+  // secretKey = agentToken (GSC) | clientSecret (Goldgate) | des_key (TCGaming)
+  secretKey   String   @db.VarChar(255)
+  // active | inactive | maintenance
+  status      String   @default("active") @db.VarChar(20)
+  // Extra config JSON:
+  //   GSC:      { currency, language, lobbyUrl, depositUrl }
+  //   Goldgate: { language, lobbyUrl }
+  //   TCGaming: { hashKey, currency, callbackUrl }
+  config      Json?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    GameProduct[]
+
+  @@map("game_aggregators")
+}
+
+// =============================================================================
+// GAME PRODUCT (Vendor within an Aggregator)
+//
+// A Product represents one vendor/sub-provider accessible through an Aggregator.
+// The productCode is specific to each Aggregator (e.g. GSC productId=1009 = CQ9,
+// but TCGaming productCode=16 = CQ9).
+//
+// Wallet model: transfer | seamless | both
+// Game types:  slot | live | rng | fishing | pvp | sports | esports | lottery
+// =============================================================================
+
+model GameProduct {
+  id             String        @id @default(cuid())
+  aggregatorId   String        @db.VarChar(30)
+  aggregator     GameAggregator @relation(fields: [aggregatorId], references: [id])
+  // Aggregator-specific code:
+  //   GSC:      numeric ID as string (e.g. "1009" = CQ9, "1007" = PG Soft)
+  //   Goldgate: vendorCode string (e.g. "casino-evolution", "pg-soft")
+  //   TCGaming: numeric code as string (e.g. "16" = CQ9, "151" = UG2 Sports)
+  productCode    String        @db.VarChar(50)
+  // Short abbreviation (e.g. "CQ9", "PG", "SBO", "BTI")
+  abbrev         String?       @db.VarChar(30)
+  // Display name (e.g. "CQ9 Gaming", "PG Soft", "SBOBET Sports")
+  name           String        @db.VarChar(150)
+  // slot | live | fishing | pvp | sports | esports | lottery
+  gameTypes      Json?         // array: ["rng", "fish"]
+  // transfer | seamless | both
+  walletType     String        @default("transfer") @db.VarChar(20)
+  // active | inactive | maintenance | delisted
+  status         String        @default("active") @db.VarChar(20)
+  thumbnail      String?       @db.VarChar(500)
+  sortOrder      Int           @default(0)
+  // Extra: { minBet, maxBet, currencies, regions }
+  config         Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  games          Game[]
+
+  @@unique([aggregatorId, productCode])
+  @@index([aggregatorId, status])
+  @@index([walletType])
+  @@map("game_products")
+}
+
+// =============================================================================
+// GAME PROVIDER (legacy alias — kept for backward compat with existing game module code)
+// New code should use GameAggregator + GameProduct instead.
+// =============================================================================
+
+model GameProvider {
+  id          String   @id @default(cuid())
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  baseUrl     String   @db.VarChar(255)
+  apiKey      String?  @db.VarChar(255)
+  secretKey   String?  @db.VarChar(255)
+  status      String   @default("active") @db.VarChar(20)
+  config      Json?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("game_providers")
+}
+
+// =============================================================================
+// GAME CATEGORY
+// =============================================================================
+
+model GameCategory {
+  id        String @id @default(cuid())
+  name      String @db.VarChar(100)
+  slug      String @unique @db.VarChar(100)
+  icon      String? @db.VarChar(255)
+  sortOrder Int    @default(0)
+  status    String @default("active") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  games     Game[]
+
+  @@map("game_categories")
+}
+
+// =============================================================================
+// GAME
+// =============================================================================
+
+model Game {
+  id            String        @id @default(cuid())
+  // New: belongs to a GameProduct (vendor within an aggregator)
+  productId     String?       @db.VarChar(30)
+  product       GameProduct?  @relation(fields: [productId], references: [id])
+  categoryId    String        @db.VarChar(30)
+  category      GameCategory  @relation(fields: [categoryId], references: [id])
+  // Game code as returned by aggregator (e.g. Goldgate gameCode, GSC gameCode, TCGaming game_code)
+  code          String        @db.VarChar(100)
+  // Aggregator-specific game ID if provided (Goldgate: gameId field)
+  externalId    String?       @db.VarChar(100)
+  name          String        @db.VarChar(150)
+  slug          String        @unique @db.VarChar(150)
+  description   String?       @db.Text
+  thumbnail     String?       @db.VarChar(500)
+  // slot | live_casino | fishing | card | sports | lottery | esports
+  type          String        @db.VarChar(30)
+  isFeatured    Boolean       @default(false)
+  isHot         Boolean       @default(false)
+  isNew         Boolean       @default(false)
+  underMaintenance Boolean    @default(false)
+  tags          Json?
+  minBet        Decimal       @default(0) @db.Decimal(18, 2)
+  maxBet        Decimal       @default(0) @db.Decimal(18, 2)
+  rtp           Decimal?      @db.Decimal(5, 2)   // Return To Player %
+  status        String        @default("active") @db.VarChar(20)
+  sortOrder     Int           @default(0)
+  config        Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  sessions      GameSession[]
+
+  @@index([productId])
+  @@index([categoryId])
+  @@index([type, status])
+  @@index([isFeatured, status])
+  @@map("games")
+}
+
+// =============================================================================
+// GAME SESSION
+// =============================================================================
+
+model GameSession {
+  id                String    @id @default(cuid())
+  userId            String    @db.VarChar(30)
+  user              User      @relation(fields: [userId], references: [id])
+  gameId            String    @db.VarChar(30)
+  game              Game      @relation(fields: [gameId], references: [id])
+  providerSessionId String?   @db.VarChar(100)
+  betAmount         Decimal   @db.Decimal(18, 2)
+  winAmount         Decimal   @default(0) @db.Decimal(18, 2)
+  netPnl            Decimal   @default(0) @db.Decimal(18, 2)  // winAmount - betAmount
+  result            Json?
+  // playing | finished | cancelled | error
+  status            String    @default("playing") @db.VarChar(20)
+  startedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  gameTransactions  GameTransaction[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([gameId])
+  @@map("game_sessions")
+}
+
+// =============================================================================
+// GAME TRANSACTION
+// (used by both gscSeamlessController and legacy game sessions)
+// =============================================================================
+
+model GameTransaction {
+  id              String       @id @default(cuid())
+  userId          String       @db.VarChar(30)
+  // sessionId is optional — seamless callbacks don't always have a session
+  sessionId       String?      @db.VarChar(30)
+  session         GameSession? @relation(fields: [sessionId], references: [id])
+  // Seamless wallet fields (from gscSeamlessController)
+  externalId      String?      @unique @db.VarChar(100) // GSC transaction id (for idempotency)
+  action          String?      @db.VarChar(50)           // e.g. "DEBIT", "CREDIT", "SETTLE"
+  wagerCode       String?      @db.VarChar(100)
+  wagerStatus     String?      @db.VarChar(30)
+  roundId         String?      @db.VarChar(100)
+  productCode     String?      @db.VarChar(50)           // GSC product_code
+  gameCode        String?      @db.VarChar(100)
+  gameType        String?      @db.VarChar(30)
+  wagerType       String?      @db.VarChar(30)           // NORMAL | FRB | etc.
+  betAmount       Decimal      @default(0) @db.Decimal(18, 2)
+  validBetAmount  Decimal      @default(0) @db.Decimal(18, 2)
+  prizeAmount     Decimal      @default(0) @db.Decimal(18, 2)
+  settledAt       DateTime?
+  // bet | win | refund | bonus | cancel
+  type            String       @db.VarChar(20)
+  amount          Decimal      @db.Decimal(18, 2)
+  balanceBefore   Decimal      @default(0) @db.Decimal(18, 2)
+  balanceAfter    Decimal      @db.Decimal(18, 2)
+  note            String?      @db.VarChar(255)
+  createdAt       DateTime     @default(now())
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@index([sessionId])
+  @@index([externalId])
+  @@index([wagerCode])
+  @@map("game_transactions")
+}
+
+// =============================================================================
+// GAME WAGER (GSC pushbetdata — wager status sync, no balance changes)
+// Populated by gscSeamlessController.pushbetdata
+// =============================================================================
+
+model GameWager {
+  id              String    @id @default(cuid())
+  memberAccount   String    @db.VarChar(100)     // GSC member_account
+  wagerCode       String    @unique @db.VarChar(100)
+  wagerStatus     String    @db.VarChar(30)       // PENDING | WIN | LOSE | VOID | CANCELLED
+  wagerType       String    @default("NORMAL") @db.VarChar(30)
+  roundId         String    @db.VarChar(100)
+  channelCode     String    @default("gscp") @db.VarChar(20)
+  gameType        String?   @db.VarChar(30)
+  productCode     String    @db.VarChar(50)
+  gameCode        String?   @db.VarChar(100)
+  currency        String    @default("VND") @db.VarChar(10)
+  betAmount       Decimal   @default(0) @db.Decimal(18, 2)
+  validBetAmount  Decimal   @default(0) @db.Decimal(18, 2)
+  prizeAmount     Decimal   @default(0) @db.Decimal(18, 2)
+  tipAmount       Decimal   @default(0) @db.Decimal(18, 2)
+  settledAt       DateTime?
+  placedAt        DateTime  @default(now())
+  payload         String?   @db.Text             // raw JSON snapshot from GSC
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([memberAccount])
+  @@index([wagerStatus])
+  @@index([productCode])
+  @@index([placedAt])
+  @@map("game_wagers")
+}
+
+// =============================================================================
+// LOTTERY — Types, Draws, Bets
+// =============================================================================
+
+model LotteryType {
+  id          String       @id @default(cuid())
+  // PC28 | MARK6 | K3 | KENO | etc.
+  code        String       @unique @db.VarChar(30)
+  name        String       @db.VarChar(100)
+  description String?      @db.Text
+  icon        String?      @db.VarChar(500)
+  status      String       @default("active") @db.VarChar(20)
+  // { drawInterval: 300, maxBet: 10000, betTypes: [...] }
+  config      Json?
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  draws       LotteryDraw[]
+  bets        LotteryBet[]
+
+  @@map("lottery_types")
+}
+
+model LotteryDraw {
+  id             String      @id @default(cuid())
+  typeId         String      @db.VarChar(30)
+  type           LotteryType @relation(fields: [typeId], references: [id])
+  // Unique period code e.g. LT20260101001
+  period         String      @unique @db.VarChar(30)
+  drawTime       DateTime
+  isClosed       Boolean     @default(false)
+  resultPreset   Json?       // Admin preset before draw
+  resultOfficial Json?       // Official result after draw
+  // WAITING | DRAWN | CANCELLED
+  status         String      @default("WAITING") @db.VarChar(20)
+  totalBetAmount Decimal     @default(0) @db.Decimal(18, 2)
+  totalPayout    Decimal     @default(0) @db.Decimal(18, 2)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  bets           LotteryBet[]
+
+  @@index([typeId, status])
+  @@index([typeId, drawTime])
+  @@map("lottery_draws")
+}
+
+model LotteryBet {
+  id        String      @id @default(cuid())
+  userId    String      @db.VarChar(30)
+  user      User        @relation(fields: [userId], references: [id])
+  drawId    String      @db.VarChar(30)
+  draw      LotteryDraw @relation(fields: [drawId], references: [id])
+  typeId    String      @db.VarChar(30)
+  type      LotteryType @relation(fields: [typeId], references: [id])
+  // TAI | XIU | BIG | SMALL | ODD | EVEN | specific number
+  betType   String      @db.VarChar(30)
+  betChoice String?     @db.VarChar(50)
+  amount    Decimal     @db.Decimal(18, 2)
+  odds      Decimal     @default(1) @db.Decimal(8, 4)
+  payout    Decimal     @default(0) @db.Decimal(18, 2)
+  // PENDING | WIN | LOSE | CANCELLED
+  status    String      @default("PENDING") @db.VarChar(20)
+  settledAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([drawId, status])
+  @@index([typeId])
+  @@map("lottery_bets")
+}
+
+// =============================================================================
+// ODDS SETTING
+// =============================================================================
+
+model OddsSetting {
+  id        String   @id @default(cuid())
+  gameType  String   @unique @db.VarChar(50)
+  rate      Decimal  @db.Decimal(18, 4)
+  minBet    Decimal  @default(0) @db.Decimal(18, 2)
+  maxBet    Decimal  @default(0) @db.Decimal(18, 2)
+  updatedAt DateTime @updatedAt
+
+  @@map("odds_settings")
+}
+
+// =============================================================================
+// PAYMENT — Virtual Accounts & Bank Config (LKvip internal system)
+// =============================================================================
+
+model VirtualAccount {
+  id             String    @id @default(cuid())
+  userId         String    @db.VarChar(30)
+  user           User      @relation(fields: [userId], references: [id])
+  // VA number — unique identifier sent to user for bank transfer reference
+  vaNumber       String    @unique @db.VarChar(30)
+  bankBin        String    @db.VarChar(20)
+  bankName       String    @db.VarChar(100)
+  // accountNumber = the internal receiving bank account number
+  accountNumber  String    @db.VarChar(30)
+  accountName    String    @db.VarChar(100)
+  // QR code data URL (base64 PNG) for display in frontend
+  qrDataUrl      String?   @db.Text
+  // Expected amount (null = any amount accepted)
+  expectedAmount Decimal?  @db.Decimal(18, 2)
+  // Actual matched amount after webhook confirmation
+  actualAmount   Decimal?  @db.Decimal(18, 2)
+  transactionRef String?   @db.VarChar(100) // bank transaction reference
+  // pending | completed | expired | cancelled
+  status         String    @default("pending") @db.VarChar(20)
+  expiredAt      DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([vaNumber])
+  @@index([accountNumber])
+  @@index([status, expiredAt])
+  @@map("virtual_accounts")
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  bankName      String   @db.VarChar(100)
+  accountNumber String   @unique @db.VarChar(30)
+  accountName   String   @db.VarChar(100)
+  bankBin       String   @db.VarChar(20)
+  logo          String?  @db.VarChar(500)
+  isMain        Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("bank_accounts")
+}
+
+model PaymentSetting {
+  id          String   @id @default(cuid())
+  projectCode String   @db.VarChar(30)
+  key         String   @db.VarChar(100)
+  value       Json
+  description String?  @db.VarChar(255)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectCode, key])
+  @@map("payment_settings")
+}
+
+// =============================================================================
+// SHARED MODULES — Support Chat / Ticket / Knowledge / Translation / Files
+// =============================================================================
+
+model SupportRoom {
+  id            String    @id @default(cuid())
+  // private | group
+  type          String    @default("private") @db.VarChar(20)
+  name          String?   @db.VarChar(100)
+  avatar        String?   @db.VarChar(500)
+  lastMessage   String?   @db.Text
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants  SupportParticipant[]
+  messages      SupportMessage[]
+  tickets       SupportTicket[]
+
+  @@map("support_rooms")
+}
+
+model SupportParticipant {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  userId     String      @db.VarChar(30)
+  isAgent    Boolean     @default(false)
+  lastReadAt DateTime    @default(now())
+  joinedAt   DateTime    @default(now())
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("support_participants")
+}
+
+model SupportMessage {
+  id         String      @id @default(cuid())
+  roomId     String      @db.VarChar(30)
+  room       SupportRoom @relation(fields: [roomId], references: [id])
+  senderId   String      @db.VarChar(30)
+  // text | image | file | sticker | system
+  type       String      @default("text") @db.VarChar(20)
+  content    String      @db.Text
+  metadata   Json?
+  isRead     Boolean     @default(false)
+  readAt     DateTime?
+  isDeleted  Boolean     @default(false)
+  origLang   String?     @db.VarChar(10)
+  translated Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([roomId, createdAt])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String       @db.VarChar(30)
+  roomId      String?      @db.VarChar(30)
+  room        SupportRoom? @relation(fields: [roomId], references: [id])
+  subject     String       @db.VarChar(255)
+  description String?      @db.Text
+  // general | payment | technical | account | other
+  category    String       @default("general") @db.VarChar(50)
+  // low | medium | high | urgent
+  priority    String       @default("medium") @db.VarChar(20)
+  // open | in_progress | resolved | closed
+  status      String       @default("open") @db.VarChar(20)
+  assignedTo  String?      @db.VarChar(30)
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  replies     SupportTicketReply[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id          String        @id @default(cuid())
+  ticketId    String        @db.VarChar(30)
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId    String        @db.VarChar(30)
+  content     String        @db.Text
+  isInternal  Boolean       @default(false)
+  attachments Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_ticket_replies")
+}
+
+model KnowledgeArticle {
+  id          String    @id @default(cuid())
+  category    String    @default("general") @db.VarChar(50)
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.VarChar(500)
+  image       String?   @db.VarChar(500)
+  authorId    String?   @db.VarChar(30)
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  // draft | published | archived
+  status      String    @default("published") @db.VarChar(20)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  translations KnowledgeTranslation[]
+
+  @@index([category, status])
+  @@map("knowledge_articles")
+}
+
+model KnowledgeTranslation {
+  id        String           @id @default(cuid())
+  articleId String           @db.VarChar(30)
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id])
+  language  String           @db.VarChar(10)
+  title     String           @db.VarChar(255)
+  content   String           @db.LongText
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, language])
+  @@map("knowledge_translations")
+}
+
+model NotificationSetting {
+  id        String   @id @default(cuid())
+  userId    String   @unique @db.VarChar(30)
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  inApp     Boolean  @default(true)
+  types     Json?
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model TranslationLog {
+  id             String   @id @default(cuid())
+  sourceLang     String   @db.VarChar(10)
+  targetLang     String   @db.VarChar(10)
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  service        String   @default("deepseek") @db.VarChar(50)
+  tokenCount     Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("translation_logs")
+}
+
+model FileUpload {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  // general | avatar | thumbnail | document | video
+  type         String   @default("general") @db.VarChar(30)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("file_uploads")
+}
+
+// =============================================================================
+// DAILY CHECK-IN SYSTEM
+// 7-day weekly streak — each day has a configured reward
+// =============================================================================
+
+model CheckinConfig {
+  id           String   @id @default(cuid())
+  day          Int      @unique                          // 1–7 (streak day)
+  rewardType   String   @default("coin") @db.VarChar(20) // coin | free_spin | bonus
+  rewardAmount Decimal  @default(0) @db.Decimal(18, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("checkin_configs")
+}
+
+model UserCheckin {
+  id           String   @id @default(cuid())
+  userId       String   @db.VarChar(30)
+  checkinDate  String   @db.VarChar(10)                 // "2025-01-15" — date string for uniqueness
+  day          Int                                       // streak day 1–7
+  rewardType   String   @db.VarChar(20)
+  rewardAmount Decimal  @db.Decimal(18, 2)
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, checkinDate])
+  @@index([userId])
+  @@map("user_checkins")
+}
+
+// =============================================================================
+// DAILY MISSIONS / TASKS SYSTEM
+// Templates define missions; UserMission tracks per-user daily progress
+// =============================================================================
+
+model MissionTemplate {
+  id           String   @id @default(cuid())
+  code         String   @unique @db.VarChar(50)          // e.g. "daily_login", "daily_bet_3"
+  title        String   @db.VarChar(100)
+  description  String?  @db.VarChar(500)
+  // daily | weekly
+  missionType  String   @default("daily") @db.VarChar(20)
+  // LOGIN | DEPOSIT | BET | INVITE | LOTTERY
+  targetType   String   @db.VarChar(30)
+  targetValue  Int      @default(1)
+  // coin | bonus | free_spin
+  rewardType   String   @default("coin") @db.VarChar(20)
+  rewardAmount Decimal  @default(0) @db.Decimal(18, 2)
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userMissions UserMission[]
+
+  @@map("mission_templates")
+}
+
+model UserMission {
+  id          String           @id @default(cuid())
+  userId      String           @db.VarChar(30)
+  templateId  String           @db.VarChar(30)
+  template    MissionTemplate  @relation(fields: [templateId], references: [id])
+  date        String           @db.VarChar(10)           // "2025-01-15" — the day this mission belongs to
+  progress    Int              @default(0)
+  completed   Boolean          @default(false)
+  claimed     Boolean          @default(false)
+  completedAt DateTime?
+  claimedAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([userId, templateId, date])
+  @@index([userId, date])
+  @@map("user_missions")
+}
+
+// =============================================================================
+// LUCKY WHEEL / SPIN SYSTEM
+// Admin configures wheel + prizes; users spin once (or more) per day
+// =============================================================================
+
+model LuckyWheelConfig {
+  id               String   @id @default(cuid())
+  name             String   @db.VarChar(100)
+  spinCost         Decimal  @default(0) @db.Decimal(18, 2)  // 0 = free
+  maxFreeSpinsPerDay Int     @default(3)
+  resetHour        Int      @default(0)                      // UTC hour when free spins reset (0 = midnight)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  prizes     WheelPrize[]
+  spinHistory SpinHistory[]
+
+  @@map("lucky_wheel_configs")
+}
+
+model WheelPrize {
+  id          String           @id @default(cuid())
+  wheelId     String           @db.VarChar(30)
+  wheel       LuckyWheelConfig @relation(fields: [wheelId], references: [id])
+  label       String           @db.VarChar(100)             // "500 Coin", "Free Spin"
+  // COIN | BONUS | FREE_SPIN | NOTHING
+  rewardType  String           @db.VarChar(20)
+  rewardValue Decimal          @default(0) @db.Decimal(18, 2)
+  probability Decimal          @db.Decimal(8, 6)             // 0.000000–1.000000; all prizes must sum to 1
+  color       String           @default("#FF6B6B") @db.VarChar(20) // hex color for segment
+  icon        String?          @db.VarChar(100)
+  sortOrder   Int              @default(0)
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+
+  spinHistory SpinHistory[]
+
+  @@map("wheel_prizes")
+}
+
+model SpinHistory {
+  id          String           @id @default(cuid())
+  userId      String           @db.VarChar(30)
+  wheelId     String           @db.VarChar(30)
+  wheel       LuckyWheelConfig @relation(fields: [wheelId], references: [id])
+  prizeId     String           @db.VarChar(30)
+  prize       WheelPrize       @relation(fields: [prizeId], references: [id])
+  rewardType  String           @db.VarChar(20)
+  rewardValue Decimal          @db.Decimal(18, 2)
+  isFree      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@map("spin_history")
+}
+
+// =============================================================================
+// LKVIP PAYMENT GATEWAY — Internal payment layer
+// VirtualAccount & WithdrawalRequest are managed by src/modules/lkvip/
+// LkvipTransaction is the financial ledger for the lkvip subsystem
+// =============================================================================
+
+/// LKvip internal transaction ledger (supplement to general Transaction model)
+/// Used by lkvip module for its own deposit/withdraw/adjustment flow
+model LkvipTransaction {
+  id            String    @id @default(cuid())
+  userId        String    @db.VarChar(30)
+  user          User      @relation(fields: [userId], references: [id])
+  // deposit | withdraw | refund | adjustment | bonus | commission
+  type          String    @db.VarChar(30)
+  amount        Decimal   @db.Decimal(18, 2)
+  balanceBefore Decimal   @default(0) @db.Decimal(18, 2)
+  balanceAfter  Decimal   @default(0) @db.Decimal(18, 2)
+  referenceType String?   @db.VarChar(30)  // va | withdrawal | deposit_order
+  referenceId   String?   @db.VarChar(60)
+  description   String?   @db.VarChar(500)
+  // pending | completed | failed
+  status        String    @default("completed") @db.VarChar(20)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("lkvip_transactions")
+}
+
+/// WithdrawalRequest — LKvip withdrawal lifecycle table (distinct from WithdrawOrder)
+/// Created by TransferService, approved/rejected by admin via lkvip admin routes
+model WithdrawalRequest {
+  id                String    @id @default(cuid())
+  userId            String    @db.VarChar(30)
+  user              User      @relation(fields: [userId], references: [id])
+  amount            Decimal   @db.Decimal(18, 2)
+  bankAccountNumber String    @db.VarChar(30)
+  bankName          String    @db.VarChar(100)
+  bankBin           String?   @db.VarChar(20)
+  accountHolder     String    @db.VarChar(100)
+  // pending | processing | completed | rejected | cancelled
+  status            String    @default("pending") @db.VarChar(20)
+  rejectionReason   String?   @db.VarChar(500)
+  transferId        String?   @db.VarChar(100)  // external payment reference
+  processedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("withdrawal_requests")
+}

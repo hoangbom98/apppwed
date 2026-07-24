@@ -1,0 +1,21 @@
+{
+  "welcome": "Chào mừng bạn đến với hệ thống",
+  "error": {
+    "generic": "Đã có lỗi xảy ra, vui lòng thử lại sau",
+    "unauthorized": "Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn",
+    "forbidden": "Bạn không có quyền truy cập tài nguyên này",
+    "not_found": "Không tìm thấy tài nguyên yêu cầu",
+    "validation": "Dữ liệu không hợp lệ"
+  },
+  "success": "Thành công",
+  "user": {
+    "not_found": "Người dùng không tồn tại",
+    "email_exist": "Email đã được đăng ký",
+    "invalid_credentials": "Email hoặc mật khẩu không đúng",
+    "balance_updated": "Số dư đã được cập nhật",
+    "status_updated": "Trạng thái người dùng đã được thay đổi",
+    "not_allowed_self_adjustment": "Bạn không được phép tự điều chỉnh vai trò hoặc trạng thái của bản thân",
+    "updated": "Cập nhật thông tin người dùng thành công",
+    "insufficient_balance": "Số dư tài khoản không đủ để thực hiện khấu trừ"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@lkvip/utils",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LKVIP shared backend utilities — slug, string helpers, validators, date formatters (Node.js / CommonJS)",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "echo '@lkvip/utils is source-direct — no build step required'",
+    "lint": "eslint src --ext .js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "lkvip",
+    "utils",
+    "backend",
+    "shared"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "decimal.js": "^10.6.0"
+  }
+}

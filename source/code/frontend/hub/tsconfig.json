@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.frontend.base.json",
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "@/*":        ["./src/*"],
+      "@ui":        ["../shared-ui/index.js"],
+      "@ui/*":      ["../shared-ui/*"],
+      "@lkvip/types": ["../../shared-types/src/index.ts"],
+      "react":      ["./node_modules/@types/react"],
+      "react-dom":  ["./node_modules/@types/react-dom"]
+    }
+  },
+  "include": ["src"]
+}

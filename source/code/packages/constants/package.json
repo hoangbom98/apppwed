@@ -1,0 +1,30 @@
+{
+  "name": "@lkvip/constants",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LKVIP shared constants — project IDs, roles, error codes, currencies (Node.js / CommonJS)",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.mjs",
+      "require": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "echo '@lkvip/constants is source-direct — no build step required'",
+    "lint": "eslint src --ext .js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "lkvip",
+    "constants",
+    "shared"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "eslint": "^10.7.0"
+  }
+}

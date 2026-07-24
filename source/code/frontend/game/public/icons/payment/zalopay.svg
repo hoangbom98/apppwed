@@ -1,0 +1,7 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="48" height="48" rx="10" fill="#0068ff"/>
+  <rect x="10" y="14" width="28" height="4" rx="2" fill="white"/>
+  <rect x="10" y="20" width="20" height="4" rx="2" fill="white" opacity="0.7"/>
+  <rect x="10" y="26" width="24" height="4" rx="2" fill="white"/>
+  <text x="24" y="42" text-anchor="middle" fill="white" font-size="7" font-weight="bold" font-family="Arial">ZaloPay</text>
+</svg>

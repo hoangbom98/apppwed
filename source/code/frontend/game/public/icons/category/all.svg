@@ -1,0 +1,16 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="48" height="48" rx="10" fill="#4f46e5"/>
+  <!-- Game controller -->
+  <rect x="8" y="17" width="32" height="18" rx="8" fill="white" opacity="0.9"/>
+  <!-- D-pad left side -->
+  <rect x="13" y="23" width="8" height="2.5" rx="1.25" fill="#4f46e5"/>
+  <rect x="15.75" y="21" width="2.5" height="7" rx="1.25" fill="#4f46e5"/>
+  <!-- Buttons right side -->
+  <circle cx="32" cy="23" r="2" fill="#ef4444"/>
+  <circle cx="36" cy="26" r="2" fill="#3b82f6"/>
+  <circle cx="32" cy="29" r="2" fill="#22c55e"/>
+  <circle cx="28" cy="26" r="2" fill="#f59e0b"/>
+  <!-- Grips -->
+  <ellipse cx="14" cy="36" rx="5" ry="3" fill="white" opacity="0.9"/>
+  <ellipse cx="34" cy="36" rx="5" ry="3" fill="white" opacity="0.9"/>
+</svg>

@@ -1,0 +1,261 @@
+/* ==========================================================================
+   frontend/dating/src/index.css
+   antd-mini inspired: pink dating theme with CSS variable tokens
+   Auto dark mode via prefers-color-scheme
+   ========================================================================== */
+@import "tailwindcss";
+
+/* ── Dating Brand Tokens (antd-mini ConfigProvider pattern) ──────────────
+   Pink/rose theme tokens. Override via applyColorConfig() at runtime.
+   ──────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --dating-primary:           #ec4899;
+  --dating-primary-dark:      #be185d;
+  --dating-primary-light:     rgba(236,72,153,0.1);
+  --dating-secondary:         #f43f5e;
+  --dating-accent:            #f97316;
+  --dating-vip:               #eab308;
+
+  /* Light palette (default) */
+  --dating-bg:                #ffffff;
+  --dating-bg-secondary:      #fafafa;
+  --dating-bg-card:           #ffffff;
+  --dating-bg-sheet:          #f5f5f7;
+  --dating-text:              #111827;
+  --dating-text-secondary:    #4b5563;
+  --dating-text-muted:        #9ca3af;
+  --dating-border:            #f3f4f6;
+  --dating-border-medium:     #e5e7eb;
+
+  /* Button tokens (antd-mini) */
+  --dating-btn-primary-bg:      var(--dating-primary);
+  --dating-btn-primary-color:   #ffffff;
+  --dating-btn-disabled-opacity: 0.4;
+  --dating-btn-active-bg:       rgba(236,72,153,0.1);
+
+  /* Card */
+  --dating-card-bg:           var(--dating-bg-card);
+  --dating-card-border:       var(--dating-border);
+  --dating-card-radius:       16px;
+  --dating-card-shadow:       0 1px 6px rgba(0,0,0,0.05);
+
+  /* Layout */
+  --dating-header-h:          52px;
+  --dating-tabbar-h:          58px;
+  --dating-safe-bottom:       env(safe-area-inset-bottom, 0px);
+
+  /* Transition */
+  --dating-trans-fast:        0.12s ease;
+  --dating-trans:             0.22s ease;
+}
+
+/* ── Dark mode — auto via prefers-color-scheme ───────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --dating-bg:                #0a0a0a;
+    --dating-bg-secondary:      #141414;
+    --dating-bg-card:           #1a1a1a;
+    --dating-bg-sheet:          #1f1f1f;
+    --dating-text:              #f0f0f0;
+    --dating-text-secondary:    #a0a0a0;
+    --dating-text-muted:        #606060;
+    --dating-border:            #2a2a2a;
+    --dating-border-medium:     #333333;
+    --dating-card-bg:           #1a1a1a;
+    --dating-card-shadow:       0 2px 10px rgba(0,0,0,0.4);
+    --dating-btn-active-bg:     rgba(236,72,153,0.15);
+  }
+}
+
+/* Dark class override */
+.dark {
+  --dating-bg:                #0a0a0a;
+  --dating-bg-secondary:      #141414;
+  --dating-bg-card:           #1a1a1a;
+  --dating-bg-sheet:          #1f1f1f;
+  --dating-text:              #f0f0f0;
+  --dating-text-secondary:    #a0a0a0;
+  --dating-text-muted:        #606060;
+  --dating-border:            #2a2a2a;
+  --dating-border-medium:     #333333;
+  --dating-card-shadow:       0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── Custom animations ──────────────────────────────────────────────────── */
+@keyframes bgSlide {
+  0%, 100% { background-position-x: 0; }
+  50%       { background-position-x: 100%; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  15%       { transform: scale(1.25); }
+  30%       { transform: scale(1); }
+  45%       { transform: scale(1.15); }
+}
+
+.animate-spin-slow    { animation: spin-slow 8s linear infinite; }
+.animate-fade-in      { animation: fadeIn 0.3s ease-out; }
+.animate-slide-up     { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-scale-in     { animation: scaleIn 0.22s ease-out both; }
+.animate-heart-beat   { animation: heartBeat 1.2s ease-in-out; }
+
+/* ── Safe area ──────────────────────────────────────────────────────────── */
+.safe-area-bottom {
+  padding-bottom: max(1rem, var(--dating-safe-bottom));
+}
+.pb-safe { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+
+/* ── Scrollbar hide ─────────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.no-scrollbar,
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Dating-specific shimmer skeleton ───────────────────────────────────── */
+@keyframes dating-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.dating-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--dating-bg-secondary) 0%,
+    var(--dating-border-medium) 50%,
+    var(--dating-bg-secondary) 100%
+  );
+  background-size: 800px 100%;
+  animation: dating-shimmer 1.4s linear infinite;
+  border-radius: 12px;
+}
+
+/* ── Story ring (antd-mini inspired ring indicator) ─────────────────────── */
+.story-ring {
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--dating-primary), var(--dating-secondary));
+  padding: 2px;
+}
+.story-ring-inner {
+  border-radius: 50%;
+  background: var(--dating-bg);
+  padding: 2px;
+  width: 100%; height: 100%;
+}
+
+/* ── User thumb card ────────────────────────────────────────────────────── */
+.dating-user-thumb {
+  border-radius: var(--dating-card-radius);
+  overflow: hidden;
+  position: relative;
+  transition: transform var(--dating-trans-fast);
+  cursor: pointer;
+}
+.dating-user-thumb:hover  { transform: scale(1.03); }
+.dating-user-thumb:active { transform: scale(0.97); }
+
+/* LIVE badge */
+.dating-live-badge {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px 6px;
+  background: var(--dating-secondary);
+  color: #fff;
+  font-size: 9px; font-weight: 800;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.dating-live-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulseDot 1.2s ease infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ── Quick action button (antd-mini rounded tile) ───────────────────────── */
+.dating-quick-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: var(--dating-bg-secondary);
+  border: 1px solid var(--dating-border);
+  transition:
+    background var(--dating-trans-fast),
+    border-color var(--dating-trans-fast),
+    transform var(--dating-trans-fast);
+}
+.dating-quick-btn:hover {
+  background: var(--dating-primary-light);
+  border-color: var(--dating-primary);
+}
+.dating-quick-btn:active { transform: scale(0.94); }
+.dating-quick-btn-icon  { font-size: 22px; line-height: 1; }
+.dating-quick-btn-label {
+  font-size: 10px; font-weight: 600;
+  color: var(--dating-text-secondary);
+  text-align: center; line-height: 1.2;
+}
+
+/* ── Section header (antd-mini style) ───────────────────────────────────── */
+.dating-section-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 800;
+  color: var(--dating-text);
+}
+.dating-section-indicator {
+  display: inline-block;
+  width: 3px; height: 16px;
+  background: var(--dating-primary);
+  border-radius: 2px;
+}
+
+/* ── VIP crown ring ─────────────────────────────────────────────────────── */
+.vip-ring {
+  background: linear-gradient(135deg, #eab308, #f59e0b);
+  padding: 2px;
+  border-radius: 50%;
+}
+
+/* ── Pink gradient text ─────────────────────────────────────────────────── */
+.dating-gradient-text {
+  background: linear-gradient(135deg, var(--dating-primary), var(--dating-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Primary button (antd-mini tokens) ──────────────────────────────────── */
+.dating-btn-primary {
+  background: linear-gradient(135deg, var(--dating-primary), var(--dating-secondary));
+  color: var(--dating-btn-primary-color);
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 10px 24px;
+  transition: opacity var(--dating-trans-fast), transform var(--dating-trans-fast);
+  cursor: pointer;
+}
+.dating-btn-primary:hover  { opacity: 0.9; }
+.dating-btn-primary:active { transform: scale(0.97); }
+.dating-btn-primary:disabled { opacity: var(--dating-btn-disabled-opacity); pointer-events: none; }

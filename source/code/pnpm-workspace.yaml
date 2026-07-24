@@ -1,0 +1,24 @@
+packages:
+  - "packages/*"
+  - "packages/mobile"
+  - "backend"
+  - "frontend/hub"
+  - "frontend/game"
+  - "frontend/trade"
+  - "frontend/dating"
+  - "frontend/sports"
+  - "frontend/admin-dashboard"
+  - "frontend/shared-ui"
+  - "shared-types"
+
+allowBuilds:
+  '@firebase/util': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  core-js: true
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
+  protobufjs: true
+  sharp: true
