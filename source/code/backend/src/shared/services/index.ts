@@ -1,4 +1,4 @@
-chuẩn dựa // @ts-nocheck
+// @ts-nocheck
 'use strict';
 /**
  * shared/services/index.ts — Barrel export for shared services.
