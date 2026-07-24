@@ -333,3 +333,114 @@ YYYYMMDD_HHMMSS_<action>_<entity>
 - [ ] Áp dụng `source/database/indexes.sql`
 - [ ] Kiểm tra Prisma Studio mỗi DB
 - [ ] Chạy API smoke test (POST /auth/register, GET /api/game/games, etc.)
+
+---
+
+## 14. Trade Module — v2.2 Schema Changes
+
+> **Released**: 2026-09
+> **Applies to**: `prisma/trade/schema.prisma`
+
+### New models added to `trade_db`
+
+| Model | Table | Description |
+|-------|-------|-------------|
+| `Deposit` | `deposits` | User deposit requests (pending → approved/rejected) |
+| `InvestmentPackage` | `investment_packages` | VIP investment packages (daily profit %, duration) |
+| `Investment` | `investments` | User investment records with profit tracking |
+| `Referral` | `referrals` | F1/F2 referral relationships (level 1=direct, 2=indirect) |
+| `CommissionLog` | `commission_logs` | Per-investment commission entries earned by referrers |
+
+### Updated `User` model relations
+
+```prisma
+deposits    Deposit[]
+investments Investment[]
+```
+
+### Running the Trade v2.2 migration
+
+```bash
+cd source/backend
+
+# 1. Generate the updated trade Prisma client
+npm run prisma:generate:trade
+# or: tsx scripts/prisma-run.ts generate trade
+
+# 2. Apply migration (dev environment)
+tsx scripts/prisma-run.ts migrate trade
+
+# 3. Apply migration (production — no data loss)
+tsx scripts/prisma-run.ts deploy trade
+
+# 4. Seed investment packages (4 default packages)
+npm run seed:trade
+```
+
+### New API routes (`/api/trade/…`)
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | `/deposit` | User | List own deposit history |
+| POST | `/deposit` | User | Submit deposit request |
+| GET | `/investment/packages` | Public | List active investment packages |
+| POST | `/investment/buy` | User | Buy an investment package |
+| GET | `/investment/my` | User | User's own investments |
+| GET | `/referral/code` | User | Get referral code + URL |
+| GET | `/referral/tree` | User | F1/F2 downline tree |
+| GET | `/referral/commissions` | User | Commission history |
+| GET | `/referral/summary` | User | F1/F2 counts + total earned |
+| GET | `/admin/deposits` | Admin | List all deposits |
+| PUT | `/admin/deposits/:id/approve` | Admin | Approve deposit → credit wallet |
+| PUT | `/admin/deposits/:id/reject` | Admin | Reject deposit |
+| GET/POST | `/admin/investment/packages` | Admin | CRUD investment packages |
+| PATCH/DELETE | `/admin/investment/packages/:id` | Admin | Update / soft-delete package |
+| GET | `/admin/investments` | Admin | List all user investments |
+
+### New cron jobs registered (`config/cron.ts`)
+
+| Schedule | Job name | Function |
+|----------|----------|----------|
+| `*/30 * * * * *` | `trade-liquidation` | Scan all open positions → auto-close at liquidation price |
+| `5 0 * * *` | `trade-profit-distribution` | Pay daily profit for all ACTIVE investments (00:05 UTC) |
+
+### Backend files added / changed
+
+| File | Change |
+|------|--------|
+| `prisma/trade/schema.prisma` | +5 models (`Deposit`, `InvestmentPackage`, `Investment`, `Referral`, `CommissionLog`), +2 User relations |
+| `controllers/depositController.ts` | New — create/list/approve/reject using `Deposit` model |
+| `controllers/investmentController.ts` | New — package CRUD, user buy, admin list |
+| `controllers/referralController.ts` | New — referral code, tree, commissions, summary |
+| `controllers/walletController.ts` | Deposit form removed (now `depositController`); withdraw unchanged |
+| `controllers/authController.ts` | `register` accepts `referralCode`, creates F1/F2 `Referral` records |
+| `routes/index.ts` | +deposit, +investment, +referral, +admin investment package routes |
+| `jobs/liquidation.job.ts` | New — `runLiquidationCheck(prisma, io)` |
+| `jobs/profitDistribution.job.ts` | New — `runProfitDistribution(prisma, io)`, pays profit + returns principal on maturity |
+| `config/cron.ts` | +2 trade cron jobs registered |
+| `prisma/seeds/trade.seed.ts` | +4 default `InvestmentPackage` rows |
+| `services/marketPriceFeed.ts` | Upsert → create (PriceHistory has no `@@unique([symbolId])`) |
+
+### Frontend pages added (`frontend/trade/src/pages/`)
+
+| Page | Route | Description |
+|------|-------|-------------|
+| `Deposit.tsx` | `/deposit` | Submit deposit request with method + proof |
+| `Investment.tsx` | `/investment` | Browse packages + buy + view active investments |
+| `Referral.tsx` | `/referral` | Referral code + F1/F2 tree + commission history |
+
+### Frontend `WalletPage.tsx` changes
+
+- Deposit button now navigates to `/deposit` (Link) — no inline form.
+- Withdraw form kept inline; uses `createWithdrawal` API.
+- `createDeposit` import removed.
+
+### Referral commission logic
+
+| Level | Who earns | Rate | Trigger |
+|-------|-----------|------|---------|
+| F1 | Direct referrer | 5% of invested amount | When F1's downline buys a package |
+| F2 | Referrer's referrer | 2% of invested amount | When F2's downline buys a package |
+
+Commission is paid immediately on `POST /investment/buy` via async fire-and-forget. No separate cron needed.
+

@@ -1,1 +1,0 @@
-module.exports = { getAll: async (prisma) => { return await prisma.crossBanner.findMany(); } };

@@ -1,9 +1,0 @@
-/**
- * @lkvip/types — src/api.types.ts
- *
- * HTTP API envelope types shared by backend controllers and all 6 frontend
- * API clients. Import via:
- *   import type { ApiResponse, PaginatedResponse } from '@lkvip/types';
- */
-export {};
-//# sourceMappingURL=api.types.js.map
