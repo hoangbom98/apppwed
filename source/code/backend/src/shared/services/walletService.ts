@@ -39,6 +39,8 @@ class WalletService {
   async credit(prisma, userId, amount, type, description = '', extra = {}) {
     const tx = prisma ?? this.prisma;
     const newBalance = await tx.$transaction(async (t) => {
+      // Read balance before update for audit trail
+      const before = await t.user.findUnique({ where: { id: userId }, select: { balance: true } });
       const user = await t.user.update({
         where: { id: userId },
         data:  { balance: { increment: amount } },
@@ -49,7 +51,8 @@ class WalletService {
           userId,
           type,
           amount,
-          balanceAfter: Number(user.balance),
+          balanceBefore: Number(before?.balance ?? 0),
+          balanceAfter:  Number(user.balance),
           note: description,
           ...extra,
         },
@@ -68,6 +71,10 @@ class WalletService {
   async debit(prisma, userId, amount, type, description = '', extra = {}) {
     const tx = prisma ?? this.prisma;
     const newBalance = await tx.$transaction(async (t) => {
+      // Read balance before atomic update — needed for audit trail
+      const before = await t.user.findUnique({ where: { id: userId }, select: { balance: true } });
+      if (!before) throw new Error('User not found');
+
       // Optimistic lock: UPDATE only if balance >= amount
       // This is atomic at DB level — prevents race conditions without SELECT first
       const result = await t.$executeRaw`
@@ -75,9 +82,6 @@ class WalletService {
         WHERE id = ${userId} AND balance >= ${amount}
       `;
       if (result === 0) {
-        // Either user not found OR balance insufficient
-        const user = await t.user.findUnique({ where: { id: userId }, select: { balance: true } });
-        if (!user) throw new Error('User not found');
         throw new Error('Số dư không đủ');
       }
       const updated = await t.user.findUnique({ where: { id: userId }, select: { balance: true } });
@@ -86,7 +90,8 @@ class WalletService {
           userId,
           type,
           amount: -amount,
-          balanceAfter: Number(updated.balance),
+          balanceBefore: Number(before.balance),
+          balanceAfter:  Number(updated.balance),
           note: description,
           ...extra,
         },
@@ -138,9 +143,10 @@ class WalletService {
   async settleFrozen(prisma, userId, amount, type, description = '') {
     const tx = prisma ?? this.prisma;
     return tx.$transaction(async (t) => {
+      const before = await t.user.findUnique({ where: { id: userId }, select: { balance: true } });
       const user = await t.user.update({
         where: { id: userId },
-        data:  { frozen: { decrement: amount } },
+        data:  { frozen: { decrement: amount }, balance: { decrement: amount } },
         select: { balance: true },
       });
       await t.transaction.create({
@@ -148,7 +154,8 @@ class WalletService {
           userId,
           type,
           amount: -amount,
-          balanceAfter: Number(user.balance),
+          balanceBefore: Number(before?.balance ?? 0),
+          balanceAfter:  Number(user.balance),
           note: description,
         },
       });

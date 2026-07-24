@@ -1,190 +1,207 @@
-# 🌐 KJC Platform — Multi-Project Ecosystem v2.0
+# LKVIP GROUP — Multi-Service Entertainment Platform
 
 [![Node.js](https://img.shields.io/badge/Node.js-20_LTS-339933?logo=nodedotjs)](https://nodejs.org)
-[![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express)](https://expressjs.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://typescriptlang.org)
 [![Prisma](https://img.shields.io/badge/Prisma-5.x-2D3748?logo=prisma)](https://prisma.io)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)](https://mysql.com)
 [![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis)](https://redis.io)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![pnpm](https://img.shields.io/badge/pnpm-9.x-F69220?logo=pnpm)](https://pnpm.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/your-org/website-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/website-admin/actions/workflows/ci.yml)
+[![CI](https://github.com/your-org/lkvip/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/lkvip/actions/workflows/ci.yml)
 
-Hệ sinh thái giải trí trực tuyến gồm **5 sub-projects** độc lập và **1 Admin Portal**, chạy trên một Backend Express/Node.js duy nhất với 6 MySQL database riêng biệt.
+Nền tảng giải trí trực tuyến gồm **6 sub-projects** độc lập và **1 Admin Portal**, chạy trên một Backend Express/TypeScript duy nhất với 6 MySQL database riêng biệt.
 
 ---
 
 ## 📁 Cấu trúc thư mục
 
 ```
-website-admin/
+/var/LKVIP/
 ├── .github/
-│   └── workflows/
-│       ├── ci.yml          # Lint + Test khi mở PR
-│       └── deploy.yml      # Auto-deploy khi push vào main
+│   ├── workflows/
+│   │   ├── ci.yml           # Lint + Typecheck + Test (on PR & push)
+│   │   ├── deploy.yml       # Auto-deploy on push to main
+│   │   └── prisma-check.yml # Validate Prisma schemas on change
+│   └── pull_request_template.md
+├── docs/                    # Architecture, API, deployment guides
+│   ├── ARCHITECTURE.md
+│   ├── API_ENDPOINTS.md
+│   ├── DEPLOYMENT.md
+│   ├── MIGRATION_GUIDE.md
+│   ├── MODULES.md
+│   ├── NFR.md
+│   ├── OPERATIONS.md
+│   ├── RISK_SYSTEM.md
+│   ├── SETUP.md
+│   ├── STANDARDIZATION.md
+│   └── VPS_DEPLOYMENT.md
 ├── source/
-│   ├── backend/            ⭐ PRODUCTION BACKEND (duy nhất)
-│   │   ├── server.ts       # TypeScript entrypoint (compiled → dist/server.js)
-│   │   ├── package.json    # npm scripts (prisma, seed, test, backup)
-│   │   ├── prisma/         # 6 Prisma schemas (hub, game, trade, dating, sports, admin)
-│   │   ├── src/
-│   │   │   ├── modules/    # hub, game, trade, dating, sports, admin, lkvip
-│   │   │   └── shared/     # middlewares, services, utils, base, config
-│   │   ├── scripts/        # backup.js, cleanup.js, restore.js
-│   │   └── uploads/        # File uploads
-│   ├── frontend/
-│   │   ├── shared-ui/      # Components, hooks, store, utils dùng chung
-│   │   ├── hub/            # KJC Hub Portal (port 5173)
-│   │   ├── game/           # KJC Game Center (port 5174)
-│   │   ├── dating/         # KJC Dating (port 5176)
-│   │   ├── trade/          # KJC Trade Pro (port 5177)
-│   │   ├── sports/         # KJC Sports Live (port 5178)
-│   │   └── admin-dashboard/ # Admin Portal (port 5180)
-│   ├── database/           # SQL reference files, indexes, schema docs
-│   ├── nginx/              # Nginx config
-│   └── scripts/            # backup.sh, restore.sh, ssl-setup.sh, deploy.sh...
-├── docs/
-│   ├── plans/              # Architecture & planning documents
-│   └── legacy/             # Archived legacy deploy scripts
-├── .env.example            # Template biến môi trường
-├── ecosystem.config.js     # PM2 config → source/backend/dist/server.js
-└── package.json            # Root scripts tiện lợi
+│   ├── code/                ⭐ ALL SOURCE CODE (pnpm workspace)
+│   │   ├── backend/         # Express API — TypeScript + Prisma
+│   │   ├── frontend/
+│   │   │   ├── admin-dashboard/  # Admin Portal (port 5180)
+│   │   │   ├── hub/              # Hub Portal (port 5173)
+│   │   │   ├── game/             # Game Center (port 5174)
+│   │   │   ├── dating/           # Dating App (port 5176)
+│   │   │   ├── trade/            # Trade Platform (port 5177)
+│   │   │   ├── sports/           # Sports Live (port 5178)
+│   │   │   ├── shared-ui/        # Shared React components & hooks
+│   │   │   └── _template/        # Starter template for new SPAs
+│   │   ├── packages/
+│   │   │   ├── constants/        # @lkvip/constants
+│   │   │   ├── shared-utils/     # @lkvip/utils
+│   │   │   └── mobile/           # @lkvip/mobile (Capacitor)
+│   │   ├── shared-types/         # @lkvip/types — shared TypeScript interfaces
+│   │   ├── tests/
+│   │   │   ├── integration/
+│   │   │   └── load/
+│   │   ├── package.json          # Workspace root scripts
+│   │   └── pnpm-workspace.yaml
+│   └── config/
+│       ├── nginx/                # Nginx reverse proxy configs
+│       ├── database/             # DB init scripts & indexes
+│       └── monitoring/           # Monitoring configs
+├── .env.example             # Environment template
+├── .editorconfig
+├── .gitignore
+├── CONTRIBUTING.md
+├── LICENSE
+├── ecosystem.config.js      # PM2 config (points to source/code/backend)
+└── package.json             # Root convenience scripts
 ```
 
-> ⚠️ **Không có** `backend/` hay `database/` ở root. Tất cả source code thực nằm trong `source/`.
+> **Source code thực nằm hoàn toàn trong `source/code/`.** Root chỉ chứa meta files và configs.
 
 ---
 
-## 🚀 Bắt đầu nhanh (Development)
+## 🚀 Bắt đầu nhanh
 
-### 1. Cài đặt prerequisites
+### 1. Prerequisites
 
 ```bash
 node --version   # >= 20.0.0
+pnpm --version   # >= 9.0.0
 mysql --version  # >= 8.0
 redis-cli ping   # PONG
 ```
 
-### 2. Cấu hình môi trường
+### 2. Cài đặt
 
 ```bash
-cp .env.example source/backend/.env
-# Điền DATABASE_URL_*, JWT_SECRET, REDIS_URL...
+# Clone
+git clone <repo-url> /var/LKVIP
+cd /var/LKVIP
+
+# Cấu hình môi trường
+cp .env.example source/code/backend/.env
+# → Điền DATABASE_URL_*, JWT_SECRET, REDIS_URL...
+
+# Cài dependencies (pnpm workspace)
+cd source/code
+pnpm install
+
+# Tạo Prisma clients + chạy migrations + seed
+pnpm --filter lkvip-backend run prisma:generate
+pnpm --filter lkvip-backend run prisma:migrate:all
+pnpm --filter lkvip-backend run seed:all
 ```
 
-### 3. Cài đặt dependencies & generate Prisma clients
+### 3. Chạy development
 
 ```bash
-cd source/backend
-npm install
-npm run prisma:generate     # Generate tất cả 6 Prisma clients
-npm run prisma:migrate:all  # Tạo tables (dev)
-npm run seed:all            # Dữ liệu mặc định
-npm run seed:demo           # Dữ liệu mẫu (optional)
+cd source/code
+
+# Backend (port 5000)
+pnpm dev:backend
+
+# Từng frontend
+pnpm dev:hub      # :5173
+pnpm dev:game     # :5174
+pnpm dev:admin    # :5180
+pnpm dev:dating   # :5176
+pnpm dev:trade    # :5177
+pnpm dev:sports   # :5178
 ```
 
-### 4. Chạy Backend
-
-```bash
-# Từ root:
-npm run dev:backend
-
-# Hoặc trực tiếp:
-cd source/backend && npm run dev
-```
-
-Backend API: `http://localhost:5000`  
-Swagger docs: `http://localhost:5000/api/docs`  
-Health check: `http://localhost:5000/health`
-
-### 5. Chạy Frontend (mỗi project riêng)
-
-```bash
-cd source/frontend/hub    && npm install && npm run dev   # :5173
-cd source/frontend/game   && npm install && npm run dev   # :5174
-cd source/frontend/dating && npm install && npm run dev   # :5176
-cd source/frontend/trade  && npm install && npm run dev   # :5177
-cd source/frontend/sports && npm install && npm run dev   # :5178
-cd source/frontend/admin-dashboard && npm install && npm run dev  # :5180
-```
+**API:** `http://localhost:5000`  
+**Swagger:** `http://localhost:5000/api/docs`  
+**Health:** `http://localhost:5000/health`
 
 ---
 
-## 📦 Scripts từ root
+## 📦 Scripts gốc
 
 | Script | Mô tả |
 |--------|-------|
-| `npm run dev:backend` | Chạy backend (nodemon) |
-| `npm run db:generate` | Generate tất cả 6 Prisma clients |
-| `npm run db:migrate` | Chạy migration (dev) |
-| `npm run db:deploy` | Deploy migration (production) |
-| `npm run db:seed` | Seed dữ liệu mặc định |
-| `npm run db:seed:demo` | Seed dữ liệu mẫu (test data) |
-| `npm run build:all` | Build tất cả 6 frontend |
-| `npm run check-env` | Kiểm tra biến môi trường |
+| `pnpm dev:backend` | Chạy backend dev server |
+| `pnpm build:all` | Build tất cả packages + frontends |
+| `pnpm prisma:generate` | Generate tất cả 6 Prisma clients |
+| `pnpm prisma:deploy` | Deploy migrations (production) |
+| `pnpm lint:all` | Lint toàn bộ codebase |
+| `pnpm typecheck:all` | Typecheck toàn bộ |
+| `pnpm test` | Chạy backend tests |
 
 ---
 
-## 🏗️ Kiến trúc
+## 🏗️ Kiến trúc tổng quan
 
 ```
-                     ┌─────────────────────────────────┐
-                     │        Nginx Reverse Proxy       │
-                     │  hub.* | game.* | admin.* | ...  │
-                     └────────────────┬────────────────┘
-                                      │
-              ┌──────────────────────▼──────────────────────┐
-              │         Express API — source/backend/         │
-              │    /api/hub  /api/game  /api/dating  ...      │
-              │         Socket.IO  |  PM2 Cluster             │
-              └───────┬───────┬───────┬───────┬──────────────┘
-                      │       │       │       │
-               ┌──────┘  ┌────┘  ┌────┘  ┌───┘
-               ▼         ▼       ▼       ▼
-           hub_db    game_db  dating_db  trade_db  sports_db  admin_db
-           (MySQL)   (MySQL)  (MySQL)   (MySQL)   (MySQL)    (MySQL)
+Internet (HTTPS)
+       │
+  [Nginx] ── SSL termination, gzip, rate limit
+       │
+       ├─ hub.domain.com    → frontend/hub/dist/
+       ├─ game.domain.com   → frontend/game/dist/
+       ├─ trade.domain.com  → frontend/trade/dist/
+       ├─ dating.domain.com → frontend/dating/dist/
+       ├─ sports.domain.com → frontend/sports/dist/
+       ├─ admin.domain.com  → frontend/admin-dashboard/dist/
+       └─ api.domain.com    → proxy → :5000
+
+[PM2 Cluster — Node.js + Express + TypeScript]
+       │
+       ├── hub_db ──── game_db ──── trade_db
+       └── dating_db ─ sports_db ─ admin_db
+            (6 MySQL 8 databases — fully isolated)
 ```
 
 ---
 
-## 🗄️ Database
+## 🗄️ Databases
 
-| DB | Mô tả | Port module |
-|----|-------|-------------|
-| `hub_db` | Hub portal, CMS, news, games | `/api/hub` |
-| `game_db` | Game center, transactions, LKVIP | `/api/game`, `/api/lkvip` |
-| `dating_db` | Dating app, chat, livestream | `/api/dating` |
-| `trade_db` | Trading platform, orders, KYC | `/api/trade` |
-| `sports_db` | Sports news, matches, live | `/api/sports` |
-| `admin_db` | Admin portal, users, config | `/api/admin` |
-
-**Apply indexes sau migration:**
-```bash
-mysql -u root -p < source/database/indexes.sql
-```
+| DB | Module | Env Var |
+|----|--------|---------|
+| `hub_db` | Hub portal, CMS, news | `HUB_DATABASE_URL` |
+| `game_db` | Gaming, wallet, VIP, lottery | `GAME_DATABASE_URL` |
+| `dating_db` | Dating, chat, livestream | `DATING_DATABASE_URL` |
+| `trade_db` | Trading, orders, KYC | `TRADE_DATABASE_URL` |
+| `sports_db` | Sports, matches, betting | `SPORTS_DATABASE_URL` |
+| `admin_db` | Admin, users, config, audit | `ADMIN_DATABASE_URL` |
 
 ---
 
 ## 🔒 Bảo mật
 
-- JWT Bearer token (1h access + 30d refresh)
-- Rate limiting: 100 req/min (public), 200 (authenticated), 5 (auth endpoints)
-- CORS chỉ cho phép origins trong `.env` `CORS_ORIGINS`
-- Helmet headers (HSTS, nosniff, ...)
-- Bcrypt salt 12 cho password
-- AES-256-CBC cho dữ liệu nhạy cảm (CMND, số tài khoản)
+- JWT Bearer (2h access + 30d refresh)
+- Rate limiting: 100 req/min (public), 5 req/min (auth endpoints)
+- CORS chỉ cho phép origins trong `CORS_ORIGINS`
+- Helmet headers (HSTS, nosniff, CSP...)
+- Bcrypt salt 12 cho password hashing
+- AES-256-CBC cho PII (CCCD, số tài khoản)
+- Risk Engine: transaction monitor, brute-force, DDoS, bot detection
 
 ---
 
 ## 📱 Mobile (Capacitor)
 
-3 apps mobile: Hub, Game, Dating — build bằng Capacitor.
+3 apps: Hub, Game, Dating — build bằng Capacitor.
 
-```powershell
-# Windows:
-.\source\scripts\build-mobile.ps1
-
-# Build một app:
-.\source\scripts\build-mobile.ps1 -App hub
+```bash
+cd source/code
+pnpm mobile:sync           # Sync web assets to native
+pnpm mobile:open:android   # Open Android Studio
+pnpm mobile:open:ios       # Open Xcode (macOS only)
 ```
 
 ---
@@ -192,54 +209,42 @@ mysql -u root -p < source/database/indexes.sql
 ## 🚢 Production Deploy
 
 ```bash
-# 1. Setup server lần đầu (Ubuntu 22.04)
-bash source/scripts/setup.sh yourdomain.com admin@yourdomain.com
+# Setup VPS lần đầu (Ubuntu 22.04)
+bash source/config/nginx/setup.sh yourdomain.com admin@yourdomain.com
 
-# 2. Deploy code
-bash source/scripts/deploy.sh
-
-# 3. Apply indexes DB
-mysql -u root -p < source/database/indexes.sql
-
-# 4. Cài SSL
-bash source/scripts/ssl-setup.sh yourdomain.com admin@yourdomain.com
-
-# 5. Setup cron jobs (backup, cleanup)
-sudo bash source/scripts/cron-setup.sh
+# Deploy code (sau lần đầu)
+git pull origin main
+cd source/code && pnpm install --frozen-lockfile
+pnpm --filter lkvip-backend run build
+pnpm run build:frontends
+pm2 reload lkvip-api --update-env
 ```
 
 ---
 
-## 🧪 Testing
+## 📄 Tài liệu
 
-```bash
-npm test                      # Chạy tất cả tests
-cd source/backend && npm test # Backend tests (Jest)
-```
-
----
-
-## 📄 Tài liệu tham khảo
-
-- [`source/database/DATABASE_GUIDE.md`](source/database/DATABASE_GUIDE.md) — Hướng dẫn vận hành database
-- [`source/backend/README.md`](source/backend/README.md) — Backend API docs
-- [`docs/plans/PLAN-INDEX.md`](docs/plans/PLAN-INDEX.md) — Danh sách tất cả implementation plans còn active
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Kiến trúc hệ thống
-- `http://localhost:5000/api/docs` — Swagger UI (khi đang chạy dev)
+| File | Nội dung |
+|------|---------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Kiến trúc hệ thống |
+| [`docs/MODULES.md`](docs/MODULES.md) | API endpoints từng module |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Hướng dẫn deploy VPS |
+| [`docs/MIGRATION_GUIDE.md`](docs/MIGRATION_GUIDE.md) | Prisma migrations |
+| [`docs/SETUP.md`](docs/SETUP.md) | Setup local dev |
+| [`docs/RISK_SYSTEM.md`](docs/RISK_SYSTEM.md) | Risk detection engine |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runbook vận hành |
 
 ---
 
-## 👤 Tài khoản mặc định (sau khi seed)
+## 👤 Tài khoản mặc định (sau seed)
 
 | Loại | Email | Mật khẩu |
 |------|-------|----------|
 | Super Admin | `admin@admin.com` | `Admin@123456` |
-| Game users | `nguyenvana@gmail.com` | `Demo@123456` |
-| Dating streamers | `lily@dating.kjc` | `Demo@123456` |
-| Trade traders | `trader_an@trade.kjc` | `Demo@123456` |
+| Game user | `nguyenvana@gmail.com` | `Demo@123456` |
 
 > ⚠️ **Đổi mật khẩu ngay trước khi deploy lên production!**
 
 ---
 
-*KJC Platform v2.0 — Backend: Node.js 20 + TypeScript + Prisma 5 + MySQL 8 | Frontend: React 19 + Vite + TailwindCSS*
+*LKVIP Platform — Backend: Node.js 20 + TypeScript + Prisma 5 + MySQL 8 | Frontend: React 19 + Vite + TailwindCSS*

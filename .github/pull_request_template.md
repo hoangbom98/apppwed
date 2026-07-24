@@ -20,15 +20,15 @@
 - [ ] Dating SPA
 - [ ] Trade SPA
 - [ ] Sports SPA
-- [ ] Shared packages (@kjc/ui, @kjc/types, @kjc/constants)
+- [ ] Shared packages (@lkvip/ui, @lkvip/types, @lkvip/constants)
 - [ ] Database schemas / migrations
 - [ ] Nginx / deployment scripts
 
 ### Checklist
-- [ ] `npm run lint:all` passes with 0 warnings
-- [ ] `npm run typecheck:all` passes with 0 errors
-- [ ] `npm run test` passes
-- [ ] If schema changed: `npm run prisma:migrate:all` run and committed
+- [ ] `pnpm lint:all` passes with 0 warnings
+- [ ] `pnpm typecheck:all` passes with 0 errors
+- [ ] `pnpm test` passes
+- [ ] If schema changed: Prisma migration created and committed
 - [ ] If new env var added: `.env.example` updated
 - [ ] No hardcoded secrets or credentials
 

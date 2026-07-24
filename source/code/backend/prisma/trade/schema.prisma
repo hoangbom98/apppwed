@@ -10,8 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("TRADE_DATABASE_URL")
+  provider          = "mysql"
+  url               = env("TRADE_DATABASE_URL")
+  shadowDatabaseUrl = env("TRADE_SHADOW_DATABASE_URL")
 }
 
 // =============================================================================
@@ -19,34 +20,46 @@ datasource db {
 // =============================================================================
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique @db.VarChar(150)
-  password  String    @db.VarChar(255)
-  fullName  String?   @db.VarChar(100)
-  avatar    String?   @db.VarChar(500)
-  phone     String?   @db.VarChar(20)
+  id              String    @id @default(cuid())
+  email           String    @unique @db.VarChar(150)
+  password        String    @db.VarChar(255)
+  tradingPassword String?   @db.VarChar(255)  // separate 6-digit trading password (hashed)
+  fullName        String?   @db.VarChar(100)
+  avatar          String?   @db.VarChar(500)
+  phone           String?   @db.VarChar(20)
   // user | admin
-  role      String    @default("user") @db.VarChar(20)
+  role            String    @default("user") @db.VarChar(20)
   // pending | verified | rejected
-  kycStatus String    @default("pending") @db.VarChar(20)
-  kycData   Json?
+  kycStatus       String    @default("pending") @db.VarChar(20)
+  kycData         Json?
   // active | suspended | banned
-  status    String    @default("active") @db.VarChar(20)
-  lastLogin DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  status          String    @default("active") @db.VarChar(20)
+  tradingFrozen   Boolean   @default(false)    // isjy — freeze trading only
+  memberLevel     Int       @default(1)        // VIP membership level 1-10
+  integral        Decimal   @default(0) @db.Decimal(18, 2)  // points balance
+  referralCode    String?   @unique @db.VarChar(20)         // user's own referral code
+  lastLogin       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  orders        Order[]
-  positions     Position[]
-  wallets       Wallet[]
-  withdrawals   Withdrawal[]
-  deposits      Deposit[]
-  kyc           Kyc?
-  transactions  Transaction[]
-  notifications Notification[]
-  alerts        PriceAlert[]
-  watchlists    Watchlist[]
-  investments   Investment[]
+  orders            Order[]
+  positions         Position[]
+  wallets           Wallet[]
+  withdrawals       Withdrawal[]
+  deposits          Deposit[]
+  kyc               Kyc?
+  transactions      Transaction[]
+  notifications     Notification[]
+  alerts            PriceAlert[]
+  watchlists        Watchlist[]
+  investments       Investment[]
+  bankAccounts      BankAccount[]
+  signinRecords     UserSignin[]
+  yuebaoInvestments YuebaoInvestment[]
+  miningInvestments MiningInvestment[]
+  prizeRecords      PrizeRecord[]
+  voucherUsages     VoucherUsage[]
+  shopOrders        ShopOrder[]
 
   @@index([email])
   @@index([status])
@@ -82,31 +95,35 @@ model Market {
 }
 
 model Symbol {
-  id         String   @id @default(cuid())
-  marketId   String   @db.VarChar(30)
-  market     Market   @relation(fields: [marketId], references: [id])
+  id               String   @id @default(cuid())
+  marketId         String   @db.VarChar(30)
+  market           Market   @relation(fields: [marketId], references: [id])
   // AAPL | BTCUSDT | EURUSD
-  code       String   @unique @db.VarChar(30)
-  name       String   @db.VarChar(100)
-  baseAsset  String?  @db.VarChar(20)
-  quoteAsset String?  @db.VarChar(20)
-  minQty     Decimal  @default(0) @db.Decimal(18, 8)
-  maxQty     Decimal  @default(0) @db.Decimal(18, 8)
-  stepSize   Decimal  @default(0) @db.Decimal(18, 8)
-  tickSize   Decimal  @default(0) @db.Decimal(18, 8)
-  minLeverage Int     @default(1)
-  maxLeverage Int     @default(1)
+  code             String   @unique @db.VarChar(30)
+  name             String   @db.VarChar(100)
+  baseAsset        String?  @db.VarChar(20)
+  quoteAsset       String?  @db.VarChar(20)
+  minQty           Decimal  @default(0) @db.Decimal(18, 8)
+  maxQty           Decimal  @default(0) @db.Decimal(18, 8)
+  stepSize         Decimal  @default(0) @db.Decimal(18, 8)
+  tickSize         Decimal  @default(0) @db.Decimal(18, 8)
+  minLeverage      Int      @default(1)
+  maxLeverage      Int      @default(1)
   // active | halted | delisted
-  status     String   @default("active") @db.VarChar(20)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status           String   @default("active") @db.VarChar(20)
+  sortOrder        Int      @default(0)
+  // JSON: { "0": [], "1": [["09:30","16:00"]], ... } — 0=Sun..6=Sat, empty=closed
+  tradingSchedule  Json?
+  orderFeeRate     Decimal  @default(0) @db.Decimal(8, 4)  // % fee per order
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  orders       Order[]
-  positions    Position[]
-  priceHistory PriceHistory[]
-  alerts       PriceAlert[]
+  orders         Order[]
+  positions      Position[]
+  priceHistory   PriceHistory[]
+  alerts         PriceAlert[]
   watchlistItems WatchlistItem[]
+  riskConfig     RiskConfig?
 
   @@index([marketId, status])
   @@map("symbols")
@@ -287,6 +304,7 @@ model Transaction {
   referenceId   String?  @db.VarChar(30)
   referenceType String?  @db.VarChar(30)
   note          String?  @db.VarChar(500)
+  balanceBefore Decimal  @default(0) @db.Decimal(18, 2)
   balanceAfter  Decimal  @db.Decimal(18, 2)
   createdAt     DateTime @default(now())
 
@@ -575,19 +593,22 @@ model Deposit {
 // =============================================================================
 
 model InvestmentPackage {
-  id          String   @id @default(cuid())
-  name        String   @db.VarChar(100)
-  description String?  @db.Text
-  minAmount   Decimal  @default(0) @db.Decimal(18, 2)
-  maxAmount   Decimal  @default(0) @db.Decimal(18, 2)  // 0 = unlimited
-  dailyProfit Decimal  @db.Decimal(8, 4)               // % per day
-  duration    Int                                        // days
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(100)
+  description  String?  @db.Text
+  minAmount    Decimal  @default(0) @db.Decimal(18, 2)
+  maxAmount    Decimal  @default(0) @db.Decimal(18, 2)   // 0 = unlimited
+  dailyProfit  Decimal  @db.Decimal(8, 4)                // % per day
+  duration     Int                                         // days
+  totalSlots   Int      @default(0)                       // 0 = unlimited
+  usedSlots    Int      @default(0)                       // how many sold
+  perUserLimit Int      @default(0)                       // 0 = unlimited per user
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  investments Investment[]
+  investments  Investment[]
 
   @@unique([name])
   @@map("investment_packages")
@@ -606,16 +627,39 @@ model Investment {
   startDate   DateTime          @default(now())
   endDate     DateTime
   lastPaidAt  DateTime?
+  voucherId   String?           @db.VarChar(30)           // applied voucher
   // ACTIVE | COMPLETED | CANCELLED
   status      String            @default("ACTIVE") @db.VarChar(20)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
+  user        User              @relation(fields: [userId], references: [id])
   package     InvestmentPackage @relation(fields: [packageId], references: [id])
+  schedule    InvestmentSchedule[]
 
   @@index([userId, status])
   @@index([status, lastPaidAt])
   @@map("investments")
+}
+
+// =============================================================================
+// INVESTMENT SCHEDULE (payment installments)
+// =============================================================================
+
+model InvestmentSchedule {
+  id           String     @id @default(cuid())
+  investmentId String     @db.VarChar(30)
+  investment   Investment @relation(fields: [investmentId], references: [id])
+  dueDate      DateTime
+  amount       Decimal    @db.Decimal(18, 2)
+  paidAt       DateTime?
+  // pending | paid | skipped
+  status       String     @default("pending") @db.VarChar(20)
+  createdAt    DateTime   @default(now())
+
+  @@index([investmentId, status])
+  @@index([dueDate, status])
+  @@map("investment_schedules")
 }
 
 // =============================================================================
@@ -655,4 +699,357 @@ model CommissionLog {
   @@index([userId, status])
   @@index([fromUserId])
   @@map("commission_logs")
+}
+
+// =============================================================================
+// SYSTEM CONFIG (key-value global settings — replaces lc_info)
+// =============================================================================
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique @db.VarChar(100)
+  value       String   @db.Text
+  // finance | trading | payment | reward | general
+  group       String   @default("general") @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  updatedAt   DateTime @updatedAt
+
+  @@index([group])
+  @@map("system_configs")
+}
+
+// =============================================================================
+// RISK CONFIG (per-symbol risk params — replaces lc_risk)
+// =============================================================================
+
+model RiskConfig {
+  id             String   @id @default(cuid())
+  symbolId       String   @unique @db.VarChar(30)
+  symbol         Symbol   @relation(fields: [symbolId], references: [id])
+  qybl           Decimal  @default(0) @db.Decimal(8, 4)   // risk rate type 3
+  qkbl           Decimal  @default(0) @db.Decimal(8, 4)   // risk rate type 4
+  maxPositionAmt Decimal  @default(0) @db.Decimal(18, 2)  // 0 = unlimited
+  marginCallRate Decimal  @default(0.1) @db.Decimal(8, 4) // 10% margin call threshold
+  updatedAt      DateTime @updatedAt
+
+  @@map("risk_configs")
+}
+
+// =============================================================================
+// BANK ACCOUNT (user-saved bank/e-wallet accounts)
+// =============================================================================
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  userId        String   @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id])
+  // bank | alipay | usdt | momo | zalo
+  type          String   @default("bank") @db.VarChar(20)
+  bankName      String?  @db.VarChar(100)
+  accountNumber String   @db.VarChar(50)
+  accountName   String   @db.VarChar(100)
+  branch        String?  @db.VarChar(100)
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@map("bank_accounts")
+}
+
+// =============================================================================
+// USER SIGN-IN (daily check-in reward)
+// =============================================================================
+
+model UserSignin {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  date      String   @db.VarChar(10)   // YYYY-MM-DD
+  reward    Decimal  @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("user_signins")
+}
+
+// =============================================================================
+// YUEBAO PRODUCT (money market savings products — 余额宝)
+// =============================================================================
+
+model YuebaoProduct {
+  id           String   @id @default(cuid())
+  title        String   @db.VarChar(100)
+  description  String?  @db.Text
+  interestRate Decimal  @db.Decimal(8, 4)   // % per annum or per term
+  days         Int                            // term length in days
+  minAmount    Decimal  @db.Decimal(18, 2)
+  maxAmount    Decimal  @default(0) @db.Decimal(18, 2)  // 0 = unlimited
+  stars        Int      @default(0)           // display rating 1-5
+  // active | inactive | deleted
+  status       String   @default("active") @db.VarChar(20)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  investments YuebaoInvestment[]
+
+  @@map("yuebao_products")
+}
+
+// =============================================================================
+// YUEBAO INVESTMENT (user's money market holding)
+// =============================================================================
+
+model YuebaoInvestment {
+  id          String        @id @default(cuid())
+  userId      String        @db.VarChar(30)
+  user        User          @relation(fields: [userId], references: [id])
+  productId   String        @db.VarChar(30)
+  product     YuebaoProduct @relation(fields: [productId], references: [id])
+  amount      Decimal       @db.Decimal(18, 2)
+  profitPaid  Decimal       @default(0) @db.Decimal(18, 2)
+  startDate   DateTime      @default(now())
+  endDate     DateTime
+  settledAt   DateTime?
+  // active | completed | cancelled
+  status      String        @default("active") @db.VarChar(20)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([endDate, status])
+  @@map("yuebao_investments")
+}
+
+// =============================================================================
+// MINING MACHINE (矿机)
+// =============================================================================
+
+model MiningMachine {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(100)
+  description String?  @db.Text
+  image       String?  @db.VarChar(500)
+  price       Decimal  @db.Decimal(18, 2)    // purchase price / deposit
+  totalStock  Int      @default(0)            // 0 = unlimited
+  stock       Int      @default(0)            // remaining stock
+  dayIncome   Decimal  @db.Decimal(18, 2)     // daily income per unit
+  cost        Decimal  @default(0) @db.Decimal(18, 2)  // daily operating cost
+  duration    Int      @default(0)            // days (0 = indefinite)
+  perUserLimit Int     @default(0)            // 0 = unlimited
+  // active | inactive | deleted
+  status      String   @default("active") @db.VarChar(20)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  investments MiningInvestment[]
+
+  @@map("mining_machines")
+}
+
+// =============================================================================
+// MINING INVESTMENT (user buys mining machine)
+// =============================================================================
+
+model MiningInvestment {
+  id        String        @id @default(cuid())
+  userId    String        @db.VarChar(30)
+  user      User          @relation(fields: [userId], references: [id])
+  machineId String        @db.VarChar(30)
+  machine   MiningMachine @relation(fields: [machineId], references: [id])
+  quantity  Int           @default(1)
+  deposit   Decimal       @db.Decimal(18, 2)   // collateral returned on completion
+  dayIncome Decimal       @db.Decimal(18, 2)   // daily income snapshot
+  profitPaid Decimal      @default(0) @db.Decimal(18, 2)
+  startDate DateTime      @default(now())
+  endDate   DateTime?
+  lastPaidAt DateTime?
+  // active | completed | cancelled
+  status    String        @default("active") @db.VarChar(20)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([status, lastPaidAt])
+  @@map("mining_investments")
+}
+
+// =============================================================================
+// VOUCHER (investment discount coupons)
+// =============================================================================
+
+model Voucher {
+  id         String    @id @default(cuid())
+  code       String    @unique @db.VarChar(30)
+  // fixed | percent
+  type       String    @default("fixed") @db.VarChar(20)
+  amount     Decimal   @db.Decimal(18, 2)    // discount amount or %
+  minPurchase Decimal  @default(0) @db.Decimal(18, 2)
+  maxUses    Int       @default(1)
+  usedCount  Int       @default(0)
+  expiresAt  DateTime?
+  // active | expired | disabled
+  status     String    @default("active") @db.VarChar(20)
+  createdAt  DateTime  @default(now())
+
+  usages VoucherUsage[]
+
+  @@map("vouchers")
+}
+
+model VoucherUsage {
+  id          String   @id @default(cuid())
+  voucherId   String   @db.VarChar(30)
+  voucher     Voucher  @relation(fields: [voucherId], references: [id])
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  referenceId String?  @db.VarChar(30)   // investment id
+  usedAt      DateTime @default(now())
+
+  @@unique([voucherId, userId])
+  @@map("voucher_usages")
+}
+
+// =============================================================================
+// PRIZE DRAW (抽奖 — lucky wheel)
+// =============================================================================
+
+model PrizeConfig {
+  id        String    @id @default(cuid())
+  name      String    @db.VarChar(100)
+  // cash | physical | points
+  type      String    @default("cash") @db.VarChar(20)
+  amount    Decimal   @default(0) @db.Decimal(18, 2)
+  odds      Decimal   @db.Decimal(8, 4)   // probability 0-100
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  eventId   String?   @db.VarChar(30)     // group prizes into events
+  endTime   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  records PrizeRecord[]
+
+  @@map("prize_configs")
+}
+
+model PrizeRecord {
+  id        String      @id @default(cuid())
+  userId    String      @db.VarChar(30)
+  user      User        @relation(fields: [userId], references: [id])
+  prizeId   String      @db.VarChar(30)
+  prize     PrizeConfig @relation(fields: [prizeId], references: [id])
+  wonAt     DateTime    @default(now())
+  claimed   Boolean     @default(false)
+  claimedAt DateTime?
+
+  @@index([userId])
+  @@index([wonAt])
+  @@map("prize_records")
+}
+
+// =============================================================================
+// BANNER / SLIDE
+// =============================================================================
+
+model Banner {
+  id        String    @id @default(cuid())
+  title     String?   @db.VarChar(255)
+  imageUrl  String    @db.VarChar(500)
+  linkUrl   String?   @db.VarChar(500)
+  // top | middle | bottom
+  position  String    @default("top") @db.VarChar(20)
+  sortOrder Int       @default(0)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  // active | inactive
+  status    String    @default("active") @db.VarChar(20)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([status, position])
+  @@map("banners")
+}
+
+// =============================================================================
+// NEWS ARTICLE
+// =============================================================================
+
+model NewsArticle {
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  content     String    @db.LongText
+  summary     String?   @db.VarChar(500)
+  thumbnail   String?   @db.VarChar(500)
+  category    String    @default("news") @db.VarChar(50)
+  authorId    String?   @db.VarChar(30)
+  views       Int       @default(0)
+  // published | draft | hidden
+  status      String    @default("published") @db.VarChar(20)
+  readReward  Decimal   @default(0) @db.Decimal(18, 2)  // reward for reading
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  viewLogs NewsViewLog[]
+
+  @@index([category, status])
+  @@map("news_articles")
+}
+
+model NewsViewLog {
+  id        String      @id @default(cuid())
+  articleId String      @db.VarChar(30)
+  article   NewsArticle @relation(fields: [articleId], references: [id])
+  userId    String      @db.VarChar(30)
+  reward    Decimal     @default(0) @db.Decimal(18, 2)
+  viewedAt  DateTime    @default(now())
+
+  @@unique([articleId, userId])   // one reward per article per user
+  @@index([userId])
+  @@map("news_view_logs")
+}
+
+// =============================================================================
+// POINTS SHOP
+// =============================================================================
+
+model ShopItem {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(100)
+  description String?  @db.Text
+  image       String?  @db.VarChar(500)
+  points      Decimal  @db.Decimal(18, 2)   // integral cost
+  stock       Int      @default(0)           // 0 = unlimited
+  // physical | cash | coupon
+  type        String   @default("physical") @db.VarChar(20)
+  cashValue   Decimal  @default(0) @db.Decimal(18, 2)  // if type=cash
+  sortOrder   Int      @default(0)
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders ShopOrder[]
+
+  @@map("shop_items")
+}
+
+model ShopOrder {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation(fields: [userId], references: [id])
+  itemId    String   @db.VarChar(30)
+  item      ShopItem @relation(fields: [itemId], references: [id])
+  points    Decimal  @db.Decimal(18, 2)
+  quantity  Int      @default(1)
+  // pending | delivered | cancelled
+  status    String   @default("pending") @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("shop_orders")
 }

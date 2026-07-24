@@ -1,5 +1,7 @@
 # ============================================================
-# Root .gitignore -- KJC Multi-Project Platform
+# Root .gitignore — LKVIP GROUP
+# Workspace root: /var/LKVIP/
+# Code root:      /var/LKVIP/source/code/
 # ============================================================
 
 # --- Node.js dependencies ---
@@ -14,6 +16,7 @@ build/
 .next/
 .nuxt/
 .output/
+*.tsbuildinfo
 
 # --- Environment / Secrets (NEVER commit real .env) ---
 .env
@@ -31,14 +34,16 @@ logs/
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.pnpm-debug.log
 **/logs/*.log
 
-# --- Database backups & uploads ---
-source/backend/backups/
-source/backend/uploads/
+# --- Runtime data (logs, uploads, backups) ---
+/data/
+source/code/backend/backups/
+source/code/backend/uploads/
 
 # --- Prisma generated clients ---
-source/backend/node_modules/.prisma/
+source/code/backend/node_modules/.prisma/
 
 # --- OS / Editor ---
 .DS_Store
@@ -55,23 +60,28 @@ desktop.ini
 *.cache
 *.pid
 .deploy_rollback
+.turbo/
+.cache/
 
 # --- Archives ---
 _archive/
 docs/legacy/
 
-# --- Capacitor / Mobile ---
-android/
-ios/
+# --- Old / reference codebases (not part of active build) ---
+trading-old/
 
-# --- Unrelated sub-projects (not part of this repo) ---
-hb88-main/
+# --- Auto-generated HTML reports ---
+*-codebase-overview.html
+*-architecture-report.html
 
 # --- Obsolete plan/draft files (auto-generated, do not commit) ---
 *-plan.md
 *-cleanup-plan.md
 *-guide-draft.md
 
+# --- Capacitor / Mobile ---
+android/
+ios/
 
 # --- Large media files ---
-source/frontend/hub/public/assets/videos/
+source/code/frontend/hub/public/assets/videos/

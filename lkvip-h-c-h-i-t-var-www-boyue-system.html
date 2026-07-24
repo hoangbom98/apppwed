@@ -1,0 +1,420 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LKVIP — Học hỏi từ BoYue</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 16px; font-weight: 700; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; color: #1f2328; }
+  h3 { font-size: 14px; font-weight: 600; margin: 18px 0 8px; color: #3b82d4; }
+  p { margin-bottom: 10px; color: #1f2328; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-orange { background: #fff7ed; color: #9a3412; }
+  .badge-purple { background: #f3e8ff; color: #6b21a8; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+  th { background: #f7f8fa; text-align: left; padding: 8px 10px; border: 1px solid #e5e7eb; font-weight: 600; color: #57606a; }
+  td { padding: 8px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  code { font-family: "SF Mono", "Fira Code", Consolas, monospace; font-size: 12px; background: #f7f8fa; padding: 1px 5px; border-radius: 3px; border: 1px solid #e5e7eb; }
+  pre { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; font-family: "SF Mono", "Fira Code", Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; margin: 10px 0 16px; }
+  .card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .card-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .priority-high { border-left: 4px solid #ef4444; }
+  .priority-medium { border-left: 4px solid #f59e0b; }
+  .priority-low { border-left: 4px solid #6b7280; }
+  .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 12px 0; }
+  .tech-item { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; }
+  .tech-label { font-size: 11px; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .tech-value { font-weight: 600; font-size: 13px; }
+  .checklist li { list-style: none; padding: 4px 0; font-size: 13px; }
+  .checklist li::before { content: "✓ "; color: #22c55e; font-weight: 700; }
+  .arrow { color: #57606a; }
+  .section-number { display: inline-block; background: #3b82d4; color: white; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 12px; font-weight: 700; margin-right: 6px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>LKVIP — Học hỏi từ BoYue Platform</h1>
+  <p class="subtitle">Phân tích kỹ thuật /var/www (boyue/okwink6) → Áp dụng vào /var/LKVIP · July 2025</p>
+
+  
+  <h2><span class="section-number">1</span>Tổng quan /var/www (BoYue)</h2>
+
+  <p><strong>BoYue</strong> là nền tảng casino game sản xuất cho thị trường Việt Nam, đang chạy production trên cùng VPS. Cấu trúc hoàn chỉnh gồm backend PHP + WAP mobile + Admin panel + 8 background workers.</p>
+
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-label">Backend</div><div class="tech-value">Webman (Workerman)</div></div>
+    <div class="tech-item"><div class="tech-label">Language</div><div class="tech-value">PHP 8.2</div></div>
+    <div class="tech-item"><div class="tech-label">Database</div><div class="tech-value">MySQL 120+ tables</div></div>
+    <div class="tech-item"><div class="tech-label">Cache</div><div class="tech-value">Redis 6.0+</div></div>
+    <div class="tech-item"><div class="tech-label">Frontend WAP</div><div class="tech-value">Vue 3 + Vite + Vant</div></div>
+    <div class="tech-item"><div class="tech-label">Admin Panel</div><div class="tech-value">Vue 3 + TypeScript + Element Plus</div></div>
+    <div class="tech-item"><div class="tech-label">Build</div><div class="tech-value">pnpm (Admin) / npm (WAP)</div></div>
+    <div class="tech-item"><div class="tech-label">Game Provider</div><div class="tech-value">TC-Gaming / GSC / Goldgate</div></div>
+  </div>
+
+  
+  <h2><span class="section-number">2</span>Kiến trúc hệ thống</h2>
+
+  <pre>
+Internet (HTTPS)
+    │
+  [Nginx :443]
+    ├─ /ws          → :8789  (User WebSocket — Workerman)
+    ├─ /admin-ws    → :8790  (Admin WebSocket)
+    ├─ /api/*       → :8788  (HTTP API — Webman)
+    ├─ /admin/      → static dist files (Vue build)
+    └─ /            → WAP SPA fallback
+
+  [Webman PHP — :8788, 4 workers × CPU cores]
+    ├─ Middleware: Exception → CORS → RateLimit → Encryption → Auth
+    └─ Controllers: auth, game, lottery, wallet, transfer, agent
+
+  Background Workers (8 processes, long-running)
+    ├─ UniversalLotteryCollector  ← Sync lottery results từ 3rd-party (mỗi 30s)
+    ├─ LotterySettlement          ← Tính kết quả thắng/thua
+    ├─ TcgBetSyncWorker           ← Sync bet history TC-Gaming
+    ├─ YuebaoInterest             ← Tính lãi tiết kiệm hàng ngày
+    ├─ AgentSettlementTask        ← Commission đại lý
+    ├─ RebateSettlement           ← Cashback hàng ngày
+    ├─ ScheduledTasks             ← Cron-like (VIP check, cleanup...)
+    └─ RobotAutoBet               ← Bot tự động cược (demo data)
+  </pre>
+
+  
+  <h2><span class="section-number">3</span>Những kỹ thuật quan trọng cần học</h2>
+
+  
+  <h3>3.1 TC-Gaming Seamless Wallet Integration (DES-ECB + SHA256)</h3>
+  <p>Đây là kỹ thuật quan trọng nhất. LKVIP đang tích hợp TC-Gaming — BoYue đã làm xong và đang chạy production.</p>
+
+  <div class="card priority-high">
+    <div class="card-title">🎯 Flow TC-Gaming đầy đủ</div>
+    <pre>
+1. Đăng ký user trên TCG
+   → Backend gọi TCG API (method=cm)
+   → Payload mã hóa bằng DES-ECB
+   → TCG trả về prefix username (VD: "14btimibbs")
+
+2. Launch game
+   → Backend gọi TCG (method=lg)
+   → TCG trả về launch URL có token
+
+3. TCG Callbacks → Backend endpoints:
+   ├─ sgb (get_balance)    ← Kiểm tra số dư
+   ├─ db  (debit)          ← Trừ tiền (đặt cược)
+   ├─ cr  (credit)         ← Cộng tiền (thắng cược)
+   ├─ rv  (reserve)        ← Tạm giữ
+   ├─ cfr (confirm)        ← Xác nhận
+   └─ rcr (rollback)       ← Hoàn tiền
+
+4. Background Worker sync bet history (mỗi 30s)
+   → method=get_bet_history
+   → Insert vào DB với idempotency check (ref_no)</pre>
+  </div>
+
+  <table>
+    <tr><th>Aspect</th><th>Chi tiết</th></tr>
+    <tr><td><strong>Mã hóa payload</strong></td><td><code>DES-ECB</code> (dùng <code>phpseclib3</code> — tương thích PHP 8.x)</td></tr>
+    <tr><td><strong>Signature verify</strong></td><td><code>SHA256(body + secret)</code> — validate mọi callback</td></tr>
+    <tr><td><strong>Idempotency</strong></td><td>Check <code>ref_no</code> trước khi xử lý — tránh double charge</td></tr>
+    <tr><td><strong>Currency</strong></td><td>1 VNDK = 1000 VND — luôn convert</td></tr>
+    <tr><td><strong>No JWT</strong></td><td>Endpoints TCG callback không cần auth JWT</td></tr>
+  </table>
+
+  <p><span class="badge badge-green">Áp dụng ngay</span> — LKVIP đang tích hợp TCG, copy pattern này vào <code>source/code/backend/src/modules/game/</code></p>
+
+  
+  <h3>3.2 Background Workers (Async Processing)</h3>
+  <p>BoYue dùng <strong>Workerman long-running workers</strong> thay vì cron jobs — nhanh hơn, linh hoạt hơn.</p>
+
+  <pre>
+// Pattern: process/UniversalLotteryCollector.php
+class UniversalLotteryCollector {
+    public function onWorkerStart() {
+        // Gọi 1 lần khi khởi động
+        Timer::add(30, [$this, 'collectDraws']); // Repeat mỗi 30s
+    }
+
+    public function collectDraws() {
+        // 1. Fetch từ 3rd-party API
+        // 2. INSERT với ON DUPLICATE KEY (idempotent)
+        // 3. Push WebSocket notification
+    }
+}</pre>
+
+  <p><span class="badge badge-blue">Học hỏi</span> — LKVIP đang dùng <code>node-cron</code>. Pattern tương tự nhưng trong Node.js là setInterval hoặc Bull queue. Cần đảm bảo idempotency trong mọi job.</p>
+
+  
+  <h3>3.3 AES-256 Encryption cho Admin API</h3>
+  <p>Toàn bộ request/response giữa Admin Panel và Backend đều được mã hóa AES-256-CBC — bảo vệ sensitive data ngay cả khi bị MitM.</p>
+
+  <pre>
+// Middleware pattern:
+if (config('app.encryption_enabled')) {
+    // Decrypt incoming request body
+    if ($request-&gt;header('X-Encrypted')) {
+        $body = AES_decrypt($request-&gt;body, $key);
+    }
+    // Process normally...
+    // Encrypt outgoing response
+    $response = AES_encrypt($data, $key);
+    return response()-&gt;json(['data' =&gt; $response]);
+}</pre>
+
+  <p><span class="badge badge-blue">Học hỏi</span> — LKVIP admin dashboard nên implement tương tự cho các API nhạy cảm (balance adjustment, user ban, payment approve).</p>
+
+  
+  <h3>3.4 Financial Database Schema</h3>
+  <p>BoYue có 120+ tables với thiết kế chuẩn cho nền tảng tài chính:</p>
+
+  <table>
+    <tr><th>Nguyên tắc</th><th>Chi tiết</th><th>LKVIP check</th></tr>
+    <tr><td><strong>DECIMAL(16,2)</strong></td><td>Mọi field tiền tệ — không dùng FLOAT/DOUBLE</td><td><span class="badge badge-orange">Kiểm tra lại</span></td></tr>
+    <tr><td><strong>InnoDB</strong></td><td>Transaction support (ACID) cho tất cả table tài chính</td><td><span class="badge badge-green">OK</span></td></tr>
+    <tr><td><strong>Frozen balance</strong></td><td><code>fcoin</code> — số dư bị tạm giữ khi đặt cược</td><td><span class="badge badge-orange">Cần thêm</span></td></tr>
+    <tr><td><strong>Audit log</strong></td><td><code>caipiao_fuddetail</code> — mọi thay đổi số dư đều log</td><td><span class="badge badge-orange">Kiểm tra</span></td></tr>
+    <tr><td><strong>Idempotency</strong></td><td><code>trano</code> (transaction no) UNIQUE — tránh double credit</td><td><span class="badge badge-orange">Cần thêm</span></td></tr>
+    <tr><td><strong>utf8mb4</strong></td><td><code>utf8mb4_unicode_ci</code> — hỗ trợ tiếng Việt đầy đủ</td><td><span class="badge badge-green">OK</span></td></tr>
+  </table>
+
+  
+  <h3>3.5 VIP &amp; Rebate System</h3>
+  <p>Hệ thống VIP của BoYue tách riêng config table và state table:</p>
+
+  <table>
+    <tr><th>Table</th><th>Mục đích</th></tr>
+    <tr><td><code>yzz_level_config</code></td><td>Config: ngưỡng điểm mỗi tier, phần thưởng</td></tr>
+    <tr><td><code>yzz_user_level</code></td><td>State: tier hiện tại + tích lũy điểm</td></tr>
+    <tr><td><code>yzz_level_reward_record</code></td><td>History phần thưởng đã nhận</td></tr>
+    <tr><td><code>yzz_level_change_log</code></td><td>Audit trail thay đổi tier</td></tr>
+  </table>
+
+  <p>Rebate rates khác nhau theo loại game: Live Casino (0.4-1.1%), Lottery (0.4-1.1%), Slots (0.3-0.8%), Sports (0.3-0.8%).</p>
+
+  
+  <h3>3.6 WebSocket Real-time (Workerman Channels)</h3>
+  <pre>
+// Pub-sub cross-process (multi-worker safe)
+$channel = Channel::create('lottery_result');
+$channel-&gt;push(['cpname' =&gt; 'tx1m', 'result' =&gt; [5,3,6]]);
+
+// WebSocket server lắng nghe
+$ws-&gt;onMessage = function($connection, $data) {
+    if ($data-&gt;channel === 'lottery_result') {
+        $connection-&gt;send(json_encode($data));
+    }
+};</pre>
+
+  <p><span class="badge badge-blue">Học hỏi</span> — LKVIP dùng Socket.IO tương tự. Cần đảm bảo event namespace đúng và handle reconnection.</p>
+
+  
+  <h3>3.7 Nginx Configuration</h3>
+
+  <pre>
+# WebSocket upgrade (PHẢI có cho Socket.IO)
+location /ws {
+    proxy_pass http://127.0.0.1:8789;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+
+# API proxy
+location /api/ {
+    proxy_pass http://127.0.0.1:8788;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+
+# Static files — cache 30 days
+location /uploads/ {
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+}</pre>
+
+  <p><span class="badge badge-green">Áp dụng ngay</span> — Copy Nginx patterns này vào <code>source/config/nginx/</code> của LKVIP.</p>
+
+  
+  <h3>3.8 Deployment Scripts</h3>
+  <p>BoYue có bộ scripts deploy hoàn chỉnh trong <code>/var/www/install-apps/</code>:</p>
+
+  <table>
+    <tr><th>Script</th><th>Chức năng</th></tr>
+    <tr><td><code>rebuild-wap.sh</code></td><td>Build WAP an toàn — giữ nguyên /admin, /uploads</td></tr>
+    <tr><td><code>deploy-boyue.sh</code></td><td>Full deploy: DB setup + composer + frontend builds + Nginx + SSL</td></tr>
+    <tr><td><code>patch-localization.sql</code></td><td>Vietnamese localization patches</td></tr>
+    <tr><td><code>patch-tcg-images.sql</code></td><td>Game icon CDN mapping</td></tr>
+  </table>
+
+  <p><span class="badge badge-blue">Học hỏi</span> — Xem cấu trúc script để cải thiện deploy pipeline của LKVIP.</p>
+
+  
+  <h2><span class="section-number">4</span>Action Plan cho LKVIP</h2>
+
+  <div class="card priority-high">
+    <div class="card-title">🔴 ƯU TIÊN CAO — Áp dụng ngay (tuần này)</div>
+    <ul class="checklist">
+      <li><strong>TC-Gaming callbacks:</strong> Thêm idempotency check bằng <code>ref_no</code> UNIQUE trong DB trước khi credit/debit</li>
+      <li><strong>Frozen balance field:</strong> Thêm <code>frozenBalance</code> vào Wallet model — tránh race condition khi user đặt cược nhiều</li>
+      <li><strong>DECIMAL precision:</strong> Review tất cả money fields trong Prisma schema — phải là <code>Decimal</code> không phải <code>Float</code></li>
+      <li><strong>Wallet audit log:</strong> Mọi thay đổi balance phải INSERT vào <code>wallet_transactions</code> với đầy đủ metadata</li>
+    </ul>
+  </div>
+
+  <div class="card priority-medium">
+    <div class="card-title">🟡 ƯU TIÊN TRUNG BÌNH (1-2 tháng)</div>
+    <ul class="checklist">
+      <li><strong>Background workers:</strong> Refactor cron jobs thành long-running workers với interval tùy chỉnh (không bị giới hạn 1 phút)</li>
+      <li><strong>AES Admin API:</strong> Encrypt request/response giữa admin dashboard và backend cho các API nhạy cảm</li>
+      <li><strong>VIP tier separation:</strong> Tách <code>vip_configs</code> (admin config) khỏi <code>user_vip</code> (user state)</li>
+      <li><strong>Rebate by game type:</strong> Mỗi loại game (slots/live/sports) có rebate rate riêng</li>
+      <li><strong>Nginx cache headers:</strong> Thêm <code>Cache-Control</code> cho static assets</li>
+    </ul>
+  </div>
+
+  <div class="card priority-low">
+    <div class="card-title">⚪ ƯU TIÊN THẤP (3-6 tháng)</div>
+    <ul class="checklist">
+      <li><strong>Redis cluster:</strong> Migrate Redis sang cluster mode khi user tăng</li>
+      <li><strong>Database replication:</strong> Master-slave khi DB &gt; 10GB</li>
+      <li><strong>APM monitoring:</strong> NewRelic/DataDog cho production metrics</li>
+      <li><strong>Robot auto-bet:</strong> Demo data generator cho testing môi trường staging</li>
+    </ul>
+  </div>
+
+  
+  <h2><span class="section-number">5</span>So sánh: BoYue vs LKVIP</h2>
+
+  <table>
+    <tr><th>Aspect</th><th>BoYue (/var/www)</th><th>LKVIP (/var/LKVIP)</th><th>Học gì?</th></tr>
+    <tr>
+      <td><strong>Auth</strong></td>
+      <td>JWT 2h/7d + Redis cache</td>
+      <td>JWT 2h/30d</td>
+      <td>Thêm Redis token cache để tránh DB lookup</td>
+    </tr>
+    <tr>
+      <td><strong>Encryption</strong></td>
+      <td>AES-256 Admin, DES 3rd-party</td>
+      <td>AES-256 PII only</td>
+      <td>Extend AES cho toàn bộ admin API</td>
+    </tr>
+    <tr>
+      <td><strong>Balance</strong></td>
+      <td>coin + fcoin (frozen)</td>
+      <td>balance only</td>
+      <td><span class="badge badge-orange">QUAN TRỌNG: thêm frozenBalance</span></td>
+    </tr>
+    <tr>
+      <td><strong>TCG Integration</strong></td>
+      <td>Production ✅ DES + idempotency</td>
+      <td>Đang phát triển</td>
+      <td>Copy exact flow từ BoYue</td>
+    </tr>
+    <tr>
+      <td><strong>Background jobs</strong></td>
+      <td>8 workers, Workerman</td>
+      <td>node-cron</td>
+      <td>Thêm BullMQ cho async jobs</td>
+    </tr>
+    <tr>
+      <td><strong>Real-time</strong></td>
+      <td>Workerman WebSocket (fast)</td>
+      <td>Socket.IO</td>
+      <td>OK — Socket.IO tương đương</td>
+    </tr>
+    <tr>
+      <td><strong>DB precision</strong></td>
+      <td>DECIMAL(16,2) strict</td>
+      <td>Cần kiểm tra</td>
+      <td>Review tất cả Prisma schema</td>
+    </tr>
+    <tr>
+      <td><strong>Deploy scripts</strong></td>
+      <td>Đầy đủ, idempotent</td>
+      <td>Cơ bản</td>
+      <td>Học cấu trúc script BoYue</td>
+    </tr>
+    <tr>
+      <td><strong>Localization</strong></td>
+      <td>vi.json đầy đủ, DB labels</td>
+      <td>Chưa có i18n</td>
+      <td>Thêm i18n JSON + DB labels VN</td>
+    </tr>
+  </table>
+
+  
+  <h2><span class="section-number">6</span>3 Fix QUAN TRỌNG nhất từ BoYue</h2>
+
+  <div class="card">
+    <div class="card-title">Fix #1: Frozen Balance (Wallet Race Condition)</div>
+    <p>BoYue dùng 2 fields tách biệt: <code>coin</code> (available) + <code>fcoin</code> (frozen). Khi user đặt cược, tiền move từ <code>coin</code> → <code>fcoin</code>. Nếu thắng → <code>fcoin</code> → <code>coin</code>. Nếu thua → <code>fcoin</code> = 0.</p>
+    <p>Không có frozen balance → có thể xảy ra race condition khi user đặt cược nhiều game cùng lúc và balance âm.</p>
+    <pre>
+-- Prisma schema cần thêm:
+model Wallet {
+  balance       Decimal @db.Decimal(16, 2)
+  frozenBalance Decimal @db.Decimal(16, 2) @default(0) // ← THÊM
+}</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fix #2: TC-Gaming Idempotency (Tránh double credit)</div>
+    <p>BoYue check <code>ref_no</code> UNIQUE trước mọi credit/debit từ TCG. Nếu ref_no đã tồn tại → return success ngay (idempotent). Không có check này → TCG retry → user được cộng tiền 2 lần.</p>
+    <pre>
+-- Table cần có:
+CREATE UNIQUE INDEX idx_ref_no ON tcg_wallet_transactions(ref_no);
+
+-- Trong code (Node.js):
+const existing = await prisma.tcgTransaction.findUnique({ where: { refNo } });
+if (existing) return { balance: await getBalance(uid) }; // idempotent</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fix #3: DECIMAL cho money fields (Không dùng Float)</div>
+    <p>Float/Double có lỗi làm tròn nhỏ (0.1 + 0.2 ≠ 0.3). Với tiền tệ, sai số này tích lũy và gây mất cân đối sổ sách. BoYue dùng DECIMAL(16,2) strict cho 100% money fields.</p>
+    <pre>
+// Prisma schema - kiểm tra:
+model Wallet {
+  balance Decimal @db.Decimal(16, 2)  // ✅ ĐÚNG
+  // balance Float                   // ❌ SAI
+}</pre>
+  </div>
+
+  
+  <h2><span class="section-number">7</span>File cụ thể cần tham khảo</h2>
+
+  <table>
+    <tr><th>File</th><th>Học gì</th></tr>
+    <tr><td><code>/var/www/boyue/app/middleware/EncryptionMiddleware.php</code></td><td>AES request/response encryption pattern</td></tr>
+    <tr><td><code>/var/www/boyue/app/middleware/RateLimitMiddleware.php</code></td><td>Redis-based rate limiting per endpoint</td></tr>
+    <tr><td><code>/var/www/boyue/process/TcgBetSyncWorker.php</code></td><td>Background worker pattern + TCG sync</td></tr>
+    <tr><td><code>/var/www/boyue/app/service/WalletService.php</code></td><td>frozen balance + audit log pattern</td></tr>
+    <tr><td><code>/var/www/boyue/app/service/UserLevelService.php</code></td><td>VIP tier calculation pattern</td></tr>
+    <tr><td><code>/var/www/boyue/config/process.php</code></td><td>Background worker registration</td></tr>
+    <tr><td><code>/var/www/boyue.okwink6.com.conf</code></td><td>Nginx WebSocket + proxy patterns</td></tr>
+    <tr><td><code>/var/www/install-apps/rebuild-wap.sh</code></td><td>Safe deploy script (protects uploads)</td></tr>
+    <tr><td><code>/var/www/TCGAPI_Sample_PHP_7.3.10/</code></td><td>TC-Gaming API official sample</td></tr>
+    <tr><td><code>/var/www/by.sql</code></td><td>Full DB schema — 120 tables tham khảo</td></tr>
+  </table>
+
+  <footer>
+    <p>Phân tích bởi Bob · LKVIP Platform · /var/www BoYue → /var/LKVIP</p>
+    <p style="margin-top:6px">Made with IBM Bob</p>
+  </footer>
+
+</div>
+</body>
+</html>

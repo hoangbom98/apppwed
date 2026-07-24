@@ -4,17 +4,26 @@ const router     = require('express').Router();
 const auth       = require('../../../shared/middlewares/auth');
 const adminGuard = require('../../../shared/middlewares/adminGuard');
 
-const authCtrl       = require('../controllers/authController');
-const marketCtrl     = require('../controllers/marketController');
-const orderCtrl      = require('../controllers/orderController');
-const walletCtrl     = require('../controllers/walletController');
-const depositCtrl    = require('../controllers/depositController');
-const investCtrl     = require('../controllers/investmentController');
-const referralCtrl   = require('../controllers/referralController');
-const kycCtrl        = require('../controllers/kycController');
-const notifCtrl      = require('../controllers/notificationController');
-const positionCtrl   = require('../controllers/positionController');
-const userCtrl       = require('../controllers/userController');
+const authCtrl          = require('../controllers/authController');
+const marketCtrl        = require('../controllers/marketController');
+const orderCtrl         = require('../controllers/orderController');
+const walletCtrl        = require('../controllers/walletController');
+const depositCtrl       = require('../controllers/depositController');
+const investCtrl        = require('../controllers/investmentController');
+const referralCtrl      = require('../controllers/referralController');
+const kycCtrl           = require('../controllers/kycController');
+const notifCtrl         = require('../controllers/notificationController');
+const positionCtrl      = require('../controllers/positionController');
+const userCtrl          = require('../controllers/userController');
+const tradingPwdCtrl    = require('../controllers/tradingPasswordController');
+const systemCfgCtrl     = require('../controllers/systemConfigController');
+const bankAccCtrl       = require('../controllers/bankAccountController');
+const miningCtrl        = require('../controllers/miningController');
+const yuebaoCtrl        = require('../controllers/yuebaoController');
+const contentCtrl       = require('../controllers/contentController');
+const prizeCtrl         = require('../controllers/prizeController');
+const riskCtrl          = require('../controllers/riskConfigController');
+const rewardCtrl        = require('../controllers/rewardController');
 
 const { paginate } = require('../../../shared/utils/helpers');
 const { ok, error } = require('../../../shared/utils/response');
@@ -204,6 +213,95 @@ if (process.env.ENABLE_2FA === 'true') {
   router.post('/auth/2fa/verify',  auth, twoFACtrl.verify);
   router.get('/auth/2fa/backup',   auth, twoFACtrl.regenerateBackupCodes);
 }
+
+// ── Trading Password ──────────────────────────────────────────────
+router.post('/trading-password/set',    auth, tradingPwdCtrl.set);
+router.post('/trading-password/change', auth, tradingPwdCtrl.change);
+router.post('/trading-password/verify', auth, tradingPwdCtrl.verify);
+
+// ── Bank Accounts ─────────────────────────────────────────────────
+router.get('/bank-accounts',         auth, bankAccCtrl.list);
+router.post('/bank-accounts',        auth, bankAccCtrl.create);
+router.patch('/bank-accounts/:id',   auth, bankAccCtrl.update);
+router.delete('/bank-accounts/:id',  auth, bankAccCtrl.remove);
+
+// ── Banners (public) ──────────────────────────────────────────────
+router.get('/banners', contentCtrl.listBanners);
+
+// ── News (public + reward) ────────────────────────────────────────
+router.get('/news',                          contentCtrl.listNews);
+router.get('/news/:slug',                    contentCtrl.getNews);
+router.post('/reward/news/:articleId',  auth, rewardCtrl.newsReward);
+
+// ── Sign-in reward ────────────────────────────────────────────────
+router.post('/reward/signin',        auth, rewardCtrl.signin);
+router.get('/reward/signin/status',  auth, rewardCtrl.signinStatus);
+
+// ── Prize Draw ────────────────────────────────────────────────────
+router.get('/prize/configs',  prizeCtrl.listPrizes);
+router.get('/prize/recent',   prizeCtrl.recentWinners);
+router.get('/prize/records',  auth, prizeCtrl.myRecords);
+router.post('/prize/draw',    auth, prizeCtrl.draw);
+
+// ── Yuebao / Money Market ─────────────────────────────────────────
+router.get('/yuebao/products', yuebaoCtrl.listProducts);
+router.get('/yuebao/my',       auth, yuebaoCtrl.myInvestments);
+router.post('/yuebao/invest',  auth, yuebaoCtrl.invest);
+
+// ── Mining ────────────────────────────────────────────────────────
+router.get('/mining/machines',      miningCtrl.listMachines);
+router.get('/mining/machines/:id',  miningCtrl.getMachine);
+router.get('/mining/my',            auth, miningCtrl.myInvestments);
+router.post('/mining/invest',       auth, tradingPwdCtrl.requireTradingPassword, miningCtrl.invest);
+
+// ── System Config (public safe keys) ─────────────────────────────
+router.get('/config', systemCfgCtrl.getPublicConfig);
+
+// ── Admin: System Config ──────────────────────────────────────────
+router.get('/admin/config',        auth, adminGuard, systemCfgCtrl.listAll);
+router.get('/admin/config/:key',   auth, adminGuard, systemCfgCtrl.getOne);
+router.put('/admin/config/:key',   auth, adminGuard, systemCfgCtrl.upsert);
+router.post('/admin/config/bulk',  auth, adminGuard, systemCfgCtrl.bulkUpsert);
+router.delete('/admin/config/:key',auth, adminGuard, systemCfgCtrl.remove);
+
+// ── Admin: Risk Config + Position Override ────────────────────────
+router.get('/admin/risk',                         auth, adminGuard, riskCtrl.listAll);
+router.get('/admin/risk/:symbolId',               auth, adminGuard, riskCtrl.getBySymbol);
+router.put('/admin/risk/:symbolId',               auth, adminGuard, riskCtrl.upsert);
+router.patch('/admin/positions/:id/close-price',  auth, adminGuard, riskCtrl.adminOverrideClosePrice);
+
+// ── Admin: Banners ────────────────────────────────────────────────
+router.get('/admin/banners',        auth, adminGuard, contentCtrl.adminListBanners);
+router.post('/admin/banners',       auth, adminGuard, contentCtrl.adminCreateBanner);
+router.patch('/admin/banners/:id',  auth, adminGuard, contentCtrl.adminUpdateBanner);
+router.delete('/admin/banners/:id', auth, adminGuard, contentCtrl.adminDeleteBanner);
+
+// ── Admin: News ───────────────────────────────────────────────────
+router.get('/admin/news',         auth, adminGuard, contentCtrl.adminListNews);
+router.post('/admin/news',        auth, adminGuard, contentCtrl.adminCreateNews);
+router.patch('/admin/news/:id',   auth, adminGuard, contentCtrl.adminUpdateNews);
+router.delete('/admin/news/:id',  auth, adminGuard, contentCtrl.adminDeleteNews);
+
+// ── Admin: Yuebao ─────────────────────────────────────────────────
+router.get('/admin/yuebao/products',               auth, adminGuard, yuebaoCtrl.adminListProducts);
+router.post('/admin/yuebao/products',              auth, adminGuard, yuebaoCtrl.adminCreateProduct);
+router.patch('/admin/yuebao/products/:id',         auth, adminGuard, yuebaoCtrl.adminUpdateProduct);
+router.delete('/admin/yuebao/products/:id',        auth, adminGuard, yuebaoCtrl.adminDeleteProduct);
+router.get('/admin/yuebao/investments',            auth, adminGuard, yuebaoCtrl.adminListInvestments);
+router.put('/admin/yuebao/investments/:id/settle', auth, adminGuard, yuebaoCtrl.adminSettle);
+
+// ── Admin: Mining ─────────────────────────────────────────────────
+router.get('/admin/mining/machines',         auth, adminGuard, miningCtrl.adminListMachines);
+router.post('/admin/mining/machines',        auth, adminGuard, miningCtrl.adminCreateMachine);
+router.patch('/admin/mining/machines/:id',   auth, adminGuard, miningCtrl.adminUpdateMachine);
+router.delete('/admin/mining/machines/:id',  auth, adminGuard, miningCtrl.adminDeleteMachine);
+router.get('/admin/mining/investments',      auth, adminGuard, miningCtrl.adminListInvestments);
+
+// ── Admin: Prize ──────────────────────────────────────────────────
+router.get('/admin/prize',         auth, adminGuard, prizeCtrl.adminList);
+router.post('/admin/prize',        auth, adminGuard, prizeCtrl.adminCreate);
+router.patch('/admin/prize/:id',   auth, adminGuard, prizeCtrl.adminUpdate);
+router.delete('/admin/prize/:id',  auth, adminGuard, prizeCtrl.adminDelete);
 
 router.get('/health', (_req, res) => res.json({ status: 'ok', module: 'trade' }));
 

@@ -1,10 +1,24 @@
-name: Deploy to Production VPS
+name: CD — Deploy to Production
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'source/code/backend/**'
+      - 'source/code/frontend/**'
+      - 'source/code/packages/**'
+      - 'source/code/shared-types/**'
+      - 'source/code/package.json'
+      - 'source/code/pnpm-workspace.yaml'
 
-# Prevent concurrent deployments
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        default: ''
+
+# Only one deploy at a time
 concurrency:
   group: deploy-production
   cancel-in-progress: false
@@ -14,80 +28,76 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
-  # ── Verify CI passes first ─────────────────────────────────────────────────
-  pre-deploy-check:
-    name: Pre-Deploy Verification
+  # Guard: manual trigger must type "deploy"
+  guard:
+    name: Deployment guard
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: source
+    if: github.event_name == 'push' || github.event.inputs.confirm == 'deploy'
     steps:
-      - uses: actions/checkout@v4
+      - run: echo "Deployment approved ✓"
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+  # Run CI checks first
+  ci:
+    name: Run CI checks
+    needs: guard
+    uses: ./.github/workflows/ci.yml
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: source/pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint backend (deploy gate)
-        run: pnpm --filter group-backend run lint
-
-      - name: TypeCheck backend (deploy gate)
-        run: pnpm --filter group-backend run type-check
-
-      - name: Run tests (deploy gate)
-        run: pnpm --filter group-backend run test
-        env:
-          NODE_ENV: test
-
-  # ── Deploy to VPS ──────────────────────────────────────────────────────────
+  # Deploy to VPS via SSH
   deploy:
     name: Deploy to VPS
+    needs: ci
     runs-on: ubuntu-latest
-    needs: pre-deploy-check
     environment: production
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT || 22 }}
-          timeout: 600s
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            set -euo pipefail
-            echo "=== KJC Deploy triggered by GitHub Actions ==="
-            echo "Commit: ${{ github.sha }}"
-            echo "Branch: ${{ github.ref_name }}"
-            echo "Actor:  ${{ github.actor }}"
+            set -e
+            cd /var/LKVIP
 
-            cd /var/www/website-admin
-            bash source/scripts/deploy.sh --module all
+            echo "=== [1/5] Git pull ==="
+            git pull origin main
 
-            echo "=== Deploy completed successfully ==="
+            echo "=== [2/5] Install dependencies ==="
+            cd source/code
+            pnpm install --frozen-lockfile --prod=false
 
-      - name: Notify deploy success
-        if: success()
-        run: |
-          echo "✅ Deploy to production succeeded"
-          echo "Commit: ${{ github.sha }}"
-          echo "Time: $(date -u)"
+            echo "=== [3/5] Build backend ==="
+            cd backend
+            pnpm build
+            cd ..
 
-      - name: Notify deploy failure
-        if: failure()
-        run: |
-          echo "❌ Deploy to production FAILED"
-          echo "Commit: ${{ github.sha }}"
-          echo "Check VPS logs: pm2 logs api-server --lines 100"
+            echo "=== [4/5] Build frontends ==="
+            pnpm run build:frontends
+
+            echo "=== [5/5] Reload PM2 (zero-downtime) ==="
+            cd backend
+            pm2 reload lkvip-api --update-env
+            pm2 save
+
+            echo "=== Deploy complete ==="
+            pm2 status
+
+      - name: Verify deployment health
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            sleep 5
+            STATUS=$(curl -sf http://localhost:5000/health | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null || echo "error")
+            if [ "$STATUS" != "healthy" ]; then
+              echo "ERROR: Health check failed! Status: $STATUS"
+              exit 1
+            fi
+            echo "Health check passed: $STATUS ✓"

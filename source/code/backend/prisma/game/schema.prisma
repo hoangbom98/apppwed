@@ -61,6 +61,8 @@ model User {
   referrals          Referral[]        @relation("Referrer")
   referredByUser     Referral[]        @relation("Referee")
   agentProfile       Agent?
+  betStats           BetStats[]
+  rebates            Rebate[]
 
   @@index([email])
   @@index([status])
@@ -1157,4 +1159,67 @@ model WithdrawalRequest {
   @@index([userId, status])
   @@index([status, createdAt])
   @@map("withdrawal_requests")
+}
+
+// =============================================================================
+// REBATE / CASHBACK (game rebate — learned from BoYue RebateService pattern)
+//
+// Rebate is calculated T+1 (next day) based on validBet per game type.
+// Rates are configured per VIP level in VipLevel.cashbackRate.
+// Settlement: cron job runs daily 01:00 — computes pending → claimable → paid.
+//
+// gameType mapping:
+//   live     → live casino (evolution, goldgate live)
+//   slot     → RNG / slot / fishing (CQ9, PG Soft, JILI, JDB)
+//   lottery  → lottery / lotto products (TCG LOTTO, PC28, KENO)
+//   sports   → sports / esports (BTI, SBO, UG2, CMD368)
+// =============================================================================
+
+model BetStats {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  // Date string "2025-01-15" — one row per user per date per gameType
+  date        String   @db.VarChar(10)
+  // live | slot | lottery | sports
+  gameType    String   @db.VarChar(20)
+  // aggregator: GSC | GOLDGATE | TCGAMING
+  aggregator  String   @default("") @db.VarChar(30)
+  validBet    Decimal  @default(0) @db.Decimal(18, 2)  // valid wager (unsettled excluded)
+  totalBet    Decimal  @default(0) @db.Decimal(18, 2)  // gross bet placed
+  totalWin    Decimal  @default(0) @db.Decimal(18, 2)  // gross win received
+  roundCount  Int      @default(0)                      // number of rounds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date, gameType, aggregator])
+  @@index([userId, date])
+  @@index([date, gameType])
+  @@map("bet_stats")
+}
+
+model Rebate {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  user        User     @relation(fields: [userId], references: [id])
+  // "2025-01-15" — the betting date this rebate is for (T)
+  betDate     String   @db.VarChar(10)
+  // live | slot | lottery | sports
+  gameType    String   @db.VarChar(20)
+  validBet    Decimal  @db.Decimal(18, 2)   // total valid bet on betDate
+  rate        Decimal  @db.Decimal(6, 4)    // rebate rate applied (e.g. 0.0050 = 0.5%)
+  amount      Decimal  @db.Decimal(18, 2)   // rebate amount = validBet × rate
+  vipLevel    Int      @default(1)
+  // pending (T+0 night) | claimable (after T+1 cron) | claimed | expired
+  status      String   @default("pending") @db.VarChar(20)
+  claimedAt   DateTime?
+  settledAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, betDate, gameType])
+  @@index([userId, status])
+  @@index([betDate, status])
+  @@index([status, createdAt])
+  @@map("rebates")
 }

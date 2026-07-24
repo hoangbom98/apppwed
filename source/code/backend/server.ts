@@ -319,10 +319,37 @@ const io = new SocketIOServer(server, {
   maxHttpBufferSize: 1e6,
 });
 
+// ── Socket.IO Redis Adapter (horizontal scaling — learned from BoYue) ─────
+// Allows multiple PM2/Node instances to broadcast to all connected clients.
+// Falls back gracefully when @socket.io/redis-adapter is not installed.
+(async () => {
+  try {
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    const { createClient }  = require('redis');
+    const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+    const pubClient = createClient({ url: redisUrl });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    logger.info('[Socket.IO] Redis adapter connected — multi-instance broadcast enabled');
+  } catch (err: any) {
+    logger.warn(`[Socket.IO] Redis adapter not available — single-instance mode (${err.message})`);
+  }
+})();
+
 // Store io in the centralised singleton so services can call getIo() anywhere
 socketStore.setIo(io);
 app.set('io', io);
 require('./src/shared/socket/handlers')(io);
+
+// ── Game BullMQ workers ────────────────────────────────────────────────────
+// Start bet-stats aggregation + rebate workers (learned from BoYue Workerman)
+try {
+  const { startGameWorkers } = require('./src/shared/queue/gameWorkers');
+  startGameWorkers();
+} catch (err: any) {
+  logger.warn(`[GameWorkers] Failed to start: ${err.message}`);
+}
 
 // ── Cron jobs ──────────────────────────────────────────────────────────────
 cron.register();

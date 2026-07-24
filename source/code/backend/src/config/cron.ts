@@ -317,6 +317,139 @@ async function tradeProfitDistribution() {
   }
 }
 
+// ── Job: Mining — daily income 01:00 UTC ──────────────────────────────────────
+async function tradeMiningDistribution() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const { runMiningDistribution } = require('../modules/trade/jobs/miningDistribution.job');
+    const tradePrisma = getPrismaClient('trade');
+    await runMiningDistribution(tradePrisma, require('../shared/services/notificationService')._io || null);
+  } catch (err) {
+    logger.error('tradeMiningDistribution failed', { err: err.message });
+  }
+}
+
+// ── Job: Yuebao — auto-settle matured at 02:00 UTC ───────────────────────────
+async function tradeYuebaoSettlement() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const { runYuebaoSettlement } = require('../modules/trade/jobs/yuebaoSettlement.job');
+    const tradePrisma = getPrismaClient('trade');
+    await runYuebaoSettlement(tradePrisma, require('../shared/services/notificationService')._io || null);
+  } catch (err) {
+    logger.error('tradeYuebaoSettlement failed', { err: err.message });
+  }
+}
+
+// ── Job: Game rebate — calculate end-of-day 23:55 UTC ────────────────────────
+// Dispatches to BullMQ game-rebate worker (falls back to direct if Redis down)
+async function gameRebateCalculate() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    // Try BullMQ first (reliable, non-blocking)
+    let dispatched = false;
+    try {
+      const { Queue } = require('bullmq');
+      const IORedis   = require('ioredis');
+      const conn = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { maxRetriesPerRequest: null, lazyConnect: true });
+      await conn.connect();
+      const q = new Queue('game-rebate', { connection: conn });
+      await q.add('calculate', { action: 'calculate', betDate: today });
+      await conn.quit();
+      dispatched = true;
+      logger.info(`[RebateCron] dispatched calculate job to BullMQ for ${today}`);
+    } catch { /* Redis unavailable — fall through to direct */ }
+
+    if (!dispatched) {
+      const { getPrismaClient } = require('./databases');
+      const RebateService = require('../shared/services/rebateService');
+      const rebateSvc = new RebateService(getPrismaClient('game'), logger);
+      const { created, totalAmount } = await rebateSvc.calculateDailyRebates(today);
+      if (created > 0) logger.info(`[RebateCron] calculated ${created} pending rebates, total=${totalAmount.toString()}`);
+    }
+  } catch (err) {
+    logger.error('gameRebateCalculate failed', { err: err.message });
+  }
+}
+
+// ── Job: Game rebate — settle claimable 01:00 UTC (T+1) ─────────────────────
+// Dispatches to BullMQ game-rebate worker (falls back to direct if Redis down)
+async function gameRebateSettle() {
+  try {
+    const yesterday = (() => { const d = new Date(); d.setDate(d.getDate()-1); return d.toISOString().split('T')[0]; })();
+    let dispatched = false;
+    try {
+      const { Queue } = require('bullmq');
+      const IORedis   = require('ioredis');
+      const conn = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { maxRetriesPerRequest: null, lazyConnect: true });
+      await conn.connect();
+      const q = new Queue('game-rebate', { connection: conn });
+      await q.add('settle', { action: 'settle', betDate: yesterday });
+      await conn.quit();
+      dispatched = true;
+      logger.info(`[RebateCron] dispatched settle job to BullMQ for ${yesterday}`);
+    } catch { /* Redis unavailable — fall through */ }
+
+    if (!dispatched) {
+      const { getPrismaClient } = require('./databases');
+      const RebateService = require('../shared/services/rebateService');
+      const rebateSvc = new RebateService(getPrismaClient('game'), logger);
+      const { settled, totalAmount } = await rebateSvc.settleDailyRebates(yesterday);
+      if (settled > 0) logger.info(`[RebateCron] settled ${settled} rebates as claimable, total=${totalAmount.toString()}`);
+    }
+  } catch (err) {
+    logger.error('gameRebateSettle failed', { err: err.message });
+  }
+}
+
+// ── Job: Game VIP check — upgrade users who hit totalBet threshold — daily 02:30 UTC ──
+// Re-check all users: if totalBet >= next VIP threshold → upgrade + grant reward
+async function gameVipLevelCheck() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const gamePrisma = getPrismaClient('game');
+
+    // Get all VIP level thresholds (sorted ascending)
+    const vipLevels = await gamePrisma.vipLevel.findMany({
+      where: { status: 'active' },
+      select: { id: true, level: true, minTotalDeposit: true, cashbackRate: true },
+      orderBy: { level: 'asc' },
+    });
+
+    if (vipLevels.length === 0) return;
+    const maxLevel = vipLevels[vipLevels.length - 1].level;
+
+    // Find users below max VIP level
+    const users = await gamePrisma.user.findMany({
+      where: { status: 'active', vipLevel: { lt: maxLevel } },
+      select: { id: true, vipLevel: true, totalDeposit: true },
+    });
+
+    let upgraded = 0;
+    for (const user of users) {
+      // Find highest level user qualifies for
+      let newLevel = user.vipLevel;
+      for (const vl of vipLevels) {
+        if (vl.level > user.vipLevel && user.totalDeposit.gte(vl.minTotalDeposit)) {
+          newLevel = vl.level;
+        }
+      }
+      if (newLevel <= user.vipLevel) continue;
+
+      await gamePrisma.user.update({
+        where: { id: user.id },
+        data: { vipLevel: newLevel },
+      });
+      upgraded++;
+      logger.info(`[VipCron] userId=${user.id} upgraded vip ${user.vipLevel} → ${newLevel}`);
+    }
+
+    if (upgraded > 0) logger.info(`[VipCron] Upgraded ${upgraded} users`);
+  } catch (err) {
+    logger.error('gameVipLevelCheck failed', { err: err.message });
+  }
+}
+
 // ── Register all jobs ────────────────────────────────────────────────────────
 function register() {
   schedule('*/14 * * * *',   'keep-alive',               keepAlive);
@@ -334,7 +467,13 @@ function register() {
   schedule('* * * * *',      'sports-live-scores',       syncSportsLiveScores);
   schedule('*/30 * * * * *', 'trade-liquidation',        tradeLiquidationCheck);
   schedule('5 0 * * *',      'trade-profit-distribution', tradeProfitDistribution);
-  logger.info('All cron jobs registered (risk + price-feed + live-scores + trade)');
+  schedule('0 1 * * *',      'trade-mining-distribution', tradeMiningDistribution);
+  schedule('0 2 * * *',      'trade-yuebao-settlement',   tradeYuebaoSettlement);
+  // Game rebate (learned from BoYue RebateService)
+  schedule('55 23 * * *',    'game-rebate-calculate',    gameRebateCalculate);
+  schedule('0 1 * * *',      'game-rebate-settle',       gameRebateSettle);
+  schedule('30 2 * * *',     'game-vip-check',           gameVipLevelCheck);
+  logger.info('All cron jobs registered (risk + price-feed + live-scores + trade + mining + yuebao + game-rebate + vip-check)');
 }
 
 module.exports = { register };

@@ -3,12 +3,12 @@ name: Prisma Schema Validation
 on:
   push:
     paths:
-      - 'source/backend/prisma/**'
-      - 'source/backend/package.json'
+      - 'source/code/backend/prisma/**'
+      - 'source/code/backend/package.json'
   pull_request:
     paths:
-      - 'source/backend/prisma/**'
-      - 'source/backend/package.json'
+      - 'source/code/backend/prisma/**'
+      - 'source/code/backend/package.json'
 
 env:
   NODE_VERSION: '20'
@@ -18,9 +18,7 @@ jobs:
   validate-schemas:
     name: Validate Prisma Schemas (6 DBs)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: source
+
     steps:
       - uses: actions/checkout@v4
 
@@ -32,40 +30,40 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: source/pnpm-lock.yaml
+          cache-dependency-path: source/code/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Install workspace deps
+        working-directory: source/code
         run: pnpm install --frozen-lockfile
 
       - name: Validate admin schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/admin/schema.prisma
 
       - name: Validate hub schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/hub/schema.prisma
 
       - name: Validate game schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/game/schema.prisma
 
       - name: Validate trade schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/trade/schema.prisma
 
       - name: Validate dating schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/dating/schema.prisma
 
       - name: Validate sports schema
-        working-directory: source/backend
+        working-directory: source/code/backend
         run: npx prisma validate --schema prisma/sports/schema.prisma
 
-      - name: Generate all Prisma clients (dry-run check)
-        working-directory: source/backend
+      - name: Generate all Prisma clients (dry-run)
+        working-directory: source/code/backend
         run: pnpm run prisma:generate
         env:
-          # Dummy DATABASE_URLs for generate-only (no actual DB needed)
           HUB_DATABASE_URL: "mysql://user:pass@localhost:3306/hub_db"
           GAME_DATABASE_URL: "mysql://user:pass@localhost:3306/game_db"
           TRADE_DATABASE_URL: "mysql://user:pass@localhost:3306/trade_db"

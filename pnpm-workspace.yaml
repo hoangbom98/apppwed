@@ -1,3 +1,12 @@
+# /var/LKVIP/pnpm-workspace.yaml
+#
+# Root workspace — delegates to source/code for actual packages.
+# To install and work with packages:
+#   cd source/code && pnpm install
+#
+# This file only exists so pnpm recognises the repository root
+# and allows workspace-level scripts in the root package.json.
+
 allowBuilds:
   '@prisma/engines': true
   prisma: true

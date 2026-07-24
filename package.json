@@ -1,37 +1,39 @@
 {
-  "name": "website-admin",
-  "version": "2.0.0",
-  "description": "Multi-Project Ecosystem — Hub, Game, Trade, Dating, Sports, Admin",
+  "name": "lkvip-root",
+  "version": "1.0.0",
+  "description": "LKVIP GROUP — Multi-Service Entertainment & Technology Platform (root meta)",
   "private": true,
-  "scripts": {
-      "dev:backend":    "cd source/backend && npm run dev",
-      "start:backend":  "cd source/backend && npm start",
-      "db:generate":    "cd source/backend && npm run prisma:generate",
-      "db:migrate":     "cd source/backend && npm run prisma:migrate:all",
-      "db:deploy":      "cd source/backend && npm run prisma:deploy:all",
-      "db:seed":        "cd source/backend && npm run seed:all",
-      "db:seed:demo":   "cd source/backend && node src/prisma/seeds/demo.seed.js",
-      "test":           "cd source/backend && npm test",
-      "lint":           "cd source/backend && npm run lint",
-      "type-check":     "cd source/backend && npm run type-check",
-      "type-check:all": "npm run type-check && cd source/frontend/hub && npx tsc --noEmit && cd ../game && npx tsc --noEmit",
-      "check-env":      "bash source/scripts/check-env.sh",
-      "health-check":   "node source/scripts/health-check.js",
-      "build:all":      "bash source/scripts/build-all.sh all",
-      "kjc":            "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts",
-      "kjc:build":      "cd source/scripts && npm run build",
-      "kjc:health":     "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts health",
-      "kjc:env":        "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts env",
-      "kjc:dev":        "cd source/scripts && npx ts-node --project tsconfig.json src/cli.ts dev"
-    },
   "engines": {
     "node": ">=20.0.0",
-    "npm":  ">=10.0.0"
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "// ─── Development (delegate to source/code workspace) ────────────────────": "",
+    "dev:backend":  "pnpm --filter lkvip-backend run dev",
+    "dev:hub":      "pnpm --filter @lkvip/hub run dev",
+    "dev:game":     "pnpm --filter @lkvip/game run dev",
+    "dev:admin":    "pnpm --filter @lkvip/admin run dev",
+    "dev:dating":   "pnpm --filter @lkvip/dating run dev",
+    "dev:trade":    "pnpm --filter @lkvip/trade run dev",
+    "dev:sports":   "pnpm --filter @lkvip/sports run dev",
+    "// ─── Build ───────────────────────────────────────────────────────────────": "",
+    "build:packages":  "pnpm --filter @lkvip/types --filter @lkvip/utils run build",
+    "build:frontends": "pnpm --filter @lkvip/hub --filter @lkvip/game --filter @lkvip/admin --filter @lkvip/dating --filter @lkvip/trade --filter @lkvip/sports run build",
+    "build:all":       "pnpm run build:packages && pnpm run build:frontends",
+    "// ─── Install ──────────────────────────────────────────────────────────────": "",
+    "install:all": "cd source/code && pnpm install",
+    "// ─── Prisma shortcuts ─────────────────────────────────────────────────────": "",
+    "prisma:generate": "pnpm --filter lkvip-backend run prisma:generate",
+    "prisma:deploy":   "pnpm --filter lkvip-backend run prisma:deploy:all",
+    "prisma:status":   "pnpm --filter lkvip-backend run prisma:status:all",
+    "// ─── Quality ──────────────────────────────────────────────────────────────": "",
+    "lint:backend":    "pnpm --filter lkvip-backend run lint",
+    "lint:all":        "pnpm -r run lint",
+    "typecheck:all":   "pnpm -r run typecheck",
+    "test":            "pnpm --filter lkvip-backend run test",
+    "test:all":        "pnpm -r run test --if-present"
   },
   "devDependencies": {
-    "prisma": "^5.15.0"
-  },
-  "dependencies": {
-    "module-alias": "^2.3.4"
+    "concurrently": "^9.0.0"
   }
 }

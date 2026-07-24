@@ -39,6 +39,11 @@ const Checkin         = lazy(() => import('./views/Checkin'));
 const DailyMissions   = lazy(() => import('./views/DailyMissions'));
 const LuckyWheel      = lazy(() => import('./views/LuckyWheel'));
 const AgentTree       = lazy(() => import('./views/AgentTree'));
+// ── New feature pages ──────────────────────────────────────────────
+const Rebate          = lazy(() => import('./views/Rebate'));
+const Mining          = lazy(() => import('./views/Mining'));
+const Yuebao          = lazy(() => import('./views/Yuebao'));
+const Transfer        = lazy(() => import('./views/Transfer'));
 
 // ── Loading fallback ───────────────────────────────────────────────────────
 function LoadingFallback() {
@@ -121,6 +126,15 @@ export default function App() {
             <Route path="/wheel"             element={<ProtectedRoute><LuckyWheel /></ProtectedRoute>} />
             <Route path="/vong-quay"         element={<ProtectedRoute><LuckyWheel /></ProtectedRoute>} />
             <Route path="/agent-tree"        element={<ProtectedRoute><AgentTree /></ProtectedRoute>} />
+            {/* ── Finance & savings routes ──────────────────────────── */}
+            <Route path="/rebate"            element={<ProtectedRoute><Rebate /></ProtectedRoute>} />
+            <Route path="/hoan-tra"          element={<ProtectedRoute><Rebate /></ProtectedRoute>} />
+            <Route path="/mining"            element={<ProtectedRoute><Mining /></ProtectedRoute>} />
+            <Route path="/may-dao"           element={<ProtectedRoute><Mining /></ProtectedRoute>} />
+            <Route path="/yuebao"            element={<ProtectedRoute><Yuebao /></ProtectedRoute>} />
+            <Route path="/so-du-bao"         element={<ProtectedRoute><Yuebao /></ProtectedRoute>} />
+            <Route path="/transfer"          element={<ProtectedRoute><Transfer /></ProtectedRoute>} />
+            <Route path="/chuyen-tien"       element={<ProtectedRoute><Transfer /></ProtectedRoute>} />
           </Route>
 
           {/* Fallback → Home */}
