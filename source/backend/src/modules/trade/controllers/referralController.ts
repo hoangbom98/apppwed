@@ -26,7 +26,7 @@ exports.getMyCode = async (req, res) => {
     // If user has no code yet (field might not be in schema), derive from id
     const code = user.referralCode || makeRefCode(user.id);
     return success(res, { code, link: `${process.env.TRADE_APP_URL || ''}/register?ref=${code}` });
-  } catch (e) {
+  } catch {
     // referralCode field might not exist — return derived code
     const code = makeRefCode(req.user.id);
     return success(res, { code, link: `${process.env.TRADE_APP_URL || ''}/register?ref=${code}` });

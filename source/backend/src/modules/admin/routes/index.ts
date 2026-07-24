@@ -25,8 +25,9 @@ const securityCtrl     = require('../controllers/securityController');
 const appCatalogCtrl   = require('../controllers/appCatalogController');
 const monitorCtrl      = require('../controllers/monitorController');
 const gameProviderCtrl = require('../controllers/gameProviderController');
-const paymentAdminRoutes = require('../../../shared/routes/payment-admin.routes');
-const mineRoutes          = require('./mine.routes');
+const paymentAdminRoutes  = require('../../../shared/routes/payment-admin.routes');
+const mineRoutes           = require('./mine.routes');
+const notifCtrl            = require('../controllers/notificationController');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 router.post('/auth/login',   authCtrl.login);
@@ -240,5 +241,11 @@ router.patch('/monitor/alerts/:id/ack',      monitorCtrl.acknowledgeAlert);
 router.patch('/monitor/alerts/:id/resolve',  monitorCtrl.resolveAlert);
 router.get('/monitor/logs',                  monitorCtrl.listAdminLogs);
 router.get('/monitor/online',                monitorCtrl.getOnlineStats);
+
+// ── Push Notifications ────────────────────────────────────────────────────────
+router.get('/notifications/status',        notifCtrl.getNotificationStatus);
+router.post('/notifications/send',         notifCtrl.sendNotification);
+router.post('/notifications/send-user',    notifCtrl.sendToUser);
+router.post('/notifications/broadcast',    notifCtrl.broadcastNotification);
 
 module.exports = router;

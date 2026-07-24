@@ -38,10 +38,22 @@ const clients = {};
  */
 function getPrismaClient(project) {
   if (!clients[project]) {
-    const clientPath = path.join(
+    // Primary: source/backend/node_modules/.prisma/<project>-client
+    // (prisma generate outputs here when run from source/backend/)
+    const primaryPath = path.join(
+      __dirname, '../../node_modules/.prisma', `${project}-client`
+    );
+    // Fallback: source/node_modules/.prisma/<project>-client
+    // (pnpm workspace hoisted location used in some setups)
+    const fallbackPath = path.join(
       __dirname, '../../../node_modules/.prisma', `${project}-client`
     );
-    const { PrismaClient } = require(clientPath);
+    let PrismaClient;
+    try {
+      ({ PrismaClient } = require(primaryPath));
+    } catch {
+      ({ PrismaClient } = require(fallbackPath));
+    }
     clients[project] = new PrismaClient();
   }
   return clients[project];

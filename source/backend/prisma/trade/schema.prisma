@@ -578,7 +578,7 @@ model Deposit {
 
 model InvestmentPackage {
   id           String   @id @default(cuid())
-  name         String   @db.VarChar(100)
+  name         String   @unique @db.VarChar(100)
   description  String?  @db.Text
   price        Decimal  @db.Decimal(18, 2)   // Minimum investment amount
   minAmount    Decimal  @db.Decimal(18, 2)
