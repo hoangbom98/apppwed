@@ -1,12 +1,21 @@
-# /var/LKVIP/pnpm-workspace.yaml
-#
-# Root workspace — delegates to source/code for actual packages.
-# To install and work with packages:
-#   cd source/code && pnpm install
-#
-# This file only exists so pnpm recognises the repository root
-# and allows workspace-level scripts in the root package.json.
+packages:
+  - "packages/*"
+  - "apps/backend"
+  - "apps/hub"
+  - "apps/game"
+  - "apps/trading"
+  - "apps/dating"
+  - "apps/sports"
+  - "apps/admin-dashboard"
 
 allowBuilds:
+  '@firebase/util': true
+  '@prisma/client': true
   '@prisma/engines': true
+  '@scarf/scarf': true
+  core-js: true
+  esbuild: true
+  msgpackr-extract: true
   prisma: true
+  protobufjs: true
+  sharp: true

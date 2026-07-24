@@ -1,6 +1,0 @@
-<?php /*a:2:{s:72:"/www/wwwroot/cs.shangxiang.vip/application/index/view/user/msg_view.html";i:1707203475;s:72:"/www/wwwroot/cs.shangxiang.vip/application/index/view/public/header.html";i:1707161130;}*/ ?>
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta content="email=no" name="format-detection"><title>消息详情</title><style type="text/css">
-        html {
-            font-size: 35px;
-        }
-    </style><link rel="stylesheet" type="text/css" href="/static/newstyle/css/common.css"></head><body><link rel="stylesheet" type="text/css" href="/static/newstyle/css/show.css"><body><div class="app"><div class="header"><img onclick="javascript:history.back()" src="/static/newstyle/img/back.png" alt=""><span>消息详情</span><span></span></div></div><div class="titlebox"><div class="title"><?php echo htmlentities($msg['title']); ?></div><div class="time"><?php echo htmlentities($msg['add_time']); ?></div></div><div class="content"><h3><?php echo htmlspecialchars_decode($msg['content']); ?></h3></div></body></html>

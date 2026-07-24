@@ -1,0 +1,125 @@
+
+// =============================================================================
+// IM TABLES — game_db
+// Learned from BoYue IMService / WebSocketServer pattern
+// Tables: im_messages, im_conversations, im_groups, im_group_members,
+//         im_friends, im_friend_requests
+// =============================================================================
+
+// ── IM Message ────────────────────────────────────────────────────────────────
+// Stores all private, group, and system messages
+
+model ImMessage {
+  id          String    @id @default(cuid())
+  fromId      String?   @db.VarChar(30)      // null = system message
+  toId        String?   @db.VarChar(30)      // private recipient
+  toGroupId   String?   @db.VarChar(30)      // group recipient
+  // 1=text | 2=image | 3=voice | 4=system
+  msgType     Int       @default(1)
+  content     String    @db.Text
+  extra       String?   @db.Text             // JSON: { title, url, … }
+  isRead      Boolean   @default(false)
+  isRecall    Boolean   @default(false)      // recalled within 2 min
+  createdAt   DateTime  @default(now())
+
+  @@index([fromId])
+  @@index([toId, isRead])
+  @@index([toGroupId])
+  @@index([createdAt])
+  @@map("im_messages")
+}
+
+// ── IM Conversation ──────────────────────────────────────────────────────────
+// Per-user conversation summary (last message + unread count)
+
+model ImConversation {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  // 1=private | 2=group | 3=system
+  targetType  Int
+  targetId    String   @db.VarChar(30)       // userId or groupId or "0" for system
+  lastMsgId   String?  @db.VarChar(30)
+  lastContent String?  @db.VarChar(255)
+  lastTime    DateTime @default(now())
+  unreadCount Int      @default(0)
+  isPinned    Boolean  @default(false)
+  isMuted     Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, lastTime])
+  @@map("im_conversations")
+}
+
+// ── IM Group ──────────────────────────────────────────────────────────────────
+
+model ImGroup {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  avatar      String?  @db.VarChar(500)
+  ownerId     String   @db.VarChar(30)
+  memberCount Int      @default(1)
+  // active | dissolved
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     ImGroupMember[]
+
+  @@index([ownerId])
+  @@map("im_groups")
+}
+
+// ── IM Group Member ───────────────────────────────────────────────────────────
+
+model ImGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String   @db.VarChar(30)
+  group     ImGroup  @relation(fields: [groupId], references: [id])
+  userId    String   @db.VarChar(30)
+  // owner | admin | member
+  role      String   @default("member") @db.VarChar(20)
+  isMuted   Boolean  @default(false)
+  nickname  String?  @db.VarChar(50)      // group-specific display name
+  joinedAt  DateTime @default(now())
+  user      User     @relation("ImGroupMemberUser", fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("im_group_members")
+}
+
+// ── IM Friend ─────────────────────────────────────────────────────────────────
+
+model ImFriend {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30)
+  user      User     @relation("ImFriendOwner", fields: [userId], references: [id])
+  friendId  String   @db.VarChar(30)
+  friend    User     @relation("ImFriendTarget", fields: [friendId], references: [id])
+  remark    String?  @db.VarChar(50)       // custom display name
+  isBlocked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, friendId])
+  @@index([userId, isBlocked])
+  @@map("im_friends")
+}
+
+// ── IM Friend Request ─────────────────────────────────────────────────────────
+
+model ImFriendRequest {
+  id        String   @id @default(cuid())
+  fromId    String   @db.VarChar(30)
+  from      User     @relation("ImFriendRequestFrom", fields: [fromId], references: [id])
+  toId      String   @db.VarChar(30)
+  message   String?  @db.VarChar(200)
+  // pending | accepted | rejected
+  status    String   @default("pending") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([toId, status])
+  @@index([fromId])
+  @@map("im_friend_requests")
+}

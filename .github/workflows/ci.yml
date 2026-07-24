@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'source/code/**'
+      - 'code/**'
       - '.github/workflows/**'
   pull_request:
     branches: [main, develop]
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: source/code/backend
+        working-directory: code/backend
 
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +37,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: source/code/pnpm-lock.yaml
+          cache-dependency-path: code/pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: source/code
+        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: Lint
@@ -75,7 +75,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: source/code/frontend/${{ matrix.app }}
+        working-directory: code/frontend/${{ matrix.app }}
 
     steps:
       - uses: actions/checkout@v4
@@ -88,10 +88,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: source/code/pnpm-lock.yaml
+          cache-dependency-path: code/pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: source/code
+        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: TypeScript typecheck
@@ -119,12 +119,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: source/code/pnpm-lock.yaml
+          cache-dependency-path: code/pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: source/code
+        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: Build shared-types
-        working-directory: source/code/shared-types
+        working-directory: code/shared-types
         run: pnpm build 2>/dev/null || pnpm exec tsc --noEmit || true

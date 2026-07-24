@@ -67,7 +67,7 @@ git log --oneline -5
 ### Kiểm tra security hàng tuần
 
 ```bash
-cd source/backend
+cd code/backend
 
 # Kiểm tra vulnerabilities
 npm audit
@@ -137,7 +137,7 @@ tail -n 100 /var/log/mysql/slow.log
 
 ```bash
 # Backup ngay lập tức
-cd /var/www/website-admin/source/backend
+cd /var/www/website-admin/code/backend
 npm run backup
 
 # Hoặc mysqldump trực tiếp
@@ -151,7 +151,7 @@ mysqldump -u root -p --all-databases | gzip > /tmp/emergency-backup-$(date +%Y%m
 mysql -u root -p game_db < /path/to/backup.sql
 
 # Restore tất cả (dùng script)
-cd source/backend
+cd code/backend
 npm run restore -- --file=./backups/backup-YYYY-MM-DD.sql.gz
 ```
 

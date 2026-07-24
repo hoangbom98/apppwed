@@ -27,13 +27,13 @@ git clone https://github.com/your-org/website-admin.git
 cd website-admin
 
 # 2. Copy env template
-cp .env.example source/backend/.env
+cp .env.example code/backend/.env
 
 # 3. Chỉnh sửa .env — xem §3 Environment Variables
-nano source/backend/.env
+nano code/backend/.env
 
 # 4. Install backend dependencies
-cd source/backend
+cd code/backend
 npm install
 ```
 
@@ -41,7 +41,7 @@ npm install
 
 ## 3. Environment Variables
 
-File: `source/backend/.env`
+File: `code/backend/.env`
 
 ### Bắt buộc (không có thì app không khởi động)
 
@@ -125,7 +125,7 @@ FLUSH PRIVILEGES;
 ### 4.2 Chạy Prisma migrations
 
 ```bash
-cd source/backend
+cd code/backend
 
 # Generate tất cả 6 Prisma clients
 npm run prisma:generate
@@ -156,7 +156,7 @@ npm run seed:hub      # Dữ liệu mẫu hub
 ## 5. Chạy Development Server
 
 ```bash
-cd source/backend
+cd code/backend
 
 # Backend API (port 5000)
 npm run dev
@@ -168,15 +168,15 @@ open http://localhost:5000/api/docs
 curl http://localhost:5000/health/live
 ```
 
-### Chạy frontend (từ thư mục source/frontend/<project>)
+### Chạy frontend (từ thư mục code/frontend/<project>)
 
 ```bash
 # Admin dashboard (port 5180)
-cd source/frontend/admin-dashboard
+cd code/frontend/admin-dashboard
 npm install && npm run dev
 
 # Hub (port 5173)
-cd source/frontend/hub
+cd code/frontend/hub
 npm install && npm run dev
 ```
 
@@ -188,7 +188,7 @@ Cách nhanh nhất — không cần cài MySQL/Redis thủ công:
 
 ```bash
 # 1. Copy env
-cp .env.example source/backend/.env
+cp .env.example code/backend/.env
 # Sửa JWT_SECRET trong .env
 
 # 2. Khởi động stack (MySQL 8 + Redis 7 + Backend API)
@@ -219,7 +219,7 @@ curl -X POST http://localhost:5000/api/admin/auth/login \
 # Expected: {"success":true,"data":{"access_token":"..."}}
 
 # 3. Chạy test suite
-cd source/backend
+cd code/backend
 npm test
 ```
 

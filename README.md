@@ -67,11 +67,11 @@ Nền tảng giải trí trực tuyến gồm **6 sub-projects** độc lập v�
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
-├── ecosystem.config.js      # PM2 config (points to source/code/backend)
+├── ecosystem.config.js      # PM2 config (points to code/backend)
 └── package.json             # Root convenience scripts
 ```
 
-> **Source code thực nằm hoàn toàn trong `source/code/`.** Root chỉ chứa meta files và configs.
+> **Source code thực nằm hoàn toàn trong `code/`.** Root chỉ chứa meta files và configs.
 
 ---
 
@@ -94,11 +94,11 @@ git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
 
 # Cấu hình môi trường
-cp .env.example source/code/backend/.env
+cp .env.example code/backend/.env
 # → Điền DATABASE_URL_*, JWT_SECRET, REDIS_URL...
 
 # Cài dependencies (pnpm workspace)
-cd source/code
+cd code
 pnpm install
 
 # Tạo Prisma clients + chạy migrations + seed
@@ -110,7 +110,7 @@ pnpm --filter lkvip-backend run seed:all
 ### 3. Chạy development
 
 ```bash
-cd source/code
+cd code
 
 # Backend (port 5000)
 pnpm dev:backend
@@ -198,7 +198,7 @@ Internet (HTTPS)
 3 apps: Hub, Game, Dating — build bằng Capacitor.
 
 ```bash
-cd source/code
+cd code
 pnpm mobile:sync           # Sync web assets to native
 pnpm mobile:open:android   # Open Android Studio
 pnpm mobile:open:ios       # Open Xcode (macOS only)
@@ -214,7 +214,7 @@ bash source/config/nginx/setup.sh yourdomain.com admin@yourdomain.com
 
 # Deploy code (sau lần đầu)
 git pull origin main
-cd source/code && pnpm install --frozen-lockfile
+cd code && pnpm install --frozen-lockfile
 pnpm --filter lkvip-backend run build
 pnpm run build:frontends
 pm2 reload lkvip-api --update-env

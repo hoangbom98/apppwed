@@ -1,0 +1,604 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LKVIP vs Boyue — Admin Analysis</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    background: #f7f8fa;
+    color: #1f2328;
+    padding: 24px 16px;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  h2 { font-size: 16px; font-weight: 700; margin: 28px 0 10px; border-left: 3px solid #3b82d4; padding-left: 10px; }
+  h3 { font-size: 13px; font-weight: 700; margin: 16px 0 6px; color: #1f2328; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 24px; }
+
+  /* Summary banner */
+  .banner {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .banner-item { text-align: center; }
+  .banner-item .val { font-size: 28px; font-weight: 800; }
+  .banner-item .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+
+  /* Cards */
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Two-col compare */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .compare-col {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .compare-col h3 { font-size: 12px; color: #57606a; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+  .compare-col.boyue { border-top: 3px solid #f59e0b; }
+  .compare-col.lkvip { border-top: 3px solid #3b82d4; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: #f7f8fa; font-weight: 600; padding: 7px 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .nowrap { white-space: nowrap; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .ok   { background: #dcfce7; color: #166534; }
+  .warn { background: #fef9c3; color: #854d0e; }
+  .err  { background: #fee2e2; color: #991b1b; }
+  .info { background: #dbeafe; color: #1e40af; }
+  .purple { background: #ede9fe; color: #5b21b6; }
+
+  /* Tag list */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11.5px;
+    color: #57606a;
+  }
+  .tag.new { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+  .tag.done { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+  .tag.partial { background: #fef9c3; border-color: #fde68a; color: #854d0e; }
+
+  /* Priority list */
+  .plist { list-style: none; margin-top: 6px; }
+  .plist li {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+  }
+  .plist li:last-child { border-bottom: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .dot.red { background: #ef4444; }
+  .dot.orange { background: #f97316; }
+  .dot.blue { background: #3b82f6; }
+
+  /* Code */
+  code {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 3px;
+    font-size: 11px;
+    padding: 1px 5px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: #5f3dc4;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 24px 0;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔍 LKVIP vs Boyue Admin — Gap Analysis</h1>
+  <p class="subtitle">Phân tích đầy đủ trang quản trị <strong>Boyue (PHP/Webman/Layui)</strong> tại <code>/var/www/boyue</code> và <strong>LKVIP Admin Dashboard (React 18 / Ant Design / Node.js)</strong> tại <code>/var/LKVIP/code</code> — những gì đã có, những gì cần bổ sung.</p>
+
+  
+  <div class="banner">
+    <div class="banner-item">
+      <div class="val" style="color:#3b82d4">33</div>
+      <div class="lbl">API controllers (LKVIP backend)</div>
+    </div>
+    <div class="banner-item">
+      <div class="val" style="color:#10b981">57+</div>
+      <div class="lbl">Trang / routes admin-dashboard</div>
+    </div>
+    <div class="banner-item">
+      <div class="val" style="color:#f59e0b">12</div>
+      <div class="lbl">Feature gaps cần bổ sung</div>
+    </div>
+  </div>
+
+  
+  <h2>1. Kiến trúc so sánh</h2>
+  <div class="compare">
+    <div class="compare-col boyue">
+      <h3>🟡 Boyue (nguồn học hỏi)</h3>
+      <ul style="list-style:disc;padding-left:16px;font-size:12.5px;line-height:2">
+        <li>PHP 8 / Webman framework</li>
+        <li>Frontend: <strong>Vue 3 + Element Plus</strong> (Art Design Pro) + Layui demo pages</li>
+        <li>Backend: <strong>Raw Db:: query builder</strong>, không ORM</li>
+        <li>Admin route: <code>/app/admin/*</code></li>
+        <li>Auth: JWT (<code>JwtService.php</code>)</li>
+        <li>5 admin controllers: Activity, ActivityReward, GameManage, GameCategory, IM</li>
+        <li>DB: MySQL 1 schema duy nhất (bảng <code>caipiao_*</code>, <code>api_game_configs</code>)</li>
+        <li>WebSocket: <code>AdminWebSocketPusher.php</code></li>
+        <li>Anti-cheat: <code>AntiCheatService.php</code></li>
+        <li>Menu: dynamic từ <code>/app/admin/rule/get</code></li>
+        <li>Theme: dark/light, 5 màu, tab multi-page</li>
+      </ul>
+    </div>
+    <div class="compare-col lkvip">
+      <h3>🔵 LKVIP (dự án của mình)</h3>
+      <ul style="list-style:disc;padding-left:16px;font-size:12.5px;line-height:2">
+        <li>Node.js 20 / Express / TypeScript</li>
+        <li>Frontend: <strong>React 18 + Ant Design 5</strong> + Tailwind</li>
+        <li>Backend: <strong>Prisma ORM</strong>, 6 databases riêng</li>
+        <li>Admin route: <code>/api/admin/*</code></li>
+        <li>Auth: JWT + refresh token, adminGuard middleware</li>
+        <li>30+ admin controllers (dashboard, finance, users, risk, ops…)</li>
+        <li>DB: 6 schemas (hub/game/dating/trade/sports/admin)</li>
+        <li>WebSocket: <code>useAdminSocket.ts</code>, Socket.IO</li>
+        <li>Risk Engine: RFM, AML, brute-force, IP blacklist</li>
+        <li>Module registry: plug-and-play per sub-project</li>
+        <li>BullMQ queues, Redis cache, cron jobs</li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <h2>2. Boyue có gì — LKVIP học được gì</h2>
+  <div class="card">
+    <h3>2.1 Game Management (GameManageController.php)</h3>
+    <p style="font-size:12.5px;color:#57606a;margin-bottom:8px">Boyue quản lý game qua bảng <code>api_game_configs</code> (TCG) LEFT JOIN <code>caipiao_game</code>. Filter: vendor, gameType (RNG/LIVE/FISH/SPORTS/ESPORTS/PVP/ELOTTO/COCKFIGHT), status, gameName. Endpoint <code>POST /admin/game/status</code> cập nhật đồng thời 2 bảng + batch status.</p>
+    <div class="tags">
+      <span class="tag done">✓ LKVIP có: GameProvidersPage + /admin/game/providers</span>
+      <span class="tag partial">⚠ LKVIP thiếu: gameType filter RNG/LIVE/FISH/COCKFIGHT</span>
+      <span class="tag partial">⚠ LKVIP thiếu: batch toggle status nhiều game cùng lúc</span>
+      <span class="tag partial">⚠ LKVIP thiếu: LEFT JOIN sync 2 bảng game khi toggle</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2.2 Activity &amp; Promotion System (ActivityCategoryController + ActivityRewardController)</h3>
+    <p style="font-size:12.5px;color:#57606a;margin-bottom:8px">Boyue có hệ thống khuyến mãi 3 lớp: <strong>Category → Activity (huodong) → Reward</strong>. Mỗi reward có: rewardType, conditionMin/Max, rewardAmount, rewardRate, limitTimes, limitPeriod, needApply. Sort + enable/disable riêng.</p>
+    <div class="tags">
+      <span class="tag done">✓ LKVIP có: PromotionPage với WELCOME/DEPOSIT/CASHBACK/FREE_SPIN/REFERRAL/EVENT/VIP</span>
+      <span class="tag partial">⚠ LKVIP thiếu: Category phân cấp (Category → Activity → Reward)</span>
+      <span class="tag partial">⚠ LKVIP thiếu: limitPeriod (daily/weekly/monthly), needApply flag</span>
+      <span class="tag partial">⚠ LKVIP thiếu: wagering requirement per reward tier</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2.3 Dashboard Console (console1.html / console2.html)</h3>
+    <p style="font-size:12.5px;color:#57606a;margin-bottom:8px">Boyue dùng Layui + SVG icons cho: 今日访问 (daily visits), 提交次数 (submissions), 下载数量 (downloads), 消息总数 (messages). Đây là style dashboard đẹp với panel cards + ECharts.</p>
+    <div class="tags">
+      <span class="tag done">✓ LKVIP có: Dashboard.jsx với KPI cards, revenue chart SVG, project bars</span>
+      <span class="tag partial">⚠ LKVIP thiếu: Lượt truy cập hôm nay, số lượng đăng ký mới</span>
+      <span class="tag partial">⚠ LKVIP thiếu: Biểu đồ ECharts-style cho active users realtime</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2.4 Role &amp; Permission System (role.html + permission.js)</h3>
+    <p style="font-size:12.5px;color:#57606a;margin-bottom:8px">Boyue có RBAC với menu <code>/app/admin/rule/get</code> dynamic. Role CRUD, assign permission tree, user role assignment. Switch enable/disable per role.</p>
+    <div class="tags">
+      <span class="tag done">✓ LKVIP có: AdminUserManagement + registry.ts với minRole, projectId gate</span>
+      <span class="tag partial">⚠ LKVIP thiếu: Role CRUD UI (tạo/sửa/xóa role từ giao diện)</span>
+      <span class="tag partial">⚠ LKVIP thiếu: Permission tree assign per role</span>
+      <span class="tag new">🆕 Cần thêm: RolesPage.jsx + /admin/roles endpoint</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2.5 Anti-Cheat &amp; IM (AntiCheatService + IMService + ImController)</h3>
+    <p style="font-size:12.5px;color:#57606a;margin-bottom:8px">Boyue có <code>AntiCheatService.php</code> phát hiện gian lận. <code>IMService.php</code> + <code>ImController</code> admin cho chat trong game. <code>AdminWebSocketPusher</code> push realtime cho admin.</p>
+    <div class="tags">
+      <span class="tag done">✓ LKVIP có: RiskAudit.jsx với 7 tabs + SecurityLogs + IP Blacklist</span>
+      <span class="tag done">✓ LKVIP có: useAdminSocket + RealtimePage</span>
+      <span class="tag partial">⚠ LKVIP thiếu: IM/Chat admin panel (xem/gửi tin nhắn game chat)</span>
+      <span class="tag new">🆕 Cần thêm: AdminIMPage.jsx + /admin/im endpoint</span>
+    </div>
+  </div>
+
+  
+  <h2>3. Gap Analysis — Bảng đầy đủ</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:28%">Tính năng</th>
+          <th style="width:16%">Boyue</th>
+          <th style="width:16%">LKVIP</th>
+          <th style="width:14%">Gap</th>
+          <th>Việc cần làm</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dashboard KPI</strong></td>
+          <td><span class="badge ok">Có</span> Layui cards</td>
+          <td><span class="badge ok">Có</span> Ant Design</td>
+          <td><span class="badge ok">Nhỏ</span></td>
+          <td>Thêm: daily visits, new signups card</td>
+        </tr>
+        <tr>
+          <td><strong>Finance Approve/Reject</strong></td>
+          <td><span class="badge ok">Có</span> PayService</td>
+          <td><span class="badge ok">Có</span> Finance.jsx</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>User Management</strong></td>
+          <td><span class="badge ok">Có</span> UserController API</td>
+          <td><span class="badge ok">Có</span> Users.jsx 5 projects</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>Game Manage + Filter</strong></td>
+          <td><span class="badge ok">Có</span> gameType RNG/LIVE/FISH…</td>
+          <td><span class="badge warn">Thiếu</span> filter gameType</td>
+          <td><span class="badge warn">Trung</span></td>
+          <td>Thêm gameType filter vào GameRoundsPage</td>
+        </tr>
+        <tr>
+          <td><strong>Batch Game Status</strong></td>
+          <td><span class="badge ok">Có</span> batchStatus PHP</td>
+          <td><span class="badge err">Chưa có</span></td>
+          <td><span class="badge err">Cao</span></td>
+          <td>Thêm POST /admin/game/batch-status + UI checkbox</td>
+        </tr>
+        <tr>
+          <td><strong>Activity Category 3 lớp</strong></td>
+          <td><span class="badge ok">Có</span> Category→Activity→Reward</td>
+          <td><span class="badge warn">Đơn giản</span> 1 lớp</td>
+          <td><span class="badge warn">Trung</span></td>
+          <td>Thêm PromoCategory + PromoRewardTiers</td>
+        </tr>
+        <tr>
+          <td><strong>Agent Commission</strong></td>
+          <td><span class="badge ok">Có</span> AgentCommissionService</td>
+          <td><span class="badge ok">Có</span> AgentsPage.jsx</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>Announcement</strong></td>
+          <td><span class="badge ok">Có</span> NoticeController</td>
+          <td><span class="badge ok">Có</span> Announcements.jsx</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>Role &amp; Permission CRUD</strong></td>
+          <td><span class="badge ok">Có</span> role.html + RBAC</td>
+          <td><span class="badge err">Chưa có UI</span></td>
+          <td><span class="badge err">Cao</span></td>
+          <td>Tạo RolesPage.jsx + /admin/roles CRUD</td>
+        </tr>
+        <tr>
+          <td><strong>IM / Chat Admin</strong></td>
+          <td><span class="badge ok">Có</span> ImController admin</td>
+          <td><span class="badge err">Chưa có</span></td>
+          <td><span class="badge warn">Trung</span></td>
+          <td>Tạo AdminIMPage.jsx + /admin/im</td>
+        </tr>
+        <tr>
+          <td><strong>Rebate Management</strong></td>
+          <td><span class="badge ok">Có</span> RebateController + RebateService</td>
+          <td><span class="badge err">Chưa có</span></td>
+          <td><span class="badge err">Cao</span></td>
+          <td>Thêm RebatePage.jsx + backend controller</td>
+        </tr>
+        <tr>
+          <td><strong>Yuebao (Savings)</strong></td>
+          <td><span class="badge ok">Có</span> YuebaoService + YuebaoController</td>
+          <td><span class="badge err">Chưa có</span></td>
+          <td><span class="badge warn">Thấp</span></td>
+          <td>Thêm vào Trade module nếu cần</td>
+        </tr>
+        <tr>
+          <td><strong>Lottery / XY28 / K3</strong></td>
+          <td><span class="badge ok">Có</span> LotteryController, K3Controller, XY28Controller</td>
+          <td><span class="badge ok">Có</span> GameLotteryPage.jsx</td>
+          <td><span class="badge warn">Trung</span></td>
+          <td>Thêm K3/XY28 specific tabs nếu cần</td>
+        </tr>
+        <tr>
+          <td><strong>Anti-Cheat Engine</strong></td>
+          <td><span class="badge ok">Có</span> AntiCheatService.php</td>
+          <td><span class="badge ok">Có</span> RiskAudit.jsx + riskController</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>LKVIP mạnh hơn (AML, IP Blacklist, Rules)</td>
+        </tr>
+        <tr>
+          <td><strong>Realtime WebSocket</strong></td>
+          <td><span class="badge ok">Có</span> AdminWebSocketPusher</td>
+          <td><span class="badge ok">Có</span> useAdminSocket + Socket.IO</td>
+          <td><span class="badge ok">OK</span></td>
+          <td>LKVIP dùng Socket.IO nâng cao hơn</td>
+        </tr>
+        <tr>
+          <td><strong>Security Settings</strong></td>
+          <td><span class="badge warn">Cơ bản</span></td>
+          <td><span class="badge ok">Có</span> SecuritySettings 4 tabs</td>
+          <td><span class="badge ok">LKVIP tốt hơn</span></td>
+          <td>Brute force, Access Control, Captcha, OTP</td>
+        </tr>
+        <tr>
+          <td><strong>Cron Jobs</strong></td>
+          <td><span class="badge warn">Process file</span></td>
+          <td><span class="badge ok">Có</span> CronJobsPage + BullMQ</td>
+          <td><span class="badge ok">LKVIP tốt hơn</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>OPS / RFM / Campaign</strong></td>
+          <td><span class="badge err">Không có</span></td>
+          <td><span class="badge ok">Có</span> OperationsDashboard + 5 pages</td>
+          <td><span class="badge ok">LKVIP vượt trội</span></td>
+          <td>Churn, CLV, RFM, Marketing automation</td>
+        </tr>
+        <tr>
+          <td><strong>Multi-project User Mgmt</strong></td>
+          <td><span class="badge err">Không có</span> — 1 DB duy nhất</td>
+          <td><span class="badge ok">Có</span> cross-project 5 DBs</td>
+          <td><span class="badge ok">LKVIP vượt trội</span></td>
+          <td>Đã hoàn chỉnh</td>
+        </tr>
+        <tr>
+          <td><strong>Collector (Proxy collect)</strong></td>
+          <td><span class="badge ok">Có</span> CollectorService.php</td>
+          <td><span class="badge err">Chưa có</span></td>
+          <td><span class="badge warn">Trung</span></td>
+          <td>Thêm payment collector proxy nếu cần</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <h2>4. Kế hoạch cập nhật — Ưu tiên</h2>
+  <div class="card">
+    <ul class="plist">
+      <li>
+        <span class="dot red"></span>
+        <div>
+          <strong>🔴 P1 — Batch Game Status toggle</strong><br />
+          <span style="font-size:12px;color:#57606a">Backend: <code>POST /admin/game/batch-status</code> trong <code>gameConfigController.ts</code>. Frontend: checkbox trong GameRoundsPage + xác nhận modal.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot red"></span>
+        <div>
+          <strong>🔴 P1 — Role Management UI</strong><br />
+          <span style="font-size:12px;color:#57606a">Tạo <code>RolesPage.jsx</code> + <code>/admin/roles</code> CRUD endpoint. Hiện tại adminGuard chỉ check role từ JWT, chưa có giao diện tạo/sửa role.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot red"></span>
+        <div>
+          <strong>🔴 P1 — Rebate Management</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue có <code>RebateService.php</code> + <code>RebateController.php</code> đầy đủ. LKVIP chưa có module hoàn trả (rebate). Cần: Prisma model + controller + <code>RebatePage.jsx</code>.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot orange"></span>
+        <div>
+          <strong>🟠 P2 — GameType Filter (RNG/LIVE/FISH/COCKFIGHT)</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue map gameCategory → gameType (8 loại). Thêm <code>Select</code> filter vào <code>GameRoundsPage.jsx</code> + truyền <code>gameType</code> query param.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot orange"></span>
+        <div>
+          <strong>🟠 P2 — Promotion Reward Tiers</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue có 3 lớp Category→Activity→Reward với limitPeriod, needApply. Mở rộng <code>PromotionPage.jsx</code> + thêm bảng <code>PromotionReward</code> vào admin Prisma schema.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot orange"></span>
+        <div>
+          <strong>🟠 P2 — IM / Chat Admin Panel</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue <code>ImController</code> cho admin quản lý tin nhắn game. Thêm <code>AdminIMPage.jsx</code> (tabs: conversations, broadcast message, mute user) + <code>/admin/im</code> endpoints.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot orange"></span>
+        <div>
+          <strong>🟠 P2 — Dashboard: Lượt truy cập hôm nay + Đăng ký mới</strong><br />
+          <span style="font-size:12px;color:#57606a">Thêm 2 KPI card vào Dashboard.jsx: <code>todayVisits</code> (từ Redis session count) và <code>newSignups</code> (đã có trong dashboardController nhưng chưa hiển thị đủ).</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot blue"></span>
+        <div>
+          <strong>🔵 P3 — K3 / XY28 Lottery specific tabs</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue có <code>K3Controller</code> và <code>XY28Controller</code> riêng. Thêm tab K3/XY28 vào <code>GameLotteryPage.jsx</code> nếu dự án dùng các game số này.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot blue"></span>
+        <div>
+          <strong>🔵 P3 — Collector / Payment Proxy</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue có <code>CollectorService.php</code> thu nạp từ proxy. Nếu LKVIP cần payment proxy, thêm vào <code>shared/payment/</code> layer.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dot blue"></span>
+        <div>
+          <strong>🔵 P3 — Yuebao (Savings/Investment)</strong><br />
+          <span style="font-size:12px;color:#57606a">Boyue <code>YuebaoService.php</code> = tiết kiệm có lãi suất. Có thể map sang <code>trade/investments</code> của LKVIP — <code>TradeInvestmentsPage.jsx</code> đã có.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  
+  <h2>5. Điểm LKVIP mạnh hơn Boyue — GIỮ NGUYÊN</h2>
+  <div class="card">
+    <div class="tags">
+      <span class="tag done">✓ 6 databases riêng (multi-project)</span>
+      <span class="tag done">✓ OPS Platform: RFM, Churn, CLV, Campaign</span>
+      <span class="tag done">✓ AML Alerts + Risk Rules configurable</span>
+      <span class="tag done">✓ IP Blacklist với Redis real-time block</span>
+      <span class="tag done">✓ Security Settings 4 tabs (Brute Force, CAPTCHA…)</span>
+      <span class="tag done">✓ BullMQ Queues thay vì setTimeout</span>
+      <span class="tag done">✓ Prisma type-safe ORM</span>
+      <span class="tag done">✓ Module Registry (plug-and-play per sub-project)</span>
+      <span class="tag done">✓ Cron Jobs UI quản lý từ dashboard</span>
+      <span class="tag done">✓ Notification Templates engine</span>
+      <span class="tag done">✓ Payment Gateway Admin (PaymentAdapter pattern)</span>
+      <span class="tag done">✓ App Catalog management</span>
+    </div>
+  </div>
+
+  
+  <h2>6. File cần tạo/sửa — Tóm tắt</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Hành động</th>
+          <th>Ưu tiên</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>src/modules/admin/controllers/gameConfigController.ts</code></td>
+          <td>Thêm <code>batchToggleStatus()</code></td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>src/modules/admin/routes/index.ts</code></td>
+          <td>Thêm <code>POST /game/batch-status</code>, <code>GET|POST|PATCH|DELETE /roles</code></td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>src/modules/admin/controllers/roleController.ts</code></td>
+          <td>Tạo mới — CRUD roles + assign permissions</td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>src/modules/admin/controllers/rebateController.ts</code></td>
+          <td>Tạo mới — list, approve, reject rebates</td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>prisma/admin/schema.prisma</code></td>
+          <td>Thêm model <code>Role</code>, <code>Permission</code>, <code>Rebate</code>, <code>PromotionReward</code></td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/shared/pages/RolesPage.jsx</code></td>
+          <td>Tạo mới — Role list + Permission tree modal</td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/shared/pages/RebatePage.jsx</code></td>
+          <td>Tạo mới — rebate list + approve/reject</td>
+          <td><span class="badge err">P1</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/game/pages/GameRoundsPage.jsx</code></td>
+          <td>Thêm gameType Select filter + batch checkbox</td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/shared/pages/PromotionPage.jsx</code></td>
+          <td>Thêm RewardTiers sub-panel (limitPeriod, needApply)</td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/shared/pages/Dashboard.jsx</code></td>
+          <td>Thêm 2 KPI: todayVisits + newSignups</td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+        <tr>
+          <td><code>src/modules/admin/controllers/imController.ts</code></td>
+          <td>Tạo mới — list conversations, broadcast, mute</td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/modules/shared/pages/AdminIMPage.jsx</code></td>
+          <td>Tạo mới — IM admin panel</td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+        <tr>
+          <td><code>frontend/admin-dashboard/src/core/routes/index.tsx</code></td>
+          <td>Thêm routes: <code>/roles</code>, <code>/rebates</code>, <code>/im</code></td>
+          <td><span class="badge warn">P2</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="section-divider" />
+
+  <div class="card" style="background:#f0fdf4;border-color:#bbf7d0">
+    <h3 style="color:#166534;margin-bottom:6px">✅ Kết luận</h3>
+    <p style="font-size:13px;line-height:1.8;color:#15803d">
+      LKVIP Admin Dashboard đã <strong>vượt trội</strong> Boyue trên các mặt: kiến trúc multi-project, OPS automation, AML/Risk engine, Security settings, BullMQ queue.<br />
+      Boyue cung cấp 3 tính năng LKVIP chưa có và cần học hỏi ngay: <strong>(1) Batch Game Status</strong>, <strong>(2) Role/Permission CRUD UI</strong>, <strong>(3) Rebate Management</strong>.<br />
+      Các tính năng còn lại (IM panel, Promotion Tiers, GameType filter) có thể triển khai theo sprint tiếp theo.
+    </p>
+  </div>
+
+  <footer>Made with IBM Bob • LKVIP Group Platform Analysis • 2025</footer>
+</div>
+</body>
+</html>

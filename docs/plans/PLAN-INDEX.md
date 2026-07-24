@@ -40,4 +40,4 @@ Tất cả plan files bên dưới đã được implement đầy đủ và **đ
 | [`../DEPLOYMENT.md`](../DEPLOYMENT.md) | Hướng dẫn deploy VPS |
 | [`../SETUP.md`](../SETUP.md) | Setup local dev |
 | [`../project-audit-report.md`](../project-audit-report.md) | Báo cáo audit chuẩn hóa |
-| [`../../source/backend/README.md`](../../source/backend/README.md) | Backend quick start |
+| [`../../code/backend/README.md`](../../code/backend/README.md) | Backend quick start |

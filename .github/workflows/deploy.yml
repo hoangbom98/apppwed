@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'source/code/backend/**'
-      - 'source/code/frontend/**'
-      - 'source/code/packages/**'
-      - 'source/code/shared-types/**'
-      - 'source/code/package.json'
-      - 'source/code/pnpm-workspace.yaml'
+      - 'code/backend/**'
+      - 'code/frontend/**'
+      - 'code/packages/**'
+      - 'code/shared-types/**'
+      - 'code/package.json'
+      - 'code/pnpm-workspace.yaml'
 
   workflow_dispatch:
     inputs:
@@ -67,7 +67,7 @@ jobs:
             git pull origin main
 
             echo "=== [2/5] Install dependencies ==="
-            cd source/code
+            cd code
             pnpm install --frozen-lockfile --prod=false
 
             echo "=== [3/5] Build backend ==="

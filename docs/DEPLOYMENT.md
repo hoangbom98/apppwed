@@ -28,8 +28,8 @@ git clone https://github.com/your-org/website-admin.git
 cd website-admin
 
 # Chạy setup script (cài Node.js, PM2, MySQL, Redis, Nginx)
-chmod +x source/scripts/setup.sh
-sudo ./source/scripts/setup.sh
+chmod +x code/backend/scripts/setup.sh
+sudo ./code/backend/scripts/setup.sh
 ```
 
 Setup script cài đặt:
@@ -42,8 +42,8 @@ Setup script cài đặt:
 ### 2.2 Cấu hình environment
 
 ```bash
-cp .env.example source/backend/.env
-nano source/backend/.env
+cp .env.example code/backend/.env
+nano code/backend/.env
 ```
 
 Điền đầy đủ các biến bắt buộc (xem [SETUP.md](SETUP.md#3-environment-variables)).
@@ -51,13 +51,13 @@ nano source/backend/.env
 **Lưu ý bảo mật:**
 ```bash
 # Chmod .env — chỉ owner được đọc
-chmod 600 source/backend/.env
+chmod 600 code/backend/.env
 ```
 
 ### 2.3 Tạo databases và chạy migrations
 
 ```bash
-cd source/backend
+cd code/backend
 
 # Install dependencies
 npm ci --omit=dev
@@ -75,14 +75,14 @@ npm run seed:all
 ### 2.4 Tạo indexes
 
 ```bash
-mysql -u root -p < source/database/indexes.sql
+mysql -u root -p < config/database/indexes.sql
 ```
 
 ### 2.5 Cấu hình SSL
 
 ```bash
-chmod +x source/scripts/ssl-setup.sh
-sudo ./source/scripts/ssl-setup.sh your-domain.com
+chmod +x code/backend/scripts/ssl-setup.sh
+sudo ./code/backend/scripts/ssl-setup.sh your-domain.com
 ```
 
 ### 2.6 Khởi động PM2
@@ -108,7 +108,7 @@ git fetch origin main
 git reset --hard origin/main
 
 # Update dependencies
-cd source/backend
+cd code/backend
 npm ci --omit=dev
 
 # Regenerate Prisma clients
@@ -125,8 +125,8 @@ pm2 reload ecosystem.config.js --update-env
 ### 3.2 Dùng deploy script
 
 ```bash
-chmod +x source/scripts/deploy.sh
-./source/scripts/deploy.sh
+chmod +x code/backend/scripts/deploy.sh
+./code/backend/scripts/deploy.sh
 ```
 
 ### 3.3 Tự động qua GitHub Actions
@@ -145,7 +145,7 @@ File: `ecosystem.config.js` (root)
 module.exports = {
   apps: [{
     name: 'kjc-api',
-    script: './source/backend/server.js',
+    script: './code/backend/server.js',
     instances: 'max',          // Tất cả CPU cores
     exec_mode: 'cluster',      // Cluster mode cho zero-downtime reload
     watch: false,
@@ -202,7 +202,7 @@ cat ~/.ssh/kjc_deploy
 
 ## 6. Nginx Configuration
 
-File mẫu: `source/nginx/`
+File mẫu: `config/nginx/`
 
 ```nginx
 server {
@@ -245,7 +245,7 @@ server {
 ### Backup thủ công
 
 ```bash
-cd source/backend
+cd code/backend
 npm run backup
 # → Tạo file backup trong ./backups/backup-YYYY-MM-DD.sql.gz
 ```
@@ -253,7 +253,7 @@ npm run backup
 ### Restore từ backup
 
 ```bash
-cd source/backend
+cd code/backend
 npm run restore -- --file=./backups/backup-2024-01-15.sql.gz
 ```
 
@@ -261,8 +261,8 @@ npm run restore -- --file=./backups/backup-2024-01-15.sql.gz
 
 ```bash
 # Cấu hình via setup script
-chmod +x source/scripts/cron-setup.sh
-./source/scripts/cron-setup.sh
+chmod +x code/backend/scripts/cron-setup.sh
+./code/backend/scripts/cron-setup.sh
 ```
 
 Lịch mặc định: backup hàng ngày lúc 2 AM, giữ 30 ngày gần nhất.
@@ -305,7 +305,7 @@ git log --oneline -5    # Tìm commit hash cần rollback
 git reset --hard <commit-hash>
 
 # Reinstall và restart
-cd source/backend
+cd code/backend
 npm ci --omit=dev
 npm run prisma:generate
 pm2 reload ecosystem.config.js --update-env

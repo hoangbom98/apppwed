@@ -21,8 +21,8 @@
 
 **Purpose:** Public portal — news, games directory, tools, websites directory, CMS pages, SEO, events, downloads.
 
-**Frontend:** `source/frontend/hub/` · Port 5173 · Capacitor mobile support  
-**Backend routes:** `source/backend/src/modules/hub/routes/index.js`  
+**Frontend:** `code/frontend/hub/` · Port 5173 · Capacitor mobile support  
+**Backend routes:** `code/backend/src/modules/hub/routes/index.js`  
 **DB:** `hub_db` (`HUB_DATABASE_URL`)
 
 ### Key Endpoints
@@ -60,8 +60,8 @@
 
 **Purpose:** Online gaming platform — games catalogue, wallet, deposits, withdrawals, VIP, promotions, lottery, live sessions.
 
-**Frontend:** `source/frontend/game/` · Port 5174 · Capacitor mobile support  
-**Backend routes:** `source/backend/src/modules/game/routes/index.js`  
+**Frontend:** `code/frontend/game/` · Port 5174 · Capacitor mobile support  
+**Backend routes:** `code/backend/src/modules/game/routes/index.js`  
 **DB:** `game_db` (`GAME_DATABASE_URL`)
 
 ### Key Endpoints
@@ -95,7 +95,7 @@
 
 **Purpose:** LK VIP payment module — deposit / withdrawal / balance queries for VIP users. Shares `game_db` via projectResolver.
 
-**Backend routes:** `source/backend/src/modules/lkvip/routes/`  
+**Backend routes:** `code/backend/src/modules/lkvip/routes/`  
 **DB:** `game_db` (same as game module — proxied via `projectResolver.js`)
 
 ### Key Endpoints
@@ -114,8 +114,8 @@
 
 **Purpose:** Binary/crypto trading platform — order book, orders, wallet, KYC, market data.
 
-**Frontend:** `source/frontend/trade/` · Port 5177  
-**Backend routes:** `source/backend/src/modules/trade/routes/index.js`  
+**Frontend:** `code/frontend/trade/` · Port 5177  
+**Backend routes:** `code/backend/src/modules/trade/routes/index.js`  
 **DB:** `trade_db` (`TRADE_DATABASE_URL`)
 
 ### Key Endpoints
@@ -145,8 +145,8 @@
 
 **Purpose:** Social dating app — swipe/match, chat, live streaming, stories, gifts, gamification, VIP.
 
-**Frontend:** `source/frontend/dating/` · Port 5176 · Capacitor + WebRTC  
-**Backend routes:** `source/backend/src/modules/dating/routes/index.js`  
+**Frontend:** `code/frontend/dating/` · Port 5176 · Capacitor + WebRTC  
+**Backend routes:** `code/backend/src/modules/dating/routes/index.js`  
 **DB:** `dating_db` (`DATING_DATABASE_URL`)  
 **Socket.IO:** namespace `/dating`
 
@@ -179,8 +179,8 @@
 
 **Purpose:** Sports news, live scores, betting, community, live streams, video highlights.
 
-**Frontend:** `source/frontend/sports/` · Port 5178  
-**Backend routes:** `source/backend/src/modules/sports/routes/index.js`  
+**Frontend:** `code/frontend/sports/` · Port 5178  
+**Backend routes:** `code/backend/src/modules/sports/routes/index.js`  
 **DB:** `sports_db` (`SPORTS_DATABASE_URL`)  
 **Socket.IO:** namespace `/sports`
 
@@ -213,8 +213,8 @@
 
 **Purpose:** Super-admin cross-project management dashboard. Manages all 6 projects from a single panel.
 
-**Frontend:** `source/frontend/admin-dashboard/` · Port 5180 (JSX, no TypeScript)  
-**Backend routes:** `source/backend/src/modules/admin/routes/index.js`  
+**Frontend:** `code/frontend/admin-dashboard/` · Port 5180 (JSX, no TypeScript)  
+**Backend routes:** `code/backend/src/modules/admin/routes/index.js`  
 **DB:** `admin_db` (`ADMIN_DATABASE_URL`) — admin users, settings, audit logs  
 **Guard:** All routes (except `/auth/login`, `/auth/refresh`) require `adminGuard`
 
@@ -246,7 +246,7 @@
 
 ## 8. Shared Infrastructure
 
-Located in `source/backend/src/shared/`.
+Located in `code/backend/src/shared/`.
 
 ### Middlewares
 

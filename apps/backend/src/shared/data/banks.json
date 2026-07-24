@@ -1,0 +1,7 @@
+[
+  { "id": 1, "name": "Ngân hàng TMCP An Bình", "code": "ABB", "bin": "970425", "shortName": "ABBANK" },
+  { "id": 2, "name": "Ngân hàng TMCP Á Châu", "code": "ACB", "bin": "970416", "shortName": "ACB" },
+  { "id": 3, "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam", "code": "BIDV", "bin": "970418", "shortName": "BIDV" },
+  { "id": 4, "name": "Ngân hàng TMCP Công Thương Việt Nam", "code": "ICB", "bin": "970415", "shortName": "VIETINBANK" },
+  { "id": 5, "name": "Ngân hàng TMCP Ngoại thương Việt Nam", "code": "VCB", "bin": "970436", "shortName": "VIETCOMBANK" }
+]

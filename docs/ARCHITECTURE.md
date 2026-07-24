@@ -100,7 +100,7 @@ source/
 ### Multi-Client Factory
 
 ```js
-// source/backend/src/config/databases.js
+// code/backend/src/config/databases.js
 function getPrismaClient(project) {
   if (!clients[project]) {
     const { PrismaClient } = require(`../../../node_modules/.prisma/${project}-client`);
@@ -291,7 +291,7 @@ npm install                          # root workspace (concurrently, typescript)
 npm run install:all                  # all 6 SPAs + backend
 
 # Backend: generate Prisma clients + run migrations
-cd source/backend
+cd code/backend
 npm run prisma:generate
 npm run prisma:migrate:all
 npm run seed:all
@@ -322,7 +322,7 @@ npm run build:admin
 ### 4. Deploy
 ```bash
 # Rolling deploy (no downtime):
-bash source/scripts/deploy.sh
+bash code/backend/scripts/deploy.sh
 
 # PM2 management:
 pm2 reload api-server --update-env
@@ -364,7 +364,7 @@ IPaymentGateway — Payment gateway config
 
 ## 🔧 Environment Variables
 
-Copy `source/backend/.env.example` to `source/backend/.env` and fill in all values.
+Copy `code/backend/.env.example` to `code/backend/.env` and fill in all values.
 
 Critical variables:
 
@@ -394,7 +394,7 @@ Both `hub` and `game` SPAs support Capacitor for Android/iOS builds.
 
 ```bash
 # Build + sync to Android:
-cd source/frontend/game
+cd code/frontend/game
 npm run cap:android      # builds → sync → open Android Studio
 
 # Live reload on device:
@@ -417,7 +417,7 @@ The `CAPACITOR_BUILD=true` env flag switches `base` from `/` to `./` in Vite con
 | `admin.domain.com` | `frontend/admin-dashboard/dist/`               |
 | `api.domain.com`   | Proxy → `http://127.0.0.1:5000`                |
 
-SSL via Let's Encrypt (`source/scripts/ssl-setup.sh`).
+SSL via Let's Encrypt (`code/backend/scripts/ssl-setup.sh`).
 
 ---
 

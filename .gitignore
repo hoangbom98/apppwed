@@ -1,7 +1,7 @@
 # ============================================================
 # Root .gitignore — LKVIP GROUP
 # Workspace root: /var/LKVIP/
-# Code root:      /var/LKVIP/source/code/
+# Code root:      /var/LKVIP/code/
 # ============================================================
 
 # --- Node.js dependencies ---
@@ -39,11 +39,11 @@ pnpm-debug.log*
 
 # --- Runtime data (logs, uploads, backups) ---
 /data/
-source/code/backend/backups/
-source/code/backend/uploads/
+code/backend/backups/
+code/backend/uploads/
 
 # --- Prisma generated clients ---
-source/code/backend/node_modules/.prisma/
+code/backend/node_modules/.prisma/
 
 # --- OS / Editor ---
 .DS_Store
@@ -84,4 +84,4 @@ android/
 ios/
 
 # --- Large media files ---
-source/code/frontend/hub/public/assets/videos/
+code/frontend/hub/public/assets/videos/

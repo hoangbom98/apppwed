@@ -78,7 +78,7 @@ cd /var/www/website-admin
 ```bash
 # Installs: Node 20, MySQL 8, Redis 7, Nginx, PM2, UFW, certbot
 # Creates: 6 databases, webadmin MySQL user, UFW rules, SSL certificates
-bash source/scripts/setup.sh yourdomain.com admin@yourdomain.com
+bash code/backend/scripts/setup.sh yourdomain.com admin@yourdomain.com
 ```
 
 This takes ~5 minutes. At the end, MySQL credentials are saved to:
@@ -92,11 +92,11 @@ This takes ~5 minutes. At the end, MySQL credentials are saved to:
 
 ```bash
 # Copy template and fill in values
-cp /var/www/website-admin/source/backend/.env.example \
-   /var/www/website-admin/source/backend/.env
+cp /var/www/website-admin/code/backend/.env.example \
+   /var/www/website-admin/code/backend/.env
 
 # Edit .env — paste DB credentials from CREDENTIALS.txt
-nano /var/www/website-admin/source/backend/.env
+nano /var/www/website-admin/code/backend/.env
 ```
 
 Minimum required changes in `.env`:
@@ -114,7 +114,7 @@ Minimum required changes in `.env`:
 
 Verify all required vars are set:
 ```bash
-bash source/scripts/check-env.sh source/backend/.env
+bash code/backend/scripts/check-env.sh code/backend/.env
 ```
 
 ---
@@ -123,7 +123,7 @@ bash source/scripts/check-env.sh source/backend/.env
 
 ```bash
 # Installs deps, runs migrations, seeds data, builds 6 frontends, starts PM2
-bash source/scripts/first-deploy.sh yourdomain.com
+bash code/backend/scripts/first-deploy.sh yourdomain.com
 ```
 
 This takes 5–15 minutes depending on VPS speed (npm installs + 6 frontend builds).
@@ -161,16 +161,16 @@ systemctl status nginx
 cd /var/www/website-admin
 
 # Full deploy (git pull + build all + pm2 reload)
-bash source/scripts/deploy.sh
+bash code/backend/scripts/deploy.sh
 
 # Backend only (zero-downtime reload)
-bash source/scripts/deploy.sh --module=backend
+bash code/backend/scripts/deploy.sh --module=backend
 
 # Rebuild one frontend only
-bash source/scripts/deploy.sh --module=hub
+bash code/backend/scripts/deploy.sh --module=hub
 
 # Backend hot reload without rebuilding frontends
-bash source/scripts/deploy.sh --skip-build
+bash code/backend/scripts/deploy.sh --skip-build
 ```
 
 ---
@@ -183,8 +183,8 @@ pm2 logs api-server --lines 100      # tail logs
 pm2 monit                             # real-time monitoring
 pm2 reload api-server --update-env   # zero-downtime reload
 pm2 restart api-server               # hard restart (brief downtime)
-bash source/scripts/start.sh stop    # stop
-bash source/scripts/start.sh start   # start
+bash code/backend/scripts/start.sh stop    # stop
+bash code/backend/scripts/start.sh start   # start
 ```
 
 ---
@@ -193,16 +193,16 @@ bash source/scripts/start.sh start   # start
 
 ```bash
 # Manual backup (all 6 databases)
-bash source/scripts/backup.sh
+bash code/backend/scripts/backup.sh
 
 # Backups are saved to: /var/backups/mysql/YYYYMMDD/
 # Retention: 30 days (configurable via BACKUP_RETENTION_DAYS in .env)
 
 # Install automated cron backups (02:00, 08:00, 14:00, 20:00 daily)
-sudo bash source/scripts/cron-setup.sh
+sudo bash code/backend/scripts/cron-setup.sh
 
 # Restore a database
-bash source/scripts/restore.sh /var/backups/mysql/20260801/hub_db_20260801_020000.sql.gz hub_db
+bash code/backend/scripts/restore.sh /var/backups/mysql/20260801/hub_db_20260801_020000.sql.gz hub_db
 ```
 
 ---
@@ -217,7 +217,7 @@ systemctl status certbot.timer
 
 Re-run manually if needed:
 ```bash
-bash source/scripts/ssl-setup.sh yourdomain.com admin@yourdomain.com
+bash code/backend/scripts/ssl-setup.sh yourdomain.com admin@yourdomain.com
 ```
 
 ---
