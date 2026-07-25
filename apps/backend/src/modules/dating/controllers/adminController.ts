@@ -4,8 +4,9 @@
  * Handles admin CRUD for: profiles, matches, gifts, moments (feed posts), reports, live sessions.
  * All routes require auth + adminGuard.
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
+const { ok, created, success, error, notFound } = require('../../../shared/utils/response');
 const { paginate } = require('../../../shared/utils/helpers');
+const { logAdminAction } = require('../../../shared/services/auditLogger.service');
 
 // ── Profiles ──────────────────────────────────────────────────────
 
@@ -37,9 +38,6 @@ exports.getProfile = async (req, res) => {
     return ok(res, item);
   } catch (e) { return error(res, e.message, 500); }
 };
-
-const { logAdminAction } = require('../../../shared/services/auditLogger.service');
-const { success, error, notFound } = require('../../../shared/utils/response');
 
 exports.updateProfile = async (req, res) => {
   try {

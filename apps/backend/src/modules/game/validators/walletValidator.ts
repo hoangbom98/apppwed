@@ -12,17 +12,18 @@ if (!Joi) {
 }
 
 const createDeposit = Joi.object({
-  amount:         Joi.number().positive().min(10_000).max(500_000_000).required(),
-  payment_method: Joi.string().valid('momo', 'zalopay', 'vnpay', 'bank', 'qr').required(),
-  bank_account:   Joi.string().max(100).optional().allow(''),
-  note:           Joi.string().max(500).optional().allow(''),
+  amount:      Joi.number().positive().min(10_000).max(500_000_000).required(),
+  method:      Joi.string().valid('momo', 'zalopay', 'vnpay', 'bank', 'qr').required(),
+  bankAccount: Joi.string().max(100).optional().allow(''),
+  note:        Joi.string().max(500).optional().allow(''),
 });
 
 const createWithdraw = Joi.object({
-  amount:         Joi.number().positive().min(50_000).max(100_000_000).required(),
-  payment_method: Joi.string().valid('banking', 'usdt', 'momo').required(),
-  address:        Joi.string().min(6).max(200).required(),
-  note:           Joi.string().max(500).optional().allow(''),
+  amount:   Joi.number().positive().min(50_000).max(100_000_000).required(),
+  method:   Joi.string().valid('banking', 'usdt', 'momo', 'bank').required(),
+  address:  Joi.string().min(6).max(200).optional().allow(''),
+  bankInfo: Joi.object().optional(),
+  note:     Joi.string().max(500).optional().allow(''),
 });
 
 const placeLotteryBet = Joi.object({

@@ -22,6 +22,8 @@ const yuebaoCtrl    = require('../controllers/savingsVaultController');
 const miningCtrl    = require('../controllers/miningController');
 const statsCtrl     = require('../controllers/statisticsController');
 const giftCodeCtrl  = require('../controllers/giftCodeController');
+const { validate }  = require('../../../shared/middlewares/validate');
+const walletSchemas = require('../validators/walletValidator');
 
 // ── Bank Accounts (protected) ─────────────────────────────────────
 const bankAccCtrl = require('../../../shared/controllers/bankAccountController');
@@ -57,9 +59,9 @@ router.get('/wallet/history',          auth, walletCtrl.getHistory);
 router.get('/wallet/deposit-config',   auth, walletCtrl.getDepositConfig);
 router.get('/wallet/withdraw-config',  auth, walletCtrl.getWithdrawConfig);
 router.get('/wallet/deposits',         auth, walletCtrl.getDeposits);
-router.post('/wallet/deposit',         auth, walletCtrl.createDeposit);
+router.post('/wallet/deposit',         auth, validate(walletSchemas.createDeposit), walletCtrl.createDeposit);
 router.get('/wallet/withdraws',        auth, walletCtrl.getWithdraws);
-router.post('/wallet/withdraw',        auth, walletCtrl.createWithdraw);
+router.post('/wallet/withdraw',        auth, validate(walletSchemas.createWithdraw), walletCtrl.createWithdraw);
 router.post('/wallet/transfer',        auth, walletCtrl.transfer);
 router.post('/wallet/transfer-user',   auth, walletCtrl.transferUser);
 

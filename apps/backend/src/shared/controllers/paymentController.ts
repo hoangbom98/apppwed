@@ -17,8 +17,13 @@
  *   GET    /admin/gateways/available — list registered adapter codes
  */
 const PaymentFactory = require('../payment/PaymentFactory');
+const Decimal = require('decimal.js');
 const { success, created, error, notFound, paginate } = require('../utils/response');
 const logger = require('../services/logger');
+const { maskSensitive } = require('../utils/maskSensitive');
+
+const toMoney = (value) => new Decimal(value).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+const moneyValue = (value) => toMoney(value).toString();
 
 // ── Helper: get admin_db Prisma for gateway config ──────────────────────────
 function getAdminPrisma(_req) {
@@ -55,9 +60,10 @@ exports.createDeposit = async (req, res) => {
   try {
     const { gatewayCode, amount } = req.body;
     const userId = req.user?.id;
+    const moneyAmount = toMoney(amount);
 
     if (!gatewayCode) return error(res, 'gatewayCode là bắt buộc');
-    if (!amount || Number(amount) <= 0) return error(res, 'Số tiền không hợp lệ');
+    if (moneyAmount.lte(0)) return error(res, 'Số tiền không hợp lệ');
 
     const adminPrisma = getAdminPrisma(req);
     const factory     = new PaymentFactory(adminPrisma);
@@ -66,14 +72,14 @@ exports.createDeposit = async (req, res) => {
     const adapter = await factory.getAdapter(gatewayCode, req.prisma);
 
     // Validate amount before creating order
-    adapter.validateAmount(Number(amount));
+    adapter.validateAmount(moneyAmount.toNumber());
 
     // Create pending deposit order in the current project's DB
     const order = await req.prisma.depositOrder.create({
       data: {
         userId,
         gatewayId: adapter.gateway.id,
-        amount:    Number(amount),
+        amount:    moneyAmount.toString(),
         currency:  req.body.currency ?? 'VND',
         status:    'pending',
       },
@@ -82,11 +88,11 @@ exports.createDeposit = async (req, res) => {
     // Get payment instructions from adapter
     const instructions = await adapter.createDeposit(order);
 
-    logger.info('Deposit order created', { orderId: order.id, userId, gatewayCode, amount });
+    logger.info('Deposit order created', { orderId: order.id, userId, gatewayCode, amount: moneyAmount.toString() });
 
     return created(res, { orderId: order.id, ...instructions }, 'Tạo đơn nạp tiền thành công');
   } catch (err) {
-    logger.error('createDeposit error', { err: err.message, body: req.body });
+    logger.error('createDeposit error', { err: err.message, body: maskSensitive(req.body) });
     return error(res, err.message || 'Không thể tạo đơn nạp tiền', 500);
   }
 };
@@ -99,29 +105,38 @@ exports.createWithdraw = async (req, res) => {
   try {
     const { gatewayCode, amount, address, bankInfo } = req.body;
     const userId = req.user?.id;
+    const moneyAmount = toMoney(amount);
 
     if (!gatewayCode) return error(res, 'gatewayCode là bắt buộc');
-    if (!amount || Number(amount) <= 0) return error(res, 'Số tiền không hợp lệ');
+    if (moneyAmount.lte(0)) return error(res, 'Số tiền không hợp lệ');
 
     const adminPrisma = getAdminPrisma(req);
     const factory     = new PaymentFactory(adminPrisma);
     const adapter     = await factory.getAdapter(gatewayCode, req.prisma);
 
-    adapter.validateAmount(Number(amount));
+    adapter.validateAmount(moneyAmount.toNumber());
 
-    const order = await req.prisma.withdrawOrder.create({
-      data: {
-        userId,
-        gatewayId: adapter.gateway.id,
-        amount:    Number(amount),
-        currency:  req.body.currency ?? 'VND',
-        address:   address ?? null,
-        bankInfo:  bankInfo ?? null,
-        status:    'pending',
-      },
+    const order = await req.prisma.$transaction(async (tx) => {
+      const result = await tx.$executeRaw`
+        UPDATE users SET frozen = frozen + ${moneyAmount.toString()}, updatedAt = NOW()
+        WHERE id = ${userId} AND balance - frozen >= ${moneyAmount.toString()}
+      `;
+      if (result === 0) throw Object.assign(new Error('Số dư khả dụng không đủ'), { status: 400 });
+
+      return tx.withdrawOrder.create({
+        data: {
+          userId,
+          gatewayId: adapter.gateway.id,
+          amount:    moneyAmount.toString(),
+          currency:  req.body.currency ?? 'VND',
+          address:   address ?? null,
+          bankInfo:  bankInfo ?? null,
+          status:    'pending',
+        },
+      });
     });
 
-    logger.info('Withdraw order created', { orderId: order.id, userId, gatewayCode, amount });
+    logger.info('Withdraw order created', { orderId: order.id, userId, gatewayCode, amount: moneyAmount.toString() });
 
     return created(res, { orderId: order.id }, 'Yêu cầu rút tiền đã được tạo. Đang chờ xử lý.');
   } catch (err) {
@@ -161,23 +176,41 @@ exports.handleWebhook = async (req, res) => {
         });
 
         if (depositOrder) {
+          const amount = toMoney(depositOrder.amount);
+          const user = await tx.user.findUnique({
+            where:  { id: depositOrder.userId },
+            select: { balance: true },
+          });
+          if (!user) throw new Error('Deposit user not found');
+
+          const balanceBefore = toMoney(user.balance);
+          const balanceAfter  = balanceBefore.plus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+
           await tx.depositOrder.update({
             where: { id: depositOrder.id },
             data:  { status: 'completed', txId: result.txId, processedAt: new Date() },
           });
-
-          // Credit user balance if model exists in this project's DB
-          if (tx.user) {
-            await tx.user.update({
-              where: { id: depositOrder.userId },
-              data:  { balance: { increment: Number(depositOrder.amount) } },
-            }).catch(() => {/* model may not have balance field */ });
-          }
+          await tx.user.update({
+            where: { id: depositOrder.userId },
+            data:  { balance: { increment: amount.toString() }, totalDeposit: { increment: amount.toString() } },
+          });
+          await tx.transaction.create({
+            data: {
+              userId:        depositOrder.userId,
+              type:          'deposit',
+              amount:        amount.toString(),
+              balanceBefore: balanceBefore.toString(),
+              balanceAfter:  balanceAfter.toString(),
+              referenceId:   depositOrder.id,
+              referenceType: 'deposit_order',
+              note:          `Payment webhook - ${gatewayCode}`,
+            },
+          });
 
           logger.info('Deposit confirmed via webhook', {
             orderId: depositOrder.id,
             userId:  depositOrder.userId,
-            amount:  depositOrder.amount,
+            amount:  amount.toString(),
             gatewayCode,
           });
         }

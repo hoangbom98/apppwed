@@ -154,4 +154,5 @@ class EventBus extends EventEmitter {
 
 const eventBus = new EventBus();
 
+export { eventBus, EVENTS };
 module.exports = { eventBus, EVENTS };

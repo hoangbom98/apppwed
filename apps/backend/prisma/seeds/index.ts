@@ -20,6 +20,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 // ── Import all seed modules ───────────────────────────────────────────────────
+const testUsersSeed      = require('./test-users.seed');
 const adminSeed          = require('./admin.seed');
 const uiConfigSeed       = require('./ui-config.seed');
 const featureFlagsSeed   = require('./feature-flags.seed');
@@ -37,6 +38,7 @@ const notifCronSeed      = require('./notification-cron.seed');
 // ── Seed registry (execution order matters) ───────────────────────────────────
 const SEEDS = [
   { name: 'Admin',                  fn: adminSeed.seed },
+  { name: 'Test Users',             fn: testUsersSeed.seed },
   { name: 'UI Config',              fn: uiConfigSeed.seed },
   { name: 'Feature Flags',          fn: featureFlagsSeed.seed },
   { name: 'Payment Gateways',       fn: paymentSeed.seed },

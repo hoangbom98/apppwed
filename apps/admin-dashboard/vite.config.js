@@ -1,12 +1,14 @@
 // frontend/admin-dashboard/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
     // Vite transform cache dùng chung toàn monorepo — React/antd chỉ transform 1 lần
     cacheDir: '../../node_modules/.vite-cache',
     plugins: [
+        tailwindcss(),
         react(),
         VitePWA({
             registerType: 'autoUpdate',

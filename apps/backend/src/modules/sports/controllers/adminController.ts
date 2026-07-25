@@ -5,6 +5,7 @@
  */
 const { ok, created, error, paginate: paginateRes } = require('../../../shared/utils/response');
 const { paginate } = require('../../../shared/utils/helpers');
+const { logAdminAction } = require('../../../shared/services/auditLogger.service');
 
 // ── Leagues ───────────────────────────────────────────────────────
 

@@ -10,9 +10,14 @@
  */
 const { success, created, error } = require('../../../shared/utils/response');
 const { paginate }                = require('../../../shared/utils/helpers');
+const Decimal                     = require('decimal.js');
+const bcrypt                      = require('bcryptjs');
 const notifSvc    = require('../../../shared/services/notificationService');
 const WalletService = require('../../../shared/services/walletService');
 const missionSvc  = require('../services/missionService');
+
+const toMoney = (value) => new Decimal(value).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+const moneyValue = (value) => toMoney(value).toString();
 
 // ── Balance ───────────────────────────────────────────────────────────────────
 exports.getBalance = async (req, res) => {
@@ -106,29 +111,27 @@ exports.createWithdraw = async (req, res) => {
     await walletSvc.checkWithdrawEligibility('game', Number(amount), req.user.id, method);
 
     // Kiểm tra số dư
-    const user = await req.prisma.user.findUnique({ where: { id: req.user.id } });
-    const available = parseFloat(user.balance) - parseFloat(user.frozen || 0);
-    if (available < parseFloat(amount)) return error(res, 'Số dư khả dụng không đủ', 400);
+    const numAmount = toMoney(amount);
+    const fee       = toMoney(0);
+    await req.prisma.$transaction(async (tx) => {
+      const result = await tx.$executeRaw`
+        UPDATE users SET frozen = frozen + ${numAmount.toString()}, updatedAt = NOW()
+        WHERE id = ${req.user.id} AND balance - frozen >= ${numAmount.toString()}
+      `;
+      if (result === 0) throw Object.assign(new Error('Số dư khả dụng không đủ'), { status: 400 });
 
-    const numAmount = parseFloat(amount);
-    const fee       = 0; // fee computed from config; default 0
-    await req.prisma.$transaction([
-      req.prisma.user.update({
-        where: { id: req.user.id },
-        data:  { frozen: { increment: numAmount } },
-      }),
-      req.prisma.withdrawOrder.create({
+      await tx.withdrawOrder.create({
         data: {
           userId:    req.user.id,
           method,
-          amount:    numAmount,
-          fee,
-          netAmount: numAmount - fee,
+          amount:    numAmount.toString(),
+          fee:       fee.toString(),
+          netAmount: numAmount.minus(fee).toString(),
           address,
           bankInfo,
         },
-      }),
-    ]);
+      });
+    });
     return created(res, null, 'Tạo lệnh rút thành công');
   } catch (e) {
     const status = e.message.includes('tạm thời') || e.message.includes('tối thiểu') ||
@@ -157,25 +160,30 @@ exports.approveDeposit = async (req, res) => {
   try {
     const order = await req.prisma.depositOrder.findUnique({ where: { id: req.params.id } });
     if (!order || order.status !== 'pending') return error(res, 'Lệnh không hợp lệ', 400);
-    const user = await req.prisma.user.findUnique({ where: { id: order.userId } });
-    const newBalance = parseFloat(user.balance) + parseFloat(order.amount);
-    await req.prisma.$transaction([
-      req.prisma.depositOrder.update({ where: { id: order.id }, data: { status: 'success', processedAt: new Date() } }),
-      req.prisma.user.update({ where: { id: order.userId }, data: { balance: newBalance, totalDeposit: { increment: parseFloat(order.amount) } } }),
-      req.prisma.transaction.create({
+    const amount = toMoney(order.amount);
+    let newBalance;
+    await req.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: order.userId }, select: { balance: true } });
+      if (!user) throw new Error('User not found');
+      const balanceBefore = toMoney(user.balance);
+      newBalance = balanceBefore.plus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+
+      await tx.depositOrder.update({ where: { id: order.id }, data: { status: 'success', processedAt: new Date() } });
+      await tx.user.update({ where: { id: order.userId }, data: { balance: { increment: amount.toString() }, totalDeposit: { increment: amount.toString() } } });
+      await tx.transaction.create({
         data: {
           userId:        order.userId,
-          amount:        order.amount,
-          balanceBefore: parseFloat(user.balance),
-          balanceAfter:  newBalance,
+          amount:        amount.toString(),
+          balanceBefore: balanceBefore.toString(),
+          balanceAfter:  newBalance.toString(),
           type:          'deposit',
           referenceId:   order.id,
           referenceType: 'deposit_order',
           note:          `Nạp ${order.method}`,
         },
-      }),
-    ]);
-    notifSvc.sendToUser(order.userId, 'balance:update', { balance: newBalance });
+      });
+    });
+    notifSvc.sendToUser(order.userId, 'balance:update', { balance: newBalance.toString() });
     notifSvc.sendToUser(order.userId, 'notification', {
       title:   'Nạp tiền thành công',
       content: `${parseFloat(order.amount).toLocaleString('vi-VN')} VND đã được cộng vào tài khoản`,
@@ -200,25 +208,31 @@ exports.approveWithdraw = async (req, res) => {
   try {
     const order = await req.prisma.withdrawOrder.findUnique({ where: { id: req.params.id } });
     if (!order || order.status !== 'pending') return error(res, 'Lệnh không hợp lệ', 400);
-    const user = await req.prisma.user.findUnique({ where: { id: order.userId } });
-    const newBalance = Math.max(0, parseFloat(user.balance) - parseFloat(order.amount));
-    const newFrozen  = Math.max(0, parseFloat(user.frozen) - parseFloat(order.amount));
-    await req.prisma.$transaction([
-      req.prisma.withdrawOrder.update({ where: { id: order.id }, data: { status: 'success', processedAt: new Date() } }),
-      req.prisma.user.update({ where: { id: order.userId }, data: { balance: newBalance, frozen: newFrozen } }),
-      req.prisma.transaction.create({
+    await req.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: order.userId }, select: { balance: true, frozen: true } });
+      if (!user) throw new Error('User not found');
+      const amount = toMoney(order.amount);
+      const balanceBefore = toMoney(user.balance);
+      const frozenBefore = toMoney(user.frozen || 0);
+      if (balanceBefore.lt(amount) || frozenBefore.lt(amount)) throw Object.assign(new Error('Số dư frozen không đủ để duyệt rút'), { status: 400 });
+      const newBalance = balanceBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+      const newFrozen = frozenBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+
+      await tx.withdrawOrder.update({ where: { id: order.id }, data: { status: 'success', processedAt: new Date() } });
+      await tx.user.update({ where: { id: order.userId }, data: { balance: newBalance.toString(), frozen: newFrozen.toString() } });
+      await tx.transaction.create({
         data: {
           userId:        order.userId,
-          amount:        -parseFloat(order.amount),
-          balanceBefore: parseFloat(user.balance),
-          balanceAfter:  newBalance,
+          amount:        amount.negated().toString(),
+          balanceBefore: balanceBefore.toString(),
+          balanceAfter:  newBalance.toString(),
           type:          'withdraw',
           referenceId:   order.id,
           referenceType: 'withdraw_order',
           note:          `Rút ${order.method}`,
         },
-      }),
-    ]);
+      });
+    });
     notifSvc.sendToUser(order.userId, 'notification', {
       title:   'Rút tiền thành công',
       content: `Lệnh rút ${parseFloat(order.amount).toLocaleString('vi-VN')} VND đã được xử lý`,
@@ -231,16 +245,22 @@ exports.rejectWithdraw = async (req, res) => {
   try {
     const order = await req.prisma.withdrawOrder.findUnique({ where: { id: req.params.id } });
     if (!order) return error(res, 'Không tìm thấy', 404);
-    await req.prisma.$transaction([
-      req.prisma.withdrawOrder.update({
+    await req.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: order.userId }, select: { frozen: true } });
+      if (!user) throw new Error('User not found');
+      const amount = toMoney(order.amount);
+      const frozenBefore = toMoney(user.frozen || 0);
+      if (frozenBefore.lt(amount)) throw Object.assign(new Error('Số dư frozen không đủ để hoàn rút'), { status: 400 });
+
+      await tx.withdrawOrder.update({
         where: { id: order.id },
         data:  { status: 'failed', adminNote: req.body.reason, processedAt: new Date() },
-      }),
-      req.prisma.user.update({
+      });
+      await tx.user.update({
         where: { id: order.userId },
-        data:  { frozen: { decrement: parseFloat(order.amount) } },
-      }),
-    ]);
+        data:  { frozen: frozenBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN).toString() },
+      });
+    });
     notifSvc.sendToUser(order.userId, 'notification', {
       title:   'Rút tiền bị từ chối',
       content: 'Lệnh rút tiền của bạn bị từ chối. Số tiền đã được hoàn lại.',
@@ -310,9 +330,15 @@ exports.transferUser = async (req, res) => {
     });
     if (!sender) return error(res, 'Không tìm thấy tài khoản', 404);
 
-    // Kiểm tra mật khẩu giao dịch (lưu hash — so sánh plain nếu chưa hash)
-    if (sender.tradingPassword && sender.tradingPassword !== String(tradingPassword)) {
-      return error(res, 'Mật khẩu giao dịch không đúng', 400);
+    if (!sender.tradingPassword) return error(res, 'Vui lòng thiết lập mật khẩu giao dịch trước', 400);
+    const pwd = String(tradingPassword);
+    const storedPwd = String(sender.tradingPassword);
+    const validTradingPassword = storedPwd.startsWith('$2')
+      ? await bcrypt.compare(pwd, storedPwd)
+      : storedPwd === pwd;
+    if (!validTradingPassword) return error(res, 'Mật khẩu giao dịch không đúng', 400);
+    if (!storedPwd.startsWith('$2')) {
+      await req.prisma.user.update({ where: { id: req.user.id }, data: { tradingPassword: await bcrypt.hash(pwd, 10) } });
     }
 
     const available = parseFloat(sender.balance) - parseFloat(sender.frozen || 0);
@@ -325,40 +351,47 @@ exports.transferUser = async (req, res) => {
     if (!receiver) return error(res, 'Không tìm thấy người nhận', 404);
     if (receiver.id === req.user.id) return error(res, 'Không thể tự chuyển cho mình', 400);
 
-    const senderNewBal   = parseFloat(sender.balance)   - numAmount;
-    const receiverNewBal = parseFloat(receiver.balance) + numAmount;
+    const amountDec = toMoney(numAmount);
+    const senderBefore = toMoney(sender.balance);
+    const receiverBefore = toMoney(receiver.balance);
+    const senderNewBal = senderBefore.minus(amountDec).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+    const receiverNewBal = receiverBefore.plus(amountDec).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
     const ref = `p2p_${Date.now()}`;
 
-    await req.prisma.$transaction([
-      req.prisma.user.update({ where: { id: req.user.id },  data: { balance: senderNewBal } }),
-      req.prisma.user.update({ where: { id: receiver.id },  data: { balance: receiverNewBal } }),
-      req.prisma.transaction.create({ data: {
+    await req.prisma.$transaction(async (tx) => {
+      const result = await tx.$executeRaw`
+        UPDATE users SET balance = balance - ${amountDec.toString()}, updatedAt = NOW()
+        WHERE id = ${req.user.id} AND balance - frozen >= ${amountDec.toString()}
+      `;
+      if (result === 0) throw Object.assign(new Error('Số dư khả dụng không đủ'), { status: 400 });
+      await tx.user.update({ where: { id: receiver.id }, data: { balance: { increment: amountDec.toString() } } });
+      await tx.transaction.create({ data: {
         userId:        req.user.id,
         type:          'transfer_out',
-        amount:        -numAmount,
-        balanceBefore: parseFloat(sender.balance),
-        balanceAfter:  senderNewBal,
+        amount:        amountDec.negated().toString(),
+        balanceBefore: senderBefore.toString(),
+        balanceAfter:  senderNewBal.toString(),
         referenceId:   ref,
         referenceType: 'p2p_transfer',
-        note:          `Chuyển tiền → ${receiver.username}: ${numAmount.toLocaleString('vi-VN')} VND`,
-      }}),
-      req.prisma.transaction.create({ data: {
+        note:          `Chuyển tiền → ${receiver.username}: ${amountDec.toNumber().toLocaleString('vi-VN')} VND`,
+      }});
+      await tx.transaction.create({ data: {
         userId:        receiver.id,
         type:          'transfer_in',
-        amount:        numAmount,
-        balanceBefore: parseFloat(receiver.balance),
-        balanceAfter:  receiverNewBal,
+        amount:        amountDec.toString(),
+        balanceBefore: receiverBefore.toString(),
+        balanceAfter:  receiverNewBal.toString(),
         referenceId:   ref,
         referenceType: 'p2p_transfer',
-        note:          `Nhận tiền ← ${sender.username}: ${numAmount.toLocaleString('vi-VN')} VND`,
-      }}),
-    ]);
+        note:          `Nhận tiền ← ${sender.username}: ${amountDec.toNumber().toLocaleString('vi-VN')} VND`,
+      }});
+    });
 
     notifSvc.sendToUser(receiver.id, 'notification', {
       title:   'Nhận tiền chuyển khoản',
       content: `${sender.username} đã chuyển ${numAmount.toLocaleString('vi-VN')} VND cho bạn`,
     });
 
-    return success(res, { newBalance: senderNewBal, toUser: receiver.username, amount: numAmount }, 'Chuyển tiền thành công');
+    return success(res, { newBalance: senderNewBal.toString(), toUser: receiver.username, amount: amountDec.toString() }, 'Chuyển tiền thành công');
   } catch (e) { return error(res, e.message, 500); }
 };

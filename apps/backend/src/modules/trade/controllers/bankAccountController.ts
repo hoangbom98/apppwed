@@ -74,6 +74,24 @@ exports.update = async (req, res) => {
   } catch (e: any) { return error(res, e.message, 500); }
 };
 
+// ── PUT /trade/bank-accounts/:id/default ─────────────────────────────────────
+exports.setDefault = async (req, res) => {
+  try {
+    const account = await req.prisma.bankAccount.findUnique({ where: { id: req.params.id } });
+    if (!account || account.userId !== req.user.id) return notFound(res, 'Tài khoản không tồn tại');
+
+    await req.prisma.bankAccount.updateMany({
+      where: { userId: req.user.id, isDefault: true },
+      data:  { isDefault: false },
+    });
+    const updated = await req.prisma.bankAccount.update({
+      where: { id: req.params.id },
+      data:  { isDefault: true },
+    });
+    return success(res, updated, 'Đã đặt tài khoản mặc định');
+  } catch (e: any) { return error(res, e.message, 500); }
+};
+
 // ── DELETE /trade/bank-accounts/:id ───────────────────────────────────────────
 exports.remove = async (req, res) => {
   try {

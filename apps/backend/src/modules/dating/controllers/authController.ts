@@ -27,9 +27,7 @@ exports.sendOtp = async (req, res) => {
     if (!phone) return error(res, 'SĐT là bắt buộc');
     const otp = generateOtp();
     await cache.set(`otp:${phone}`, otp, 300);
-    if (process.env.NODE_ENV !== 'production') {
-      logger.info(`[OTP] ${phone}: ${otp}`);
-    }
+    logger.info('Dating OTP issued', { phone });
     return success(res, null, 'OTP đã gửi');
   } catch (e) { return error(res, e.message, 500); }
 };
@@ -214,10 +212,12 @@ exports.refresh = async (req, res) => {
 
 // ── Logout ─────────────────────────────────────────────────────────
 exports.logout = async (req, res) => {
-  if (req.user?.id) {
-    await sessionService.revokeRefreshToken('dating', req.user.id).catch(() => {});
-    await sessionService.destroy('dating', req.user.id).catch(() => {});
-    auditService.logSecurity({ project: 'dating', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
-  }
-  return success(res, null, 'Đăng xuất thành công');
+  try {
+    if (req.user?.id) {
+      await sessionService.revokeRefreshToken('dating', req.user.id);
+      await sessionService.destroy('dating', req.user.id);
+      auditService.logSecurity({ project: 'dating', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+    }
+    return success(res, null, 'Đăng xuất thành công');
+  } catch (e) { return error(res, e.message, 500); }
 };

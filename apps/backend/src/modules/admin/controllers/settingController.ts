@@ -3,6 +3,15 @@
 const { success, error } = require('../../../shared/utils/response');
 const https = require('https');
 
+const MASKED_VALUE = '[REDACTED]';
+const SECRET_KEY_PATTERN = /(pass|password|secret|token|api[_-]?key|private|credential)/i;
+const isSecretKey = (key) => SECRET_KEY_PATTERN.test(key || '');
+const isMaskedSecretValue = (key, value) => isSecretKey(key) && String(value) === MASKED_VALUE;
+const maskSetting = (setting) => setting && isSecretKey(setting.key)
+  ? { ...setting, value: setting.value ? MASKED_VALUE : '' }
+  : setting;
+const maskSettings = (settings) => settings.map(maskSetting);
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Bulk-upsert settings sent as array of { key, value, group? } */
@@ -12,18 +21,15 @@ exports.bulkUpsert = async (req, res) => {
     if (!Array.isArray(settings) || settings.length === 0)
       return error(res, 'settings phải là mảng không rỗng', 400);
 
-    const results = [];
-    for (const item of settings) {
-      const { key, value, group = 'integrations', description } = item;
-      if (!key || value === undefined) continue;
-      const row = await req.prisma.systemSetting.upsert({
+    const rows = settings
+      .filter(item => item?.key && item.value !== undefined && !isMaskedSecretValue(item.key, item.value))
+      .map(({ key, value, group = 'integrations', description }) => req.prisma.systemSetting.upsert({
         where:  { key },
         create: { key, value: String(value), group, description },
         update: { value: String(value), ...(description !== undefined && { description }) },
-      });
-      results.push(row);
-    }
-    return success(res, { updated: results }, 'Đã lưu cấu hình');
+      }));
+    const results = await req.prisma.$transaction(rows);
+    return success(res, { updated: maskSettings(results) }, 'Đã lưu cấu hình');
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -195,7 +201,7 @@ exports.getAll = async (req, res) => {
       where,
       orderBy: [{ group: 'asc' }, { key: 'asc' }],
     });
-    return success(res, settings);
+    return success(res, maskSettings(settings));
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -206,7 +212,7 @@ exports.getOne = async (req, res) => {
       where: { key: req.params.key },
     });
     if (!setting) return error(res, 'Không tìm thấy', 404);
-    return success(res, setting);
+    return success(res, maskSetting(setting));
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -215,11 +221,16 @@ exports.update = async (req, res) => {
   try {
     const { value } = req.body;
     if (value === undefined) return error(res, 'Thiếu value');
+    if (isMaskedSecretValue(req.params.key, value)) {
+      const setting = await req.prisma.systemSetting.findUnique({ where: { key: req.params.key } });
+      if (!setting) return error(res, 'Không tìm thấy key', 404);
+      return success(res, maskSetting(setting), 'Đã lưu cài đặt');
+    }
     const setting = await req.prisma.systemSetting.update({
       where: { key: req.params.key },
       data:  { value: String(value) },
     });
-    return success(res, setting, 'Đã lưu cài đặt');
+    return success(res, maskSetting(setting), 'Đã lưu cài đặt');
   } catch (e) {
     if (e.code === 'P2025') return error(res, 'Không tìm thấy key', 404);
     return error(res, e.message, 500);
@@ -231,12 +242,17 @@ exports.create = async (req, res) => {
   try {
     const { key, value, group = 'general', description } = req.body;
     if (!key || value === undefined) return error(res, 'Thiếu key hoặc value');
+    if (isMaskedSecretValue(key, value)) {
+      const setting = await req.prisma.systemSetting.findUnique({ where: { key } });
+      if (!setting) return error(res, 'Không thể tạo secret từ giá trị đã che', 400);
+      return success(res, maskSetting(setting), 'Đã lưu');
+    }
     const setting = await req.prisma.systemSetting.upsert({
       where:  { key },
       create: { key, value: String(value), group, description },
       update: { value: String(value), group, description },
     });
-    return success(res, setting, 'Đã lưu');
+    return success(res, maskSetting(setting), 'Đã lưu');
   } catch (e) { return error(res, e.message, 500); }
 };
 

@@ -8,7 +8,6 @@
 
     "module":                     "ESNext",
     "moduleResolution":           "bundler",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax":       true,
     "moduleDetection":            "force",
     "composite":                  true,

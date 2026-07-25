@@ -73,6 +73,9 @@ module.exports = (req, res, next) => {
     email:   decoded.email    || null,
     role:    decoded.role     || 'user',
     project: decoded.project,
+    // modules[] gates the frontend registry (ProtectedRoute + getVisibleMenuGroups).
+    // Passed through so downstream middlewares & controllers can read req.user.modules.
+    modules: Array.isArray(decoded.modules) ? decoded.modules : [],
   };
 
   next();

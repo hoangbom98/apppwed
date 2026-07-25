@@ -6,8 +6,12 @@
 //   WithdrawOrder  → pending/approved withdrawal orders
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
+const Decimal             = require('decimal.js');
 const { success, error }  = require('../../../shared/utils/response');
 const emit                = require('../../../shared/socket/projectEmitter');
+
+const toMoney = (value) => new Decimal(value).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+const moneyValue = (value) => toMoney(value).toString();
 
 /**
  * GET /admin/finance/transactions
@@ -85,12 +89,13 @@ exports.approveDeposit = async (req, res) => {
     if (!order)                    return error(res, 'Deposit order not found', 404);
     if (order.status !== 'pending') return error(res, `Cannot approve: status is ${order.status}`, 400);
 
-    const amount = Number(order.amount);
+    const amount = toMoney(order.amount);
     let balanceAfter;
     await gameDb.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: order.userId }, select: { balance: true } });
-      const balanceBefore = Number(user?.balance || 0);
-      balanceAfter = balanceBefore + amount;
+      if (!user) throw new Error('Deposit user not found');
+      const balanceBefore = toMoney(user.balance);
+      balanceAfter = balanceBefore.plus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
 
       await tx.depositOrder.update({
         where: { id: order.id },
@@ -98,15 +103,15 @@ exports.approveDeposit = async (req, res) => {
       });
       await tx.user.update({
         where: { id: order.userId },
-        data:  { balance: { increment: amount }, totalDeposit: { increment: amount } },
+        data:  { balance: { increment: amount.toString() }, totalDeposit: { increment: amount.toString() } },
       });
       await tx.transaction.create({
         data: {
           userId:        order.userId,
           type:          'deposit',
-          amount,
-          balanceBefore,
-          balanceAfter,
+          amount:        amount.toString(),
+          balanceBefore: balanceBefore.toString(),
+          balanceAfter:  balanceAfter.toString(),
           referenceId:   order.id,
           referenceType: 'deposit_order',
           note:          `Admin approved deposit - ${order.method}`,
@@ -117,8 +122,8 @@ exports.approveDeposit = async (req, res) => {
     // Real-time: notify admin room + the user whose deposit was approved
     emit.depositApproved(project, order.userId, {
       orderId:    order.id,
-      amount,
-      newBalance: balanceAfter,
+      amount:     amount.toString(),
+      newBalance: balanceAfter.toString(),
       method:     order.method,
     });
 
@@ -147,7 +152,7 @@ exports.rejectDeposit = async (req, res) => {
     // Real-time: thông báo tới admin room + người dùng bị từ chối
     emit.depositRejected(project, order.userId, {
       orderId: order.id,
-      amount:  Number(order.amount),
+      amount:  toMoney(order.amount).toString(),
       reason:  reason || 'Admin rejected',
     });
 
@@ -200,13 +205,16 @@ exports.approveWithdrawal = async (req, res) => {
     if (!['pending', 'processing'].includes(order.status))
       return error(res, `Cannot approve: status is ${order.status}`, 400);
 
-    const amount = Number(order.amount);
+    const amount = toMoney(order.amount);
     let balanceAfter;
     await gameDb.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: order.userId }, select: { balance: true, frozen: true } });
-      const balanceBefore = Number(user?.balance || 0);
-      balanceAfter        = Math.max(0, balanceBefore - amount);
-      const frozenAfter   = Math.max(0, Number(user?.frozen || 0) - amount);
+      if (!user) throw new Error('Withdrawal user not found');
+      const balanceBefore = toMoney(user.balance);
+      const frozenBefore  = toMoney(user.frozen || 0);
+      if (balanceBefore.lt(amount) || frozenBefore.lt(amount)) throw Object.assign(new Error('Số dư frozen không đủ để duyệt rút'), { status: 400 });
+      balanceAfter = balanceBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
+      const frozenAfter = frozenBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);
 
       await tx.withdrawOrder.update({
         where: { id: order.id },
@@ -214,15 +222,15 @@ exports.approveWithdrawal = async (req, res) => {
       });
       await tx.user.update({
         where: { id: order.userId },
-        data:  { balance: balanceAfter, frozen: frozenAfter },
+        data:  { balance: balanceAfter.toString(), frozen: frozenAfter.toString() },
       });
       await tx.transaction.create({
         data: {
           userId:        order.userId,
           type:          'withdraw',
-          amount:        -amount,
-          balanceBefore,
-          balanceAfter,
+          amount:        amount.negated().toString(),
+          balanceBefore: balanceBefore.toString(),
+          balanceAfter:  balanceAfter.toString(),
           referenceId:   order.id,
           referenceType: 'withdraw_order',
           note:          `Admin approved withdrawal - ${order.method}`,
@@ -233,8 +241,8 @@ exports.approveWithdrawal = async (req, res) => {
     // Real-time: notify admin room + the user whose withdrawal was approved
     emit.withdrawalApproved(project, order.userId, {
       orderId:    order.id,
-      amount,
-      newBalance: balanceAfter,
+      amount:     amount.toString(),
+      newBalance: balanceAfter.toString(),
       method:     order.method,
     });
 
@@ -256,28 +264,29 @@ exports.rejectWithdrawal = async (req, res) => {
     if (!['pending', 'processing'].includes(order.status))
       return error(res, `Cannot reject: status is ${order.status}`, 400);
 
-    const amount = Number(order.amount);
+    const amount = toMoney(order.amount);
     await gameDb.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: order.userId }, select: { balance: true, frozen: true } });
-      const balanceBefore = Number(user?.balance || 0);
-      const frozenBefore  = Number(user?.frozen  || 0);
+      if (!user) throw new Error('Withdrawal user not found');
+      const balanceBefore = toMoney(user.balance);
+      const frozenBefore  = toMoney(user.frozen || 0);
+      if (frozenBefore.lt(amount)) throw Object.assign(new Error('Số dư frozen không đủ để hoàn rút'), { status: 400 });
 
       await tx.withdrawOrder.update({
         where: { id: order.id },
         data:  { status: 'failed', adminNote: reason || 'Admin rejected', processedAt: new Date() },
       });
-      // Unfreeze: decrement frozen WITHOUT deducting balance (funds stay on platform)
       await tx.user.update({
         where: { id: order.userId },
-        data:  { frozen: Math.max(0, frozenBefore - amount) },
+        data:  { frozen: frozenBefore.minus(amount).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN).toString() },
       });
       await tx.transaction.create({
         data: {
           userId:        order.userId,
           type:          'refund',
-          amount,
-          balanceBefore,
-          balanceAfter:  balanceBefore,
+          amount:        amount.toString(),
+          balanceBefore: balanceBefore.toString(),
+          balanceAfter:  balanceBefore.toString(),
           referenceId:   order.id,
           referenceType: 'withdraw_order',
           note:          `Withdrawal rejected: ${reason || 'Admin rejected'}`,
@@ -288,7 +297,7 @@ exports.rejectWithdrawal = async (req, res) => {
     // Real-time: notify admin room + the user whose withdrawal was rejected
     emit.withdrawalRejected(project, order.userId, {
       orderId: order.id,
-      amount,
+      amount:  amount.toString(),
       reason:  reason || 'Admin rejected',
     });
 

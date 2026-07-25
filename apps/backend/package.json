@@ -39,6 +39,7 @@
     "seed:aggregators": "tsx prisma/seeds/gameAggregators.seed.ts",
     "seed:game-products": "tsx prisma/seeds/gameProducts.seed.ts",
     "seed:demo": "tsx prisma/seeds/demo.seed.ts",
+    "seed:test-users": "tsx prisma/seeds/test-users.seed.ts",
     "storage:migrate": "tsx scripts/migrate-storage.ts",
     "// ── Lint / TypeCheck ─────────────────────────────────────────────────────": "",
     "lint": "eslint src --ext .ts --max-warnings 0",

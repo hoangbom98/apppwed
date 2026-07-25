@@ -105,13 +105,14 @@ exports.refreshToken = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  if (req.user?.id) {
-    // Revoke refresh token binding on explicit logout (session invalidation)
-    await sessionService.revokeRefreshToken('hub', req.user.id).catch(() => {});
-    await sessionService.destroy('hub', req.user.id).catch(() => {});
-    auditService.logSecurity({ project: 'hub', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
-  }
-  return success(res, null, 'Đăng xuất thành công');
+  try {
+    if (req.user?.id) {
+      await sessionService.revokeRefreshToken('hub', req.user.id);
+      await sessionService.destroy('hub', req.user.id);
+      auditService.logSecurity({ project: 'hub', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+    }
+    return success(res, null, 'Đăng xuất thành công');
+  } catch (e) { return error(res, e.message, 500); }
 };
 
 exports.changePassword = async (req, res) => {
@@ -126,8 +127,7 @@ exports.changePassword = async (req, res) => {
     const user = await req.prisma.user.findUnique({ where: { id: req.user.id } });
     if (!await comparePassword(oldPassword, user.password)) return error(res, 'Mật khẩu cũ không đúng');
     await req.prisma.user.update({ where: { id: user.id }, data: { password: await hashPassword(newPassword) } });
-    // Revoke all active refresh tokens after password change (NIST IA-5)
-    await sessionService.revokeRefreshToken('hub', user.id).catch(() => {});
+    await sessionService.revokeRefreshToken('hub', user.id);
     auditService.logSecurity({ project: 'hub', userId: user.id, event: 'password_changed', ip: req.ip, ua: req.get('user-agent'), meta: {} });
     return success(res, null, 'Đổi mật khẩu thành công');
   } catch (e) { return error(res, e.message, 500); }

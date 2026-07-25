@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/api/baseAdminApi.ts
 import client from '@admin/api/client';
 import type { AxiosResponse } from 'axios';

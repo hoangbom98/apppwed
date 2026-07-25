@@ -41,6 +41,8 @@ const groupFinanceCtrl     = require('../controllers/groupFinanceController');
 // ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
 const telegramCtrl         = require('../controllers/telegramBroadcastController');
 
+const requirePermission = require('../../../shared/middlewares/requirePermission');
+
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 router.post('/auth/login',   authCtrl.login);
 router.post('/auth/refresh', authCtrl.refresh);
@@ -63,15 +65,15 @@ router.get('/stats',                      statsCtrl.getStats);
 router.get('/stats/finance',              statsCtrl.getFinanceStats);
 router.get('/stats/revenue-chart',        statsCtrl.getRevenueChart);
 router.get('/stats/system',               statsCtrl.getSystemInfo);
-router.post('/stats/system/maintenance',  statsCtrl.setMaintenanceMode);
+router.post('/stats/system/maintenance',  requirePermission('system.maintenance'), statsCtrl.setMaintenanceMode);
 
 // ── Admin Users (quản lý admin accounts) ──────────────────────────────────────
-router.get('/admins',                   adminUserCtrl.list);
-router.get('/admins/:id',               adminUserCtrl.get);
-router.post('/admins',                  adminUserCtrl.create);
-router.patch('/admins/:id',             adminUserCtrl.update);
-router.patch('/admins/:id/password',    adminUserCtrl.resetPassword);
-router.delete('/admins/:id',            adminUserCtrl.remove);
+router.get('/admins',                   requirePermission('settings.admins'), adminUserCtrl.list);
+router.get('/admins/:id',               requirePermission('settings.admins'), adminUserCtrl.get);
+router.post('/admins',                  requirePermission('settings.admins'), adminUserCtrl.create);
+router.patch('/admins/:id',             requirePermission('settings.admins'), adminUserCtrl.update);
+router.patch('/admins/:id/password',    requirePermission('settings.admins'), adminUserCtrl.resetPassword);
+router.delete('/admins/:id',            requirePermission('settings.admins'), adminUserCtrl.remove);
 
 // ── Users (cross-project member management) ───────────────────────────────────
 router.get('/users/summary',            userCtrl.getUserSummary);
@@ -81,14 +83,14 @@ router.patch('/users/:id/status',       userCtrl.toggleUserStatus);
 router.post('/users/:id/balance',       userCtrl.adjustBalance);
 
 // ── Finance — Transactions ────────────────────────────────────────────────────
-router.get('/finance/summary',                  financeCtrl.getSummary);
-router.get('/finance/transactions',             transactionCtrl.listTransactions);
-router.get('/finance/deposits',                 transactionCtrl.listDeposits);
-router.patch('/finance/deposits/:id/approve',   transactionCtrl.approveDeposit);
-router.patch('/finance/deposits/:id/reject',    transactionCtrl.rejectDeposit);
-router.get('/finance/withdrawals',              transactionCtrl.listWithdrawals);
-router.patch('/finance/withdrawals/:id/approve', transactionCtrl.approveWithdrawal);
-router.patch('/finance/withdrawals/:id/reject',  transactionCtrl.rejectWithdrawal);
+router.get('/finance/summary',                   requirePermission('finance.view'),    financeCtrl.getSummary);
+router.get('/finance/transactions',              requirePermission('finance.view'),    transactionCtrl.listTransactions);
+router.get('/finance/deposits',                  requirePermission('finance.view'),    transactionCtrl.listDeposits);
+router.patch('/finance/deposits/:id/approve',    requirePermission('finance.approve'), transactionCtrl.approveDeposit);
+router.patch('/finance/deposits/:id/reject',     requirePermission('finance.reject'),  transactionCtrl.rejectDeposit);
+router.get('/finance/withdrawals',               requirePermission('finance.view'),    transactionCtrl.listWithdrawals);
+router.patch('/finance/withdrawals/:id/approve', requirePermission('finance.approve'), transactionCtrl.approveWithdrawal);
+router.patch('/finance/withdrawals/:id/reject',  requirePermission('finance.reject'),  transactionCtrl.rejectWithdrawal);
 
 // Legacy alias (backward compat for older frontend code)
 router.get('/transactions', transactionCtrl.listTransactions);
@@ -134,10 +136,10 @@ router.get('/third-party/calls',                       thirdPartyCtrl.listCallLo
 router.get('/third-party/calls/stats',                 thirdPartyCtrl.callLogStats);
 
 // ── Security Settings (must be before /settings/:key to avoid shadowing) ───────
-router.get('/settings/security',                 securityCtrl.get);
-router.post('/settings/security',                securityCtrl.save);
-router.post('/settings/security/reset',          securityCtrl.reset);
-router.post('/settings/security/test-captcha',   securityCtrl.testCaptcha);
+router.get('/settings/security',                 requirePermission('settings.security'), securityCtrl.get);
+router.post('/settings/security',                requirePermission('settings.security'), securityCtrl.save);
+router.post('/settings/security/reset',          requirePermission('settings.security'), securityCtrl.reset);
+router.post('/settings/security/test-captcha',   requirePermission('settings.security'), securityCtrl.testCaptcha);
 
 // ── Integration test (must be before /settings/:key) ─────────────────────────
 router.post('/settings/integration-test',        settingCtrl.testIntegration);
@@ -218,9 +220,9 @@ router.patch('/risk/aml/:id',                     riskCtrl.updateAmlAlert);
 router.get('/risk/security-logs',                 riskCtrl.listSecurityLogs);
 
 // IP Blacklist
-router.get('/risk/ip-blacklist',                  riskCtrl.listIpBlacklist);
-router.post('/risk/ip-blacklist',                 riskCtrl.addIpBlacklist);
-router.delete('/risk/ip-blacklist/:ip',           riskCtrl.removeIpBlacklist);
+router.get('/risk/ip-blacklist',                  requirePermission('risk.ip'), riskCtrl.listIpBlacklist);
+router.post('/risk/ip-blacklist',                 requirePermission('risk.ip'), riskCtrl.addIpBlacklist);
+router.delete('/risk/ip-blacklist/:ip',           requirePermission('risk.ip'), riskCtrl.removeIpBlacklist);
 
 // User risk score & actions (must come AFTER /risk/users to avoid param conflict)
 router.get('/risk/users/:userId/score',           riskCtrl.getUserRiskScore);
