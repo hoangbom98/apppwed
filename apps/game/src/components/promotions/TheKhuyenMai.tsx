@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Link } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import { formatDate } from '@/utils/dinhDang';

@@ -13,11 +13,11 @@ export default defineConfig({
             devOptions: { enabled: false },
             includeAssets: ['favicon.ico', 'logo.svg'],
             manifest: {
-                name: 'LKVIP Game',
-                short_name: 'Game',
-                description: 'LKVIP GROUP — Slots, Xổ số, Casino, Live, VIP',
-                theme_color: '#8b5cf6',
-                background_color: '#0f0a1e',
+                name: 'LKVIP Trade',
+                short_name: 'Trade',
+                description: 'LKVIP GROUP — Sàn giao dịch P2P, theo dõi thị trường real-time',
+                theme_color: '#10b981',
+                background_color: '#0a0f1a',
                 display: 'standalone',
                 orientation: 'portrait',
                 start_url: '/',
@@ -37,7 +37,7 @@ export default defineConfig({
                         urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
                         handler: 'NetworkFirst',
                         options: {
-                            cacheName: 'game-api-cache',
+                            cacheName: 'trade-api-cache',
                             networkTimeoutSeconds: 10,
                             expiration: { maxEntries: 100, maxAgeSeconds: 3600 },
                             cacheableResponse: { statuses: [0, 200] },
@@ -47,7 +47,7 @@ export default defineConfig({
                         urlPattern: /\.(png|jpg|jpeg|svg|gif|webp|avif)$/i,
                         handler: 'CacheFirst',
                         options: {
-                            cacheName: 'game-image-cache',
+                            cacheName: 'trade-image-cache',
                             expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
                         },
                     },
@@ -66,7 +66,7 @@ export default defineConfig({
     },
     base: process.env.CAPACITOR_BUILD === 'true' ? './' : '/',
     server: {
-        port: 5174,
+        port: 5177,
         proxy: {
             '/api': { target: 'http://localhost:5000', changeOrigin: true },
             '/socket.io': { target: 'http://localhost:5000', changeOrigin: true, ws: true },
@@ -86,16 +86,10 @@ export default defineConfig({
                         return 'react-vendor';
                     if (id.includes('@tanstack/react-query'))
                         return 'query-vendor';
-                    if (id.includes('@tanstack/react-table'))
-                        return 'table-vendor';
                     if (id.includes('socket.io-client'))
                         return 'socket-vendor';
                     if (id.includes('lucide-react'))
                         return 'ui-vendor';
-                    if (id.includes('framer-motion'))
-                        return 'motion-vendor';
-                    if (id.includes('recharts') || id.includes('d3-'))
-                        return 'charts-vendor';
                 },
             },
         },

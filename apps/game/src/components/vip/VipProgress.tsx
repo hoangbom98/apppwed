@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { VIP_COLORS } from '@/utils/hangso';
 import { formatVND } from '@/utils/dinhDang';

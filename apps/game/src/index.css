@@ -5,6 +5,11 @@
    ========================================================================== */
 @import "tailwindcss";
 
+/* Register custom 'dark' color so dark:bg-dark resolves to #0F1A1A */
+@theme {
+  --color-dark: #0F1A1A;
+}
+
 /* ── Game Brand Tokens (antd-mini ConfigProvider style) ─────────────────
    All colours live here. Change once, updates everywhere.
    Override at runtime via applyColorConfig() from server config.

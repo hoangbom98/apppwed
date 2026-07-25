@@ -11,13 +11,13 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             devOptions: { enabled: false },
-            includeAssets: ['favicon.ico', 'logo.svg'],
+            includeAssets: ['favicon.png', 'favicon.svg', 'apple-touch-icon.png'],
             manifest: {
-                name: 'LKVIP Game',
-                short_name: 'Game',
-                description: 'LKVIP GROUP — Slots, Xổ số, Casino, Live, VIP',
-                theme_color: '#8b5cf6',
-                background_color: '#0f0a1e',
+                name: 'LKVIP Hub',
+                short_name: 'Hub',
+                description: 'LKVIP GROUP — Cổng thông tin Games, Websites, Tools & Tin tức',
+                theme_color: '#3b82f6',
+                background_color: '#0f172a',
                 display: 'standalone',
                 orientation: 'portrait',
                 start_url: '/',
@@ -37,7 +37,7 @@ export default defineConfig({
                         urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
                         handler: 'NetworkFirst',
                         options: {
-                            cacheName: 'game-api-cache',
+                            cacheName: 'hub-api-cache',
                             networkTimeoutSeconds: 10,
                             expiration: { maxEntries: 100, maxAgeSeconds: 3600 },
                             cacheableResponse: { statuses: [0, 200] },
@@ -47,7 +47,7 @@ export default defineConfig({
                         urlPattern: /\.(png|jpg|jpeg|svg|gif|webp|avif)$/i,
                         handler: 'CacheFirst',
                         options: {
-                            cacheName: 'game-image-cache',
+                            cacheName: 'hub-image-cache',
                             expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
                         },
                     },
@@ -60,15 +60,15 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
             '@ui': path.resolve(__dirname, '../../packages/ui/src'),
             '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
-            '@lkvip/constants': path.resolve(__dirname, '../../packages/constants/src'),
         },
         dedupe: ['react', 'react-dom', 'react-router-dom'],
     },
     base: process.env.CAPACITOR_BUILD === 'true' ? './' : '/',
     server: {
-        port: 5174,
+        port: 5173,
         proxy: {
             '/api': { target: 'http://localhost:5000', changeOrigin: true },
+            '/uploads': { target: 'http://localhost:5000', changeOrigin: true },
             '/socket.io': { target: 'http://localhost:5000', changeOrigin: true, ws: true },
         },
     },
@@ -86,16 +86,12 @@ export default defineConfig({
                         return 'react-vendor';
                     if (id.includes('@tanstack/react-query'))
                         return 'query-vendor';
-                    if (id.includes('@tanstack/react-table'))
-                        return 'table-vendor';
                     if (id.includes('socket.io-client'))
                         return 'socket-vendor';
                     if (id.includes('lucide-react'))
                         return 'ui-vendor';
-                    if (id.includes('framer-motion'))
-                        return 'motion-vendor';
-                    if (id.includes('recharts') || id.includes('d3-'))
-                        return 'charts-vendor';
+                    if (id.includes('i18next') || id.includes('react-i18next'))
+                        return 'i18n-vendor';
                 },
             },
         },

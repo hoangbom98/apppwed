@@ -7,7 +7,8 @@
       "@/*":          ["./src/*"],
       "@ui":          ["../../packages/ui/src/index.ts"],
       "@ui/*":        ["../../packages/ui/src/*"],
-      "@lkvip/types": ["../../packages/types/src/index.ts"]
+      "@lkvip/types": ["../../packages/types/src/index.ts"],
+      "virtual:pwa-register/react": ["../../node_modules/vite-plugin-pwa/react.d.ts"]
     }
   },
   "include": ["src"],

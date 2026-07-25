@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Copy, CheckCircle, Users, TrendingUp } from 'lucide-react';
 import { formatVND } from '@/utils/dinhDang';

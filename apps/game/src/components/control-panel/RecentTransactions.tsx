@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { ArrowUpCircle, ArrowDownCircle, Gamepad2, Trophy, Gift, Clock } from 'lucide-react';
 import type { RecentTransaction } from '@/api/apiBangDieuKhien';

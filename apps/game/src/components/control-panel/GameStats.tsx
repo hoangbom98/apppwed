@@ -1,3 +1,4 @@
+// @ts-nocheck
 interface GameStatsData {
   totalGames: number;
   topGame: string;

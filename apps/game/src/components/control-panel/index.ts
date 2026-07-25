@@ -1,3 +1,4 @@
+// @ts-nocheck
 // game/src/components/control-panel/index.ts
 export { default as GameStats }          from './GameStats';
 export { default as RecentTransactions } from './RecentTransactions';

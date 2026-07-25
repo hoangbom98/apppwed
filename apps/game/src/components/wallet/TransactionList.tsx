@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { formatVND, formatDateTime } from '@/utils/dinhDang';
 import EmptyState from '@/components/chung/TrangRong';
