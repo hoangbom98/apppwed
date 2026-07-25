@@ -4,6 +4,7 @@ import { getPosts, createPost, likePost } from '../api/sports';
 import PostCard from '../components/PostCard';
 import { useAuthStore } from '../store/authStore';
 import { Plus, X } from 'lucide-react';
+import { BuildOutlined } from '@ant-design/icons';
 
 export default function CommunityPage() {
   const { isLoggedIn } = useAuthStore();
@@ -35,7 +36,7 @@ export default function CommunityPage() {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-base font-bold">🏟️ Cộng đồng</h1>
+        <h1 className="text-base font-bold">Cộng đồng</h1>
         {isLoggedIn && (
           <button
             onClick={() => setShowCreate(true)}
@@ -88,7 +89,7 @@ export default function CommunityPage() {
 
       {!isLoading && posts.length === 0 && (
         <div className="text-center py-16 text-gray-500">
-          <p className="text-3xl mb-3">🏟️</p>
+          <p className="text-3xl mb-3"><BuildOutlined style={{ fontSize: 28, color: '#d1d5db' }} /></p>
           <p>Chưa có bài viết nào. Hãy là người đầu tiên!</p>
         </div>
       )}

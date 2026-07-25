@@ -6,8 +6,7 @@ import * as yup from 'yup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Plus, Trash2, Star, X, AlertCircle, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getBankAccounts, addBankAccount, deleteBankAccount, setDefaultBankAccount } from '@/api/apiNganHang';
-import { VN_BANKS } from '@/utils/tainguyen';
+import { VN_BANKS, getBankAccounts, addBankAccount, deleteBankAccount, setDefaultBankAccount } from '@/api/bank';
 import { Skeleton } from '@/components/chung/KhungTaiTrang';
 
 const schema = yup.object({
@@ -27,7 +26,7 @@ function maskNumber(n: string) {
 export default function BankAccount() {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [revealedId, setRevealedId] = useState<number | null>(null);
+  const [revealedId, setRevealedId] = useState<string | null>(null);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['bank-accounts'],
@@ -113,7 +112,7 @@ export default function BankAccount() {
                   >
                     <option value="">-- Chọn ngân hàng --</option>
                     {VN_BANKS.map(b => (
-                      <option key={b.code} value={b.code}>{b.name} ({b.code})</option>
+                      <option key={b.code} value={b.code}>{b.name} ({b.shortName})</option>
                     ))}
                   </select>
                   {errors.bank_code && (
@@ -195,13 +194,13 @@ export default function BankAccount() {
                 key={acc.id}
                 layout
                 className={`relative p-4 rounded-xl border-2 transition-colors ${
-                  acc.is_default
+                  acc.isDefault
                     ? 'border-primary bg-primary/5 dark:border-secondary dark:bg-secondary/5'
                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                 }`}
               >
                 {/* Default badge */}
-                {acc.is_default && (
+                {acc.isDefault && (
                   <span className="absolute top-2 right-2 text-[10px] font-bold text-accent bg-accent/20 px-2 py-0.5 rounded-full">
                     Mặc định
                   </span>
@@ -212,8 +211,8 @@ export default function BankAccount() {
                     <CreditCard className="w-4 h-4 text-primary dark:text-secondary" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">{acc.bank_name}</p>
-                    <p className="text-[10px] text-gray-400">{acc.bank_code}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm">{acc.bankName}</p>
+                    <p className="text-[10px] text-gray-400">{(acc as any).bankCode ?? ''}</p>
                   </div>
                 </div>
                 {/* Account number with toggle */}
@@ -221,9 +220,9 @@ export default function BankAccount() {
                   <div>
                     <p className="text-xs text-gray-400 mb-0.5">Số tài khoản</p>
                     <p className="font-bold text-gray-900 dark:text-white text-sm tracking-widest">
-                      {isRevealed ? acc.account_number : maskNumber(acc.account_number)}
+                      {isRevealed ? acc.accountNumber : maskNumber(acc.accountNumber)}
                     </p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{acc.account_holder}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{acc.accountName}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Eye toggle */}
@@ -234,7 +233,7 @@ export default function BankAccount() {
                       {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                     {/* Set default */}
-                    {!acc.is_default && (
+                    {!acc.isDefault && (
                       <button
                         onClick={() => defaultMut.mutate(acc.id)}
                         disabled={defaultMut.isPending}

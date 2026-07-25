@@ -25,11 +25,10 @@ git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
 
 # 2. Copy env
-cp .env.example code/backend/.env
+cp .env.example apps/backend/.env
 # Điền JWT_SECRET, DATABASE_URLs...
 
-# 3. Install (pnpm workspace)
-cd code
+# 3. Install (pnpm workspace — chạy từ root)
 pnpm install
 
 # 4. Tạo Prisma clients + migrate + seed
@@ -115,7 +114,7 @@ chore(ci): thêm coverage threshold vào jest config
 ### Lint & Format
 
 ```bash
-cd code
+# Từ root /var/LKVIP
 
 # Kiểm tra toàn bộ
 pnpm lint:all
@@ -130,10 +129,10 @@ pnpm --filter lkvip-backend run type-check
 
 ## Tests
 
-Tests backend nằm tại `code/backend/src/__tests__/`.
+Tests backend nằm tại `apps/backend/src/__tests__/`.
 
 ```bash
-cd code
+# Từ root /var/LKVIP
 
 # Chạy tất cả tests
 pnpm test
@@ -153,10 +152,10 @@ pnpm --filter lkvip-backend run test:coverage
 
 ## Database schema
 
-Khi thay đổi Prisma schema (`backend/prisma/*/schema.prisma`):
+Khi thay đổi Prisma schema (`apps/backend/prisma/*/schema.prisma`):
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # 1. Sửa file schema
 # 2. Tạo migration file

@@ -54,14 +54,24 @@ export const adminLotteryDraws = {
   get:    (id: string | number)     => client.get(`/game/lottery/draws/${id}`),
   create: (body: APIBody)   => client.post('/game/lottery/admin/draws', body),
   update: (id: string | number, b: APIBody)  => client.post(`/game/lottery/admin/draws/${id}/result`, b),
+  cancel: (id: string | number)     => client.post(`/game/lottery/admin/draws/${id}/cancel`),
   remove: () => Promise.reject(new Error('Not supported')),
 };
 
 export const adminLotteryBets = {
   list:   (params: APIParams) => client.get('/game/lottery/admin/bets', { params }),
+  refund: (id: string | number)     => client.patch(`/admin/lottery/bets/${id}/refund`),
   create: () => Promise.reject(new Error('Not supported')),
   update: () => Promise.reject(new Error('Not supported')),
   remove: () => Promise.reject(new Error('Not supported')),
+};
+
+// ── Lottery Types CRUD ────────────────────────────────────────────────────────
+export const adminLotteryTypes = {
+  list:   (params?: APIParams) => client.get('/game/lottery/types', { params }),
+  create: (body: APIBody)      => client.post('/game/admin/lottery/types', body),
+  update: (id: string | number, b: APIBody) => client.patch(`/game/admin/lottery/types/${id}`, b),
+  remove: (id: string | number)             => client.delete(`/game/admin/lottery/types/${id}`),
 };
 
 // ── Game config (project registry) ────────────────────────────────────────────

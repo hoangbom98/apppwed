@@ -28,7 +28,7 @@ const FIELDS = [
 
 export default function Register() {
   const [showPwd, setShowPwd] = useState(false);
-  const { register: registerUser, isLoading } = useAuthStore();
+  const { register: registerUser, isLoading } = useAuthStore() as any;
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({

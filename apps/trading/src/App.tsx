@@ -28,6 +28,11 @@ const KYCPage             = lazy(() => import('@/pages/KYC'));
 const ProfilePage         = lazy(() => import('@/pages/Profile'));
 const SettingsPage        = lazy(() => import('@/pages/Settings'));
 
+// ── New feature pages ──────────────────────────────────────────────────────────
+const YuebaoPage          = lazy(() => import('@/pages/Yuebao'));
+const MiningPage          = lazy(() => import('@/pages/Mining'));
+const PrizeDrawPage       = lazy(() => import('@/pages/PrizeDraw'));
+
 // ── Spinner ────────────────────────────────────────────────────────────────────
 function Spinner() {
   return (
@@ -85,6 +90,11 @@ export default function App() {
           <Route path="kyc"           element={<ProtectedRoute><KYCPage /></ProtectedRoute>} />
           <Route path="profile"       element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="settings"      element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+          {/* New feature pages */}
+          <Route path="yuebao"        element={<ProtectedRoute><YuebaoPage /></ProtectedRoute>} />
+          <Route path="mining"        element={<ProtectedRoute><MiningPage /></ProtectedRoute>} />
+          <Route path="prize"         element={<ProtectedRoute><PrizeDrawPage /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

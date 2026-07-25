@@ -61,7 +61,7 @@ export default function LeagueDetailPage() {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {league?.logo
             ? <img src={league.logo} alt={league.name} className="w-7 h-7 object-contain rounded" />
-            : <div className="w-7 h-7 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-white">⚽</div>
+            : <div className="w-7 h-7 rounded bg-gray-700 flex items-center justify-center text-[8px] font-bold text-white">Liga</div>
           }
           <div className="min-w-0">
             <h1 className="font-bold text-white text-sm truncate">{league?.name ?? slug}</h1>
@@ -80,7 +80,7 @@ export default function LeagueDetailPage() {
         <div className="flex items-start gap-4">
           {league?.logo
             ? <img src={league.logo} alt={league.name} className="w-16 h-16 object-contain" />
-            : <div className="w-16 h-16 rounded-xl bg-green-600/40 flex items-center justify-center text-3xl">⚽</div>
+            : <div className="w-16 h-16 rounded-xl bg-green-600/40 flex items-center justify-center text-xs font-bold text-green-300">Liga</div>
           }
           <div>
             <h2 className="text-xl font-black text-white">{league?.name}</h2>

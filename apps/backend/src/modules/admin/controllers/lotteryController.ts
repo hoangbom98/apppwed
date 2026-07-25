@@ -184,3 +184,84 @@ exports.refundBet = async (req, res) => {
     return success(res, { message: 'Bet refunded successfully' });
   } catch (e) { return error(res, e.message, 500); }
 };
+
+// ── New methods delegating to LotteryService (Admin) ─────────────────────────
+// These wrap the upgraded lotteryService.ts (full CRUD + period + stats).
+
+const lotterySvc = require('../services/lotteryService');
+
+/** GET /admin/lottery/stats */
+exports.getStats = async (req, res) => {
+  try {
+    const stats = await lotterySvc.getStats();
+    return success(res, stats);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+/** GET /admin/lottery/types */
+exports.listTypes = async (req, res) => {
+  try {
+    const types = await lotterySvc.listTypes();
+    return success(res, types);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+/** GET /admin/lottery/draws */
+exports.listDraws = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, typeId, status } = req.query;
+    const skip   = (Number(page) - 1) * Number(limit);
+    const result = await lotterySvc.listDraws({ typeId, status, skip, take: Number(limit) });
+    return paginate(res, result.data, { total: result.total, page: Number(page), limit: Number(limit) });
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+/** POST /admin/lottery/draws */
+exports.createDraw = async (req, res) => {
+  try {
+    const draw = await lotterySvc.createDraw(req.body);
+    return success(res, draw, 'Draw created', 201);
+  } catch (e) { return error(res, e.message, e.code === 'RESOURCE_NOT_FOUND' ? 404 : 500); }
+};
+
+/** GET /admin/lottery/draws/:id */
+exports.getDraw = async (req, res) => {
+  try {
+    const draw = await lotterySvc.getDraw(req.params.id);
+    if (!draw) return notFound(res, 'Draw not found');
+    return success(res, draw);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+/** POST /admin/lottery/draws/:id/result */
+exports.setResult = async (req, res) => {
+  try {
+    const { resultOfficial } = req.body;
+    if (!resultOfficial) return error(res, 'resultOfficial is required', 400);
+    const result = await lotterySvc.setResult(req.params.id, resultOfficial);
+    return success(res, result, 'Result submitted, settlement queued');
+  } catch (e) {
+    const clientCodes = ['LOTTERY_DRAW_NOT_FOUND', 'LOTTERY_ALREADY_SETTLED', 'RESOURCE_CONFLICT'];
+    return error(res, e.message, clientCodes.includes(e.code) ? 400 : 500);
+  }
+};
+
+/** POST /admin/lottery/draws/:id/cancel */
+exports.cancelDraw = async (req, res) => {
+  try {
+    const result = await lotterySvc.cancelDraw(req.params.id, req.body.reason);
+    return success(res, result, `Draw cancelled, ${result.cancelled} bets refunded`);
+  } catch (e) {
+    return error(res, e.message, e.code === 'LOTTERY_DRAW_NOT_FOUND' ? 404 : 400);
+  }
+};
+
+/** GET /admin/lottery/draws/:id/bets */
+exports.getDrawBets = async (req, res) => {
+  try {
+    const { page = 1, limit = 50, status } = req.query;
+    const skip   = (Number(page) - 1) * Number(limit);
+    const result = await lotterySvc.getDrawBets(req.params.id, { skip, take: Number(limit), status });
+    return paginate(res, result.data, { total: result.total, page: Number(page), limit: Number(limit) });
+  } catch (e) { return error(res, e.message, 500); }
+};

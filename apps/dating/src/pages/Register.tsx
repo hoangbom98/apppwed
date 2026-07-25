@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Camera, ChevronLeft } from 'lucide-react';
+import { ManOutlined, WomanOutlined, GiftOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { sendOtp } from '@/api/auth';
-import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
 import { ASSET_UI } from '@/utils/constants';
 
@@ -20,7 +20,7 @@ export default function Register() {
   const [gender, setGender] = useState('');
   const [city, setCity]   = useState('');
   const [avatar, setAvatar] = useState<string>('');
-  const [file, setFile]   = useState<File | null>(null);
+  const [_file, setFile]  = useState<File | null>(null);
 
   const handleSendOtp = async () => {
     if (!phone || phone.length < 9) return toast.error('Nhập số điện thoại hợp lệ');
@@ -146,7 +146,7 @@ export default function Register() {
                       ? 'border-pink-400 bg-pink-500/20 text-pink-300 font-semibold'
                       : 'border-white/20 text-white/60'
                   }`}>
-                  {g === 'male' ? '♂ Nam' : g === 'female' ? '♀ Nữ' : '⚧ Khác'}
+                  {g === 'male' ? <><ManOutlined /> Nam</> : g === 'female' ? <><WomanOutlined /> Nữ</> : 'Khác'}
                 </button>
               ))}
             </div>
@@ -169,7 +169,7 @@ export default function Register() {
               <button onClick={handleFinish} disabled={isLoading}
                 className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold rounded-xl text-sm disabled:opacity-50 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
                 {isLoading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                Hoàn tất đăng ký 🎉
+                <GiftOutlined /> Hoàn tất đăng ký
               </button>
               <button onClick={handleFinish} className="w-full text-sm text-white/40 text-center">
                 Bỏ qua, thêm sau

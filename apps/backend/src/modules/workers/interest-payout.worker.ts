@@ -1,11 +1,12 @@
 import { Worker, Queue } from 'bullmq';
-import { PrismaClient } from '@prisma/client';
 import { redis } from '../../utils/redis';
-import { WalletService } from '../../shared/services/walletService';
 import { logger } from '../../shared/logger';
 
-const prisma = new PrismaClient();
-const walletService = new WalletService();
+const { getPrismaClient } = require('../../config/databases');
+const WalletService = require('../../shared/services/walletService');
+
+const prisma = getPrismaClient('trade');
+const walletService = new WalletService(prisma);
 
 // Queue xử lý trả lãi (payout)
 export const interestPayoutQueue = new Queue('interest-payout', {
@@ -16,10 +17,10 @@ export const interestPayoutWorker = new Worker(
   'interest-payout',
   async (job) => {
     const { payoutId, type } = job.data; // type: 'normal' | 'mall'
-    
-    await prisma.$transaction(async (tx) => {
+
+    await prisma.$transaction(async (tx: any) => {
       // 1. Lấy dữ liệu và khóa row (SELECT FOR UPDATE)
-      const payout = type === 'normal' 
+      const payout = type === 'normal'
         ? await tx.lcInvestList.findUnique({ where: { id: payoutId } })
         : await tx.lcMallInvestList.findUnique({ where: { id: payoutId } });
 
@@ -31,10 +32,10 @@ export const interestPayoutWorker = new Worker(
           where: { id: payoutId },
           data: { status: 1, time2: new Date(), pay2: payout.pay1 }
         });
-        
+
         // 3. Cộng tiền
         if (payout.pay1 > 0) {
-          await walletService.credit(payout.uid, payout.pay1, `payout_${payoutId}`, 'INTEREST', tx);
+          await walletService.credit(tx, payout.uid, payout.pay1, 'interest', `payout_${payoutId}`);
         }
       } else {
         await tx.lcMallInvestList.update({
@@ -44,8 +45,8 @@ export const interestPayoutWorker = new Worker(
 
         // Xử lý Mall (BTC/Conversion)
         if (payout.pay1 > 0) {
-            // TODO: Gọi API giá BTC ở đây (nên tách riêng hoặc cache)
-            await walletService.credit(payout.uid, payout.pay1, `mall_payout_${payoutId}`, 'INTEREST_MALL', tx);
+          // TODO: Gọi API giá BTC ở đây (nên tách riêng hoặc cache)
+          await walletService.credit(tx, payout.uid, payout.pay1, 'interest_mall', `mall_payout_${payoutId}`);
         }
       }
     });
@@ -58,7 +59,7 @@ export const interestPayoutWorker = new Worker(
 // Schedule: quét các gói cần trả lãi
 setInterval(async () => {
   const now = Math.floor(Date.now() / 1000);
-  
+
   // Quét normal
   const normal = await prisma.lcInvestList.findMany({ where: { status: 0, time1: { lte: new Date(now * 1000) } } });
   for (const item of normal) await interestPayoutQueue.add('payout', { payoutId: item.id, type: 'normal' });

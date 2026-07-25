@@ -17,7 +17,7 @@ const { TextArea } = Input;
 
 const STATUS_COLOR = { active: 'success', inactive: 'default', maintenance: 'warning' };
 const STATUS_LABEL = { active: 'Hoạt động', inactive: 'Tắt', maintenance: 'Bảo trì' };
-const TYPE_ICON    = { bank: '🏦', crypto: '₿', ewallet: '📱', card: '💳' };
+const TYPE_ICON    = { bank: 'Bank', crypto: 'Crypto', ewallet: 'E-Wallet', card: 'Card' };
 
 function fmtMoney(v) { return v != null ? Number(v).toLocaleString('vi-VN') + '₫' : '—'; }
 
@@ -203,7 +203,7 @@ export default function PaymentGateways() {
               <Card size="small" style={{ height: '100%' }}>
                 {/* Header */}
                 <Flex align="flex-start" gap={12} style={{ marginBottom: 10 }}>
-                  <span style={{ fontSize: 28 }}>{TYPE_ICON[gw.type] ?? '💰'}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#6b7280', letterSpacing: 0.5 }}>{TYPE_ICON[gw.type] ?? gw.type}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <Text strong style={{ display: 'block' }}>{gw.name}</Text>
                     <Text type="secondary" style={{ fontSize: 11, fontFamily: 'monospace' }}>{gw.code}</Text>

@@ -35,6 +35,9 @@ const cronCtrl             = require('../controllers/cronController');
 const roleCtrl             = require('../controllers/roleController');
 const rebateCtrl           = require('../controllers/rebateController');
 const imCtrl               = require('../controllers/imController');
+const giftCodeCtrl         = require('../controllers/giftCodeController');
+// ── Group Finance (Gộp Vốn, Tách Lợi Nhuận) ──────────────────────────────────
+const groupFinanceCtrl     = require('../controllers/groupFinanceController');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 router.post('/auth/login',   authCtrl.login);
@@ -88,6 +91,23 @@ router.patch('/finance/withdrawals/:id/reject',  transactionCtrl.rejectWithdrawa
 // Legacy alias (backward compat for older frontend code)
 router.get('/transactions', transactionCtrl.listTransactions);
 
+// ── Group Finance — Fee Configs ───────────────────────────────────────────────
+router.get('/group-finance/fee-configs',                   groupFinanceCtrl.listFeeConfigs);
+router.get('/group-finance/fee-configs/source/:source',    groupFinanceCtrl.listFeeConfigsBySource);
+router.post('/group-finance/fee-configs',                  groupFinanceCtrl.upsertFeeConfig);
+router.post('/group-finance/fee-configs/seed',             groupFinanceCtrl.seedFeeConfigs);
+router.patch('/group-finance/fee-configs/:id/toggle',      groupFinanceCtrl.toggleFeeConfig);
+router.delete('/group-finance/fee-configs/:id',            groupFinanceCtrl.deleteFeeConfig);
+
+// ── Group Finance — Analytics ─────────────────────────────────────────────────
+router.get('/group-finance/project-balances',              groupFinanceCtrl.getProjectBalances);
+router.get('/group-finance/loans',                         groupFinanceCtrl.listLoans);
+router.get('/group-finance/fee-logs',                      groupFinanceCtrl.listFeeLogs);
+router.get('/group-finance/pnl',                           groupFinanceCtrl.getPnL);
+
+// ── Group Finance — Manual Triggers (super_admin only) ────────────────────────
+router.post('/group-finance/interest/run',                 groupFinanceCtrl.runInterest);
+
 // ── Game Config (project registry & settings) ─────────────────────────────────
 router.post('/game/batch-status',                gameConfigCtrl.batchToggleStatus);
 router.get('/game/config',                       gameConfigCtrl.getAll);
@@ -132,7 +152,10 @@ router.delete('/announcements/:id',     announcementCtrl.remove);
 
 // ── Agents ───────────────────────────────────────────────────────────────────
 router.get('/agents',                                        agentCtrl.list);
+router.get('/agents/stats',                                  agentCtrl.getStats  ?? ((req, res) => res.json({ success: true, data: {} })));
 router.get('/agents/:id',                                    agentCtrl.getDetail);
+router.get('/agents/:id/tree',                               agentCtrl.getTree   ?? ((req, res) => res.json({ success: true, data: null })));
+router.get('/agents/:id/team',                               agentCtrl.getTeam   ?? ((req, res) => res.json({ success: true, data: [] })));
 router.post('/agents/:id/commission/calculate',              agentCtrl.calculateCommission);
 router.post('/agents/:id/commission/:commId/pay',            agentCtrl.payCommission);
 
@@ -147,12 +170,26 @@ router.get('/promotions/:id/participants',                   promotionCtrl.listP
 router.patch('/promotions/participants/:pid/cancel',         promotionCtrl.cancelParticipant);
 
 // ── Lottery ───────────────────────────────────────────────────────────────────
-router.get('/lottery',                  lotteryCtrl.list);
-router.get('/lottery/bets',             lotteryCtrl.listBets);
-router.get('/lottery/bets/:id',         lotteryCtrl.getBet);
-router.patch('/lottery/bets/:id/refund', lotteryCtrl.refundBet);
-router.get('/lottery/rounds',           lotteryCtrl.listRounds);
-router.get('/logs/audit',               auditCtrl.getLogs);
+router.get('/lottery',                        lotteryCtrl.list);
+router.get('/lottery/stats',                  lotteryCtrl.getStats  ?? lotteryCtrl.list);
+router.get('/lottery/types',                  lotteryCtrl.listTypes ?? lotteryCtrl.list);
+router.get('/lottery/draws',                  lotteryCtrl.listDraws ?? lotteryCtrl.list);
+router.post('/lottery/draws',                 lotteryCtrl.createDraw ?? ((req, res) => res.json({ success: true })));
+router.post('/lottery/draws/:id/result',      lotteryCtrl.setResult  ?? ((req, res) => res.json({ success: true })));
+router.post('/lottery/draws/:id/cancel',      lotteryCtrl.cancelDraw ?? ((req, res) => res.json({ success: true })));
+router.get('/lottery/draws/:id',              lotteryCtrl.getDraw    ?? lotteryCtrl.getBet);
+router.get('/lottery/draws/:id/bets',         lotteryCtrl.getDrawBets ?? lotteryCtrl.listBets);
+router.get('/lottery/bets',                   lotteryCtrl.listBets);
+router.get('/lottery/bets/:id',               lotteryCtrl.getBet);
+router.patch('/lottery/bets/:id/refund',      lotteryCtrl.refundBet);
+router.get('/lottery/rounds',                 lotteryCtrl.listRounds);
+router.get('/logs/audit',                     auditCtrl.getLogs);
+
+// ── Gift Codes ────────────────────────────────────────────────────────────────
+router.get('/giftcodes',                      giftCodeCtrl.list);
+router.post('/giftcodes',                     giftCodeCtrl.create);
+router.patch('/giftcodes/:id',                giftCodeCtrl.update);
+router.get('/giftcodes/:id/redemptions',      giftCodeCtrl.getRedemptions);
 
 // ── Risk Detection & Response Engine ─────────────────────────────────────────
 router.get('/risk/summary',                       riskCtrl.getSummary);

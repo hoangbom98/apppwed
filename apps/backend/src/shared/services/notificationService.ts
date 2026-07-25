@@ -111,3 +111,6 @@ class NotificationService {
 }
 
 module.exports = new NotificationService();
+
+// Named export for TypeScript `import { NotificationService } from '...'` consumers
+export { NotificationService };

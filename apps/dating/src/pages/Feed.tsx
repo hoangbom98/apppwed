@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFeed, likePost, unlikePost } from '@/api/feed';
@@ -69,7 +69,6 @@ function PostCard({ post, onLike, onComment }: { post: any; onLike: () => void; 
 }
 
 export default function Feed() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const qc = useQueryClient();
   const [showCompose, setShowCompose] = useState(false);

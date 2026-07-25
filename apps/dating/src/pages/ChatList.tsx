@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getConversations } from '@/api/chat';
 import Avatar from '@/components/common/Avatar';
 import { formatTime } from '@/utils/formatters';
-import { Search, Edit } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { MessageOutlined, MailOutlined } from '@ant-design/icons';
 
 export default function ChatList() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function ChatList() {
   return (
     <div>
       <div className="px-4 pt-4 flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-black text-gray-900">💬 Tin nhắn</h1>
+        <h1 className="text-2xl font-black text-gray-900"><MessageOutlined /> Tin nhắn</h1>
         <button onClick={() => navigate('/search')} className="p-2 rounded-full hover:bg-gray-100">
           <Search size={20} className="text-gray-600" />
         </button>
@@ -34,7 +35,7 @@ export default function ChatList() {
         </div>
       ) : conversations.length === 0 ? (
         <div className="flex flex-col items-center py-20">
-          <div className="text-6xl mb-4">💌</div>
+          <div className="text-6xl mb-4"><MailOutlined style={{ fontSize: 56, color: '#d1d5db' }} /></div>
           <p className="text-gray-500">Chưa có cuộc trò chuyện nào</p>
           <button onClick={() => navigate('/matches')} className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-xl text-sm font-semibold">
             Xem Match

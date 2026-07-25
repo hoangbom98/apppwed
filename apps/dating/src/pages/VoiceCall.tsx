@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCallStore } from '@/store/callStore';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { useQuery } from '@tanstack/react-query';
 import { getUserById } from '@/api/users';
-import { Phone, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Phone, Mic, MicOff, Volume2 } from 'lucide-react';
 import { formatDuration } from '@/utils/formatters';
 import Avatar from '@/components/common/Avatar';
 
@@ -12,7 +12,7 @@ export default function VoiceCall() {
   const { userId } = useParams<{ userId: string }>();
   const uid = Number(userId);
   const navigate = useNavigate();
-  const { callState, duration, isMuted, toggleMute, setCallState, tick } = useCallStore();
+  const { callState, duration, isMuted, toggleMute, tick } = useCallStore();
   const { startCall, hangup } = useWebRTC(uid, 'voice');
 
   const { data: partner } = useQuery({ queryKey: ['user', uid], queryFn: () => getUserById(uid) });

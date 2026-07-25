@@ -4,7 +4,7 @@
  * Falls back to empty (no modal shown) if no popup config exists.
  * Hardcoded CDN URLs and marketing copy have been removed.
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAppConfig } from '@ui';
 
 interface Slide {

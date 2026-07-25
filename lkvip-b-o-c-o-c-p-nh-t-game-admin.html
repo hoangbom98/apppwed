@@ -1,0 +1,185 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LKVIP — Cập nhật Game &amp; Admin Dashboard</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px}
+  h1{font-size:20px;font-weight:800;margin-bottom:4px;color:#1f2328}
+  .subtitle{font-size:12px;color:#57606a;margin-bottom:24px}
+  h2{font-size:13px;font-weight:700;color:#1f2328;text-transform:uppercase;letter-spacing:.6px;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e7eb}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .card{border:1px solid #e5e7eb;border-radius:8px;padding:14px;background:#f7f8fa}
+  .card-title{font-size:11px;font-weight:700;color:#57606a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;margin-right:4px;margin-bottom:3px}
+  .green{background:#d1fae5;color:#065f46}
+  .blue{background:#dbeafe;color:#1e40af}
+  .orange{background:#ffedd5;color:#9a3412}
+  .purple{background:#ede9fe;color:#5b21b6}
+  .red{background:#fee2e2;color:#991b1b}
+  .yellow{background:#fef9c3;color:#713f12}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px}
+  th{background:#f7f8fa;border:1px solid #e5e7eb;padding:7px 10px;text-align:left;font-weight:700;font-size:11px;color:#57606a;text-transform:uppercase}
+  td{border:1px solid #e5e7eb;padding:7px 10px;vertical-align:top}
+  td:first-child{font-family:monospace;font-size:11px;color:#6b7280;white-space:nowrap}
+  .ok{color:#16a34a;font-weight:700}
+  .tag-new{background:#dbeafe;color:#1d4ed8;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:4px}
+  .summary-row{display:flex;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+  .stat{text-align:center;padding:14px 18px;border:1px solid #e5e7eb;border-radius:8px;min-width:100px;flex:1}
+  .stat-num{font-size:26px;font-weight:900;color:#3b82d4}
+  .stat-lbl{font-size:11px;color:#57606a;margin-top:2px}
+  .file-list{list-style:none;margin-bottom:8px}
+  .file-list li{padding:4px 0;font-size:12px;border-bottom:1px solid #f3f4f6;display:flex;align-items:baseline;gap:8px}
+  .file-list li:last-child{border-bottom:none}
+  .filepath{font-family:monospace;font-size:11px;color:#0f172a}
+  .change-desc{color:#57606a;font-size:12px}
+  .section-block{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px}
+  .tsc{font-family:monospace;font-size:12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:8px 14px;border-radius:6px;display:inline-block;margin-top:4px}
+  footer{margin-top:40px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:11px;color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🎮 LKVIP — Cập nhật Logic Cốt lõi</h1>
+  <div class="subtitle">Ngày: <strong>07/2025</strong>  |  Phạm vi: Game (apps/game) + Admin Dashboard + Backend API</div>
+
+  
+  <div class="summary-row">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-lbl">Files thay đổi</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">TS Errors</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-lbl">Apps kiểm tra</div></div>
+    <div class="stat"><div class="stat-num">+8</div><div class="stat-lbl">API endpoints mới</div></div>
+  </div>
+
+  <div class="tsc">✅ npx tsc --noEmit — 0 errors trên cả 3 apps (backend · admin-dashboard · game)</div>
+
+  
+  <h2>1 · Game Frontend (apps/game)</h2>
+  <div class="section-block">
+    <p style="margin-bottom:10px;font-size:12.5px"><strong>Vấn đề phát hiện:</strong> <code>Transfer.tsx</code> gọi <code>transferFunds()</code> với tham số <code>toUsername</code> — nhưng kiểu của <code>transferFunds</code> chỉ nhận <code>direction/amount</code> (wallet flip). Gây <span class="badge red">TS2353</span>.</p>
+    <ul class="file-list">
+      <li>
+        <span class="filepath">apps/game/src/api/transfer.ts</span>
+        <span class="change-desc">Tách thành 2 hàm: <strong>transferFunds</strong> (ví chính ↔ ví game) + <strong>transferToUser</strong> (P2P user→user, body: toUsername/amount/tradingPassword)</span>
+      </li>
+      <li>
+        <span class="filepath">apps/game/src/views/Transfer.tsx</span>
+        <span class="change-desc">Import và gọi đúng <code>transferToUser</code> → fix TS error, UI giữ nguyên</span>
+      </li>
+    </ul>
+  </div>
+
+  
+  <h2>2 · Backend API (apps/backend)</h2>
+
+  <div class="section-block" style="margin-bottom:10px">
+    <div class="card-title">Wallet Controller — walletController.ts</div>
+    <ul class="file-list">
+      <li>
+        <span class="filepath">+ transferUser()</span>
+        <span class="change-desc">Endpoint P2P mới: tìm người nhận qua username/email, kiểm tra mật khẩu giao dịch, trừ/cộng balance trong 1 DB transaction, ghi 2 bản ghi transaction (out/in), gửi notification WebSocket tới người nhận</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section-block" style="margin-bottom:10px">
+    <div class="card-title">Lottery Controller — lotteryController.ts</div>
+    <ul class="file-list">
+      <li><span class="filepath">getTypes()</span><span class="change-desc">Phân quyền: admin thấy tất cả, user public chỉ thấy <code>active:true</code>; sắp xếp theo <code>createdAt desc</code></span></li>
+      <li><span class="filepath">getDraws()</span><span class="change-desc">Thêm filter <code>from/to</code> theo drawTime, include <code>type</code> relation</span></li>
+      <li><span class="filepath">getMyBets()</span><span class="change-desc">Thêm filter <code>typeId</code>, include draw với kết quả</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">listAdminBets()</span><span class="change-desc">List tất cả bets (admin): filter status, drawId, typeId, search user, from/to date, pagination đầy đủ</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">cancelDraw()</span><span class="change-desc">Huỷ kỳ quay đang chờ: cập nhật status CANCELLED, hoàn tiền tất cả bets qua $transaction, ghi lịch sử refund</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">createType()</span><span class="change-desc">Tạo loại xổ số mới: validate code unique, drawIntervalMin, active</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">updateType()</span><span class="change-desc">Cập nhật loại: whitelist fields, convert type-safe</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">deleteType()</span><span class="change-desc">Xoá loại: kiểm tra không còn kỳ liên kết trước khi xoá (bảo vệ tính toàn vẹn)</span></li>
+    </ul>
+  </div>
+
+  <div class="section-block" style="margin-bottom:10px">
+    <div class="card-title">Game Admin Controller — gameAdminController.ts</div>
+    <ul class="file-list">
+      <li><span class="filepath">listRounds()</span><span class="change-desc">Thêm filter: <code>gameType</code>, <code>search</code> (username/gameCode/gameName OR), <code>from/to</code> date range; include email trong user select</span></li>
+    </ul>
+  </div>
+
+  <div class="section-block">
+    <div class="card-title">Routes — game/routes/index.ts <span class="tag-new">8 routes mới</span></div>
+    <table>
+      <thead><tr><th>Method</th><th>Path</th><th>Mô tả</th></tr></thead>
+      <tbody>
+        <tr><td>POST</td><td>/game/wallet/transfer</td><td>Chuyển ví chính ↔ ví game (đã mount đúng)</td></tr>
+        <tr><td>POST</td><td>/game/wallet/transfer-user</td><td>Chuyển tiền P2P user→user 🆕</td></tr>
+        <tr><td>GET</td><td>/game/lottery/admin/bets</td><td>List tất cả bets có filter (admin) 🆕</td></tr>
+        <tr><td>POST</td><td>/game/lottery/admin/draws/:id/cancel</td><td>Huỷ kỳ + hoàn tiền 🆕</td></tr>
+        <tr><td>POST</td><td>/game/admin/lottery/types</td><td>Tạo loại xổ số 🆕</td></tr>
+        <tr><td>PATCH</td><td>/game/admin/lottery/types/:id</td><td>Sửa loại xổ số 🆕</td></tr>
+        <tr><td>DELETE</td><td>/game/admin/lottery/types/:id</td><td>Xoá loại xổ số 🆕</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <h2>3 · Admin Dashboard (apps/admin-dashboard)</h2>
+
+  <div class="section-block" style="margin-bottom:10px">
+    <div class="card-title">GameLotteryPage.jsx — Route /game/lottery</div>
+    <p style="font-size:12px;color:#57606a;margin-bottom:8px">Cấu trúc lại thành 3 tab độc lập:</p>
+    <ul class="file-list">
+      <li><span class="filepath">Tab: Kỳ quay</span><span class="change-desc">Filter theo loại XS, status, date range. Nút <strong>Huỷ kỳ</strong> (với confirm). Hiển thị totalBet/totalPayout với ₫</span></li>
+      <li><span class="filepath">Tab: Lịch sử cược</span><span class="change-desc">Filter status, drawId, search user, date range. Nút <strong>Hoàn tiền</strong> cho bets đang PENDING</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">Tab: Quản lý loại XS</span><span class="change-desc">CRUD đầy đủ: thêm/sửa/xoá loại xổ số, toggle active/inactive trực tiếp trên bảng</span></li>
+    </ul>
+  </div>
+
+  <div class="section-block" style="margin-bottom:10px">
+    <div class="card-title">GameRoundsPage.jsx — Route /game/rounds</div>
+    <ul class="file-list">
+      <li><span class="filepath">Filter nâng cấp</span><span class="change-desc">Thêm: <strong>userId</strong> exact, <strong>provider</strong>, <strong>date range</strong> (từ ngày – đến ngày)</span></li>
+      <li><span class="filepath">Export CSV</span><span class="change-desc">Nút export trang hiện tại thành CSV UTF-8 BOM (mở được Excel tiếng Việt)</span></li>
+      <li><span class="filepath">Xoá lọc</span><span class="change-desc">Nút xoá lọc hiện khi có filter đang active</span></li>
+    </ul>
+  </div>
+
+  <div class="section-block">
+    <div class="card-title">game/api.ts — Admin API client</div>
+    <ul class="file-list">
+      <li><span class="filepath">adminLotteryDraws.cancel()</span><span class="change-desc">Gọi POST /cancel</span></li>
+      <li><span class="filepath">adminLotteryBets.refund()</span><span class="change-desc">Gọi PATCH /refund</span></li>
+      <li><span class="filepath tag-new">NEW</span><span class="filepath">adminLotteryTypes</span><span class="change-desc">CRUD đầy đủ: list/create/update/remove</span></li>
+    </ul>
+  </div>
+
+  
+  <h2>4 · Bảo vệ dữ liệu &amp; Tính toàn vẹn</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">P2P Transfer</div>
+      <span class="badge green">Atomic</span> <span class="badge blue">Validation</span><br /><br />
+      <span style="font-size:12px">Dùng Prisma <code>$transaction</code> — nếu 1 bước lỗi, toàn bộ rollback. Kiểm tra số dư khả dụng trước, kiểm tra mật khẩu giao dịch, kiểm tra không tự chuyển cho mình.</span>
+    </div>
+    <div class="card">
+      <div class="card-title">Cancel Draw</div>
+      <span class="badge orange">Refund</span> <span class="badge purple">Atomic</span><br /><br />
+      <span style="font-size:12px">Hoàn tiền tất cả bets PENDING trong cùng 1 transaction. Ghi log refund cho mỗi user. Chỉ huỷ được kỳ ở trạng thái WAITING/PENDING.</span>
+    </div>
+    <div class="card">
+      <div class="card-title">Delete LotteryType</div>
+      <span class="badge red">Guard</span><br /><br />
+      <span style="font-size:12px">Kiểm tra <code>count(draws linked)</code> trước khi xoá. Nếu có kỳ liên kết → trả 409 Conflict, không cho xoá.</span>
+    </div>
+    <div class="card">
+      <div class="card-title">Admin Bets endpoint</div>
+      <span class="badge blue">Filter</span> <span class="badge green">Paginate</span><br /><br />
+      <span style="font-size:12px">Filter OR trên user.username + email, filter drawId, typeId, status, date range. Pagination đầy đủ meta.</span>
+    </div>
+  </div>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

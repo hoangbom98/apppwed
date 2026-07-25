@@ -49,7 +49,7 @@ export function useSocket() {
 
     // ── Notifications ────────────────────────────────────────────────
     _socket.on('notification', (data: { title?: string; content?: string }) => {
-      toast(data.title || data.content || 'Thông báo mới', { icon: '🔔' });
+      toast(data.title || data.content || 'Thông báo mới');
       window.dispatchEvent(new CustomEvent('socket:notification', { detail: data }));
     });
 

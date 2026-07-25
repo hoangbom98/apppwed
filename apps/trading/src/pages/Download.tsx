@@ -5,9 +5,8 @@
  * Route: /download  (public, no DesktopLayout)
  */
 import { AppDistributionPage } from '@ui';
-import type { AppConfig } from '@ui';
 
-const TRADE_APP: AppConfig = {
+const TRADE_APP: Record<string, any> = {
   // ── Branding ────────────────────────────────────────────────────────
   name:        'Trade Pro',
   developer:   'Trade Pro Exchange',
@@ -33,14 +32,14 @@ const TRADE_APP: AppConfig = {
 
   // ── Feature badges ───────────────────────────────────────────────────
   features: [
-    '📈 Biểu đồ realtime chuyên sâu',
-    '🔔 Cảnh báo giá tức thì',
-    '💼 Quản lý danh mục thông minh',
-    '🏦 Nạp/rút qua 20 ngân hàng VN',
-    '🔒 Bảo mật 2FA & sinh trắc học',
-    '📊 Phân tích kỹ thuật nâng cao',
-    '🤖 AI gợi ý giao dịch',
-    '💱 Spot & Futures trading',
+    'Biểu đồ realtime chuyên sâu',
+    'Cảnh báo giá tức thì',
+    'Quản lý danh mục thông minh',
+    'Nạp/rút qua 20 ngân hàng VN',
+    'Bảo mật 2FA & sinh trắc học',
+    'Phân tích kỹ thuật nâng cao',
+    'AI gợi ý giao dịch',
+    'Spot & Futures trading',
   ],
 
   // ── Screenshots ──────────────────────────────────────────────────────
@@ -55,17 +54,17 @@ const TRADE_APP: AppConfig = {
   // ── Description ──────────────────────────────────────────────────────
   description: `Trade Pro là nền tảng giao dịch chuyên nghiệp tại Việt Nam — biểu đồ realtime, phân tích kỹ thuật nâng cao và quản lý danh mục thông minh.
 
-📈 Công cụ giao dịch:
+Công cụ giao dịch:
 • Biểu đồ candlestick realtime — 50+ chỉ báo kỹ thuật
 • Spot & Futures: chứng khoán VN, crypto, forex
 • Đặt lệnh nhanh với Stop-Loss & Take-Profit tự động
 
-📊 Phân tích thị trường:
+Phân tích thị trường:
 • AI phân tích xu hướng và gợi ý entry/exit
 • Tin tức tài chính cập nhật mỗi 5 phút
 • Báo cáo lợi nhuận/lỗ hàng ngày
 
-🏦 Tài chính an toàn:
+Tài chính an toàn:
 • Nạp/rút qua 20 ngân hàng Việt Nam
 • Bảo mật 2FA + nhận diện khuôn mặt
 • Mã hóa dữ liệu cấp ngân hàng`,

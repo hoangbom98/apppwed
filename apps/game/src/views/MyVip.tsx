@@ -98,8 +98,8 @@ export default function Vip() {
         {/* Coin burst particles */}
         {showCoinBurst && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center gap-2 z-20">
-            {['💰', '🪙', '💎', '✨', '🎊'].map((c, i) => (
-              <span key={i} className="animate-coin-burst text-xl" style={{ animationDelay: `${i * 0.08}s` }}>{c}</span>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i} className="animate-coin-burst inline-block w-2 h-2 rounded-full bg-yellow-400" style={{ animationDelay: `${i * 0.08}s` }} />
             ))}
           </div>
         )}

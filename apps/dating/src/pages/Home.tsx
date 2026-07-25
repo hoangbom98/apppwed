@@ -9,8 +9,13 @@ import { useQuery } from '@tanstack/react-query';
 import { getHomeData } from '@/api/users';
 import { getStories } from '@/api/stories';
 import { useAuthStore } from '@/store/authStore';
-import Avatar from '@/components/common/Avatar';
 import { MapPin, Zap, Crown, Users, Star, Heart } from 'lucide-react';
+import {
+  HeartOutlined, GiftOutlined, PlaySquareOutlined, StarFilled,
+  MobileOutlined, TeamOutlined, RocketOutlined, DiamondOutlined,
+  FireOutlined, CheckCircleFilled, EnvironmentOutlined, StarOutlined,
+  CrownOutlined,
+} from '@ant-design/icons';
 import { ASSET_UI } from '@/utils/constants';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
@@ -189,15 +194,15 @@ function StoryBubble({
 /* ══════════════════════════════════════════════════════════════════════════
    QUICK ACTION TILES — antd-mini grid of rounded tile buttons
    ══════════════════════════════════════════════════════════════════════════ */
-const QUICK_ACTIONS = [
-  { icon: '💘', label: 'Swipe',    path: '/swipe' },
-  { icon: '🎁', label: 'Quà',      path: '/shop' },
-  { icon: '🎮', label: 'Party',    path: '/party' },
-  { icon: '🌟', label: 'VIP',      path: '/vip' },
-  { icon: '📺', label: 'Shorts',   path: '/shorts' },
-  { icon: '👥', label: 'Cộng đồng',path: '/community' },
-  { icon: '🎯', label: 'Sự kiện',  path: '/events' },
-  { icon: '💎', label: 'Nạp xu',   path: '/recharge' },
+const QUICK_ACTIONS: { icon: React.ReactNode; label: string; path: string }[] = [
+  { icon: <HeartOutlined />,      label: 'Swipe',     path: '/swipe' },
+  { icon: <GiftOutlined />,       label: 'Quà',       path: '/shop' },
+  { icon: <PlaySquareOutlined />, label: 'Party',     path: '/party' },
+  { icon: <StarFilled />,         label: 'VIP',       path: '/vip' },
+  { icon: <MobileOutlined />,     label: 'Shorts',    path: '/shorts' },
+  { icon: <TeamOutlined />,       label: 'Cộng đồng', path: '/community' },
+  { icon: <RocketOutlined />,     label: 'Sự kiện',   path: '/events' },
+  { icon: <DiamondOutlined />,    label: 'Nạp xu',    path: '/recharge' },
 ];
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -205,7 +210,7 @@ const QUICK_ACTIONS = [
    ══════════════════════════════════════════════════════════════════════════ */
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  useAuthStore();
 
   const { data: home, isLoading } = useQuery({
     queryKey: ['home'],
@@ -308,47 +313,47 @@ export default function Home() {
       <div className="mt-4">
 
         <UserSection
-          title="🔥 Nổi bật hôm nay"
-          icon={<Zap size={14} style={{ color: '#f97316' }} />}
+          title="Nổi bật hôm nay"
+          icon={<FireOutlined style={{ color: '#f97316' }} />}
           users={hotUsers}
           onSeeAll={() => navigate('/discovery')}
           navigate={navigate}
         />
 
         <UserSection
-          title="🟢 Đang online"
-          icon={<span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />}
+          title="Đang online"
+          icon={<CheckCircleFilled style={{ color: '#22c55e' }} />}
           users={onlineUsers}
           onSeeAll={() => navigate('/discovery?filter=online')}
           navigate={navigate}
         />
 
         <UserSection
-          title="📍 Gần bạn"
-          icon={<MapPin size={13} style={{ color: '#3b82f6' }} />}
+          title="Gần bạn"
+          icon={<EnvironmentOutlined style={{ color: '#3b82f6' }} />}
           users={nearbyUsers}
           onSeeAll={() => navigate('/nearby')}
           navigate={navigate}
         />
 
         <UserSection
-          title="⭐ Gợi ý cho bạn"
-          icon={<Star size={13} style={{ color: '#eab308' }} />}
+          title="Gợi ý cho bạn"
+          icon={<StarOutlined style={{ color: '#eab308' }} />}
           users={recommended}
           onSeeAll={() => navigate('/discovery')}
           navigate={navigate}
         />
 
         <UserSection
-          title="✨ Thành viên mới"
-          icon={<Users size={13} style={{ color: '#22c55e' }} />}
+          title="Thành viên mới"
+          icon={<TeamOutlined style={{ color: '#22c55e' }} />}
           users={newUsers}
           navigate={navigate}
         />
 
         <UserSection
-          title="👑 VIP"
-          icon={<Crown size={13} style={{ color: '#eab308' }} />}
+          title="VIP"
+          icon={<CrownOutlined style={{ color: '#eab308' }} />}
           users={vipUsers}
           navigate={navigate}
         />

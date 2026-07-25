@@ -3,12 +3,12 @@ name: Prisma Schema Validation
 on:
   push:
     paths:
-      - 'code/backend/prisma/**'
-      - 'code/backend/package.json'
+      - 'apps/backend/prisma/**'
+      - 'apps/backend/package.json'
   pull_request:
     paths:
-      - 'code/backend/prisma/**'
-      - 'code/backend/package.json'
+      - 'apps/backend/prisma/**'
+      - 'apps/backend/package.json'
 
 env:
   NODE_VERSION: '20'
@@ -30,38 +30,37 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: code/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: Validate admin schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/admin/schema.prisma
 
       - name: Validate hub schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/hub/schema.prisma
 
       - name: Validate game schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/game/schema.prisma
 
       - name: Validate trade schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/trade/schema.prisma
 
       - name: Validate dating schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/dating/schema.prisma
 
       - name: Validate sports schema
-        working-directory: code/backend
+        working-directory: apps/backend
         run: npx prisma validate --schema prisma/sports/schema.prisma
 
       - name: Generate all Prisma clients (dry-run)
-        working-directory: code/backend
+        working-directory: apps/backend
         run: pnpm run prisma:generate
         env:
           HUB_DATABASE_URL: "mysql://user:pass@localhost:3306/hub_db"

@@ -2,10 +2,10 @@
   "extends": "../../tsconfig.frontend.base.json",
   "compilerOptions": {
     "paths": {
-      "@/*":        ["./src/*"],
-      "@ui":        ["../shared-ui"],
-      "@ui/*":      ["../shared-ui/*"],
-      "@lkvip/types": ["../../shared-types/src/index.ts"]
+      "@/*":          ["./src/*"],
+      "@ui":          ["../../packages/ui/src/index.ts"],
+      "@ui/*":        ["../../packages/ui/src/*"],
+      "@lkvip/types": ["../../packages/types/src/index.ts"]
     }
   },
   "include": ["src"]

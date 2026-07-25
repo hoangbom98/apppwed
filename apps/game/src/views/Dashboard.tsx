@@ -51,7 +51,7 @@ export default function Dashboard() {
       {/* ── Welcome header ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Chào mừng trở lại 👋</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Chào mừng trở lại</p>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-0.5">
             {user?.username ?? 'Người chơi'}
           </h1>

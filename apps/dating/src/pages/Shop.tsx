@@ -3,13 +3,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { getShopItems, buyItem } from '@/api/shop';
 import PageHeader from '@/components/common/PageHeader';
 import toast from 'react-hot-toast';
+import { GiftOutlined, PictureOutlined, HighlightOutlined, MessageOutlined, StarOutlined, DollarOutlined } from '@ant-design/icons';
 
-const CATEGORIES = [
-  { id: 'gift',  label: '🎁 Quà tặng' },
-  { id: 'frame', label: '🖼 Khung ảnh' },
-  { id: 'theme', label: '🎨 Theme' },
-  { id: 'bubble', label: '💬 Bong bóng' },
-  { id: 'avatar', label: '✨ Viền Avatar' },
+const CATEGORIES: { id: string; label: React.ReactNode }[] = [
+  { id: 'gift',   label: <><GiftOutlined /> Quà tặng</> },
+  { id: 'frame',  label: <><PictureOutlined /> Khung ảnh</> },
+  { id: 'theme',  label: <><HighlightOutlined /> Theme</> },
+  { id: 'bubble', label: <><MessageOutlined /> Bong bóng</> },
+  { id: 'avatar', label: <><StarOutlined /> Viền Avatar</> },
 ];
 
 export default function Shop() {
@@ -45,10 +46,10 @@ export default function Shop() {
           {items.map((item: any) => (
             <div key={item.id} className="bg-white rounded-2xl border border-gray-100 p-3 flex flex-col items-center gap-2">
               <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
-                <span className="text-3xl">{item.icon || '🎁'}</span>
+                {item.icon ? <span className="text-3xl">{item.icon}</span> : <GiftOutlined style={{ fontSize: 28, color: '#ec4899' }} />}
               </div>
               <p className="text-xs font-semibold text-gray-900 text-center">{item.name}</p>
-              <p className="text-xs text-pink-500 font-bold">🪙 {item.price}</p>
+              <p className="text-xs text-pink-500 font-bold"><DollarOutlined /> {item.price}</p>
               <button onClick={() => buyMut.mutate(item.id)}
                 className="w-full py-1.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white text-xs font-semibold rounded-lg active:scale-95 transition-transform">
                 Mua

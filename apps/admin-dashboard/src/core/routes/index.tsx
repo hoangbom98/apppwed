@@ -102,6 +102,11 @@ const ADMIN_CHILD_ROUTES = [
   { index: true,               element: <Dashboard /> },
   { path: 'users',             element: <Users /> },
   { path: 'members',           element: <ProjectUsers /> },
+  // ── Group Finance ─────────────────────────────────────────────────────────
+  { path: 'group-finance',         element: lazyPage(() => import('@admin/modules/finance/GroupFinanceDashboard')) },
+  { path: 'group-finance/fee-cfg', element: lazyPage(() => import('@admin/modules/finance/FeeConfigPage'))        },
+  { path: 'group-finance/loans',   element: lazyPage(() => import('@admin/modules/finance/InternalLoansPage'))    },
+  // ── Legacy finance (deposit/withdraw approval) ────────────────────────────
   { path: 'finance',           element: <Finance /> },
   { path: 'transactions',      element: <Transactions /> },
   { path: 'announcements',     element: <Announcements /> },
@@ -145,6 +150,7 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'game/providers',    element: lazyPage(() => import('@admin/modules/game/pages/GameProvidersPage')) },
   { path: 'game/config',       element: lazyPage(() => import('@admin/modules/game/pages/GameConfig')) },
   { path: 'game/lottery',      element: lazyPage(() => import('@admin/modules/game/pages/GameLotteryPage')) },
+  { path: 'game/statistics',   element: lazyPage(() => import('@admin/modules/game/pages/GameStatisticsPage')) },
 
   // Dating
   { path: 'dating/users',      element: <ProjectUserPage project="dating" title="Dating — Người dùng" columns={DATING_COLUMNS} /> },
@@ -156,6 +162,7 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'dating/config',     element: lazyPage(() => import('@admin/modules/dating/pages/DatingConfig')) },
 
   // Sports
+  { path: 'sports',            element: lazyPage(() => import('@admin/modules/sports/pages/SportsOverviewPage')) },
   { path: 'sports/users',      element: <ProjectUserPage project="sports" title="Sports — Người dùng" columns={SPORTS_COLUMNS} /> },
   { path: 'sports/leagues',    element: lazyPage(() => import('@admin/modules/sports/pages/SportsLeaguesPage')) },
   { path: 'sports/teams',      element: lazyPage(() => import('@admin/modules/sports/pages/SportsTeamsPage')) },

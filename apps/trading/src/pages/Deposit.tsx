@@ -6,9 +6,9 @@ import { useAuthStore } from '@/store/authStore';
 import { fmt, fmtTime } from '@/utils/formatters';
 
 const METHODS = [
-  { id: 'bank',  label: 'Chuyển khoản ngân hàng', icon: '🏦', fee: '0 đ',    time: '15–30 phút' },
-  { id: 'usdt',  label: 'USDT (TRC20 / BEP20)',   icon: '💵', fee: '1 USDT', time: '5–10 phút'  },
-  { id: 'momo',  label: 'MoMo',                    icon: '📱', fee: '0 đ',    time: '5–10 phút'  },
+  { id: 'bank',  label: 'Chuyển khoản ngân hàng', fee: '0 đ',    time: '15–30 phút' },
+  { id: 'usdt',  label: 'USDT (TRC20 / BEP20)',   fee: '1 USDT', time: '5–10 phút'  },
+  { id: 'momo',  label: 'MoMo',                    fee: '0 đ',    time: '5–10 phút'  },
 ];
 
 const STATUS_ICON: Record<string, React.FC<{ size: number; className: string }>> = {
@@ -37,12 +37,12 @@ export default function DepositPage() {
     queryFn:  () => getDeposits(),
     enabled:  !!user,
   });
-  const deposits = data?.data ?? data ?? [];
+  const deposits = data?.data ?? [];
 
   const depositMut = useMutation({
     mutationFn: (vars: any) => createDeposit(vars),
     onSuccess: () => {
-      setMsg('✅ Yêu cầu nạp tiền đã gửi. Chờ admin duyệt.');
+      setMsg('Yêu cầu nạp tiền đã gửi. Chờ admin duyệt.');
       setAmount(''); setNote(''); setTxHash('');
       qc.invalidateQueries({ queryKey: ['deposits'] });
     },
@@ -86,7 +86,6 @@ export default function DepositPage() {
                   ? 'bg-green-950/40 border-green-600/50 text-white'
                   : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600'
               }`}>
-              <p className="text-xl mb-1">{m.icon}</p>
               <p className="text-[11px] font-semibold leading-tight">{m.label}</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{m.time}</p>
             </button>
@@ -103,7 +102,7 @@ export default function DepositPage() {
                 {copiedAddr ? <CheckCircle size={14} className="text-green-400" /> : <Copy size={14} />}
               </button>
             </div>
-            <p className="text-[10px] text-yellow-400 mt-2">⚠ Chỉ gửi USDT TRC20. Tài sản khác sẽ mất vĩnh viễn.</p>
+            <p className="text-[10px] text-yellow-400 mt-2">Chỉ gửi USDT TRC20. Tài sản khác sẽ mất vĩnh viễn.</p>
             <div className="mt-3">
               <label className="text-xs text-gray-500 mb-1 block">Tx Hash (hash giao dịch, tuỳ chọn)</label>
               <input
@@ -163,7 +162,7 @@ export default function DepositPage() {
 
         {msg && (
           <div className={`mb-3 p-3 rounded-xl text-xs font-medium ${
-            msg.startsWith('✅') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
+            msg.startsWith('Yêu cầu') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
           }`}>{msg}</div>
         )}
 
@@ -171,7 +170,7 @@ export default function DepositPage() {
           onClick={handleSubmit} disabled={depositMut.isPending}
           className="w-full py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold text-sm transition-colors disabled:opacity-50"
         >
-          {depositMut.isPending ? 'Đang gửi...' : '✅ Gửi yêu cầu nạp tiền'}
+          {depositMut.isPending ? 'Đang gửi...' : 'Gửi yêu cầu nạp tiền'}
         </button>
       </div>
 

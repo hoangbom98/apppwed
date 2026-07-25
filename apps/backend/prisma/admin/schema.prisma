@@ -34,10 +34,13 @@ model AdminUser {
   updatedAt   DateTime  @updatedAt
 
   logs        SystemLog[]
-  assignedTasks OpsTask[] @relation("AssignedTasks")
+  assignedTasks OpsTask[]  @relation("AssignedTasks")
+  adminRole   AdminRole?   @relation("AdminUserRole", fields: [roleId], references: [id])
+  roleId      Int?
 
   @@index([status])
   @@index([role])
+  @@index([roleId])
   @@map("admin_users")
 }
 
@@ -317,7 +320,8 @@ model Transaction {
   user          User     @relation(fields: [userId], references: [id])
   walletId      String
   wallet        Wallet   @relation(fields: [walletId], references: [id])
-  type          String   @db.VarChar(30)    // deposit|withdraw|transfer|bonus|commission|payment|refund
+  type          String   @db.VarChar(30)    // deposit|withdraw|transfer|bonus|commission|payment|refund|bet|win|fee|interest|rebate
+  source        String   @default("HUB")   @db.VarChar(20)   // GAME|SPORTS|TRADE|DATING|HUB|ADMIN|SYSTEM
   amount        Decimal  @db.Decimal(18,2)
   fee           Decimal  @default(0) @db.Decimal(18,2)
   status        String   @default("pending") @db.VarChar(20)
@@ -330,7 +334,83 @@ model Transaction {
   @@index([userId, status])
   @@index([userId, type, createdAt])
   @@index([status, createdAt])
+  @@index([source, type, createdAt])
   @@map("transactions")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GROUP FINANCE — FEE CONFIG, PROJECT BALANCE, INTERNAL LOAN
+// Implements "Pool Capital, Split Profit" (Gộp Vốn, Tách Lợi Nhuận)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Dynamic fee configuration per project-source and transaction type.
+/// Admin can adjust fees live without code deploys.
+model FeeConfig {
+  id          String    @id @default(cuid())
+  source      String    @db.VarChar(20)    // GAME|SPORTS|TRADE|DATING|HUB
+  txType      String    @db.VarChar(20)    // BET|WIN|WITHDRAW|DEPOSIT
+  feeType     String    @db.VarChar(20)    // PERCENTAGE|FIXED
+  value       Decimal   @db.Decimal(8,4)   // e.g. 2.5000 for 2.5% or 50000 for fixed VND
+  minAmount   Decimal?  @db.Decimal(18,2)  // minimum transaction amount to apply fee
+  maxAmount   Decimal?  @db.Decimal(18,2)  // maximum transaction amount to apply fee
+  maxFee      Decimal?  @db.Decimal(18,2)  // cap on the fee itself
+  isActive    Boolean   @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([source, txType])
+  @@index([source, isActive])
+  @@map("fee_configs")
+}
+
+/// Running balance book for each sub-project (can go negative = borrowed from Group Pool).
+model ProjectBalance {
+  id          String   @id @default(cuid())
+  source      String   @unique @db.VarChar(20)  // GAME|SPORTS|TRADE|DATING|HUB
+  balance     Decimal  @default(0) @db.Decimal(18,2)  // net position (negative = in debt to group)
+  totalBet    Decimal  @default(0) @db.Decimal(18,2)
+  totalWin    Decimal  @default(0) @db.Decimal(18,2)
+  totalFee    Decimal  @default(0) @db.Decimal(18,2)
+  updatedAt   DateTime @updatedAt
+
+  @@map("project_balances")
+}
+
+/// Records each internal loan event when a sub-project balance goes negative.
+model InternalLoan {
+  id           String    @id @default(cuid())
+  source       String    @db.VarChar(20)    // borrowing project
+  amount       Decimal   @db.Decimal(18,2)  // principal borrowed
+  interestRate Decimal   @db.Decimal(7,4)   // daily rate e.g. 0.0005 = 0.05%/day
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  status       String    @default("ACTIVE") @db.VarChar(20)  // ACTIVE|PAID
+  totalInterest Decimal  @default(0) @db.Decimal(18,2)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([source, status])
+  @@map("internal_loans")
+}
+
+/// Fee log — one row per fee collected so reconciliation is easy.
+model FeeLog {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30)
+  source      String   @db.VarChar(20)    // GAME|SPORTS|TRADE|DATING|HUB
+  txType      String   @db.VarChar(20)    // BET|WIN|WITHDRAW
+  grossAmount Decimal  @db.Decimal(18,2)
+  feeAmount   Decimal  @db.Decimal(18,2)
+  netAmount   Decimal  @db.Decimal(18,2)
+  referenceId String?  @db.VarChar(60)
+  createdAt   DateTime @default(now())
+
+  @@index([source, createdAt])
+  @@index([userId, createdAt])
+  @@map("fee_logs")
 }
 
 model PaymentGateway {
@@ -1306,17 +1386,25 @@ model AdminRole {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// REBATE SYSTEM  (học từ RebateService.php + RebateController.php Boyue)
+// REBATE SYSTEM
+// Admin configures rebate rules (RebateRule); per-user claims are tracked in
+// RebateClaim. Fine-grained per-game-type + VIP rates live in game_db (Rebate).
+// BoYue equivalent: caipiao_rebate_category_config / caipiao_fanshui
 // ═══════════════════════════════════════════════════════════════════════════
 
-/// Luật hoàn trả — cấu hình % hoàn trả theo gameType/period
+/// Rebate rule — admin-configured rate per game type and settlement period.
+/// Example: { name: "Slot Daily 0.5%", gameType: "slot", rebateRate: 0.0050, period: "daily" }
 model RebateRule {
   id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(150)            // vd: "Slot Daily Rebate 0.5%"
-  gameType    String?  @db.VarChar(30)             // RNG|LIVE|FISH|SPORTS — null = tất cả
-  rebateRate  Decimal  @db.Decimal(6,4)            // % hoàn trả, vd: 0.5 = 0.5%
-  minBet      Decimal  @default(0) @db.Decimal(18,2) // cược tối thiểu để nhận rebate
-  period      String   @default("daily") @db.VarChar(20) // daily|weekly|monthly
+  name        String   @db.VarChar(150)
+  /// Game type key: live | slot | lottery | sports | null (all types)
+  gameType    String?  @db.VarChar(30)
+  /// Rebate rate as decimal fraction: 0.0050 = 0.5%
+  rebateRate  Decimal  @db.Decimal(6,4)
+  /// Minimum valid bet required to qualify for rebate
+  minBet      Decimal  @default(0) @db.Decimal(18,2)
+  /// Settlement period: daily | weekly | monthly
+  period      String   @default("daily") @db.VarChar(20)
   project     String   @default("game") @db.VarChar(20)
   sortOrder   Int      @default(0)
   status      String   @default("active") @db.VarChar(20)
@@ -1329,17 +1417,21 @@ model RebateRule {
   @@map("rebate_rules")
 }
 
-/// Yêu cầu hoàn trả của từng người chơi (mỗi kỳ 1 claim)
+/// Per-user rebate claim — one record per (rule, user, period).
+/// Status lifecycle: pending → approved → paid  OR  rejected
 model RebateClaim {
   id           Int       @id @default(autoincrement())
   ruleId       Int
   rule         RebateRule @relation(fields: [ruleId], references: [id])
-  userId       String    @db.VarChar(30)           // user ID trong project DB
+  /// User ID in the project DB (game_db or trade_db)
+  userId       String    @db.VarChar(30)
   project      String    @default("game") @db.VarChar(20)
-  period       String    @db.VarChar(30)           // vd: "2025-07" hoặc "2025-07-10"
+  /// Period key: "2025-07" (monthly) or "2025-07-10" (daily)
+  period       String    @db.VarChar(30)
   totalBet     Decimal   @default(0) @db.Decimal(18,2)
   rebateAmount Decimal   @default(0) @db.Decimal(18,2)
-  status       String    @default("pending") @db.VarChar(20) // pending|approved|rejected
+  /// pending | approved | rejected
+  status       String    @default("pending") @db.VarChar(20)
   approvedBy   String?   @db.VarChar(30)
   approvedAt   DateTime?
   note         String?   @db.Text

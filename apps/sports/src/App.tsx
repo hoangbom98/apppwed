@@ -32,6 +32,7 @@ const LeaguesPage      = lazy(() => import('./pages/Leagues'));
 const TeamsPage        = lazy(() => import('./pages/Teams'));
 const TeamDetailPage   = lazy(() => import('./pages/TeamDetail'));
 const FavoritesPage    = lazy(() => import('./pages/Favorites'));
+const PromotionsPage   = lazy(() => import('./pages/Promotions'));
 
 // ── Protected pages ───────────────────────────────────────────────────────────
 const ProfilePage       = lazy(() => import('./pages/Profile'));
@@ -39,6 +40,7 @@ const NotificationsPage = lazy(() => import('./pages/Notifications'));
 const SettingsPage      = lazy(() => import('./pages/Settings'));
 const SupportPage       = lazy(() => import('./pages/Support'));
 const WalletPage        = lazy(() => import('./pages/WalletPage'));
+const AdminSportsPage   = lazy(() => import('./pages/AdminSports'));
 
 // ── Guards ────────────────────────────────────────────────────────────────────
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -99,6 +101,7 @@ export default function App() {
           <Route path="teams"                element={<TeamsPage />} />
           <Route path="teams/:slug"          element={<TeamDetailPage />} />
           <Route path="favorites"            element={<FavoritesPage />} />
+          <Route path="promotions"           element={<PromotionsPage />} />
 
           {/* Protected */}
           <Route path="profile"       element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
@@ -106,6 +109,7 @@ export default function App() {
           <Route path="settings"      element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="support"       element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
           <Route path="wallet"        element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
+          <Route path="admin"         element={<ProtectedRoute><AdminSportsPage /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

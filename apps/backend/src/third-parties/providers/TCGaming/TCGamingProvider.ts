@@ -18,6 +18,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import crypto from 'crypto';
+import { withLock } from '../../../core/utils/distributed-lock';
 import { BaseProvider }  from '../../core/BaseProvider';
 import { ServiceType, IAggregatorConfig } from '../../core/interfaces';
 import { GameApiService }  from './services/GameApiService';
@@ -172,15 +173,69 @@ export class TCGamingProvider extends BaseProvider {
    * @param prisma  Calling module's Prisma client (game_db or sports_db)
    */
   async handleSeamlessCallback(
-    body: { method: string; username?: string; transactions?: unknown[] },
-    prisma: { user: { findFirst: Function; update: Function }; transaction: { findFirst: Function; create: Function }; $transaction: Function },
+    body: { method: string; username?: string; transactions?: unknown[]; ref_no?: string; reserve_ref?: string },
+    prisma: { user: { findFirst: Function; update: Function }; transaction: { findFirst: Function; create: Function }; $transaction: Function; reserve: { findFirst: Function; create: Function; update: Function } },
   ): Promise<unknown> {
-    switch (body.method) {
-      case 'sgb': return this._seamlessBalance(body, prisma);
-      case 'db':  return this._seamlessDebit(body as { method: string; username: string; transactions: unknown[] }, prisma);
-      case 'cr':  return this._seamlessCredit(body as { method: string; username: string; transactions: unknown[] }, prisma);
-      default:    throw new Error(`TCGaming seamless: unknown method "${body.method}"`);
-    }
+    const ref_no = body.ref_no || body.reserve_ref || 'unknown';
+    return withLock(`tcg:${body.method}:${ref_no}`, 300, async () => {
+      switch (body.method) {
+        case 'sgb': return this._seamlessBalance(body, prisma as any);
+        case 'db':  return this._seamlessDebit(body as { method: string; username: string; transactions: unknown[] }, prisma as any);
+        case 'cr':  return this._seamlessCredit(body as { method: string; username: string; transactions: unknown[] }, prisma as any);
+        case 'rv':  return this._seamlessReserve(body as unknown as { username: string; ref_no: string; amount: number; product_type: number }, prisma);
+        case 'rcr': return this._seamlessCancel(body as { ref_no: string; reserve_ref: string }, prisma);
+        case 'cfr': return this._seamlessConfirm(body as { ref_no: string; reserve_ref: string }, prisma);
+        default:    throw new Error(`TCGaming seamless: unknown method "${body.method}"`);
+      }
+    });
+
+  }
+
+  private async _seamlessReserve(
+    { username, ref_no, amount, product_type }: { username: string; ref_no: string; amount: number; product_type: number },
+    prisma: any,
+  ): Promise<unknown> {
+    // Idempotency: Check if already reserved
+    const existing = await prisma.reserve.findFirst({ where: { reserve_ref: ref_no } });
+    if (existing) return { status: 0 }; // Already processed
+
+    const user = await prisma.user.findFirst({ where: { username } });
+    if (!user || user.balance < amount) return { status: 3001, error_desc: 'Insufficient balance' };
+    
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: user.id }, data: { balance: { decrement: amount } } }),
+      prisma.reserve.create({ data: { reserve_ref: ref_no, uid: user.id, amount, status: 0 } })
+    ]);
+    return { status: 0 };
+  }
+
+  private async _seamlessCancel(
+    { ref_no, reserve_ref }: { ref_no: string; reserve_ref: string },
+    prisma: any,
+  ): Promise<unknown> {
+    const reserve = await prisma.reserve.findFirst({ where: { reserve_ref } });
+    // Idempotency: If status is already 2 (cancelled), return success
+    if (reserve && reserve.status === 2) return { status: 0 };
+    if (!reserve || reserve.status !== 0) return { status: 7, error_desc: 'Reserve not found or invalid' };
+    
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: reserve.uid }, data: { balance: { increment: reserve.amount } } }),
+      prisma.reserve.update({ where: { id: reserve.id }, data: { status: 2 } })
+    ]);
+    return { status: 0 };
+  }
+
+  private async _seamlessConfirm(
+    { ref_no, reserve_ref }: { ref_no: string; reserve_ref: string },
+    prisma: any,
+  ): Promise<unknown> {
+    const reserve = await prisma.reserve.findFirst({ where: { reserve_ref } });
+    // Idempotency: If status is already 1 (confirmed), return success
+    if (reserve && reserve.status === 1) return { status: 0 };
+    if (!reserve || reserve.status !== 0) return { status: 7, error_desc: 'Reserve not found or invalid' };
+    
+    await prisma.reserve.update({ where: { id: reserve.id }, data: { status: 1 } });
+    return { status: 0 };
   }
 
   private async _seamlessBalance(

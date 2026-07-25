@@ -22,7 +22,7 @@ export default function HighlightCard({ highlight, onClick }: { highlight: Highl
       <div className="relative aspect-video bg-gray-700">
         {highlight.thumbnail
           ? <img src={highlight.thumbnail} alt={highlight.title} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-gray-600">⚽</div>}
+          : <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs">Video</div>}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center">
             <Play size={16} className="text-gray-900 ml-0.5" />

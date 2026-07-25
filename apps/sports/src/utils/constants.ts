@@ -11,6 +11,8 @@ export const ROUTES = {
   COMMUNITY:     '/community',
   STREAMS:       '/streams',
   STREAM:        '/streams/:id',
+  PROMOTIONS:    '/promotions',
+  WALLET:        '/wallet',
   PROFILE:       '/profile',
   NOTIFICATIONS: '/notifications',
   SEARCH:        '/search',

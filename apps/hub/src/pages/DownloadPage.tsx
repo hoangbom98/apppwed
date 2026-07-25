@@ -10,10 +10,9 @@
 
 import React, { useState } from 'react';
 import { useQuery }        from '@tanstack/react-query';
-import { DownloadButton }  from '@ui/components/DownloadButton';
-import { DownloadModal }   from '@ui/components/DownloadModal';
-import { useDeviceOS }     from '@ui/hooks/useDeviceOS';
+import { DownloadButton, DownloadModal, useDeviceOS } from '@ui';
 import { getAppCatalog }   from '../api/hub';
+import { MobileOutlined, LaptopOutlined, InfoCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 
 // ── Env-var fallback helpers ──────────────────────────────────────────────────
 function envUrl(fallback: string, key: string): string {
@@ -29,7 +28,9 @@ interface AppCard {
   bg:           string;
   androidLink:  string;
   iosLink:      string;
-  icon:         string;
+  /** Emoji or short text shown in the card header icon box */
+  icon?:        string;
+  /** URL for the DownloadModal app icon image */
   appIcon?:     string;
   category:     string;
   rating:       number;
@@ -42,7 +43,6 @@ const FALLBACK_APPS: AppCard[] = [
     key: 'game',
     name:     'GAMEX',
     tagline:  'Casino & Game H5 hàng đầu Việt Nam',
-    icon:     '🎰',
     color:    '#16a34a',
     bg:       'linear-gradient(135deg,#052e16,#14532d)',
     category: 'Giải trí · 18+',
@@ -56,7 +56,6 @@ const FALLBACK_APPS: AppCard[] = [
     key: 'sports',
     name:     'Sports Live',
     tagline:  'Bóng đá trực tiếp & Tỷ số realtime',
-    icon:     '⚽',
     color:    '#16a34a',
     bg:       'linear-gradient(135deg,#052e16,#065f46)',
     category: 'Thể thao',
@@ -70,7 +69,6 @@ const FALLBACK_APPS: AppCard[] = [
     key: 'dating',
     name:     'AppLive18',
     tagline:  'Hẹn hò & Live stream kết nối trái tim',
-    icon:     '💘',
     color:    '#ec4899',
     bg:       'linear-gradient(135deg,#500724,#831843)',
     category: 'Hẹn hò · 18+',
@@ -84,7 +82,6 @@ const FALLBACK_APPS: AppCard[] = [
     key: 'trade',
     name:     'Trade Pro',
     tagline:  'Giao dịch chứng khoán & Crypto',
-    icon:     '📈',
     color:    '#3b82f6',
     bg:       'linear-gradient(135deg,#172554,#1e3a8a)',
     category: 'Tài chính',
@@ -127,10 +124,10 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 function OSBanner({ os }: { os: string }) {
-  const map: Record<string, { label: string; bg: string; color: string }> = {
-    android: { label: '🤖 Đã phát hiện: Android — nút tải sẽ lấy APK trực tiếp', bg: '#dcfce7', color: '#15803d' },
-    ios:     { label: '🍎 Đã phát hiện: iPhone/iPad — nút tải sẽ hướng dẫn cài qua Safari', bg: '#dbeafe', color: '#1d4ed8' },
-    desktop: { label: '💻 Đang dùng Desktop — quét mã QR để tải trên điện thoại', bg: '#f3f4f6', color: '#374151' },
+  const map: Record<string, { label: React.ReactNode; bg: string; color: string }> = {
+    android: { label: <><MobileOutlined /> Đã phát hiện: Android — nút tải sẽ lấy APK trực tiếp</>, bg: '#dcfce7', color: '#15803d' },
+    ios:     { label: <><MobileOutlined /> Đã phát hiện: iPhone/iPad — nút tải sẽ hướng dẫn cài qua Safari</>, bg: '#dbeafe', color: '#1d4ed8' },
+    desktop: { label: <><LaptopOutlined /> Đang dùng Desktop — quét mã QR để tải trên điện thoại</>, bg: '#f3f4f6', color: '#374151' },
   };
   const info = map[os] ?? map.desktop;
   return (
@@ -174,7 +171,7 @@ export default function DownloadPage() {
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
         <h1 style={{ fontSize: 28, fontWeight: 900, color: '#111827', marginBottom: 8 }}>
-          📱 Tải ứng dụng
+          <MobileOutlined style={{ marginRight: 8 }} />Tải ứng dụng
         </h1>
         <p style={{ color: '#6b7280', fontSize: 15, margin: 0 }}>
           Tải ngay ứng dụng di động — trải nghiệm tốt hơn trên điện thoại của bạn
@@ -205,7 +202,7 @@ export default function DownloadPage() {
                 <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, lineHeight: 1.5, margin: '0 0 12px' }}>{app.tagline}</p>
                 <div style={{ display: 'flex', gap: 16 }}>
                   <StarRating rating={app.rating} />
-                  <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>⬇ {app.downloads}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}><DownloadOutlined /> {app.downloads}</span>
                 </div>
               </div>
 
@@ -215,7 +212,7 @@ export default function DownloadPage() {
                   androidLink={app.androidLink}
                   iosLink={app.iosLink}
                   primaryColor={app.primaryColor}
-                  size="md"
+                  size="large"
                   style={{ flex: 1, justifyContent: 'center' }}
                 />
                 <button
@@ -223,7 +220,7 @@ export default function DownloadPage() {
                   title="Xem chi tiết"
                   style={{ padding: '10px 14px', border: '1px solid #e5e7eb', borderRadius: 10, background: '#fff', cursor: 'pointer', fontSize: 16, color: '#6b7280', flexShrink: 0 }}
                 >
-                  ℹ️
+                  <InfoCircleOutlined />
                 </button>
               </div>
             </div>

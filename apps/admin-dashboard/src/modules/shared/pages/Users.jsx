@@ -198,7 +198,7 @@ export default function Users() {
       render: (v, r) => (
         <div>
           <Text strong className="cursor-pointer hover:text-blue-400" onClick={() => setDetailUser(r)}>{v}</Text>
-          {r.lastLoginAt && <div><Text type="secondary" className="text-[11px]">🕐 {new Date(r.lastLoginAt).toLocaleDateString('vi-VN')}</Text></div>}
+          {r.lastLoginAt && <div><Text type="secondary" className="text-[11px]">{new Date(r.lastLoginAt).toLocaleDateString('vi-VN')}</Text></div>}
         </div>
       )},
     { title: 'Email',    dataIndex: 'email',    key: 'email', render: v => <Text type="secondary" className="text-xs">{v}</Text> },

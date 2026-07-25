@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getNotifications, markRead, markAllRead } from '@/api/notifications';
 import PageHeader from '@/components/common/PageHeader';
 import { formatTime } from '@/utils/formatters';
-import { Heart, MessageCircle, Gift, Bell, Zap, Star } from 'lucide-react';
+import { Heart, MessageCircle, Gift, Bell, Zap } from 'lucide-react';
+import { BellOutlined } from '@ant-design/icons';
 
 const TYPES: Record<string, { icon: React.ElementType; color: string }> = {
   like:    { icon: Heart,          color: 'bg-pink-100 text-pink-500' },
@@ -47,7 +48,7 @@ export default function Notifications() {
 
       {notifications.length === 0 ? (
         <div className="flex flex-col items-center py-16">
-          <div className="text-5xl mb-3">🔔</div>
+          <div className="text-5xl mb-3"><BellOutlined style={{ fontSize: 48, color: '#d1d5db' }} /></div>
           <p className="text-gray-400 text-sm">Chưa có thông báo</p>
         </div>
       ) : (

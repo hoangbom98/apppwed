@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Send, History, ChevronRight, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { transferFunds, getTransferHistory, getWalletBalance } from '@/api/transfer';
+import { transferToUser, getTransferHistory, getWalletBalance } from '@/api/transfer';
 import { Skeleton } from '@/components/common/Skeleton';
 import { formatVND } from '@/utils/dinhDang';
 
@@ -34,7 +34,7 @@ export default function Transfer() {
   });
 
   const mut = useMutation({
-    mutationFn: transferFunds,
+    mutationFn: transferToUser,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['wallet-balance'] });
       qc.invalidateQueries({ queryKey: ['transfer-history'] });
@@ -144,7 +144,7 @@ export default function Transfer() {
           {/* Submit */}
           <button
             disabled={!toUser || !amount || Number(amount) <= 0 || !pwd || pwd.length < 6 || mut.isPending}
-            onClick={() => mut.mutate({ toUsername: toUser, amount: Number(amount), tradingPassword: pwd })}
+            onClick={() => mut.mutate({ toUsername: toUser, amount: Number(amount), tradingPassword: pwd  })}
             className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40"
             style={{ background: 'var(--game-accent)', color: '#000' }}
           >

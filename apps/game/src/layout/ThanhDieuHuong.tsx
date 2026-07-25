@@ -1,49 +1,51 @@
 /**
  * layout/ThanhDieuHuong.tsx — Game Bottom Nav (re-exported as "BottomNav")
  * -------------------------------------------------------------------------
- * "Tải App" tab opens a DownloadModal (OS-aware bottom-sheet) instead of
- * navigating to a separate page — gives a native app-like feel.
+ * Uses H5BottomNav from shared-ui. NavItem shape: { label, icon, path }.
+ * "Tải App" tab opens a DownloadModal instead of navigating.
  */
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { H5BottomNav }   from '@ui';
 import { DownloadModal } from '@ui/components/DownloadModal';
-import { TABBAR_ICONS }  from '@/utils/tainguyen';
+import {
+  HomeOutlined, GiftOutlined, WalletOutlined, DownloadOutlined, UserOutlined
+} from '@ant-design/icons';
 
-// Download links — injected via env or fallback
+// Download links
 const ANDROID_LINK = (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_APK
   || 'https://yourdomain.com/downloads/gamex.apk';
 const IOS_LINK     = (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_IOS
   || 'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/gamex.plist';
 
-const ITEMS = [
-  { to: '/',            activeSrc: TABBAR_ICONS.home.select,       inactiveSrc: TABBAR_ICONS.home.nor,       label: 'Trang chủ' },
-  { to: '/promotions',  activeSrc: TABBAR_ICONS.promotions.select,  inactiveSrc: TABBAR_ICONS.promotions.nor, label: 'Khuyến mãi' },
-  { to: '/deposit',     activeSrc: TABBAR_ICONS.deposit.select,     inactiveSrc: TABBAR_ICONS.deposit.nor,    label: 'Nạp tiền' },
-  {
-    // "Tải App" — intercept click, open modal instead of navigating
-    to: '/download',
-    activeSrc:   TABBAR_ICONS.download.select,
-    inactiveSrc: TABBAR_ICONS.download.nor,
-    label:       'Tải App',
-    onClick:     '__DOWNLOAD_MODAL__' as const,   // special signal
-  },
-  { to: '/profile',     activeSrc: TABBAR_ICONS.profile.select,     inactiveSrc: TABBAR_ICONS.profile.nor,    label: 'Tôi' },
+const BASE_ITEMS = [
+  { path: '/',           label: 'Trang chủ', icon: <HomeOutlined     style={{ fontSize: 18 }} /> },
+  { path: '/promotions', label: 'Khuyến mãi', icon: <GiftOutlined    style={{ fontSize: 18 }} /> },
+  { path: '/deposit',    label: 'Nạp tiền',   icon: <WalletOutlined  style={{ fontSize: 18 }} /> },
+  { path: '/__download', label: 'Tải App',    icon: <DownloadOutlined style={{ fontSize: 18 }} /> },
+  { path: '/profile',    label: 'Tôi',        icon: <UserOutlined    style={{ fontSize: 18 }} /> },
 ];
 
 const BottomNav: React.FC = () => {
   const [dlOpen, setDlOpen] = useState(false);
+  const navigate  = useNavigate();
+  const location  = useLocation();
 
-  // Build items, overriding "Tải App" with a modal trigger
-  const items = ITEMS.map((item) => {
-    if ((item as any).onClick === '__DOWNLOAD_MODAL__') {
-      return { ...item, onTabClick: () => setDlOpen(true) };
+  const handleNavigate = (path: string) => {
+    if (path === '/__download') {
+      setDlOpen(true);
+    } else {
+      navigate(path);
     }
-    return item;
-  });
+  };
 
   return (
     <>
-      <H5BottomNav items={items} />
+      <H5BottomNav
+        items={BASE_ITEMS}
+        active={location.pathname}
+        onNavigate={handleNavigate}
+      />
       <DownloadModal
         open={dlOpen}
         onClose={() => setDlOpen(false)}

@@ -3,7 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { getLevel, getAchievements } from '@/api/gamification';
 import PageHeader from '@/components/common/PageHeader';
 import { useAuthStore } from '@/store/authStore';
-import { Star, Trophy, Shield, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
+import {
+  MedalOutlined, StarOutlined, DiamondOutlined, TrophyOutlined,
+  FireOutlined, HeartOutlined, StarFilled, PlaySquareOutlined,
+  CheckOutlined,
+} from '@ant-design/icons';
 
 export default function Level() {
   const { user } = useAuthStore();
@@ -33,18 +38,18 @@ export default function Level() {
 
         {/* Badges */}
         <div>
-          <h3 className="font-bold text-gray-900 mb-3">🏅 Huy hiệu</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><MedalOutlined /> Huy hiệu</h3>
           <div className="grid grid-cols-4 gap-3">
-            {[
-              { icon: '⭐', name: 'Ngôi sao', desc: 'Lv.5+' },
-              { icon: '💎', name: 'Kim cương', desc: 'VIP' },
-              { icon: '🏆', name: 'Champion', desc: 'Top 10' },
-              { icon: '🔥', name: 'Hot', desc: '50 match' },
-              { icon: '💕', name: 'Tình nhân', desc: '100 like' },
-              { icon: '🌟', name: 'Sao sáng', desc: 'Livestream' },
-              { icon: '🎮', name: 'Gamer', desc: 'Party' },
-              { icon: '✓', name: 'Xác minh', desc: 'Verified' },
-            ].map(badge => (
+            {([
+              { icon: <StarOutlined />,      name: 'Ngôi sao', desc: 'Lv.5+' },
+              { icon: <DiamondOutlined />,   name: 'Kim cương', desc: 'VIP' },
+              { icon: <TrophyOutlined />,    name: 'Champion', desc: 'Top 10' },
+              { icon: <FireOutlined />,      name: 'Hot', desc: '50 match' },
+              { icon: <HeartOutlined />,     name: 'Tình nhân', desc: '100 like' },
+              { icon: <StarFilled />,        name: 'Sao sáng', desc: 'Livestream' },
+              { icon: <PlaySquareOutlined />,name: 'Gamer', desc: 'Party' },
+              { icon: <CheckOutlined />,     name: 'Xác minh', desc: 'Verified' },
+            ] as { icon: React.ReactNode; name: string; desc: string }[]).map(badge => (
               <div key={badge.name} className="flex flex-col items-center gap-1 p-2.5 bg-gray-50 rounded-2xl">
                 <span className="text-2xl">{badge.icon}</span>
                 <p className="text-[10px] font-semibold text-gray-700">{badge.name}</p>
@@ -57,7 +62,7 @@ export default function Level() {
         {/* Achievements */}
         {achievements.length > 0 && (
           <div>
-            <h3 className="font-bold text-gray-900 mb-3">🏆 Thành tích</h3>
+            <h3 className="font-bold text-gray-900 mb-3"><TrophyOutlined /> Thành tích</h3>
             <div className="space-y-2">
               {achievements.map((a: any) => (
                 <div key={a.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100">
@@ -66,7 +71,7 @@ export default function Level() {
                     <p className="text-sm font-semibold text-gray-900">{a.title}</p>
                     <p className="text-xs text-gray-400">{a.description}</p>
                   </div>
-                  {a.is_unlocked && <span className="text-green-500 text-xs font-bold">✓</span>}
+                  {a.is_unlocked && <CheckOutlined className="text-green-500 text-xs font-bold" />}
                 </div>
               ))}
             </div>

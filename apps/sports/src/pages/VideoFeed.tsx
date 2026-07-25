@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getShortVideos, likeVideo } from '../api/sports';
 import { Heart, Share2 } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function VideoFeedPage() {
   if (videos.length === 0) return (
     <div className="h-screen flex items-center justify-center text-gray-500">
       <div className="text-center">
-        <p className="text-4xl mb-3">📹</p>
+        <p className="text-sm text-gray-500 mb-3">Chưa có video</p>
         <p>Chưa có video nào.</p>
       </div>
     </div>

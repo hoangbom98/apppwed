@@ -189,7 +189,7 @@ function AlertsTab({ onBadgeUpdate }) {
         <div style={{ padding: '6px 14px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)', fontSize: 12 }}>
           <BellOutlined style={{ color: '#f87171', marginRight: 8 }} />
           <Text style={{ color: '#fca5a5' }}>{ticker}</Text>
-          <Button type="link" size="small" style={{ fontSize: 11, color: '#9ca3af' }} onClick={() => setTicker(null)}>✕</Button>
+          <Button type="link" size="small" style={{ fontSize: 11, color: '#9ca3af' }} onClick={() => setTicker(null)}>×</Button>
         </div>
       )}
 

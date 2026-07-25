@@ -74,8 +74,8 @@ export default function Breadcrumb() {
 
   if (segments.length === 0) return null;
 
-  const crumbs = [
-    { label: 'Dashboard', to: '/' },
+  const crumbs: Array<{ label: string; to: string; last: boolean }> = [
+    { label: 'Dashboard', to: '/', last: false },
     ...segments.map((seg, i) => ({
       label: LABELS[seg] ?? seg,
       to:    '/' + segments.slice(0, i + 1).join('/'),

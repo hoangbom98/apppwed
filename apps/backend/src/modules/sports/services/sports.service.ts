@@ -1,10 +1,10 @@
 // src/modules/sports/services/sports.service.ts
-import { PrismaClient } from '@prisma/client';
 import { ServiceRegistry } from '../../../third-parties/core/ServiceRegistry';
 import { ServiceType } from '../../../third-parties/core/interfaces';
-import { logger } from '../../../core/logger/logger.service';
+import { logger } from '../../../shared/services/logger';
 
-const prisma = new PrismaClient();
+const { getPrismaClient } = require('../../../config/databases');
+const prisma = getPrismaClient('sports');
 
 export class SportsService {
   async syncEvents(projectId: string, date: string) {

@@ -94,9 +94,9 @@ function SystemPageInner() {
       qc.invalidateQueries({ queryKey: ['systemInfo'] });
       const mode = res.data?.data?.maintenanceMode;
       if (mode) {
-        message.warning('⚠️ Maintenance mode BẬT — users sẽ thấy trang bảo trì');
+        message.warning('Maintenance mode BẬT — users sẽ thấy trang bảo trì');
       } else {
-        message.success('✅ Maintenance mode TẮT');
+        message.success('Maintenance mode TẮT');
       }
     },
     onError: () => message.error('Lỗi khi thay đổi maintenance mode'),
@@ -185,7 +185,7 @@ function SystemPageInner() {
           <PM2Panel processes={pm2} isRestarting={restartProcess.isPending} onRestart={name => restartProcess.mutate(name)} />
 
           {/* Maintenance toggle */}
-          <Card title="⚙️ Maintenance Mode">
+          <Card title="Maintenance Mode">
             <div className="flex items-center justify-between">
               <div className="max-w-md">
                 <p className="text-sm text-gray-200">Chế độ bảo trì</p>
@@ -196,7 +196,7 @@ function SystemPageInner() {
           </Card>
 
           {/* Raw info table */}
-          <Card title="📋 Thông tin chi tiết">
+          <Card title="Thông tin chi tiết">
             <Descriptions bordered size="small" column={1}>
               <Descriptions.Item label="Node.js version">{sys?.node ?? '—'}</Descriptions.Item>
               <Descriptions.Item label="Environment">{sys?.env ?? '—'}</Descriptions.Item>

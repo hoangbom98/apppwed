@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getStreams } from '@/api/live';
-import { Users, Radio, Zap } from 'lucide-react';
+import { Users, Radio } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
 import { useAuthStore } from '@/store/authStore';
 
@@ -10,7 +10,7 @@ const CATEGORIES = ['Tất cả', 'Hẹn hò', 'Tâm sự', 'Game', 'Âm nhạc'
 
 export default function Live() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  useAuthStore();
   const [cat, setCat] = useState('Tất cả');
   const { data, isLoading } = useQuery({
     queryKey: ['live-streams', cat],

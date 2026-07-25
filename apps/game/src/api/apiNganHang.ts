@@ -1,2 +1,2 @@
-// Compat shim: apiNganHang (bank accounts)
-export * from './bankLegacy';
+// Compat shim: apiNganHang → bank.ts (updated)
+export * from './bank';

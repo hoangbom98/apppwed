@@ -1,32 +1,37 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "lib": ["ES2022"],
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "resolveJsonModule": true,
-    "declaration": false,
-    "outDir": "dist",
-    "rootDir": ".",
-    "allowJs": true,
-    "checkJs": false,
-    "sourceMap": false,
+    "target":                        "ES2022",
+    "module":                        "CommonJS",
+    "lib":                           ["ES2022"],
+    "moduleResolution":              "node",
+    "ignoreDeprecations":            "6.0",
+    "esModuleInterop":               true,
+    "allowSyntheticDefaultImports":  true,
+    "skipLibCheck":                  true,
+    "strict":                        false,
+    "strictNullChecks":              false,
+    "noImplicitAny":                 false,
+    "resolveJsonModule":             true,
+    "declaration":                   false,
+    "outDir":                        "dist",
+    "rootDir":                       ".",
+    "allowJs":                       true,
+    "checkJs":                       false,
+    "sourceMap":                     false,
     "forceConsistentCasingInFileNames": true,
-    "moduleDetection": "force",
-    "noEmitOnError": false,
-    "types": ["node"],
+    "moduleDetection":               "force",
+    "noEmitOnError":                 false,
+    "types":                         ["node"],
     "paths": {
-      "@lkvip/constants": ["../packages/constants/src/index.js"],
-      "@lkvip/utils":     ["../packages/shared-utils/src/index.js"]
+      "@lkvip/types":     ["../packages/types/src/index.ts"],
+      "@lkvip/constants": ["../packages/constants/src/index.ts"],
+      "@lkvip/utils":     ["../packages/utils/src/index.ts"]
     }
   },
   "include": ["src/**/*", "server.ts"],
-  "exclude": ["node_modules", "dist", "prisma/seeds", "prisma/migrations", "src/__tests__/**/*", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": [
+    "node_modules", "dist",
+    "prisma/seeds", "prisma/migrations",
+    "src/__tests__/**/*", "**/*.test.ts", "**/*.spec.ts"
+  ]
 }

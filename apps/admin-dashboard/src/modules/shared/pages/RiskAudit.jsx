@@ -8,7 +8,7 @@ import {
   Card, Statistic, Row, Col, App, Spin, Space, Typography,
 } from 'antd';
 import {
-  ShieldFilled, BarChartOutlined, AlertFilled, DollarOutlined,
+  SafetyOutlined, BarChartOutlined, AlertFilled, DollarOutlined,
   FileTextOutlined, StopOutlined, AuditOutlined, PlusOutlined,
 } from '@ant-design/icons';
 import api from '@admin/api/client';
@@ -58,7 +58,7 @@ function SummaryPanel() {
                 title={c.label}
                 value={c.value ?? '—'}
                 valueStyle={{ color: c.color, fontSize: 24 }}
-                prefix={<ShieldFilled style={{ color: c.color, fontSize: 14 }} />}
+                prefix={<SafetyOutlined style={{ color: c.color, fontSize: 14 }} />}
               />
             </Card>
           </Col>
@@ -381,7 +381,7 @@ function IpBlacklist() {
 
       <Modal
         open={adding}
-        title="🚫 Block IP"
+        title="Block IP"
         onCancel={() => { setAdding(false); form.resetFields(); }}
         onOk={() =>
           form.validateFields().then(values =>
@@ -438,13 +438,13 @@ function AuditLog() {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const TABS = [
-  { key: 'summary', label: '📊 Tổng quan',       icon: <BarChartOutlined />,  children: <SummaryPanel /> },
-  { key: 'users',   label: '🔴 Nguy cơ cao',      icon: <ShieldFilled />,      children: <SuspiciousUsers /> },
-  { key: 'alerts',  label: '⚠️ Risk Alerts',      icon: <AlertFilled />,       children: <RiskAlerts /> },
-  { key: 'aml',     label: '💰 AML',               icon: <DollarOutlined />,    children: <AmlAlerts /> },
-  { key: 'seclog',  label: '🕵️ Security Logs',    icon: <FileTextOutlined />,  children: <SecurityLogs /> },
-  { key: 'ipblock', label: '🚫 IP Blacklist',      icon: <StopOutlined />,      children: <IpBlacklist /> },
-  { key: 'audit',   label: '📋 Nhật ký Admin',    icon: <AuditOutlined />,     children: <AuditLog /> },
+  { key: 'summary', label: 'Tổng quan',       icon: <BarChartOutlined />,  children: <SummaryPanel /> },
+  { key: 'users',   label: 'Nguy cơ cao',      icon: <SafetyOutlined />,    children: <SuspiciousUsers /> },
+  { key: 'alerts',  label: 'Risk Alerts',      icon: <AlertFilled />,       children: <RiskAlerts /> },
+  { key: 'aml',     label: 'AML',               icon: <DollarOutlined />,    children: <AmlAlerts /> },
+  { key: 'seclog',  label: 'Security Logs',    icon: <FileTextOutlined />,  children: <SecurityLogs /> },
+  { key: 'ipblock', label: 'IP Blacklist',      icon: <StopOutlined />,      children: <IpBlacklist /> },
+  { key: 'audit',   label: 'Nhật ký Admin',    icon: <AuditOutlined />,     children: <AuditLog /> },
 ];
 
 function RiskAuditInner() {

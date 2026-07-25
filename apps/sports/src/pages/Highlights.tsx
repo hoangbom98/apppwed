@@ -15,7 +15,7 @@ export default function HighlightsPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-base font-bold mb-4">🎬 Highlights</h1>
+      <h1 className="text-base font-bold mb-4">Highlights</h1>
 
       {/* Video modal */}
       {playing && (
@@ -23,7 +23,7 @@ export default function HighlightsPage() {
           <div className="w-full max-w-lg" onClick={e => e.stopPropagation()}>
             <video src={playing.videoUrl} controls autoPlay className="w-full rounded-xl" />
             <p className="text-sm font-semibold mt-2">{playing.title}</p>
-            <button onClick={() => setPlaying(null)} className="mt-2 text-xs text-gray-400 hover:text-white">✕ Đóng</button>
+            <button onClick={() => setPlaying(null)} className="mt-2 text-xs text-gray-400 hover:text-white">Đóng</button>
           </div>
         </div>
       )}

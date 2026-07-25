@@ -7,7 +7,7 @@ import { useLiveSocket } from '@/hooks/useLiveSocket';
 import { useLiveStore } from '@/store/liveStore';
 import { useAuthStore } from '@/store/authStore';
 import { getSocket } from '@/hooks/useSocket';
-import { ArrowLeft, Heart, Share2, Gift, Users, ChevronRight, Send } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Gift, Users, Send } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
 import BottomSheet from '@/components/common/BottomSheet';
 
@@ -15,7 +15,7 @@ export default function LiveRoom() {
   const { id } = useParams<{ id: string }>();
   const streamId = Number(id);
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  useAuthStore();
   const { chatMessages, viewerCount, giftQueue, shiftGift } = useLiveStore();
   const [showGifts, setShowGifts] = useState(false);
   const [chatText, setChatText] = useState('');

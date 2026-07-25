@@ -118,7 +118,7 @@ export default function AccessControl({ settings, onChange }) {
             tip="Khi đăng nhập từ IP mới, hệ thống tự đăng xuất phiên cũ trên IP trước đó."
             description={
               ac.admin_single_ip
-                ? '⚠ Bật — Admin chỉ được đăng nhập từ 1 địa chỉ IP tại một thời điểm.'
+                ? 'Bật — Admin chỉ được đăng nhập từ 1 địa chỉ IP tại một thời điểm.'
                 : 'Tắt — Admin có thể đăng nhập từ nhiều IP.'
             }
             checked={ac.admin_single_ip}
@@ -129,7 +129,7 @@ export default function AccessControl({ settings, onChange }) {
             tip="Khi đăng nhập từ thiết bị mới, hệ thống tự đăng xuất phiên cũ trên thiết bị trước."
             description={
               ac.admin_single_device
-                ? '⚠ Bật — Admin chỉ được đăng nhập từ 1 thiết bị tại một thời điểm.'
+                ? 'Bật — Admin chỉ được đăng nhập từ 1 thiết bị tại một thời điểm.'
                 : 'Tắt — Admin có thể đăng nhập từ nhiều thiết bị.'
             }
             checked={ac.admin_single_device}
@@ -149,7 +149,7 @@ export default function AccessControl({ settings, onChange }) {
             tip="Khi người dùng đăng nhập từ thiết bị mới, hệ thống tự đăng xuất phiên cũ."
             description={
               ac.client_single_device
-                ? '⚠ Bật — Người dùng chỉ được đăng nhập từ 1 thiết bị tại một thời điểm.'
+                ? 'Bật — Người dùng chỉ được đăng nhập từ 1 thiết bị tại một thời điểm.'
                 : 'Tắt — Người dùng có thể đăng nhập từ nhiều thiết bị (điện thoại + máy tính).'
             }
             checked={ac.client_single_device}

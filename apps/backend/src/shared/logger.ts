@@ -2,10 +2,13 @@
 /**
  * src/shared/logger.ts — Re-export shim.
  *
- * Several legacy files in src/services/ and src/middlewares/ import from
- * '../../shared/logger' (the old path used before v2.0 restructuring).
+ * Several legacy files import from '../../shared/logger' (old path before v2.0).
  * This shim keeps them compiling without touching each legacy file.
  *
  * The canonical logger lives at src/shared/services/logger.ts.
  */
-module.exports = require('./services/logger');
+const _logger = require('./services/logger');
+module.exports = _logger;
+
+// Named export so `import { logger } from '../../shared/logger'` compiles.
+export const logger = _logger;

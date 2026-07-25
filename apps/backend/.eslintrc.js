@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  extends: ['../.eslintrc.node.js'],
+  extends: ['../../config/eslint/.eslintrc.node.js'],
 
   rules: {
     // Backend-specific JS overrides

@@ -33,7 +33,7 @@ export default function OrderHistoryPage() {
   const [canceling, setCanceling] = useState<string | null>(null);
 
   // Map UI filter to backend status query param
-  const statusParam = filter === 'open' ? undefined : filter === 'all' ? undefined : filter;
+  const _statusParam = filter === 'open' ? undefined : filter === 'all' ? undefined : filter;
   // We need to filter client-side for 'open' = pending|partial
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['orders', filter],

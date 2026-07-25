@@ -1,67 +1,85 @@
 import { useState } from 'react';
-import { createOrder } from '@/api/trade';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { createOrder, getWallet } from '@/api/trade';
 import { useAuthStore } from '@/store/authStore';
 import { fmt } from '@/utils/formatters';
-import { X, TrendingUp, TrendingDown } from 'lucide-react';
-
-interface Pair {
-  symbol: string;
-  lastPrice: number;
-  priceChange: number;
-  high24h: number;
-  low24h: number;
-}
+import { X, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import type { TradePair, OrderSide, OrderType } from '@/types';
 
 interface Props {
-  pair: Pair;
+  pair: TradePair;
   onClose: () => void;
 }
 
 const ORDER_TYPES = ['Thị trường', 'Giới hạn', 'Dừng lỗ'] as const;
+const LEVERAGES   = [1, 2, 5, 10, 20] as const;
 
 export default function OrderPanel({ pair, onClose }: Props) {
   const { user } = useAuthStore();
-  const [side, setSide]           = useState<'buy' | 'sell'>('buy');
+  const qc = useQueryClient();
+  const [side, setSide]           = useState<OrderSide>('buy');
   const [orderType, setOrderType] = useState<typeof ORDER_TYPES[number]>('Thị trường');
   const [price, setPrice]         = useState(fmt(pair.lastPrice, 2).replace(/,/g, ''));
   const [qty, setQty]             = useState('');
   const [percent, setPercent]     = useState(0);
+  const [leverage, setLeverage]   = useState<typeof LEVERAGES[number]>(1);
   const [loading, setLoading]     = useState(false);
   const [msg, setMsg]             = useState('');
 
+  // Fetch real wallet balance
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet'],
+    queryFn:  () => getWallet(),
+    enabled:  !!user,
+    staleTime: 10_000,
+  });
+  const balance  = parseFloat(String(walletData?.data?.balance ?? 0));
+  const frozen   = parseFloat(String(walletData?.data?.frozen  ?? 0));
+  const available = Math.max(0, balance - frozen);
+
   const isUp  = pair.priceChange >= 0;
   const total = parseFloat(price || '0') * parseFloat(qty || '0');
+  const margin = leverage > 1 ? total / leverage : total;
 
   const handlePercent = (pct: number) => {
     setPercent(pct);
-    const available = 1000; // mock balance
     const cost = (available * pct) / 100;
-    setQty((cost / parseFloat(price || '1')).toFixed(6));
+    const effectivePrice = parseFloat(price || '1');
+    // qty = (cost * leverage) / price  → user controls margin, not full size
+    setQty((cost * leverage / effectivePrice).toFixed(6));
   };
 
   const handleSubmit = async () => {
     if (!user) { setMsg('Vui lòng đăng nhập để đặt lệnh'); return; }
     if (!qty || parseFloat(qty) <= 0) { setMsg('Nhập số lượng hợp lệ'); return; }
+    if (side === 'buy' && margin > available + 0.01) {
+      setMsg(`Số dư khả dụng không đủ (cần ${fmt(margin, 2)} USD)`);
+      return;
+    }
     setLoading(true);
     setMsg('');
     try {
-      const typeMap: Record<typeof ORDER_TYPES[number], string> = {
+      const typeMap: Record<typeof ORDER_TYPES[number], OrderType> = {
         'Thị trường': 'market',
         'Giới hạn':   'limit',
         'Dừng lỗ':    'stop',
       };
-      // Backend orderController accepts symbol code (e.g. "BTCUSDT" or "BTC/USDT")
       await createOrder({
         symbol:   pair.symbol,
         side,
         type:     typeMap[orderType],
         price:    orderType !== 'Thị trường' ? parseFloat(price) : undefined,
         quantity: parseFloat(qty),
-      });
-      setMsg(`✅ Đặt lệnh ${side === 'buy' ? 'MUA' : 'BÁN'} thành công!`);
+        leverage,
+      } as Parameters<typeof createOrder>[0]);
+      setMsg(`Đặt lệnh ${side === 'buy' ? 'MUA' : 'BÁN'} thành công!`);
       setQty('');
-    } catch (e: any) {
-      setMsg(e.response?.data?.message || 'Lỗi đặt lệnh');
+      setPercent(0);
+      qc.invalidateQueries({ queryKey: ['wallet'] });
+      qc.invalidateQueries({ queryKey: ['orders'] });
+    } catch (e: unknown) {
+      const err = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setMsg(err ?? 'Lỗi đặt lệnh');
     } finally {
       setLoading(false);
     }
@@ -83,6 +101,11 @@ export default function OrderPanel({ pair, onClose }: Props) {
             }
             {fmt(pair.lastPrice, 2)} ({pair.priceChange > 0 ? '+' : ''}{pair.priceChange.toFixed(2)}%)
           </p>
+          {user && (
+            <p className="text-[10px] mt-0.5 flex items-center gap-1" style={{ color: 'var(--bn-text-secondary)' }}>
+              <Wallet size={9} /> Khả dụng: <span className="text-white font-semibold">{fmt(available, 2)} USD</span>
+            </p>
+          )}
         </div>
         <button
           onClick={onClose}
@@ -118,6 +141,25 @@ export default function OrderPanel({ pair, onClose }: Props) {
         >
           BÁN
         </button>
+      </div>
+
+      {/* Leverage selector */}
+      <div className="mb-4">
+        <label className="text-xs mb-1.5 block" style={{ color: 'var(--bn-text-secondary)' }}>
+          Đòn bẩy (Leverage)
+        </label>
+        <div className="flex gap-1.5">
+          {LEVERAGES.map(lv => (
+            <button key={lv} onClick={() => { setLeverage(lv); setQty(''); setPercent(0); }}
+              className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
+              style={leverage === lv
+                ? { background: 'var(--bn-yellow)', color: '#0b0e11' }
+                : { background: 'var(--bn-bg-elevated)', color: 'var(--bn-text-secondary)' }
+              }>
+              {lv}x
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Order Type */}
@@ -187,20 +229,27 @@ export default function OrderPanel({ pair, onClose }: Props) {
         ))}
       </div>
 
-      {/* Total */}
-      <div
-        className="flex justify-between items-center py-3 mb-4"
-        style={{ borderTop: '1px solid var(--bn-border)' }}
-      >
-        <span className="text-xs" style={{ color: 'var(--bn-text-secondary)' }}>Tổng giá trị</span>
-        <span className="font-bold text-white">{fmt(total, 2)} {pair.symbol.split('/')[1]}</span>
+      {/* Total & Margin */}
+      <div className="py-3 mb-4 space-y-1" style={{ borderTop: '1px solid var(--bn-border)' }}>
+        <div className="flex justify-between items-center">
+          <span className="text-xs" style={{ color: 'var(--bn-text-secondary)' }}>Tổng giá trị</span>
+          <span className="font-bold text-white text-sm">{fmt(total, 2)} {pair.symbol.split('/')[1]}</span>
+        </div>
+        {leverage > 1 && (
+          <div className="flex justify-between items-center">
+            <span className="text-xs" style={{ color: 'var(--bn-text-secondary)' }}>Ký quỹ ({leverage}x)</span>
+            <span className="text-xs font-semibold" style={{ color: margin > available ? 'var(--bn-red)' : 'var(--bn-green)' }}>
+              {fmt(margin, 2)} {pair.symbol.split('/')[1]}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Message */}
       {msg && (
         <div
           className="mb-3 p-2.5 rounded-xl text-xs font-medium"
-          style={msg.startsWith('✅')
+          style={msg.startsWith('Đặt lệnh')
             ? { background: 'rgba(14,203,129,0.1)', color: 'var(--bn-green)', border: '1px solid rgba(14,203,129,0.25)' }
             : { background: 'rgba(246,70,93,0.1)',  color: 'var(--bn-red)',   border: '1px solid rgba(246,70,93,0.25)'  }
           }

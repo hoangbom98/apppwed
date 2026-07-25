@@ -48,7 +48,7 @@ redis-cli ping && redis-cli info | grep used_memory_human
 pm2 reload ecosystem.config.js --update-env
 
 # 7. Nếu không phục hồi — rollback
-cd /var/www/website-admin
+cd /var/LKVIP
 git log --oneline -5
 # git reset --hard <previous-commit>
 ```
@@ -67,7 +67,7 @@ git log --oneline -5
 ### Kiểm tra security hàng tuần
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # Kiểm tra vulnerabilities
 npm audit
@@ -137,7 +137,7 @@ tail -n 100 /var/log/mysql/slow.log
 
 ```bash
 # Backup ngay lập tức
-cd /var/www/website-admin/code/backend
+cd /var/LKVIP/apps/backend
 npm run backup
 
 # Hoặc mysqldump trực tiếp
@@ -151,7 +151,7 @@ mysqldump -u root -p --all-databases | gzip > /tmp/emergency-backup-$(date +%Y%m
 mysql -u root -p game_db < /path/to/backup.sql
 
 # Restore tất cả (dùng script)
-cd code/backend
+cd apps/backend
 npm run restore -- --file=./backups/backup-YYYY-MM-DD.sql.gz
 ```
 

@@ -2,6 +2,7 @@ import React from 'react';
 import PageHeader from '@/components/common/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { Upload, BarChart2, DollarSign, ArrowUpRight } from 'lucide-react';
+import { EyeOutlined, HeartOutlined, DollarOutlined } from '@ant-design/icons';
 
 export default function Creator() {
   const navigate = useNavigate();
@@ -18,11 +19,11 @@ export default function Creator() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Người xem', value: '---', icon: '👁' },
-            { label: 'Fan', value: '---', icon: '❤️' },
-            { label: 'Thu nhập', value: '0 xu', icon: '💰' },
-          ].map(s => (
+          {([
+            { label: 'Người xem', value: '---', icon: <EyeOutlined /> },
+            { label: 'Fan',       value: '---', icon: <HeartOutlined /> },
+            { label: 'Thu nhập',  value: '0 xu', icon: <DollarOutlined /> },
+          ] as { label: string; value: string; icon: React.ReactNode }[]).map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-3 text-center">
               <div className="text-2xl mb-1">{s.icon}</div>
               <p className="font-black text-gray-900 text-base">{s.value}</p>

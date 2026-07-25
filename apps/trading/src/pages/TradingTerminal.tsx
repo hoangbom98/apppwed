@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getPairs, getPairBySymbol } from '@/api/trade';
+import { getPairs } from '@/api/trade';
 import { useTradeStore } from '@/store/tradeStore';
 import OrderPanel from '@/components/trade/OrderPanel';
 import { fmt, fmtPct } from '@/utils/formatters';
+import { MOCK_PAIRS } from '@/constants/mock';
+import type { TradePair } from '@/types';
 import {
   TrendingUp, TrendingDown, ChevronDown, RefreshCw,
   Activity, BarChart2, BookOpen,
 } from 'lucide-react';
 
 // ── Order Book (mock) ──────────────────────────────────────────────────────────
-function OrderBook({ pair }: { pair: any }) {
+function OrderBook({ pair }: { pair: TradePair }) {
   const asks = [
     { price: pair.lastPrice * 1.0012, qty: 0.842 },
     { price: pair.lastPrice * 1.0008, qty: 1.234 },
@@ -87,10 +89,10 @@ function OrderBook({ pair }: { pair: any }) {
 }
 
 // ── Chart Placeholder ──────────────────────────────────────────────────────────
-function ChartArea({ pair }: { pair: any }) {
+function ChartArea({ pair }: { pair: TradePair }) {
   const isUp = pair.priceChange >= 0;
   // Generate a simple SVG sparkline
-  const points = Array.from({ length: 60 }, (_, i) => {
+  const points = Array.from({ length: 60 }, (_, _i) => {
     const noise = (Math.random() - 0.48) * 0.008;
     return noise;
   }).reduce<number[]>((acc, n, i) => {
@@ -161,16 +163,6 @@ function ChartArea({ pair }: { pair: any }) {
   );
 }
 
-// ── Pair Selector ──────────────────────────────────────────────────────────────
-const MOCK_PAIRS = [
-  { id:1,  symbol:'BTC/USDT',   baseAsset:'BTC',  quoteAsset:'USDT', lastPrice:43250.50, priceChange:2.35,  volume24h:1_240_000_000, high24h:44100,  low24h:42100  },
-  { id:2,  symbol:'ETH/USDT',   baseAsset:'ETH',  quoteAsset:'USDT', lastPrice:2285.30,  priceChange:-1.12, volume24h:580_000_000,   high24h:2340,   low24h:2250   },
-  { id:3,  symbol:'BNB/USDT',   baseAsset:'BNB',  quoteAsset:'USDT', lastPrice:315.80,   priceChange:0.88,  volume24h:120_000_000,   high24h:320,    low24h:310    },
-  { id:4,  symbol:'SOL/USDT',   baseAsset:'SOL',  quoteAsset:'USDT', lastPrice:98.45,    priceChange:4.21,  volume24h:310_000_000,   high24h:102,    low24h:94     },
-  { id:5,  symbol:'XRP/USDT',   baseAsset:'XRP',  quoteAsset:'USDT', lastPrice:0.6230,   priceChange:-0.45, volume24h:90_000_000,    high24h:0.635,  low24h:0.611  },
-  { id:6,  symbol:'ADA/USDT',   baseAsset:'ADA',  quoteAsset:'USDT', lastPrice:0.5810,   priceChange:1.67,  volume24h:74_000_000,    high24h:0.593,  low24h:0.571  },
-];
-
 // ── TradingTerminal ────────────────────────────────────────────────────────────
 export default function TradingTerminalPage() {
   const { selectedPair, selectPair, setPairs } = useTradeStore();
@@ -186,14 +178,14 @@ export default function TradingTerminalPage() {
     if (data?.data) setPairs(data.data);
   }, [data]);
 
-  const pairs = data?.data ?? MOCK_PAIRS;
+  const pairs: TradePair[] = data?.data ?? MOCK_PAIRS;
 
   // Auto-select first pair if none
   useEffect(() => {
     if (!selectedPair && pairs.length > 0) selectPair(pairs[0]);
   }, [pairs, selectedPair]);
 
-  const pair = selectedPair ?? MOCK_PAIRS[0];
+  const pair: TradePair = selectedPair ?? MOCK_PAIRS[0];
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -214,7 +206,7 @@ export default function TradingTerminalPage() {
           {showPairList && (
             <div className="absolute top-full mt-1 left-0 z-50 w-64 rounded-xl shadow-2xl overflow-hidden"
               style={{ background: 'var(--bn-bg-surface)', border: '1px solid var(--bn-border)' }}>
-              {pairs.map((p: any) => {
+              {pairs.map((p) => {
                 const isUp = p.priceChange >= 0;
                 return (
                   <button

@@ -48,7 +48,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   setTyping: (userId, isTyping) =>
     set((s) => {
       const t = new Set(s.typingUsers);
-      isTyping ? t.add(userId) : t.delete(userId);
+      if (isTyping) { t.add(userId); } else { t.delete(userId); }
       return { typingUsers: t };
     }),
   markSeen: (userId) =>

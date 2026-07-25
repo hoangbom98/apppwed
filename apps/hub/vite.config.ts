@@ -1,32 +1,70 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  cacheDir: '../../node_modules/.vite-cache',
+
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: { enabled: false },
+      includeAssets: ['favicon.png', 'favicon.svg', 'apple-touch-icon.png'],
+      manifest: {
+        name:             'LKVIP Hub',
+        short_name:       'Hub',
+        description:      'LKVIP GROUP — Cổng thông tin Games, Websites, Tools & Tin tức',
+        theme_color:      '#3b82f6',
+        background_color: '#0f172a',
+        display:          'standalone',
+        orientation:      'portrait',
+        start_url:        '/',
+        scope:            '/',
+        lang:             'vi',
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns:  ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        skipWaiting:   true,
+        clientsClaim:  true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'hub-api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: { maxEntries: 100, maxAgeSeconds: 3600 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\.(png|jpg|jpeg|svg|gif|webp|avif)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'hub-image-cache',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 
   resolve: {
     alias: {
-      '@':          path.resolve(__dirname, './src'),
-      '@ui':        path.resolve(__dirname, '../shared-ui'),
-      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
-      // Force shared-ui source files to resolve peer deps from hub/node_modules
-      // (Vite 8 / rolldown resolves from source file location, not importer)
-      'react':            path.resolve(__dirname, './node_modules/react'),
-      'react-dom':        path.resolve(__dirname, './node_modules/react-dom'),
-      'react-router-dom': path.resolve(__dirname, './node_modules/react-router-dom'),
-      'lucide-react':     path.resolve(__dirname, './node_modules/lucide-react'),
-      'zustand':          path.resolve(__dirname, './node_modules/zustand'),
-      'axios':            path.resolve(__dirname, './node_modules/axios'),
-      'yup':              path.resolve(__dirname, './node_modules/yup'),
-      'socket.io-client': path.resolve(__dirname, './node_modules/socket.io-client'),
+      '@':            path.resolve(__dirname, './src'),
+      '@ui':          path.resolve(__dirname, '../../packages/ui/src'),
+      '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
     },
     dedupe: ['react', 'react-dom', 'react-router-dom'],
   },
 
-  // ─── IMPORTANT cho Capacitor ─────────────────────────────────────────────────
-  // base: './' cho phép Capacitor WebView load assets với đường dẫn tương đối
-  // Khi chạy `npm run dev` bình thường → base tự động là '/'
   base: process.env.CAPACITOR_BUILD === 'true' ? './' : '/',
 
   server: {
@@ -39,17 +77,19 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'dist',
-    // Tối ưu bundle size cho mobile
+    outDir:    'dist',
+    sourcemap: false,
+    minify:    'esbuild',
+    cssCodeSplit: true,
     chunkSizeWarningLimit: 800,
     rollupOptions: {
-      treeshake: true,
+      treeshake: { moduleSideEffects: false },
       output: {
-        // Code splitting thủ công để giảm chunk size (Vite 8: must be a function)
         manualChunks: (id) => {
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) return 'react-vendor';
+          if (id.includes('/node_modules/react') || id.includes('/node_modules/react-dom') || id.includes('/node_modules/react-router')) return 'react-vendor';
           if (id.includes('@tanstack/react-query')) return 'query-vendor';
-          if (id.includes('lucide-react')) return 'ui-vendor';
+          if (id.includes('socket.io-client'))      return 'socket-vendor';
+          if (id.includes('lucide-react'))           return 'ui-vendor';
           if (id.includes('i18next') || id.includes('react-i18next')) return 'i18n-vendor';
         },
       },

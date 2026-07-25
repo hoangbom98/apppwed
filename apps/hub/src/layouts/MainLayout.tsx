@@ -11,7 +11,7 @@ import MusicController   from '@/components/MusicController';
 import BackToTop         from '@/components/BackToTop';
 import SearchBar         from '@/components/SearchBar';
 import { useAuthStore }  from '@/store/authStore';
-import { useAppConfig, applyColorConfig } from '@ui/hooks/useAppConfig';
+import { useAppConfig, applyColorConfig } from '@ui';
 import { useSocket }     from '@/hooks/useSocket';
 
 // ── Desktop nav links ────────────────────────────────────────────────────
@@ -178,14 +178,14 @@ export default function MainLayout() {
                     onClick={() => setUserMenuOpen(false)}
                     role="menuitem"
                   >
-                    👤 Tài khoản
+                    Tài khoản
                   </Link>
                   <button
                     className="hub-dropdown-item hub-dropdown-item--danger"
                     onClick={handleLogout}
                     role="menuitem"
                   >
-                    🚪 Đăng xuất
+                    Đăng xuất
                   </button>
                 </div>
               )}

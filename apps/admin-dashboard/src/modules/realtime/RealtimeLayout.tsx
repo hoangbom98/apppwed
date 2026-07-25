@@ -45,12 +45,12 @@ function fmtVND(n) {
 }
 
 const LEVEL_STYLE = {
-  CRITICAL: { bg: 'bg-red-900/50 border-red-800',    dot: 'bg-red-400',    text: 'text-red-400',    icon: '🚨' },
-  WARNING:  { bg: 'bg-yellow-900/40 border-yellow-800', dot: 'bg-yellow-400', text: 'text-yellow-400', icon: '⚠️' },
-  INFO:     { bg: 'bg-blue-900/30 border-blue-800',   dot: 'bg-blue-400',   text: 'text-blue-400',   icon: 'ℹ️' },
-  DEPOSIT:  { bg: 'bg-green-900/30 border-green-800', dot: 'bg-green-400',  text: 'text-green-400',  icon: '💰' },
-  WITHDRAW: { bg: 'bg-orange-900/30 border-orange-800', dot: 'bg-orange-400', text: 'text-orange-400', icon: '💸' },
-  EVENT:    { bg: 'bg-gray-800/60 border-gray-700',   dot: 'bg-gray-400',   text: 'text-gray-400',   icon: '📌' },
+  CRITICAL: { bg: 'bg-red-900/50 border-red-800',    dot: 'bg-red-400',    text: 'text-red-400',    icon: '!' },
+  WARNING:  { bg: 'bg-yellow-900/40 border-yellow-800', dot: 'bg-yellow-400', text: 'text-yellow-400', icon: '!' },
+  INFO:     { bg: 'bg-blue-900/30 border-blue-800',   dot: 'bg-blue-400',   text: 'text-blue-400',   icon: 'i' },
+  DEPOSIT:  { bg: 'bg-green-900/30 border-green-800', dot: 'bg-green-400',  text: 'text-green-400',  icon: '+' },
+  WITHDRAW: { bg: 'bg-orange-900/30 border-orange-800', dot: 'bg-orange-400', text: 'text-orange-400', icon: '-' },
+  EVENT:    { bg: 'bg-gray-800/60 border-gray-700',   dot: 'bg-gray-400',   text: 'text-gray-400',   icon: '·' },
 };
 
 function getStyle(event) {
@@ -248,7 +248,7 @@ function SystemHealth() {
           <div className="flex justify-between text-xs">
             <span className="text-gray-500">Trạng thái</span>
             <span className={`font-semibold ${maintenance ? 'text-yellow-400' : 'text-green-400'}`}>
-              {maintenance ? '🔧 Bảo trì' : '✅ Hoạt động'}
+              {maintenance ? 'Bảo trì' : 'Hoạt động'}
             </span>
           </div>
         </div>

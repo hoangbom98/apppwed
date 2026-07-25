@@ -2,20 +2,24 @@ import { NavLink, Link } from 'react-router-dom';
 import {
   TrendingUp, ScrollText, Wallet, UserCheck, BarChart2,
   LineChart, ShieldCheck, Settings, LogIn, Zap,
-  ArrowUpRight, TrendingDown, Users,
+  ArrowUpRight, TrendingDown, Users, Landmark, Cpu, Gift,
 } from 'lucide-react';
+import { CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { useAppConfig } from '@ui/hooks/useAppConfig';
 
 const MENU_ITEMS = [
-  { to: '/',            icon: TrendingUp,  label: 'Thị trường',   end: true  },
-  { to: '/terminal',    icon: LineChart,   label: 'Giao dịch',    end: false },
-  { to: '/portfolio',   icon: BarChart2,   label: 'Danh mục',     end: false },
-  { to: '/orders',      icon: ScrollText,  label: 'Lịch sử lệnh', end: false },
-  { to: '/wallet',      icon: Wallet,      label: 'Ví',           end: false },
-  { to: '/deposit',     icon: ArrowUpRight, label: 'Nạp tiền',    end: false },
-  { to: '/investment',  icon: TrendingDown, label: 'Đầu tư',      end: false },
-  { to: '/referral',    icon: Users,        label: 'Giới thiệu',  end: false },
+  { to: '/',            icon: TrendingUp,   label: 'Thị trường',   end: true  },
+  { to: '/terminal',    icon: LineChart,    label: 'Giao dịch',    end: false },
+  { to: '/portfolio',   icon: BarChart2,    label: 'Danh mục',     end: false },
+  { to: '/orders',      icon: ScrollText,   label: 'Lịch sử lệnh', end: false },
+  { to: '/wallet',      icon: Wallet,       label: 'Ví',           end: false },
+  { to: '/deposit',     icon: ArrowUpRight, label: 'Nạp tiền',     end: false },
+  { to: '/investment',  icon: TrendingDown, label: 'Đầu tư',       end: false },
+  { to: '/yuebao',      icon: Landmark,     label: 'Tiết kiệm',    end: false },
+  { to: '/mining',      icon: Cpu,          label: 'Máy đào',      end: false },
+  { to: '/prize',       icon: Gift,         label: 'Quay thưởng',  end: false },
+  { to: '/referral',    icon: Users,        label: 'Giới thiệu',   end: false },
 ];
 
 const BOTTOM_ITEMS = [
@@ -92,7 +96,9 @@ export default function DesktopSidebar() {
                   {(user as any).fullName || (user as any).email}
                 </p>
                 <p className="text-[10px]" style={{ color: (user as any).kycStatus === 'verified' ? 'var(--bn-green)' : 'var(--bn-text-muted)' }}>
-                  {(user as any).kycStatus === 'verified' ? '✓ KYC' : '⚠ Chưa KYC'}
+                  {(user as any).kycStatus === 'verified'
+                    ? <><CheckCircleOutlined /> KYC</>
+                    : <><WarningOutlined /> Chưa KYC</>}
                 </p>
               </div>
             </div>

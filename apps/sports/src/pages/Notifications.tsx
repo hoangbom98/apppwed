@@ -13,7 +13,7 @@ export default function NotificationsPage() {
     queryFn: () => getNotifications({ limit: 50 }),
     staleTime: 30_000,
   });
-  const notifications: any[] = data?.notifications || [];
+  const notifications: any[] = data?.data || data?.notifications || [];
 
   const markAllMut = useMutation({
     mutationFn: markAllNotifsRead,
@@ -31,7 +31,7 @@ export default function NotificationsPage() {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-base font-bold">🔔 Thông báo</h1>
+        <h1 className="text-base font-bold">Thông báo</h1>
         {notifications.some(n => !n.isRead) && (
           <button
             onClick={() => markAllMut.mutate()}
@@ -70,7 +70,6 @@ export default function NotificationsPage() {
 
       {!isLoading && notifications.length === 0 && (
         <div className="text-center py-16 text-gray-500">
-          <p className="text-4xl mb-3">🔕</p>
           <p>Không có thông báo nào.</p>
         </div>
       )}

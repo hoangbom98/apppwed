@@ -39,7 +39,7 @@ const clients = {};
 function getPrismaClient(project) {
   if (!clients[project]) {
     const clientPath = path.join(
-      __dirname, '../../../node_modules/.prisma', `${project}-client`
+      __dirname, '../../node_modules/.prisma', `${project}-client`
     );
     const { PrismaClient } = require(clientPath);
     clients[project] = new PrismaClient();
@@ -56,3 +56,6 @@ async function disconnectAll() {
 }
 
 module.exports = { getPrismaClient, disconnectAll };
+
+// Named exports for TypeScript `import { getPrismaClient } from '...'` consumers
+export { getPrismaClient, disconnectAll };

@@ -157,7 +157,10 @@ export class ServiceRegistry {
     const result: IProvider[] = [];
     for (const provider of this.providers.values()) {
       if (!provider.getService(serviceType)) continue;
-      if (scope && scope !== '*' && !provider.scopes.includes(scope) && !provider.scopes.includes('*')) continue;
+      if (scope && scope !== '*') {
+        const scopes = provider.scopes ?? [];
+        if (!scopes.includes(scope) && !scopes.includes('*')) continue;
+      }
       result.push(provider);
     }
     return result;

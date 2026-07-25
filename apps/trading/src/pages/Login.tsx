@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { TrendingUp, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { GoogleOutlined, SendOutlined } from '@ant-design/icons';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -116,16 +117,12 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-4 space-y-2.5">
-            {[
-              { name: 'Google', icon: '🅖', color: 'hover:border-red-700/50' },
-              { name: 'Telegram', icon: '✈️', color: 'hover:border-blue-700/50' },
-            ].map(p => (
-              <button key={p.name}
-                className={`w-full flex items-center justify-center gap-3 py-3 bg-gray-900 border border-gray-800 ${p.color} text-gray-300 hover:text-white rounded-xl text-sm font-medium transition-all`}
-              >
-                <span className="text-base">{p.icon}</span>Tiếp tục với {p.name}
-              </button>
-            ))}
+            <button className="w-full flex items-center justify-center gap-3 py-3 bg-gray-900 border border-gray-800 hover:border-red-700/50 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition-all">
+              <GoogleOutlined className="text-base" />Tiếp tục với Google
+            </button>
+            <button className="w-full flex items-center justify-center gap-3 py-3 bg-gray-900 border border-gray-800 hover:border-blue-700/50 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition-all">
+              <SendOutlined className="text-base" />Tiếp tục với Telegram
+            </button>
           </div>
         </div>
       </div>

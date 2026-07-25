@@ -58,6 +58,7 @@ model User {
   transactions     Transaction[]
   depositOrders    DepositOrder[]
   withdrawOrders   WithdrawOrder[]
+  promotionClaims  PromotionClaim[]
 
   @@index([email])
   @@index([status])
@@ -878,4 +879,51 @@ model FileUpload {
 
   @@index([userId, type])
   @@map("file_uploads")
+}
+
+// =============================================================================
+// PROMOTIONS — Lì xì / Bonus / FreeBet / Rebate
+// =============================================================================
+
+model Promotion {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  // lucky_money | bonus | freebet | rebate | deposit_bonus
+  type        String   @db.VarChar(30)
+  value       Decimal  @db.Decimal(18, 2)
+  minBet      Decimal? @db.Decimal(18, 2)   // Min stake to qualify
+  maxClaim    Int      @default(1)           // Max claims per user
+  // active | inactive | expired
+  isActive    Boolean  @default(true)
+  startDate   DateTime
+  endDate     DateTime
+  metadata    Json?    // Extra config (e.g. lucky_money odds table)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  claims      PromotionClaim[]
+
+  @@index([isActive, startDate, endDate])
+  @@index([type, isActive])
+  @@map("promotions")
+}
+
+model PromotionClaim {
+  id          String    @id @default(cuid())
+  promotionId String    @db.VarChar(30)
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  userId      String    @db.VarChar(30)
+  user        User      @relation(fields: [userId], references: [id])
+  amount      Decimal   @db.Decimal(18, 2)
+  // pending | approved | rejected
+  status      String    @default("approved") @db.VarChar(20)
+  claimedAt   DateTime  @default(now())
+  processedAt DateTime?
+  metadata    Json?
+
+  @@index([userId, promotionId])
+  @@index([userId, status])
+  @@index([promotionId, status])
+  @@map("promotion_claims")
 }

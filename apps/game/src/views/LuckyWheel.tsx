@@ -83,7 +83,7 @@ function SpinCanvas({ prizes, spinDeg, isSpinning }: {
         })}
         {/* Center circle */}
         <circle cx={cx} cy={cy} r={18} fill="#fff" stroke="#e5e7eb" strokeWidth="2" />
-        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="14">🎰</text>
+        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="#6b7280">★</text>
       </svg>
     </div>
   );
@@ -139,9 +139,9 @@ export default function LuckyWheel() {
         setIsSpinning(false);
         qc.invalidateQueries({ queryKey: ['wheel-spins'] });
         if (rewardValue && Number(rewardValue) > 0) {
-          toast.success(`🎉 Chúc mừng! Bạn nhận được: ${prize?.label}`);
+          toast.success(`Chúc mừng! Bạn nhận được: ${prize?.label}`);
         } else {
-          toast(`Bạn nhận được: ${prize?.label}`, { icon: '🎰' });
+          toast(`Bạn nhận được: ${prize?.label}`);
         }
       }, 4200);
     },
@@ -182,7 +182,7 @@ export default function LuckyWheel() {
                 : 'text-gray-500'
             }`}
           >
-            {tab === 'wheel' ? '🎰 Vòng quay' : '📋 Lịch sử'}
+            {tab === 'wheel' ? 'Vòng quay' : 'Lịch sử'}
           </button>
         ))}
       </div>
@@ -214,7 +214,7 @@ export default function LuckyWheel() {
                       Đang quay...
                     </span>
                   ) : (
-                    `🆓 Quay miễn phí (${freeRemaining})`
+                    `Quay miễn phí (${freeRemaining})`
                   )}
                 </button>
                 <button
@@ -222,7 +222,7 @@ export default function LuckyWheel() {
                   disabled={isSpinning || Number(wheel.spinCost) === 0}
                   className="py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-2xl disabled:opacity-40 hover:opacity-90 transition-all active:scale-[0.98]"
                 >
-                  💰 Quay ({formatVND(Number(wheel.spinCost))})
+                  Quay ({formatVND(Number(wheel.spinCost))})
                 </button>
               </div>
 
@@ -230,7 +230,7 @@ export default function LuckyWheel() {
               {lastPrize && !isSpinning && (
                 <div className="flex items-center gap-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-4">
                   <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl" style={{ background: lastPrize.color ?? '#8b5cf6' }}>
-                    {lastPrize.icon ?? '🎁'}
+                    {lastPrize.icon ?? '★'}
                   </div>
                   <div>
                     <p className="text-xs text-purple-600 dark:text-purple-400 font-bold">Phần thưởng vừa quay</p>

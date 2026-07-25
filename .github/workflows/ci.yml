@@ -4,7 +4,8 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'code/**'
+      - 'apps/**'
+      - 'packages/**'
       - '.github/workflows/**'
   pull_request:
     branches: [main, develop]
@@ -24,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: code/backend
+        working-directory: apps/backend
 
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +38,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: code/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: Lint
@@ -71,11 +71,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [admin-dashboard, hub, game, trade, dating, sports]
+        app: [admin-dashboard, hub, game, trading, dating, sports]
 
     defaults:
       run:
-        working-directory: code/frontend/${{ matrix.app }}
+        working-directory: apps/${{ matrix.app }}
 
     steps:
       - uses: actions/checkout@v4
@@ -88,10 +88,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: code/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: TypeScript typecheck
@@ -100,7 +99,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          VITE_API_URL: https://api.yourdomain.com
+          VITE_API_URL: https://api.tc-gaming.live
           VITE_APP_ENV: production
 
   # ── Packages: build shared packages ─────────────────────────────────────────
@@ -119,12 +118,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: code/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install workspace deps
-        working-directory: code
         run: pnpm install --frozen-lockfile
 
       - name: Build shared-types
-        working-directory: code/shared-types
+        working-directory: packages/shared-types
         run: pnpm build 2>/dev/null || pnpm exec tsc --noEmit || true

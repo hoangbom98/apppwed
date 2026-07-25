@@ -24,13 +24,13 @@ const ACTION_COLOR = {
 
 const ACTION_PILLS = [
   { key: '',        label: 'Tất cả' },
-  { key: 'login',   label: '🔐 Login' },
-  { key: 'create',  label: '➕ Tạo mới' },
-  { key: 'update',  label: '✏️ Cập nhật' },
-  { key: 'delete',  label: '🗑️ Xoá' },
-  { key: 'approve', label: '✅ Duyệt' },
-  { key: 'reject',  label: '❌ Từ chối' },
-  { key: 'export',  label: '📥 Export' },
+  { key: 'login',   label: 'Login' },
+  { key: 'create',  label: 'Tạo mới' },
+  { key: 'update',  label: 'Cập nhật' },
+  { key: 'delete',  label: 'Xoá' },
+  { key: 'approve', label: 'Duyệt' },
+  { key: 'reject',  label: 'Từ chối' },
+  { key: 'export',  label: 'Export' },
 ];
 
 function actionTag(action = '') {

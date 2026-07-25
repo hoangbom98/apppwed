@@ -3,7 +3,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import {
   Home, Calendar, Trophy, Tv, User, Download,
   BarChart2, Newspaper, Video, Users, Bell, Search,
-  Shield, Star,
+  Shield, Star, Gift,
 } from 'lucide-react';
 import { useAppConfig, applyColorConfig } from '@ui/hooks/useAppConfig';
 import { useAuthStore } from '@/store/authStore';
@@ -20,12 +20,13 @@ const PRIMARY_NAV = [
 ] as const;
 
 const SECONDARY_NAV = [
-  { to: '/standings', icon: BarChart2, label: 'Bảng xếp hạng' },
-  { to: '/news',      icon: Newspaper, label: 'Tin tức'         },
-  { to: '/videos',    icon: Video,     label: 'Highlights'      },
-  { to: '/streams',   icon: Tv,        label: 'Livestream'      },
-  { to: '/community', icon: Users,     label: 'Cộng đồng'       },
-  { to: '/download',  icon: Download,  label: 'Tải App'         },
+  { to: '/standings',   icon: BarChart2, label: 'Bảng xếp hạng' },
+  { to: '/news',        icon: Newspaper, label: 'Tin tức'         },
+  { to: '/videos',      icon: Video,     label: 'Highlights'      },
+  { to: '/streams',     icon: Tv,        label: 'Livestream'      },
+  { to: '/community',   icon: Users,     label: 'Cộng đồng'       },
+  { to: '/promotions',  icon: Gift,      label: 'Khuyến mãi'      },
+  { to: '/download',    icon: Download,  label: 'Tải App'         },
 ];
 
 // ── Desktop Sidebar ────────────────────────────────────────────────────────────

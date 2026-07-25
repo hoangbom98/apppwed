@@ -1,12 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getReferralInfo, getReferralHistory } from '@/api/community';
 import { useAuthStore } from '@/store/authStore';
 import PageHeader from '@/components/common/PageHeader';
 import { Share2, Copy, Gift } from 'lucide-react';
+import { GiftOutlined, FileTextOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
-import { formatVND, formatTime } from '@/utils/formatters';
+import { formatTime } from '@/utils/formatters';
 
 export default function Referral() {
   const { user } = useAuthStore();
@@ -29,7 +29,7 @@ export default function Referral() {
 
         {/* Referral card */}
         <div className="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white text-center">
-          <div className="text-4xl mb-3">🎁</div>
+          <div className="text-4xl mb-3"><GiftOutlined style={{ fontSize: 40, color: '#fff' }} /></div>
           <h2 className="font-black text-xl mb-1">Mời bạn bè – Nhận thưởng</h2>
           <p className="text-white/80 text-sm mb-5">Mỗi bạn bè đăng ký bạn nhận 50 xu hoa hồng!</p>
 
@@ -65,7 +65,7 @@ export default function Referral() {
         {/* History */}
         {history.length > 0 && (
           <div>
-            <h3 className="font-bold text-gray-900 text-sm mb-3">📋 Lịch sử hoa hồng</h3>
+            <h3 className="font-bold text-gray-900 text-sm mb-3"><FileTextOutlined /> Lịch sử hoa hồng</h3>
             <div className="space-y-2">
               {history.map((h: any, i: number) => (
                 <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">

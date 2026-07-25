@@ -1,0 +1,21 @@
+{
+  "welcome": "システムへようこそ",
+  "error": {
+    "generic": "エラーが発生しました。後ほど再試行してください",
+    "unauthorized": "ログインしていないか、セッションが期限切れです",
+    "forbidden": "このリソースへのアクセス権がありません",
+    "not_found": "リクエストされたリソースが見つかりません",
+    "validation": "入力データが無効です"
+  },
+  "success": "成功",
+  "user": {
+    "not_found": "ユーザーが存在しません",
+    "email_exist": "メールアドレスはすでに登録されています",
+    "invalid_credentials": "メールアドレスまたはパスワードが正しくありません",
+    "balance_updated": "残高が正常に更新されました",
+    "status_updated": "ユーザーステータスが変更されました",
+    "not_allowed_self_adjustment": "自分のロールまたはステータスを自分で調整することはできません",
+    "updated": "ユーザー情報が正常に更新されました",
+    "insufficient_balance": "口座残高が不足しています"
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
+import { WarningOutlined, CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface SetupData {
@@ -111,7 +112,7 @@ export default function TwoFactor() {
             {!is2FAEnabled ? (
               <>
                 <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-4 text-sm text-yellow-300">
-                  ⚠️ Yêu cầu: Tài khoản Trading <strong>phải bật 2FA</strong> để kích hoạt đầy đủ chức năng nạp/rút.
+                  <WarningOutlined style={{ marginRight: 6 }} />Yêu cầu: Tài khoản Trading <strong>phải bật 2FA</strong> để kích hoạt đầy đủ chức năng nạp/rút.
                 </div>
                 <button
                   onClick={() => setupMutation.mutate()}
@@ -173,7 +174,7 @@ export default function TwoFactor() {
         {step === 'done' && (
           <div className="space-y-4">
             <div className="bg-green-900/20 border border-green-700/30 rounded-xl p-4 text-sm text-green-300">
-              ✅ 2FA đã được bật thành công!
+              <CheckCircleOutlined style={{ marginRight: 6 }} />2FA đã được bật thành công!
             </div>
 
             <div>
@@ -194,7 +195,7 @@ export default function TwoFactor() {
                 onClick={copyBackupCodes}
                 className="mt-3 w-full py-2.5 rounded-xl bg-gray-700 text-white text-sm font-semibold hover:bg-gray-600 transition-colors"
               >
-                {copied ? '✓ Đã sao chép' : 'Sao chép tất cả mã'}
+                {copied ? <><CheckOutlined /> Đã sao chép</> : 'Sao chép tất cả mã'}
               </button>
             </div>
 

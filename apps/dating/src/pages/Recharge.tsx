@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { deposit } from '@/api/wallet';
-import { PAYMENT_METHODS, QUICK_AMOUNTS, ASSET_UI } from '@/utils/constants';
 import { formatVND } from '@/utils/formatters';
 import PageHeader from '@/components/common/PageHeader';
 import toast from 'react-hot-toast';
 import { ChevronRight, Gift, Shield, Clock } from 'lucide-react';
 
+import { BankOutlined, DollarCircleOutlined, MobileOutlined, CreditCardOutlined, DollarOutlined } from '@ant-design/icons';
+
 // Pay method with icons from applive18 pattern
-const PAY_METHODS = [
-  { id:'momo',    label:'MoMo',         icon:'💜', color:'#a50064', note:'Thanh toán tức thì' },
-  { id:'zalopay', label:'ZaloPay',      icon:'💙', color:'#0068FF', note:'Thanh toán tức thì' },
-  { id:'bank',    label:'Ngân hàng',    icon:'🏦', color:'#1a56db', note:'3 - 15 phút'        },
-  { id:'usdt',    label:'USDT',         icon:'💵', color:'#26a17b', note:'5 - 10 phút'        },
+const PAY_METHODS: { id: string; label: string; icon: React.ReactNode; color: string; note: string }[] = [
+  { id:'momo',    label:'MoMo',         icon:<MobileOutlined style={{ color:'#a50064' }} />, color:'#a50064', note:'Thanh toán tức thì' },
+  { id:'zalopay', label:'ZaloPay',      icon:<DollarCircleOutlined style={{ color:'#0068FF' }} />, color:'#0068FF', note:'Thanh toán tức thì' },
+  { id:'bank',    label:'Ngân hàng',    icon:<BankOutlined style={{ color:'#1a56db' }} />, color:'#1a56db', note:'3 - 15 phút'        },
+  { id:'usdt',    label:'USDT',         icon:<DollarOutlined style={{ color:'#26a17b' }} />, color:'#26a17b', note:'5 - 10 phút'        },
 ];
 
 // Coin packages (applive18 pattern: amount → coin_amount + bonus)
@@ -41,12 +42,12 @@ export default function Recharge() {
   const { mutate, isPending } = useMutation({
     mutationFn: () => deposit({ amount, method, currency: 'VND' }),
     onSuccess: (data: any) => {
-      toast.success('🎉 Tạo đơn nạp tiền thành công!');
+      toast.success('Tạo đơn nạp tiền thành công!');
       // If backend returns payment URL, open it
       if (data?.paymentUrl) window.open(data.paymentUrl, '_blank');
       else navigate('/wallet');
     },
-    onError: () => toast.error('❌ Lỗi tạo đơn nạp tiền'),
+    onError: () => toast.error('Lỗi tạo đơn nạp tiền'),
   });
 
   return (
@@ -57,7 +58,7 @@ export default function Recharge() {
         {/* Coins package grid */}
         <div>
           <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <span className="text-amber-500">🪙</span> Chọn gói xu
+            <CreditCardOutlined className="text-amber-500" /> Chọn gói xu
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {COIN_PACKAGES.map((pkg, idx) => (
@@ -71,15 +72,15 @@ export default function Recharge() {
               >
                 {pkg.hot && (
                   <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[10px] font-bold rounded-full whitespace-nowrap">
-                    🔥 PHỔ BIẾN
+                    PHỔ BIẾN
                   </span>
                 )}
                 {pkg.premium && (
                   <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] font-bold rounded-full whitespace-nowrap">
-                    💎 VIP
+                    <DiamondOutlined /> VIP
                   </span>
                 )}
-                <p className="text-2xl font-black text-amber-500">🪙 {pkg.coins.toLocaleString()}</p>
+                <p className="text-2xl font-black text-amber-500"><DollarOutlined /> {pkg.coins.toLocaleString()}</p>
                 {pkg.bonus > 0 && (
                   <p className="text-xs text-green-600 font-semibold mt-0.5">+{pkg.bonus} xu thưởng</p>
                 )}
@@ -104,7 +105,7 @@ export default function Recharge() {
         {/* Payment methods */}
         <div>
           <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <span>💳</span> Phương thức thanh toán
+            <CreditCardOutlined /> Phương thức thanh toán
           </h3>
           <div className="grid grid-cols-2 gap-2.5">
             {PAY_METHODS.map(pm => (
@@ -132,18 +133,18 @@ export default function Recharge() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Xu nhận được:</span>
-              <span className="font-bold text-amber-500">🪙 {coins.toLocaleString()} xu</span>
+              <span className="font-bold text-amber-500"><DollarOutlined /> {coins.toLocaleString()} xu</span>
             </div>
             {bonus > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Xu thưởng:</span>
-                <span className="font-bold text-green-600">+🪙 {bonus} xu</span>
+                <span className="font-bold text-green-600">+<DollarOutlined /> {bonus} xu</span>
               </div>
             )}
             {(coins + bonus) > 0 && (
               <div className="flex justify-between text-sm border-t border-pink-200 pt-2 mt-2">
                 <span className="font-bold text-gray-700">Tổng xu:</span>
-                <span className="font-black text-pink-600 text-base">🪙 {(coins + bonus).toLocaleString()} xu</span>
+                <span className="font-black text-pink-600 text-base"><DollarOutlined /> {(coins + bonus).toLocaleString()} xu</span>
               </div>
             )}
           </div>

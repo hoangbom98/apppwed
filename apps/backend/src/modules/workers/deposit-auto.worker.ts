@@ -1,13 +1,13 @@
 import { Worker, Queue } from 'bullmq';
-import { PrismaClient } from '@prisma/client';
 import { redis } from '../../utils/redis';
-import { WalletService } from '../../shared/services/walletService';
-import { NotificationService } from '../../shared/services/notificationService';
 import { logger } from '../../shared/logger';
 
-const prisma = new PrismaClient();
-const walletService = new WalletService();
-const notif = new NotificationService();
+const { getPrismaClient } = require('../../config/databases');
+const WalletService = require('../../shared/services/walletService');
+const notif = require('../../shared/services/notificationService');
+
+const prisma = getPrismaClient('game');
+const walletService = new WalletService(prisma);
 
 // Queue xử lý deposit
 export const depositQueue = new Queue('deposit-processing', {
@@ -40,22 +40,22 @@ export const depositWorker = new Worker(
     }
 
     // Xử lý thành công
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       await tx.deposit.update({
         where: { id: depositId },
         data: {
           status: 'completed',
           completedAt: new Date(),
-          txId: matched.txId,
+          txId: (matched as any).txId,
         },
       });
 
       await walletService.credit(
+        tx,
         deposit.userId,
         deposit.amount,
+        'deposit',
         `deposit_${depositId}`,
-        'BANK_AUTO',
-        tx
       );
 
       // Check bonus
@@ -64,20 +64,20 @@ export const depositWorker = new Worker(
       }) <= 1;
       if (isFirstDeposit) {
         await walletService.credit(
+          tx,
           deposit.userId,
           deposit.amount * 0.1, // 10% bonus
+          'bonus',
           `first_deposit_bonus_${depositId}`,
-          'BONUS',
-          tx
         );
       }
     });
 
-    await notif.sendNotification('deposit_success', {
+    notif.sendToUser(deposit.userId, 'deposit_success', {
       username: deposit.user.username,
       amount: deposit.amount,
       time: new Date(),
-    }, { telegram: deposit.user.telegramChatId, email: deposit.user.email });
+    });
 
     logger.info(`Deposit ${depositId} auto-processed`);
   },

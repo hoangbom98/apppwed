@@ -1,23 +1,30 @@
 {
+  /**
+   * tsconfig.base.json
+   * ──────────────────
+   * Root TypeScript config extended by all packages (backend, shared-types,
+   * shared-utils, constants, cli). Frontend SPAs extend tsconfig.frontend.base.json.
+   */
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "strict": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "target":                        "ES2022",
+    "module":                        "ESNext",
+    "moduleResolution":              "bundler",
+    "lib":                           ["ES2022"],
+    "strict":                        true,
+    "esModuleInterop":               true,
+    "skipLibCheck":                  true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true
+    "resolveJsonModule":             true,
+    "declaration":                   true,
+    "declarationMap":                true,
+    "sourceMap":                     true,
+    "noUnusedLocals":                false,
+    "noUnusedParameters":            false,
+    "noImplicitReturns":             false,
+    "noFallthroughCasesInSwitch":    true,
+    "allowSyntheticDefaultImports":  true,
+    "allowJs":                       false,
+    "checkJs":                       false
   },
   "exclude": ["node_modules", "dist", "build"]
 }

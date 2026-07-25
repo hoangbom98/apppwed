@@ -40,6 +40,7 @@ function makeServices() {
   const TicketAutomation    = require('../automation/ticketAutomation');
   const MarketingAutomation = require('../automation/marketingAutomation');
   const CashFlowForecast    = require('../financial/cashFlowForecast');
+  const InterestWorker      = require('../financial/interestWorker');
 
   return {
     // Multi-project analyzers — receive all project clients
@@ -50,9 +51,11 @@ function makeServices() {
     cashflow:  new CashFlowForecast(projectClients.game, admin),  // financial still game-primary
 
     // Admin-only services
-    tasks:    new TaskManager(admin),
-    campaigns: new CampaignTrigger(admin),
-    tickets:  new TicketAutomation(admin),
+    tasks:      new TaskManager(admin),
+    campaigns:  new CampaignTrigger(admin),
+    tickets:    new TicketAutomation(admin),
+    // Group Finance workers
+    interest:   new InterestWorker(admin),
   };
 }
 
@@ -99,6 +102,9 @@ function register() {
 
   // Monthly on 28th: cash flow forecast + reserve check
   cron.schedule('0 0 28 * *', () => run('cashFlowForecast', () => svc.cashflow.checkReserve()));
+
+  // Daily at 00:05: internal loan interest calculation (Group Finance)
+  cron.schedule('5 0 * * *', () => run('internalInterest', () => svc.interest.run()));
 
   logger.info(`[OpsJobs] All auto-ops cron jobs registered (projects: ${ALL_PROJECTS.join(', ')})`);
 }

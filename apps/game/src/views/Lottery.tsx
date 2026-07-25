@@ -133,7 +133,7 @@ export default function XoSo() {
   const mutation = useMutation({
     mutationFn: placeBet,
     onSuccess: () => {
-      setMsg({ text: '✅ Đặt cược thành công!', ok: true });
+      setMsg({ text: 'Đặt cược thành công!', ok: true });
       setSelectedBet('');
       qc.invalidateQueries({ queryKey: ['lottery-my-bets'] });
       qc.invalidateQueries({ queryKey: ['wallet'] });
@@ -158,7 +158,7 @@ export default function XoSo() {
     <div className="min-h-screen bg-dark text-white pb-20">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-dark/95 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-yellow-500 flex items-center justify-center text-lg">🎰</div>
+        <div className="w-8 h-8 rounded-xl bg-yellow-500 flex items-center justify-center text-xs font-bold text-dark">XS</div>
         <div>
           <h1 className="font-extrabold text-base text-white">Xổ Số</h1>
           <p className="text-[10px] text-gray-400">Mini Game · Xổ số trực tuyến</p>
@@ -321,7 +321,6 @@ export default function XoSo() {
           </div>
           {myBets.length === 0 ? (
             <div className="py-10 text-center text-gray-500 text-sm">
-              <p className="text-3xl mb-2">🎯</p>
               <p>Chưa có lịch sử cược</p>
             </div>
           ) : (

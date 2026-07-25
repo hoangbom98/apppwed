@@ -3,13 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getNotifications, getUnreadCount, markNotifRead } from '@/api/trade';
 
 const TYPE_ICON: Record<string, string> = {
-  order_filled: '✅',
-  kyc_update:   '🪪',
-  deposit:      '💰',
-  withdraw:     '📤',
-  price_alert:  '🔔',
-  margin_call:  '⚠️',
-  system:       '📢',
+  order_filled: 'Lệnh khớp',
+  kyc_update:   'KYC',
+  deposit:      'Nạp tiền',
+  withdraw:     'Rút tiền',
+  price_alert:  'Cảnh báo giá',
+  margin_call:  'Margin Call',
+  system:       'Hệ thống',
 };
 
 export default function Notifications() {

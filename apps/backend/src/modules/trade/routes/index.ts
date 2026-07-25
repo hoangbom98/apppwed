@@ -225,10 +225,11 @@ router.post('/trading-password/change', auth, tradingPwdCtrl.change);
 router.post('/trading-password/verify', auth, tradingPwdCtrl.verify);
 
 // ── Bank Accounts ─────────────────────────────────────────────────
-router.get('/bank-accounts',         auth, bankAccCtrl.list);
-router.post('/bank-accounts',        auth, bankAccCtrl.create);
-router.patch('/bank-accounts/:id',   auth, bankAccCtrl.update);
-router.delete('/bank-accounts/:id',  auth, bankAccCtrl.remove);
+router.get('/bank-accounts',              auth, bankAccCtrl.list);
+router.post('/bank-accounts',             auth, bankAccCtrl.create);
+router.patch('/bank-accounts/:id',        auth, bankAccCtrl.update);
+router.put('/bank-accounts/:id/default',  auth, bankAccCtrl.setDefault);
+router.delete('/bank-accounts/:id',       auth, bankAccCtrl.remove);
 
 // ── Banners (public) ──────────────────────────────────────────────
 router.get('/banners', contentCtrl.listBanners);

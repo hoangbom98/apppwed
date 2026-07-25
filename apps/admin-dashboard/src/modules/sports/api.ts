@@ -36,4 +36,6 @@ export const adminBets = {
 };
 
 export const getSportsStats = () =>
-  client.get('/admin/stats').then(r => r.data?.data ?? r.data);
+  client.get('/sports/admin/stats').catch(() =>
+    client.get('/admin/stats'),
+  ).then((r: any) => r.data?.data ?? r.data);

@@ -46,7 +46,7 @@ export function useSocket() {
 
     // ── Notifications ───────────────────────────────────────────────
     _socket.on('notification', (data: { title?: string; content?: string }) => {
-      toast(data.title || data.content || 'Thông báo mới', { icon: '🔔' });
+      toast(data.title || data.content || 'Thông báo mới');
       window.dispatchEvent(new CustomEvent('socket:notification', { detail: data }));
     });
 
@@ -64,11 +64,13 @@ export function useSocket() {
       liveUpdates?: unknown[];
     }) => {
       window.dispatchEvent(new CustomEvent('socket:match_update', { detail: data }));
+      window.dispatchEvent(new CustomEvent('sports:match_update', { detail: data }));
     });
 
     // ── Sports live stream chat ─────────────────────────────────────
     _socket.on('sports_live_chat', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:sports_live_chat', { detail: data }));
+      window.dispatchEvent(new CustomEvent('sports:live_chat', { detail: data }));
     });
 
     return () => {

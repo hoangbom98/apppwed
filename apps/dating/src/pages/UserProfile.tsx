@@ -1,13 +1,12 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getUserById } from '@/api/users';
-import { likeUser, superLike } from '@/api/match';
+import { likeUser } from '@/api/match';
 import { followUser } from '@/api/profile';
-import { Heart, Star, MessageCircle, Phone, Video, Gift, Shield, Crown, MapPin } from 'lucide-react';
+import { Heart, MessageCircle, Video, Shield, MapPin } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import UserBadges from '@/components/common/UserBadges';
-import BottomSheet from '@/components/common/BottomSheet';
 import { formatAge } from '@/utils/formatters';
 
 export default function UserProfile() {
@@ -19,7 +18,7 @@ export default function UserProfile() {
   const user = data?.user || data;
 
   const likeMut = useMutation({ mutationFn: () => likeUser(uid) });
-  const followMut = useMutation({ mutationFn: () => followUser(uid) });
+  useMutation({ mutationFn: () => followUser(uid) }); // followMut reserved for future use
 
   if (isLoading) return (
     <div className="flex justify-center py-20">

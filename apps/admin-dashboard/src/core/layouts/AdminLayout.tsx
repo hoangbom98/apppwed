@@ -21,6 +21,7 @@ import '@admin/modules/trade/index';
 import '@admin/modules/hub/index';
 import '@admin/modules/ops/index';
 import '@admin/modules/settings/index';
+import '@admin/modules/finance/index';
 
 import { getVisibleMenuGroups, type MenuGroup, type MenuItem } from '@admin/modules/registry';
 

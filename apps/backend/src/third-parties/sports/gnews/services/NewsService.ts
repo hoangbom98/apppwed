@@ -1,22 +1,9 @@
 // src/third-parties/sports/gnews/services/NewsService.ts
-import { BaseService } from '../../core/BaseService';
-import { ServiceType } from '../../core/interfaces';
-import { GNewsProvider } from '../GNewsProvider';
+//
+// DEPRECATED: This file is a legacy duplicate.
+// The canonical NewsService lives at:
+//   src/third-parties/providers/GNews/services/NewsService.ts
+//
+// Re-export so old import paths keep compiling.
 
-export class NewsService extends BaseService {
-  constructor(private provider: GNewsProvider) {
-    super(ServiceType.SPORTS_NEWS, 'GNews Sports News', 'GNEWS');
-  }
-
-  async call(payload: any): Promise<any> {
-    return this.provider['callApi']({
-      method: 'GET',
-      url: '/top-headlines',
-      params: { 
-        topic: 'sports', 
-        lang: 'vi',
-        ...payload 
-      },
-    });
-  }
-}
+export { NewsService } from '../../../providers/GNews/services/NewsService';

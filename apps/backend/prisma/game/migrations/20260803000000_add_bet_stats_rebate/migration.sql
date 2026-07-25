@@ -3,7 +3,7 @@
 -- Learned from BoYue RebateService pattern (T+1 settlement)
 
 -- bet_stats: daily aggregated betting stats per user per game type
-CREATE TABLE `bet_stats` (
+CREATE TABLE IF NOT EXISTS `bet_stats` (
   `id`          VARCHAR(30)   NOT NULL,
   `userId`      VARCHAR(30)   NOT NULL,
   `date`        VARCHAR(10)   NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `bet_stats` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- rebates: daily rebate records per user per game type (T+1 settlement)
-CREATE TABLE `rebates` (
+CREATE TABLE IF NOT EXISTS `rebates` (
   `id`          VARCHAR(30)   NOT NULL,
   `userId`      VARCHAR(30)   NOT NULL,
   `betDate`     VARCHAR(10)   NOT NULL,

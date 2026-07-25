@@ -1,12 +1,11 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useSocket } from '@/hooks/useSocket';
 import DatingLayout from '@/layouts/DatingLayout';
 import IncomingCallOverlay from '@/components/call/IncomingCallOverlay';
 import { ASSET_NAV } from '@/utils/constants';
-import { InstallPrompt } from '@ui/pwa/install';
-import { UpdateBanner }  from '@ui/pwa/update';
+import { InstallPrompt, UpdateBanner } from '@ui';
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 const Login           = lazy(() => import('@/pages/Login'));

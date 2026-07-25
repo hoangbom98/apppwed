@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { getMessages, sendMessage, recallMessage, deleteMessage } from '@/api/chat';
+import { getMessages, sendMessage } from '@/api/chat';
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { useChatStore } from '@/store/chatStore';
 import { useAuthStore } from '@/store/authStore';
 import { getUserById } from '@/api/users';
 import Avatar from '@/components/common/Avatar';
-import { ArrowLeft, Phone, Video, Send, Image, Smile, Mic, MoreVertical, Gift } from 'lucide-react';
+import { ArrowLeft, Phone, Video, Send, Image, Smile, Mic, Gift } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
 
 export default function ChatRoom() {
@@ -71,7 +71,7 @@ export default function ChatRoom() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg) => {
-          const isMe = msg.sender_id === me?.id;
+          const isMe = String(msg.sender_id) === String(me?.id);
           return (
             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}>
               {!isMe && <Avatar src={partner?.avatar} name={partner?.full_name} size={28} />}

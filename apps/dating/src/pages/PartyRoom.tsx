@@ -3,17 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getPartyRooms, joinPartyRoom } from '@/api/community';
 import PageHeader from '@/components/common/PageHeader';
-import { Users, Mic, Music, Gamepad2, Plus } from 'lucide-react';
+import { Users, Plus } from 'lucide-react';
+
+import { MessageOutlined, PlaySquareOutlined, SoundOutlined, AudioOutlined, GiftOutlined } from '@ant-design/icons';
+
+const ROOM_TYPE_ICONS: Record<string, React.ReactNode> = {
+  chat:    <MessageOutlined />,
+  game:    <PlaySquareOutlined />,
+  music:   <SoundOutlined />,
+  karaoke: <AudioOutlined />,
+};
 
 const ROOM_TYPES = [
-  { id: 'chat',  label: '💬 Tâm sự',  icon: '💬' },
-  { id: 'game',  label: '🎮 Game',   icon: '🎮' },
-  { id: 'music', label: '🎵 Âm nhạc', icon: '🎵' },
-  { id: 'karaoke', label: '🎤 Karaoke', icon: '🎤' },
+  { id: 'chat',    label: 'Tâm sự'  },
+  { id: 'game',    label: 'Game'    },
+  { id: 'music',   label: 'Âm nhạc' },
+  { id: 'karaoke', label: 'Karaoke' },
 ];
 
 export default function PartyRoom() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // used in room click handlers below
   const { data, isLoading } = useQuery({ queryKey: ['party-rooms'], queryFn: getPartyRooms });
   const rooms = data?.rooms || [];
 
@@ -30,7 +39,7 @@ export default function PartyRoom() {
         {ROOM_TYPES.map(t => (
           <button key={t.id}
             className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold whitespace-nowrap">
-            {t.label}
+            {ROOM_TYPE_ICONS[t.id]} {t.label}
           </button>
         ))}
       </div>
@@ -41,7 +50,7 @@ export default function PartyRoom() {
         </div>
       ) : rooms.length === 0 ? (
         <div className="flex flex-col items-center py-16">
-          <div className="text-5xl mb-3">🎉</div>
+          <div className="text-5xl mb-3"><GiftOutlined style={{ fontSize: 48, color: '#d1d5db' }} /></div>
           <p className="text-gray-500 text-sm">Chưa có phòng nào</p>
           <p className="text-gray-400 text-xs mt-1">Tạo phòng mới ngay!</p>
         </div>
@@ -52,7 +61,7 @@ export default function PartyRoom() {
               className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
               onClick={() => joinPartyRoom(room.id)}>
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center text-2xl flex-shrink-0">
-                {room.type === 'game' ? '🎮' : room.type === 'music' ? '🎵' : room.type === 'karaoke' ? '🎤' : '💬'}
+                {ROOM_TYPE_ICONS[room.type] ?? <MessageOutlined />}
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-sm text-gray-900 truncate">{room.title}</h4>

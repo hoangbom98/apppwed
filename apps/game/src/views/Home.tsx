@@ -92,7 +92,7 @@ function CategoryChip({ cat }: { cat: any }) {
             onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
           />
         ) : (
-          <span className="text-2xl">{cat.icon || '🎮'}</span>
+          <span className="text-xs font-semibold text-gray-400">{cat.name}</span>
         )}
         <span
           className="text-[10px] font-semibold text-center leading-tight"
@@ -251,7 +251,7 @@ export default function Home() {
             >
               <div>
                 <p className="text-sm font-black flex items-center gap-2">
-                  <span>📲</span> Tải App GAMEX
+                  Tải App GAMEX
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   Android APK · iOS Enterprise · Tự động nhận diện

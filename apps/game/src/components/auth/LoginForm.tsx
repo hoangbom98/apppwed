@@ -15,7 +15,7 @@ type FormValues = yup.InferType<typeof schema>;
 
 export const LoginForm: React.FC = () => {
   const [showPwd, setShowPwd] = useState(false);
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading } = useAuthStore() as any;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
@@ -26,7 +26,7 @@ export const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await login(data);
+      await login(data as any);
       toast.success('Đăng nhập thành công!');
       navigate(redirect);
     } catch (e: any) {

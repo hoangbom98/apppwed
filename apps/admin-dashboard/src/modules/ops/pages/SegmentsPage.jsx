@@ -16,8 +16,8 @@ const SEG_COLORS = {
   bronze:   'orange',
 };
 const SEG_LABEL = {
-  champion: 'Champion 🏆', gold: 'Gold 🥇', silver: 'Silver ⭐',
-  at_risk: 'At Risk ⚠️',   bronze: 'Bronze 🥉',
+  champion: 'Champion', gold: 'Gold', silver: 'Silver',
+  at_risk: 'At Risk',   bronze: 'Bronze',
 };
 
 const fmt  = n => Number(n || 0).toLocaleString('vi-VN');

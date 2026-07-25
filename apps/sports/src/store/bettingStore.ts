@@ -42,7 +42,7 @@ interface BettingStore {
   setWalletBalance: (balance: number)    => void;
 }
 
-export const useBettingStore = create<BettingStore>()((set, get) => ({
+export const useBettingStore = create<BettingStore>()((set, _get) => ({
   slip:          [],
   totalStake:    0,
   potentialWin:  0,

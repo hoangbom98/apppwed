@@ -84,3 +84,6 @@ process.on('uncaughtException', (err) => {
 });
 
 module.exports = logger;
+
+// Named export for TypeScript `import { logger } from '...'` consumers
+export { logger };

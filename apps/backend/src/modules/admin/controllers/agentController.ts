@@ -187,3 +187,33 @@ exports.payCommission = async (req, res) => {
     return success(res, { message: 'Commission paid successfully' });
   } catch (e) { return error(res, e.message, 500); }
 };
+
+// ── GET /agents/stats ─────────────────────────────────────────────────────────
+exports.getStats = async (req, res) => {
+  try {
+    const agentSvc = require('../services/agentService');
+    const stats    = await agentSvc.getStats();
+    return success(res, stats);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+// ── GET /agents/:id/tree ──────────────────────────────────────────────────────
+exports.getTree = async (req, res) => {
+  try {
+    const agentSvc = require('../services/agentService');
+    const tree     = await agentSvc.getTree(req.params.id);
+    if (!tree) return notFound(res, 'Agent not found');
+    return success(res, tree);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+// ── GET /agents/:id/team ──────────────────────────────────────────────────────
+exports.getTeam = async (req, res) => {
+  try {
+    const agentSvc = require('../services/agentService');
+    const { page = 1, limit = 20 } = req.query;
+    const skip   = (Number(page) - 1) * Number(limit);
+    const result = await agentSvc.getTeam(req.params.id, { skip, take: Number(limit) });
+    return paginate(res, result.data, { total: result.total, page: Number(page), limit: Number(limit) });
+  } catch (e) { return error(res, e.message, 500); }
+};

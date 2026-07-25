@@ -22,7 +22,7 @@ const SportsDashboard: React.FC = () => {
   };
 
   const syncEvents = async () => {
-    if (!syncDate) return message.warn('Please select a date');
+    if (!syncDate) return message.warning('Please select a date');
     try {
       await api.post('/api/sports/sync', { date: syncDate.format('YYYY-MM-DD') });
       message.success('Sync started');

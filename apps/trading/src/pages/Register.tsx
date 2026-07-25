@@ -22,7 +22,7 @@ export default function RegisterPage() {
     if (!agreed) { setError('Vui lòng đồng ý với điều khoản sử dụng'); return; }
     setLoading(true); setError('');
     try {
-      await apiRegister({ fullName: form.fullName, email: form.email, phone: form.phone, password: form.password });
+      await apiRegister({ fullName: form.fullName, email: form.email, password: form.password });
       await login({ email: form.email, password: form.password });
       navigate('/');
     } catch (err: any) {

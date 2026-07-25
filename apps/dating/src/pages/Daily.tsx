@@ -4,10 +4,15 @@ import { getDailyStatus, checkin, getMissions, spin } from '@/api/gamification';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
-import { Gift, CheckCircle, Circle, RotateCw } from 'lucide-react';
+import { CheckCircle, Circle, RotateCw } from 'lucide-react';
+import {
+  DollarOutlined, DiamondOutlined, GiftOutlined, StarOutlined,
+  CloseCircleOutlined, CalendarOutlined, CheckOutlined, PlaySquareOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons';
 
 const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-const SPIN_PRIZES = ['🪙 50', '💎 5', '🪙 100', '🎁 Quà', '🪙 200', '⭐ +10 EXP', '🪙 30', '🚫 Thử lại'];
+const SPIN_PRIZES = ['Xu 50', 'Kim 5', 'Xu 100', 'Quà', 'Xu 200', '+10 EXP', 'Xu 30', 'Thử lại'];
 
 export default function Daily() {
   const qc = useQueryClient();
@@ -21,7 +26,7 @@ export default function Daily() {
   const checkinMut = useMutation({
     mutationFn: checkin,
     onSuccess: (data: any) => {
-      toast.success(`Điểm danh thành công! +${data.reward} xu 🎉`);
+      toast.success(`Điểm danh thành công! +${data.reward} xu`);
       qc.invalidateQueries({ queryKey: ['daily-status'] });
     },
     onError: () => toast.error('Đã điểm danh hôm nay'),
@@ -52,26 +57,26 @@ export default function Daily() {
       <div className="px-4 space-y-6 pb-8">
         {/* Check-in calendar */}
         <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-4">
-          <h3 className="font-bold text-gray-900 mb-3">📅 Điểm danh</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><CalendarOutlined /> Điểm danh</h3>
           <div className="flex gap-2 mb-4">
             {DAYS.map((day, i) => (
               <div key={day} className="flex-1 flex flex-col items-center gap-1">
                 <span className="text-[10px] text-gray-500">{day}</span>
                 <div className={`w-full aspect-square rounded-xl flex items-center justify-center text-sm ${i < checkinDays ? 'bg-pink-500 text-white' : 'bg-white border border-gray-200 text-gray-400'}`}>
-                  {i < checkinDays ? '✓' : `+${(i + 1) * 10}`}
+                  {i < checkinDays ? <CheckOutlined /> : `+${(i + 1) * 10}`}
                 </div>
               </div>
             ))}
           </div>
           <Button onClick={() => checkinMut.mutate()} loading={checkinMut.isPending}
             fullWidth disabled={status?.checked_today}>
-            {status?.checked_today ? '✓ Đã điểm danh hôm nay' : '🎁 Điểm danh nhận thưởng'}
+            {status?.checked_today ? <><CheckOutlined /> Đã điểm danh hôm nay</> : <><GiftOutlined /> Điểm danh nhận thưởng</>}
           </Button>
         </div>
 
         {/* Lucky Spin */}
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
-          <h3 className="font-bold text-gray-900 mb-3">🎡 Vòng quay may mắn</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><PlaySquareOutlined /> Vòng quay may mắn</h3>
           <div className="flex flex-col items-center gap-4">
             <div className="relative w-48 h-48">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10 text-2xl">▼</div>
@@ -98,7 +103,7 @@ export default function Daily() {
 
         {/* Missions */}
         <div>
-          <h3 className="font-bold text-gray-900 mb-3">📋 Nhiệm vụ hàng ngày</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><FileTextOutlined /> Nhiệm vụ hàng ngày</h3>
           <div className="space-y-2">
             {missions.map((m: any) => (
               <div key={m.id} className="flex items-center gap-3 p-3.5 bg-white rounded-xl border border-gray-100">

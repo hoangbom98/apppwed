@@ -25,7 +25,7 @@ export default function CommentItem({ comment, depth = 0 }: { comment: Comment; 
           <p className="text-sm text-gray-100 mt-0.5">{comment.content}</p>
           <p className="text-[10px] text-gray-500 mt-0.5">
             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
-            {comment.likes > 0 && <span className="ml-2">❤️ {comment.likes}</span>}
+            {comment.likes > 0 && <span className="ml-2">{comment.likes}</span>}
           </p>
         </div>
       </div>

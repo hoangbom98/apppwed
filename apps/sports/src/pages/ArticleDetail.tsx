@@ -46,7 +46,7 @@ export default function ArticleDetailPage() {
       <span className="text-xs text-green-400 font-semibold uppercase">{article.category}</span>
       <h1 className="text-xl font-bold mt-1 mb-2">{article.title}</h1>
       <p className="text-xs text-gray-500 mb-4">
-        {article.author?.fullName || 'Ban biên tập'} · {formatDateTime(article.publishedAt || article.createdAt)} · 👁 {article.views}
+        {article.author?.fullName || 'Ban biên tập'} · {formatDateTime(article.publishedAt || article.createdAt)} · {article.views} lượt xem
       </p>
       <div className="prose prose-invert text-sm leading-relaxed text-gray-200" dangerouslySetInnerHTML={{ __html: article.content }} />
 

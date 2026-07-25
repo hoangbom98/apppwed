@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { getWallet, getWalletHistory, createWithdrawal } from '@/api/trade';
 import { useAuthStore } from '@/store/authStore';
 import { fmt, fmtTime } from '@/utils/formatters';
-import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useState } from 'react';
 
 type Mode = 'overview' | 'withdraw';
 
 const WITHDRAW_METHODS = [
-  { id: 'bank',  label: 'Ngân hàng', icon: '🏦', time: '15–60 phút' },
-  { id: 'usdt',  label: 'USDT',      icon: '💵', time: '5–15 phút'  },
+  { id: 'bank',  label: 'Ngân hàng', time: '15–60 phút' },
+  { id: 'usdt',  label: 'USDT',      time: '5–15 phút'  },
 ];
 
 export default function WalletPage() {
@@ -33,9 +33,9 @@ export default function WalletPage() {
     enabled:  !!user,
   });
 
-  const wallet  = walletData?.data ?? walletData ?? null;
-  const balance = parseFloat(wallet?.balance ?? 0);
-  const frozen  = parseFloat(wallet?.frozen  ?? 0);
+  const wallet  = walletData?.data ?? null;
+  const balance = parseFloat(String(wallet?.balance ?? 0));
+  const frozen  = parseFloat(String(wallet?.frozen  ?? 0));
   // Transaction model: id, userId, amount, type, referenceId, referenceType, note, balanceAfter, createdAt
   // No status field — display type-based icon instead
   const history: any[] = histData?.data ?? [];
@@ -43,7 +43,7 @@ export default function WalletPage() {
   const withdrawMut = useMutation({
     mutationFn: (vars: any) => createWithdrawal(vars),
     onSuccess: () => {
-      setMsg('✅ Yêu cầu rút tiền đã gửi. Đang xử lý.');
+      setMsg('Yêu cầu rút tiền đã gửi. Đang xử lý.');
       setAmount('');
       qc.invalidateQueries({ queryKey: ['wallet'] });
     },
@@ -76,7 +76,7 @@ export default function WalletPage() {
             {fmt(balance - frozen, 2)} <span className="text-xl text-gray-400">USD</span>
           </p>
           {frozen > 0 && (
-            <p className="text-xs text-yellow-400 mt-1">🔒 {fmt(frozen, 2)} USD đang khóa</p>
+            <p className="text-xs text-yellow-400 mt-1">{fmt(frozen, 2)} USD đang khóa</p>
           )}
         </div>
         <div className="relative z-10 flex gap-3 mt-5">
@@ -100,8 +100,8 @@ export default function WalletPage() {
       {mode === 'withdraw' && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-white text-base">💸 Rút tiền</h2>
-            <button onClick={() => setMode('overview')} className="text-gray-500 hover:text-white text-xs">✕ Đóng</button>
+            <h2 className="font-bold text-white text-base">Rút tiền</h2>
+            <button onClick={() => setMode('overview')} className="text-gray-500 hover:text-white text-xs">Đóng</button>
           </div>
 
           {/* Method */}
@@ -113,7 +113,6 @@ export default function WalletPage() {
                     ? 'bg-orange-950/40 border-orange-600/50 text-white'
                     : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600'
                 }`}>
-                <p className="text-lg mb-1">{m.icon}</p>
                 <p className="text-[11px] font-semibold">{m.label}</p>
                 <p className="text-[10px] text-gray-500 mt-0.5">{m.time}</p>
               </button>
@@ -159,7 +158,7 @@ export default function WalletPage() {
 
           {msg && (
             <div className={`mb-3 p-3 rounded-xl text-xs font-medium ${
-              msg.startsWith('✅') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
+              msg.startsWith('Yêu cầu') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
             }`}>{msg}</div>
           )}
 

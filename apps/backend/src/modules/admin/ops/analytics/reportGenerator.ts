@@ -3,6 +3,12 @@
 /**
  * ReportGenerator — produces daily operational snapshots across all 5 projects.
  *
+ * v2.1 additions:
+ *  - Per-project P&L breakdown (BET / WIN / FEE / INTEREST / COMMISSION / REBATE)
+ *    sourced from admin_db.transactions grouped by source.
+ *  - ProjectBalance summary (pool position per sub-project).
+ *  - Enhanced Telegram message with P&L table.
+ *
  * Report is stored in admin DB (opsDailyReport) and can be
  * forwarded to Telegram if BOT_TOKEN / CHAT_ID are configured.
  */
@@ -19,6 +25,9 @@ const _safeSum = async (model, field, where = {}) => {
   } catch { return 0; }
 };
 
+/** Sources tracked in P&L report */
+const PNL_SOURCES = ['GAME', 'SPORTS', 'TRADE', 'DATING', 'HUB'];
+
 class ReportGenerator {
   /**
    * @param {object} projectClients  – map: { game: PrismaClient, hub: PrismaClient, ... }
@@ -32,6 +41,63 @@ class ReportGenerator {
       this.projects = { game: projectClients };
     }
     this.admin = adminPrisma;
+  }
+
+  // ── Per-project P&L from admin_db.transactions ───────────────────────────
+  async generatePnL(from: Date, to: Date) {
+    const pnl: Record<string, {
+      totalBet: number; totalWin: number; totalFee: number;
+      totalInterest: number; totalCommission: number; totalRebate: number;
+      netRevenue: number;
+    }> = {};
+
+    for (const source of PNL_SOURCES) {
+      try {
+        const agg = await this.admin.$queryRaw`
+          SELECT
+            SUM(CASE WHEN type = 'bet'        THEN ABS(amount) ELSE 0 END) AS totalBet,
+            SUM(CASE WHEN type = 'win'        THEN ABS(amount) ELSE 0 END) AS totalWin,
+            SUM(CASE WHEN type = 'fee'        THEN ABS(amount) ELSE 0 END) AS totalFee,
+            SUM(CASE WHEN type = 'interest'   THEN ABS(amount) ELSE 0 END) AS totalInterest,
+            SUM(CASE WHEN type = 'commission' THEN ABS(amount) ELSE 0 END) AS totalCommission,
+            SUM(CASE WHEN type = 'rebate'     THEN ABS(amount) ELSE 0 END) AS totalRebate
+          FROM transactions
+          WHERE source = ${source}
+            AND status = 'completed'
+            AND createdAt BETWEEN ${from} AND ${to}
+        `;
+        const row = Array.isArray(agg) ? agg[0] : agg;
+        const totalBet        = Number(row?.totalBet        || 0);
+        const totalWin        = Number(row?.totalWin        || 0);
+        const totalFee        = Number(row?.totalFee        || 0);
+        const totalInterest   = Number(row?.totalInterest   || 0);
+        const totalCommission = Number(row?.totalCommission || 0);
+        const totalRebate     = Number(row?.totalRebate     || 0);
+        // Net revenue = (BET income − WIN payout) + fees + interest − commissions − rebates
+        const netRevenue = (totalBet - totalWin) + totalFee + totalInterest - totalCommission - totalRebate;
+        pnl[source] = { totalBet, totalWin, totalFee, totalInterest, totalCommission, totalRebate, netRevenue };
+      } catch {
+        pnl[source] = { totalBet: 0, totalWin: 0, totalFee: 0, totalInterest: 0, totalCommission: 0, totalRebate: 0, netRevenue: 0 };
+      }
+    }
+
+    return pnl;
+  }
+
+  /** Snapshot of each sub-project's pool position */
+  async getProjectBalances() {
+    try {
+      const rows = await this.admin.projectBalance.findMany({ orderBy: { source: 'asc' } });
+      return rows.map((r: any) => ({
+        source:   r.source,
+        balance:  Number(r.balance),
+        totalBet: Number(r.totalBet),
+        totalWin: Number(r.totalWin),
+        totalFee: Number(r.totalFee),
+      }));
+    } catch {
+      return [];
+    }
   }
 
   // ── Generate + persist daily report ──────────────────────────────────────
@@ -83,6 +149,15 @@ class ReportGenerator {
       safeCount(this.admin.opsCampaignLog, { createdAt: { gte: yesterday } }),
     ]);
 
+    // ── Per-project P&L breakdown (admin_db transactions) ─────────────────
+    const pnl             = await this.generatePnL(yesterday, now);
+    const projectBalances = await this.getProjectBalances();
+
+    // Group totals
+    const totalFee      = Object.values(pnl).reduce((s, p) => s + p.totalFee,      0);
+    const totalInterest = Object.values(pnl).reduce((s, p) => s + p.totalInterest, 0);
+    const totalNetRev   = Object.values(pnl).reduce((s, p) => s + p.netRevenue,    0);
+
     const report = {
       date: todayStr,
       summary: {
@@ -96,6 +171,12 @@ class ReportGenerator {
         withdrawAmount:  withdrawAmt,
         withdrawCount,
         netRevenue:      depositAmt - withdrawAmt,
+        // New Group Finance metrics
+        totalFeeCollected:     totalFee,
+        totalInterestCollected: totalInterest,
+        groupNetRevenue:       totalNetRev,
+        pnlBySource:           pnl,
+        projectBalances,
       },
       operations: {
         ticketsCreated,
@@ -152,16 +233,27 @@ class ReportGenerator {
       .map(([p, s]) => ` • ${p}: ${fmt(s.users)} users (+${fmt(s.newUsers)} mới)`)
       .join('\n');
 
+    // Per-project P&L lines
+    const pnlLines = Object.entries(report.financial.pnlBySource || {})
+      .map(([src, p]) => ` • ${src}: Cược ${fmt(p.totalBet)}đ | Thắng ${fmt(p.totalWin)}đ | Phí ${fmt(p.totalFee)}đ | Net *${fmt(p.netRevenue)}*đ`)
+      .join('\n');
+
     const msg = `
 📊 *Báo cáo ngày ${report.date}*
 
 👤 *Người dùng (tổng):* ${fmt(report.summary.totalUsers)} | Mới ${fmt(report.summary.totalNewUsers)}
 ${projectLines}
 
-💰 *Tài chính (game):*
+💰 *Tài chính nạp/rút:*
  • Nạp: ${fmt(report.financial.depositAmount)}đ (${fmt(report.financial.depositCount)} GD)
  • Rút: ${fmt(report.financial.withdrawAmount)}đ (${fmt(report.financial.withdrawCount)} GD)
- • Net: ${fmt(report.financial.netRevenue)}đ
+
+📈 *P&L tập đoàn (hôm qua):*
+${pnlLines}
+ ─────────────────────────
+ • Phí tổng: *${fmt(report.financial.totalFeeCollected)}*đ
+ • Lãi vay nội bộ: *${fmt(report.financial.totalInterestCollected)}*đ
+ • Net revenue tổng: *${fmt(report.financial.groupNetRevenue)}*đ
 
 🛠 *Vận hành:*
  • Ticket: ${fmt(report.operations.ticketsCreated)} mới / ${fmt(report.operations.ticketsResolved)} giải quyết

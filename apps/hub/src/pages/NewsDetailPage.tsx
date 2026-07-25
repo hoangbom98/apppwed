@@ -25,7 +25,7 @@ export default function NewsDetailPage() {
       <div className="flex gap-4 text-sm text-gray-400">
         {article.author && <span>Tác giả: {article.author}</span>}
         <span>{new Date(article.created_at).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-        <span>👁 {article.views} lượt xem</span>
+        <span>{article.views} lượt xem</span>
       </div>
       <div
         className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"

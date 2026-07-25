@@ -1,24 +1,18 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { Link } from 'react-router-dom';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle, RefreshCw, CreditCard } from 'lucide-react';
-
-// Sports module uses Hub wallet (shared)
-import api from '@/api/client';
-
-const getWallet      = ()              => api.get('/sports/auth/me').then(r => r.data);
-const getWalletHistory = ()            => api.get('/hub/wallet/history').then(r => r.data);
-const createDeposit  = (data: object) => api.post('/hub/wallet/deposit',  data).then(r => r.data);
-const createWithdraw = (data: object) => api.post('/hub/wallet/withdraw', data).then(r => r.data);
+import { getWallet, getWalletHistory, createDeposit, createWithdrawal } from '@/api/sports';
+import { MobileOutlined, DollarCircleOutlined, BankOutlined } from '@ant-design/icons';
 
 type Mode = 'overview' | 'deposit' | 'withdraw';
 
 const QUICK_AMOUNTS = [50_000, 100_000, 200_000, 500_000, 1_000_000, 2_000_000];
-const DEPOSIT_METHODS = [
-  { id:'momo',   label:'MoMo',     icon:'💜', note:'Tức thì' },
-  { id:'zalopay',label:'ZaloPay',  icon:'💙', note:'Tức thì' },
-  { id:'bank',   label:'Ngân hàng',icon:'🏦', note:'5-15 phút' },
+const DEPOSIT_METHODS: { id: string; label: string; note: string; icon: React.ReactNode }[] = [
+  { id:'momo',   label:'MoMo',     note:'Tức thì',   icon:<MobileOutlined style={{ color:'#a50064' }} /> },
+  { id:'zalopay',label:'ZaloPay',  note:'Tức thì',   icon:<DollarCircleOutlined style={{ color:'#0068FF' }} /> },
+  { id:'bank',   label:'Ngân hàng',note:'5-15 phút', icon:<BankOutlined style={{ color:'#1a56db' }} /> },
 ];
 
 export default function WalletPage() {
@@ -35,37 +29,39 @@ export default function WalletPage() {
   });
   const { data: histData, isLoading: histLoading } = useQuery({
     queryKey: ['sports-wallet-history'],
-    queryFn:  getWalletHistory,
+    queryFn:  () => getWalletHistory({ limit: 30 }),
     enabled:  isLoggedIn,
   });
 
-  const balance = data?.user?.balance ?? data?.data?.balance ?? 0;
+  const balance = data?.balance ?? data?.data?.balance ?? 0;
   const history = histData?.data ?? histData?.transactions ?? [];
 
   const depositMut = useMutation({
-    mutationFn: () => createDeposit({ amount: parseFloat(amount), paymentMethod: method }),
-    onSuccess: (d: any) => {
-      setMsg('✅ Tạo đơn nạp tiền thành công!');
+    mutationFn: () => createDeposit({ amount: parseFloat(amount), method }),
+    onSuccess: (_d: any) => {
+      setMsg('Tạo đơn nạp tiền thành công!');
       setAmount('');
       refetch();
     },
-    onError: (e: any) => setMsg(e.response?.data?.message || '❌ Lỗi nạp tiền'),
+    onError: (e: any) => setMsg(e.response?.data?.message || 'Lỗi nạp tiền'),
   });
 
   const withdrawMut = useMutation({
-    mutationFn: () => createWithdraw({ amount: parseFloat(amount), paymentMethod: method }),
+    mutationFn: () => createWithdrawal({ amount: parseFloat(amount) }),
     onSuccess: () => {
-      setMsg('✅ Yêu cầu rút tiền đã gửi!');
+      setMsg('Yêu cầu rút tiền đã gửi!');
       setAmount('');
       refetch();
     },
-    onError: (e: any) => setMsg(e.response?.data?.message || '❌ Lỗi rút tiền'),
+    onError: (e: any) => setMsg(e.response?.data?.message || 'Lỗi rút tiền'),
   });
 
   if (!isLoggedIn) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-        <div className="text-5xl mb-4">🔒</div>
+        <div className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
         <h2 className="text-xl font-bold text-white mb-2">Chưa đăng nhập</h2>
         <p className="text-gray-400 text-sm mb-6">Đăng nhập để xem ví và nạp tiền cá cược</p>
         <Link to="/login" className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl transition-colors">
@@ -109,8 +105,8 @@ export default function WalletPage() {
       {(mode === 'deposit' || mode === 'withdraw') && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-white">{mode === 'deposit' ? '💰 Nạp tiền cá cược' : '💸 Rút tiền'}</h2>
-            <button onClick={() => { setMode('overview'); setMsg(''); }} className="text-gray-500 hover:text-white text-xs">✕</button>
+            <h2 className="font-bold text-white">{mode === 'deposit' ? 'Nạp tiền cá cược' : 'Rút tiền'}</h2>
+            <button onClick={() => { setMode('overview'); setMsg(''); }} className="text-gray-500 hover:text-white text-xs">×</button>
           </div>
 
           {/* Payment method */}
@@ -148,7 +144,7 @@ export default function WalletPage() {
 
           {msg && (
             <div className={`mb-3 p-3 rounded-xl text-xs font-medium ${
-              msg.startsWith('✅') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
+              msg.startsWith('Tạo') || msg.startsWith('Yêu cầu') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
             }`}>{msg}</div>
           )}
 

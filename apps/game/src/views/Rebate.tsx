@@ -5,15 +5,17 @@
  */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Gift, ChevronRight, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Gift, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getRebateStatus, claimRebate, getRebateHistory, getRebateRates } from '@/api/rebate';
 import { Skeleton } from '@/components/common/Skeleton';
 import { formatVND } from '@/utils/dinhDang';
 
-const STATUS_LABELS: Record<number, { label: string; cls: string }> = {
-  0: { label: 'Đang duyệt', cls: 'text-yellow-500 bg-yellow-500/10' },
-  1: { label: 'Đã duyệt',   cls: 'text-green-500  bg-green-500/10'  },
+const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
+  pending:   { label: 'Chờ xử lý',  cls: 'text-yellow-500 bg-yellow-500/10' },
+  claimable: { label: 'Có thể nhận', cls: 'text-blue-400   bg-blue-400/10'   },
+  claimed:   { label: 'Đã nhận',    cls: 'text-green-500  bg-green-500/10'  },
+  expired:   { label: 'Hết hạn',   cls: 'text-gray-400   bg-gray-400/10'   },
 };
 
 export default function Rebate() {
@@ -42,7 +44,7 @@ export default function Rebate() {
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['rebate-status'] });
       qc.invalidateQueries({ queryKey: ['rebate-history'] });
-      toast.success(`Đã nhận hoàn trả ${formatVND(res?.data?.amount || 0)}`);
+      toast.success(`Đã nhận hoàn trả ${formatVND((res as any)?.data?.amount || 0)}`);
     },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Có lỗi xảy ra'),
   });
@@ -59,8 +61,7 @@ export default function Rebate() {
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3"
            style={{ background: 'var(--game-primary)' }}>
-        <button onClick={() => history.length > 0 ? null : window.history.back()}
-                className="p-1 text-white">
+        <button onClick={() => window.history.back()} className="p-1 text-white">
           <ChevronRight className="rotate-180" size={20} />
         </button>
         <h1 className="text-white font-bold text-base flex-1">Hoàn trả hàng ngày</h1>
@@ -132,24 +133,24 @@ export default function Rebate() {
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
             </div>
-          ) : history.length === 0 ? (
+          ) : histList.length === 0 ? (
             <div className="text-center py-16 text-gray-500 text-sm">Chưa có lịch sử</div>
           ) : (
             <div className="space-y-2">
-              {history.map((item: any) => (
+              {histList.map((item: any) => (
                 <div key={item.id} className="game-card rounded-xl p-3 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-400">{item.createdAt?.slice(0, 16)}</p>
                     <p className="text-sm font-semibold text-white mt-0.5">
-                      Cược: {formatVND(item.betAmount)} · Tỷ lệ: {item.rate}
+                      Cược: {formatVND(item.validBet ?? item.betAmount)} · Tỷ lệ: {(item.rate * 100).toFixed(2)}%
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold" style={{ color: 'var(--game-accent)' }}>
                       +{formatVND(item.amount)}
                     </p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${STATUS_LABELS[item.status]?.cls}`}>
-                      {STATUS_LABELS[item.status]?.label}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${STATUS_LABELS[item.status]?.cls ?? 'bg-gray-500/10 text-gray-400'}`}>
+                      {STATUS_LABELS[item.status]?.label ?? item.status}
                     </span>
                   </div>
                 </div>

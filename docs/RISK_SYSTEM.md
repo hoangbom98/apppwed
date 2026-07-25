@@ -34,7 +34,7 @@ Hệ thống **Autonomous Risk Detection & Response** phát hiện và can thi�
 ## 📂 Cấu trúc code
 
 ```
-code/backend/src/
+apps/backend/src/
 ├── risk/                          ← 🆕 Risk detector modules
 │   ├── transactionMonitor.js      — phát hiện giao dịch bất thường
 │   ├── adaptiveLimits.js          — điều chỉnh hạn mức động
@@ -70,7 +70,7 @@ code/backend/src/
 config/database/
 └── risk_migration.sql             ← 🆕 Migration SQL
 
-code/backend/prisma/admin/
+apps/backend/prisma/admin/
 └── schema.prisma                  ← 🔄 Extended with 4 new risk tables
 ```
 
@@ -87,7 +87,7 @@ mysql -u root -p admin_db < config/database/risk_migration.sql
 ### 2. Tạo Prisma client mới
 
 ```bash
-cd code/backend
+cd apps/backend
 npm install geoip-lite  # optional but recommended
 npx prisma generate --schema=./prisma/admin/schema.prisma
 ```
@@ -357,7 +357,7 @@ curl -X POST http://localhost:3000/api/game/auth/login \
 ```bash
 # Ensure TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set
 node -e "
-const alertHelper = require('./code/backend/src/risk/alertHelper');
+const alertHelper = require('./apps/backend/src/risk/alertHelper');
 alertHelper.sendAlert('🧪 Test alert from risk system', 'high');
 "
 # Expected: Telegram message received

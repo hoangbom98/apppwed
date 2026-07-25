@@ -4,7 +4,7 @@ import { useCallStore } from '@/store/callStore';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { useQuery } from '@tanstack/react-query';
 import { getUserById } from '@/api/users';
-import { Phone, Mic, MicOff, Camera, CameraOff, Gift, RotateCcw } from 'lucide-react';
+import { Phone, Mic, MicOff, Camera, CameraOff, Gift } from 'lucide-react';
 import { formatDuration } from '@/utils/formatters';
 
 export default function VideoCall() {

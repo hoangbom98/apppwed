@@ -27,7 +27,7 @@ function StatBar({ label, home, away }: { label: string; home: number; away: num
 }
 
 const EVENT_ICONS: Record<string, string> = {
-  goal: '⚽', card: '🟨', substitution: '↕️', var: '📺', penalty: '⚽', red_card: '🟥',
+  goal: 'Bàn thắng', card: 'Thẻ vàng', substitution: 'Thay người', var: 'VAR', penalty: 'Penalty', red_card: 'Thẻ đỏ',
 };
 
 export default function MatchDetailPage() {
@@ -49,9 +49,11 @@ export default function MatchDetailPage() {
     socket.emit('join_match', matchId);
     const onUpdate = () => qc.invalidateQueries({ queryKey: ['match', matchId] });
     window.addEventListener('sports:match_update', onUpdate);
+    window.addEventListener('socket:match_update', onUpdate);
     return () => {
       socket.emit('leave_match', matchId);
       window.removeEventListener('sports:match_update', onUpdate);
+      window.removeEventListener('socket:match_update', onUpdate);
     };
   }, [matchId, qc]);
 

@@ -291,3 +291,6 @@ class WalletService {
 }
 
 module.exports = WalletService;
+
+// Named export for TypeScript `import { WalletService } from '...'` consumers
+export { WalletService };

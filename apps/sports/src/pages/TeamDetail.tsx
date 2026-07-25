@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getTeam, getMatches } from '../api/sports';
 import { useSportsStore } from '../store/sportsStore';
 import MatchCard from '../components/MatchCard';
-import { ChevronLeft, Star, Calendar, Trophy, Users } from 'lucide-react';
+import { ChevronLeft, Star, Calendar, Trophy } from 'lucide-react';
 
 type Tab = 'matches' | 'info';
 
@@ -78,7 +78,7 @@ export default function TeamDetailPage() {
             <h2 className="text-xl font-black text-white">{team.name}</h2>
             {team.country && <p className="text-sm text-gray-400 mt-0.5">🌍 {team.country}</p>}
             {team.founded && <p className="text-xs text-gray-500 mt-0.5">Thành lập: {team.founded}</p>}
-            {team.stadium && <p className="text-xs text-gray-500 mt-0.5">🏟 {team.stadium}</p>}
+            {team.stadium && <p className="text-xs text-gray-500 mt-0.5">{team.stadium}</p>}
           </div>
         </div>
         {team.description && (

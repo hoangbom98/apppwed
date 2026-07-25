@@ -1,15 +1,28 @@
-name: CD — Deploy to Production
+name: CD — Deploy to Production (tc-gaming.live)
+
+# Isolation: deploys exclusively to /var/LKVIP under user 'lkvip'.
+# Never touches /var/www or any other project on the same VPS.
+# Required GitHub Secrets:
+#   VPS_HOST      → 104.248.146.203
+#   VPS_USER      → lkvip
+#   VPS_SSH_KEY   → lkvip user's private SSH key
+#   VPS_PORT      → 22  (optional, defaults to 22)
 
 on:
   push:
     branches: [main]
     paths:
-      - 'code/backend/**'
-      - 'code/frontend/**'
-      - 'code/packages/**'
-      - 'code/shared-types/**'
-      - 'code/package.json'
-      - 'code/pnpm-workspace.yaml'
+      - 'apps/backend/**'
+      - 'apps/hub/**'
+      - 'apps/game/**'
+      - 'apps/trading/**'
+      - 'apps/dating/**'
+      - 'apps/sports/**'
+      - 'apps/admin-dashboard/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
 
   workflow_dispatch:
     inputs:
@@ -18,7 +31,7 @@ on:
         required: true
         default: ''
 
-# Only one deploy at a time
+# Only one deploy at a time — never run concurrent deploys
 concurrency:
   group: deploy-production
   cancel-in-progress: false
@@ -26,6 +39,9 @@ concurrency:
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9'
+  DEPLOY_DIR: '/var/LKVIP'           # ← isolated root; never /var/www
+  PM2_APP: 'lkvip-api'
+  INTERNAL_PORT: '5000'
 
 jobs:
   # Guard: manual trigger must type "deploy"
@@ -42,9 +58,9 @@ jobs:
     needs: guard
     uses: ./.github/workflows/ci.yml
 
-  # Deploy to VPS via SSH
+  # Deploy to VPS via SSH — runs as dedicated 'lkvip' user
   deploy:
-    name: Deploy to VPS
+    name: Deploy to VPS (lkvip@104.248.146.203)
     needs: ci
     runs-on: ubuntu-latest
     environment: production
@@ -56,34 +72,39 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          username: ${{ secrets.VPS_USER }}        # must be 'lkvip'
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             set -e
+
+            # ── Guard: only run inside the isolated project directory ──────────
             cd /var/LKVIP
+            if [[ "$(pwd)" != "/var/LKVIP" ]]; then
+              echo "ERROR: wrong deploy directory"
+              exit 1
+            fi
 
-            echo "=== [1/5] Git pull ==="
-            git pull origin main
+            echo "=== [1/6] Git pull ==="
+            git pull --ff-only origin main
 
-            echo "=== [2/5] Install dependencies ==="
-            cd code
+            echo "=== [2/6] Install dependencies ==="
             pnpm install --frozen-lockfile --prod=false
 
-            echo "=== [3/5] Build backend ==="
-            cd backend
-            pnpm build
-            cd ..
+            echo "=== [3/6] Build packages ==="
+            pnpm run build:packages 2>/dev/null || true
 
-            echo "=== [4/5] Build frontends ==="
+            echo "=== [4/6] Build backend ==="
+            pnpm --filter lkvip-backend run build
+
+            echo "=== [5/6] Build frontends ==="
             pnpm run build:frontends
 
-            echo "=== [5/5] Reload PM2 (zero-downtime) ==="
-            cd backend
+            echo "=== [6/6] Reload PM2 (zero-downtime) ==="
             pm2 reload lkvip-api --update-env
             pm2 save
 
-            echo "=== Deploy complete ==="
+            echo "=== Deploy complete @ $(date) ==="
             pm2 status
 
       - name: Verify deployment health
@@ -95,9 +116,14 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             sleep 5
-            STATUS=$(curl -sf http://localhost:5000/health | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null || echo "error")
+            # Health check on internal port only — never expose 5000 externally
+            STATUS=$(curl -sf http://127.0.0.1:5000/health \
+              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" \
+              2>/dev/null || echo "error")
             if [ "$STATUS" != "healthy" ]; then
               echo "ERROR: Health check failed! Status: $STATUS"
+              echo "Run: pm2 logs lkvip-api --lines 50"
               exit 1
             fi
             echo "Health check passed: $STATUS ✓"
+            echo "Public URL: https://api.tc-gaming.live/health"

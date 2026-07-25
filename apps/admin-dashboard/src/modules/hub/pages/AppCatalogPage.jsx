@@ -15,10 +15,10 @@ const catalogApi = {
 
 // ── Color swatch map ───────────────────────────────────────────────────────────
 const APP_META = {
-  game:    { icon: '🎰', bg: 'linear-gradient(135deg,#052e16,#14532d)', label: 'Game' },
-  dating:  { icon: '💘', bg: 'linear-gradient(135deg,#500724,#831843)', label: 'Dating' },
-  sports:  { icon: '⚽', bg: 'linear-gradient(135deg,#052e16,#065f46)', label: 'Sports' },
-  trade:   { icon: '📈', bg: 'linear-gradient(135deg,#172554,#1e3a8a)', label: 'Trade' },
+  game:    { bg: 'linear-gradient(135deg,#052e16,#14532d)', label: 'Game' },
+  dating:  { bg: 'linear-gradient(135deg,#500724,#831843)', label: 'Dating' },
+  sports:  { bg: 'linear-gradient(135deg,#052e16,#065f46)', label: 'Sports' },
+  trade:   { bg: 'linear-gradient(135deg,#172554,#1e3a8a)', label: 'Trade' },
 };
 
 // ── Toast ──────────────────────────────────────────────────────────────────────
@@ -35,14 +35,11 @@ function Toast({ msg, type }) {
 
 // ── App card (list view) ────────────────────────────────────────────────────────
 function AppCard({ app, onEdit }) {
-  const meta = APP_META[app.appId] ?? { icon: '📦', bg: '#374151', label: app.appId };
+  const meta = APP_META[app.appId] ?? { bg: '#374151', label: app.appId };
   return (
     <div className="border border-gray-800 rounded-xl overflow-hidden">
       {/* Header gradient */}
       <div style={{ background: meta.bg }} className="px-5 py-4 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center text-2xl flex-shrink-0">
-          {meta.icon}
-        </div>
         <div className="flex-1 min-w-0">
           <p className="text-white font-bold text-base leading-tight truncate">{app.name}</p>
           <p className="text-white/60 text-xs mt-0.5">{app.category ?? meta.label}</p>
@@ -67,8 +64,8 @@ function AppCard({ app, onEdit }) {
           <span className="text-gray-400 truncate flex-1 font-mono">{app.iosLink || '—'}</span>
         </div>
         <div className="flex items-center gap-3 pt-1 text-xs text-gray-500">
-          <span>⭐ {parseFloat(app.rating).toFixed(1)}</span>
-          <span>⬇ {app.downloads ?? '—'}</span>
+          <span>{parseFloat(app.rating).toFixed(1)} sao</span>
+          <span>{app.downloads ?? '—'} lượt tải</span>
           <span className="ml-auto">{app.developer ?? ''}</span>
         </div>
       </div>
@@ -78,7 +75,7 @@ function AppCard({ app, onEdit }) {
           onClick={() => onEdit(app)}
           className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold rounded-lg transition-colors"
         >
-          ✏️ Chỉnh sửa
+          Chỉnh sửa
         </button>
       </div>
     </div>
@@ -114,7 +111,7 @@ function EditModal({ app, onClose, onSave, isSaving }) {
             <h2 className="text-white font-bold text-lg">Chỉnh sửa App</h2>
             <p className="text-gray-500 text-xs mt-0.5 font-mono">{app.appId}</p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-200 text-xl leading-none">✕</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-200 text-xl leading-none">×</button>
         </div>
 
         {/* Form */}
@@ -168,7 +165,7 @@ function EditModal({ app, onClose, onSave, isSaving }) {
             disabled={isSaving}
             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
           >
-            {isSaving ? 'Đang lưu...' : '💾 Lưu thay đổi'}
+            {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
           </button>
           <button
             onClick={onClose}
@@ -203,7 +200,7 @@ export default function AppCatalogPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['adminAppCatalog'] });
       setEditing(null);
-      showToast('✅ Đã lưu thông tin app');
+      showToast('Đã lưu thông tin app');
     },
     onError: (err) => showToast(err?.response?.data?.message || 'Lỗi khi lưu', 'error'),
   });
@@ -229,7 +226,7 @@ export default function AppCatalogPage() {
 
       {/* Info banner */}
       <div className="bg-blue-950/50 border border-blue-800 rounded-xl px-5 py-3 text-xs text-blue-300">
-        💡 Thay đổi tại đây sẽ ngay lập tức hiển thị trên trang <strong>/download</strong> của Hub.
+        Thay đổi tại đây sẽ ngay lập tức hiển thị trên trang <strong>/download</strong> của Hub.
         Hub DownloadPage tự động fetch từ <code className="font-mono">/api/hub/app-catalog</code> và fallback về env vars nếu API lỗi.
       </div>
 
@@ -249,7 +246,7 @@ export default function AppCatalogPage() {
           ))}
           {apps.length === 0 && (
             <div className="md:col-span-2 py-16 text-center text-gray-500">
-              <p className="text-4xl mb-4">📦</p>
+              <p className="text-3xl mb-4 text-gray-600">—</p>
               <p className="font-semibold">Chưa có app nào trong catalog</p>
               <p className="text-sm mt-1">Chạy <code className="font-mono text-blue-400">npm run seed:ui-config</code> để thêm dữ liệu mẫu</p>
             </div>

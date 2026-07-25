@@ -17,9 +17,14 @@ export default function Agent() {
     enabled: !!user,
   });
 
+  const referralLink = data?.referralCode
+    ? `${window.location.origin}/register?ref=${data.referralCode}`
+    : null;
+
   const copyLink = () => {
-    if (data?.referral_link) {
-      navigator.clipboard.writeText(data.referral_link);
+    const link = referralLink;
+    if (link) {
+      navigator.clipboard.writeText(link);
       setCopied(true);
       toast.success('Đã sao chép link giới thiệu!');
       setTimeout(() => setCopied(false), 2500);
@@ -47,12 +52,12 @@ export default function Agent() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-          <p className="text-3xl font-black text-accent">{data?.total_referred || 0}</p>
+          <p className="text-3xl font-black text-accent">{data?.referralCount || 0}</p>
           <p className="text-xs text-gray-500 mt-1">Người được mời</p>
         </div>
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
           <p className="text-xl font-black text-primary dark:text-secondary">
-            {formatVND(data?.total_commission || 0)}
+            {formatVND(Number(data?.totalCommission ?? 0))}
           </p>
           <p className="text-xs text-gray-500 mt-1">Tổng hoa hồng</p>
         </div>
@@ -63,7 +68,7 @@ export default function Agent() {
         <p className="text-xs text-gray-500 mb-2">Mã giới thiệu của bạn</p>
         <div className="flex items-center gap-2 mb-3">
           <code className="text-xl font-black text-gray-900 dark:text-white tracking-widest flex-1">
-            {user.referral_code}
+            {(user as any).referral_code || (user as any).referralCode || '—'}
           </code>
           <button
             onClick={copyLink}
@@ -75,8 +80,8 @@ export default function Agent() {
             }
           </button>
         </div>
-        {data?.referral_link && (
-          <p className="text-[10px] text-gray-400 break-all">{data.referral_link}</p>
+        {referralLink && (
+          <p className="text-[10px] text-gray-400 break-all">{referralLink}</p>
         )}
       </div>
 
@@ -85,7 +90,7 @@ export default function Agent() {
         <TrendingUp className="w-6 h-6 text-accent shrink-0" />
         <div>
           <p className="text-sm font-bold text-gray-900 dark:text-white">Tỷ lệ hoa hồng</p>
-          <p className="text-xs text-gray-500">Nhận {data?.agent?.commission_rate || 2}% từ giao dịch của người bạn mời</p>
+          <p className="text-xs text-gray-500">Nhận {data?.commissionRate ? (Number(data.commissionRate) * 100).toFixed(0) : 2}% từ giao dịch của người bạn mời</p>
         </div>
       </div>
 

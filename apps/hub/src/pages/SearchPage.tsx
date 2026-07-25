@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { search as apiSearch } from '../api/hub';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { AutoComplete } from '@ui/pwa/autoComplete/AutoComplete';
-import type { AutoCompleteItem } from '@ui/pwa/autoComplete/useAutoComplete';
+import { AutoComplete } from '@ui';
+import type { AutoCompleteItem } from '@ui';
 import Spinner from '../components/Spinner';
 import Card from '../components/Card';
 

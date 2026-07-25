@@ -4,12 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { getAlbum, getProfileStats } from '@/api/profile';
 import { Settings, Edit, Crown, Shield, Grid3X3 } from 'lucide-react';
+import {
+  CreditCardOutlined, CrownOutlined, GiftOutlined, RocketOutlined,
+  CalendarOutlined, UsergroupAddOutlined, GlobalOutlined,
+  SettingOutlined, MobileOutlined, DollarOutlined, DiamondOutlined,
+} from '@ant-design/icons';
 import { VIP_NAMES } from '@/utils/constants';
 import { formatAge } from '@/utils/formatters';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const { data: albumData } = useQuery({ queryKey: ['album-me'], queryFn: () => getAlbum() });
   const { data: statsData } = useQuery({ queryKey: ['profile-stats-me'], queryFn: getProfileStats });
   const photos = albumData?.photos || [];
@@ -75,11 +80,11 @@ export default function Profile() {
         {/* Coin row */}
         <div className="flex justify-around mt-4">
           <div className="flex items-center gap-1.5 bg-amber-50 rounded-xl px-4 py-2">
-            <span>🪙</span>
+            <DollarOutlined className="text-amber-500" />
             <span className="font-bold text-amber-700 text-sm">{user.coins.toLocaleString()} xu</span>
           </div>
           <div className="flex items-center gap-1.5 bg-blue-50 rounded-xl px-4 py-2">
-            <span>💎</span>
+            <DiamondOutlined className="text-blue-500" />
             <span className="font-bold text-blue-700 text-sm">{user.diamonds.toLocaleString()} kim cương</span>
           </div>
         </div>
@@ -87,17 +92,17 @@ export default function Profile() {
 
       {/* Quick menu */}
       <div className="px-4 mt-5 grid grid-cols-4 gap-3">
-        {[
-          { icon: '💳', label: 'Ví', path: '/wallet' },
-          { icon: '👑', label: 'VIP', path: '/vip' },
-          { icon: '🎁', label: 'Cửa hàng', path: '/shop' },
-          { icon: '🎯', label: 'Level', path: '/level' },
-          { icon: '📅', label: 'Điểm danh', path: '/daily' },
-          { icon: '🤝', label: 'Giới thiệu', path: '/referral' },
-          { icon: '🌐', label: 'Sáng tạo', path: '/creator' },
-          { icon: '⚙️', label: 'Cài đặt', path: '/settings' },
-          { icon: '📱', label: 'Tải App', path: '/download' },
-        ].map(item => (
+        {([
+          { icon: <CreditCardOutlined />,      label: 'Ví',         path: '/wallet' },
+          { icon: <CrownOutlined />,           label: 'VIP',        path: '/vip' },
+          { icon: <GiftOutlined />,            label: 'Cửa hàng',   path: '/shop' },
+          { icon: <RocketOutlined />,          label: 'Level',      path: '/level' },
+          { icon: <CalendarOutlined />,        label: 'Điểm danh',  path: '/daily' },
+          { icon: <UsergroupAddOutlined />,    label: 'Giới thiệu', path: '/referral' },
+          { icon: <GlobalOutlined />,          label: 'Sáng tạo',   path: '/creator' },
+          { icon: <SettingOutlined />,         label: 'Cài đặt',    path: '/settings' },
+          { icon: <MobileOutlined />,          label: 'Tải App',    path: '/download' },
+        ] as { icon: React.ReactNode; label: string; path: string }[]).map(item => (
           <button key={item.path} onClick={() => navigate(item.path)}
             className="flex flex-col items-center gap-1.5 p-3 bg-gray-50 hover:bg-pink-50 rounded-2xl transition-colors">
             <span className="text-2xl">{item.icon}</span>

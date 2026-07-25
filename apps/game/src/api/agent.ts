@@ -1,4 +1,4 @@
-import api from './httpClient';
-
-export const getAgentInfo  = () => api.get('/game/agent/info').then(r => r.data.data);
-export const getReferrals  = () => api.get('/game/agent/referrals').then(r => r.data.data);
+// game/src/api/agent.ts
+// Canonical agent API — re-exports everything from agencyLegacy + adds extra helpers.
+// All views should import from this file, not agencyLegacy directly.
+export * from './agencyLegacy';

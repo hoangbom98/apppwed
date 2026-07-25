@@ -17,6 +17,19 @@ const agentCtrl     = require('../controllers/agentController');
 const checkinCtrl   = require('../controllers/checkinController');
 const missionCtrl   = require('../controllers/missionController');
 const spinCtrl      = require('../controllers/spinController');
+const rebateCtrl    = require('../controllers/rebateController');
+const yuebaoCtrl    = require('../controllers/savingsVaultController');
+const miningCtrl    = require('../controllers/miningController');
+const statsCtrl     = require('../controllers/statisticsController');
+const giftCodeCtrl  = require('../controllers/giftCodeController');
+
+// ── Bank Accounts (protected) ─────────────────────────────────────
+const bankAccCtrl = require('../../../shared/controllers/bankAccountController');
+router.get('/bank-accounts',              auth, bankAccCtrl.list);
+router.post('/bank-accounts',             auth, bankAccCtrl.create);
+router.patch('/bank-accounts/:id',        auth, bankAccCtrl.update);
+router.put('/bank-accounts/:id/default',  auth, bankAccCtrl.setDefault);
+router.delete('/bank-accounts/:id',       auth, bankAccCtrl.remove);
 
 // ── Autocomplete (public, rate-limited by global middleware) ──────
 router.get('/autocomplete', autocompleteCtrl.autocomplete);
@@ -47,6 +60,8 @@ router.get('/wallet/deposits',         auth, walletCtrl.getDeposits);
 router.post('/wallet/deposit',         auth, walletCtrl.createDeposit);
 router.get('/wallet/withdraws',        auth, walletCtrl.getWithdraws);
 router.post('/wallet/withdraw',        auth, walletCtrl.createWithdraw);
+router.post('/wallet/transfer',        auth, walletCtrl.transfer);
+router.post('/wallet/transfer-user',   auth, walletCtrl.transferUser);
 
 router.post('/promotions/:id/claim', auth, gameCtrl.claimPromotion);
 router.get('/promotions/my-claims',  auth, gameCtrl.getMyClaims);
@@ -72,6 +87,15 @@ if (process.env.ENABLE_2FA === 'true') {
   router.post('/auth/2fa/verify',   auth, twoFACtrl.verify);
   router.get('/auth/2fa/backup',    auth, twoFACtrl.regenerateBackupCodes);
 }
+
+// ── Admin: Statistics ─────────────────────────────────────────────
+router.get('/admin/statistics/overview',       auth, adminGuard, statsCtrl.getOverview);
+router.get('/admin/statistics/finance',        auth, adminGuard, statsCtrl.getFinance);
+router.get('/admin/statistics/team',           auth, adminGuard, statsCtrl.getTeam);
+router.get('/admin/statistics/profit',         auth, adminGuard, statsCtrl.getProfit);
+router.get('/admin/statistics/users',          auth, adminGuard, statsCtrl.getUserStats);
+router.get('/admin/statistics/recharge-trend', auth, adminGuard, statsCtrl.getRechargeTrend);
+router.get('/admin/statistics/bet-trend',      auth, adminGuard, statsCtrl.getBetTrend);
 
 // ── Admin: Rounds (game sessions) ────────────────────────────────
 router.get('/admin/rounds',             auth, adminGuard, gameAdminCtrl.listRounds);
@@ -147,8 +171,16 @@ router.get('/lottery/draws/current/:typeId',     lotteryCtrl.getCurrentDraw);
 router.get('/lottery/draws/:id/result',          lotteryCtrl.getResult);
 router.post('/lottery/bet',                      auth, lotteryCtrl.placeBet);
 router.get('/lottery/my-bets',                   auth, lotteryCtrl.getMyBets);
+// Admin lottery endpoints — must come before parameterised /:id routes
+router.get('/lottery/admin/bets',                auth, adminGuard, lotteryCtrl.listAdminBets);
 router.post('/lottery/admin/draws',              auth, adminGuard, lotteryCtrl.createDraw);
 router.post('/lottery/admin/draws/:id/result',   auth, adminGuard, lotteryCtrl.setResult);
+router.post('/lottery/admin/draws/:id/cancel',   auth, adminGuard, lotteryCtrl.cancelDraw);
+
+// ── Lottery Types CRUD (admin) ────────────────────────────────────────────────
+router.post('/admin/lottery/types',              auth, adminGuard, lotteryCtrl.createType);
+router.patch('/admin/lottery/types/:id',         auth, adminGuard, lotteryCtrl.updateType);
+router.delete('/admin/lottery/types/:id',        auth, adminGuard, lotteryCtrl.deleteType);
 
 // ── Sessions ──────────────────────────────────────────────────────
 router.post('/sessions/launch',                  auth, sessionCtrl.launch);
@@ -186,6 +218,30 @@ router.get('/wheel',           httpCache(300), spinCtrl.getWheel);
 router.get('/wheel/my-spins',  auth, spinCtrl.getMySpins);
 router.post('/wheel/spin',     auth, spinCtrl.spin);
 router.get('/wheel/history',   auth, spinCtrl.getHistory);
+
+// ── Rebate / Fanshui ──────────────────────────────────────────────
+router.get('/rebate/rates',    rebateCtrl.getRates);              // public — no auth
+router.get('/rebate/status',   auth, rebateCtrl.getStatus);
+router.post('/rebate/claim',   auth, rebateCtrl.claim);
+router.get('/rebate/history',  auth, rebateCtrl.getHistory);
+
+// ── Savings Vault (Số dư Bảo) ────────────────────────────────────────────
+router.get('/savings-vault/products',  httpCache(300), yuebaoCtrl.getProducts);  // public
+router.get('/savings-vault/my',        auth, yuebaoCtrl.getMy);
+router.post('/savings-vault/invest',   auth, yuebaoCtrl.invest);
+router.post('/savings-vault/withdraw', auth, yuebaoCtrl.withdraw);
+
+// ── Mining Machines ───────────────────────────────────────────────
+router.get('/mining/machines',     httpCache(300), miningCtrl.getMachines);  // public
+router.get('/mining/machines/:id', httpCache(300), miningCtrl.getMachine);   // public
+router.get('/mining/my',           auth, miningCtrl.getMy);
+router.post('/mining/invest',      auth, miningCtrl.invest);
+
+// ── Gift Code ─────────────────────────────────────────────────────
+// POST /game/giftcode/redeem — user redeems a code (authenticated)
+// GET  /game/giftcode/history — user's redemption history
+router.post('/giftcode/redeem',  auth, giftCodeCtrl.redeem);
+router.get('/giftcode/history',  auth, giftCodeCtrl.getHistory);
 
 // ── Agent / Commission ────────────────────────────────────────────
 router.get('/agent/check',       auth, agentCtrl.checkAgent);

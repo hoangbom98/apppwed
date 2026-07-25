@@ -11,7 +11,7 @@ const CATEGORIES = ['Hẹn hò', 'Tâm sự', 'Game', 'Âm nhạc', 'Nghệ thu�
 
 export default function Broadcast() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  useAuthStore();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
 

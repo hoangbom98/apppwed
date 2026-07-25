@@ -3,9 +3,8 @@
 
 'use strict';
 const crypto = require('crypto');
-const VirtualAccountService = require('../services/virtualAccountService');
-const notifSvc = require('../../../shared/services/notificationService');
-const logger   = require('../../../shared/services/logger');
+const { enqueueLkvipDepositWebhook, enqueueLkvipMomoWebhook } = require('../../workers/lkvip-webhook-retry.worker');
+const logger = require('../../../shared/services/logger');
 
 /**
  * Verify HMAC-SHA256 signature from webhook payload.
@@ -34,6 +33,7 @@ exports.handleDepositWebhook = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid amount' });
     }
 
+    // 1. Verify signature BEFORE enqueuing — reject bad requests immediately
     const webhookSecret = process.env.LKVIP_WEBHOOK_SECRET;
     try {
       verifyWebhookSignature(
@@ -46,19 +46,15 @@ exports.handleDepositWebhook = async (req, res) => {
       return res.status(sigErr.status || 401).json({ success: false, error: sigErr.message });
     }
 
-    const vaService = new VirtualAccountService(req.prisma);
-    const result    = await vaService.confirmDeposit(vaNumber, parseFloat(amount), transactionRef);
-
-    notifSvc.sendToUser(result.user.id, 'balance:update', {
-      balance:     Number(result.user.balance),
-      transaction: result.transaction,
-    });
-    notifSvc.sendToUser(result.user.id, 'notification', {
-      title:   'Nạp tiền thành công',
-      content: `${parseFloat(amount).toLocaleString('vi-VN')} VND đã được cộng vào tài khoản`,
+    // 2. Enqueue for async processing — acknowledge gateway immediately (prevents timeout + duplicate retry from gateway)
+    await enqueueLkvipDepositWebhook({
+      vaNumber,
+      amount:         parseFloat(amount),
+      transactionRef: transactionRef || `va_${vaNumber}_${Date.now()}`,
+      receivedAt:     new Date().toISOString(),
     });
 
-    logger.info(`[LKvip] Deposit OK vaNumber=${vaNumber} amount=${amount} userId=${result.user.id}`);
+    logger.info(`[LKvip] Deposit webhook enqueued vaNumber=${vaNumber} amount=${amount}`);
     return res.status(200).json({ success: true, message: 'OK' });
   } catch (err) {
     logger.error(`[LKvip] Deposit webhook error: ${err.message}`);
@@ -75,13 +71,13 @@ exports.handleMomoWebhook = async (req, res) => {
       message, extraData, signature,
     } = req.body;
 
-    // MoMo sends resultCode=0 for success
+    // MoMo sends resultCode=0 for success — respond 200 regardless, MoMo requirement
     if (resultCode !== 0) {
       logger.warn(`[LKvip] MoMo IPN non-zero resultCode=${resultCode} orderId=${orderId}`);
-      return res.status(200).json({ success: false, message }); // Always 200 to MoMo
+      return res.status(200).json({ success: false, message });
     }
 
-    // Verify MoMo HMAC signature
+    // 1. Verify MoMo HMAC signature BEFORE enqueuing
     const momoSecret = process.env.MOMO_SECRET_KEY;
     if (momoSecret) {
       const rawSignature = [
@@ -101,7 +97,7 @@ exports.handleMomoWebhook = async (req, res) => {
       }
     }
 
-    // extraData contains userId encoded as base64 JSON by our deposit initiation
+    // 2. Decode userId from extraData
     let userId = null;
     try {
       if (extraData) {
@@ -115,28 +111,17 @@ exports.handleMomoWebhook = async (req, res) => {
       return res.status(200).json({ success: false, error: 'Cannot resolve user' });
     }
 
-    // Credit user balance
-    const depositAmount = parseFloat(amount);
-    await req.prisma.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { id: userId },
-        data:  { balance: { increment: depositAmount }, totalDepositToday: { increment: depositAmount } },
-      });
-      await tx.lkvipTransaction.create({
-        data: {
-          userId,
-          type:         'deposit',
-          amount:       depositAmount,
-          referenceType: 'momo',
-          referenceId:  orderId,
-          description:  `Nạp tiền MoMo orderId=${orderId}`,
-          status:       'completed',
-        },
-      });
+    // 3. Enqueue for async processing — idempotency guaranteed by orderId jobId dedup
+    await enqueueLkvipMomoWebhook({
+      orderId,
+      userId,
+      amount:      parseFloat(amount),
+      partnerCode: partnerCode || '',
+      requestId:   requestId  || '',
+      receivedAt:  new Date().toISOString(),
     });
 
-    notifSvc.sendToUser(userId, 'balance:update', { balance: null });
-    logger.info(`[LKvip] MoMo IPN OK orderId=${orderId} userId=${userId} amount=${amount}`);
+    logger.info(`[LKvip] MoMo IPN enqueued orderId=${orderId} userId=${userId} amount=${amount}`);
     return res.status(200).json({ success: true, message: 'OK' });
   } catch (err) {
     logger.error(`[LKvip] MoMo webhook error: ${err.message}`);

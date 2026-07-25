@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getShorts, likeShort, shareShort } from '@/api/shorts';
 import { useAuthStore } from '@/store/authStore';
-import { Heart, MessageCircle, Share2, Gift, Music, Crown, Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Gift, Music, Crown, Volume2, VolumeX, Pause } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
 
 // VIP prompt overlay — based on applive18 video_detail.html pattern
@@ -173,7 +173,7 @@ function ShortItem({ short, isActive }: { short: any; isActive: boolean }) {
         <div className="flex items-center gap-2 text-white/80 text-xs">
           <Music size={12} />
           {/* marquee is non-standard; use scrolling text div instead */}
-          <span className="truncate max-w-[180px] text-xs overflow-hidden inline-block" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{short.music_name || '🎵 Nhạc gốc'}</span>
+          <span className="truncate max-w-[180px] text-xs overflow-hidden inline-block" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{short.music_name || 'Nhạc gốc'}</span>
         </div>
       </div>
 

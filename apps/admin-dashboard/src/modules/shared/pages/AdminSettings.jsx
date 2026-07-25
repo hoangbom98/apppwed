@@ -129,8 +129,8 @@ function TabGeneral() {
   const reset = () => setForm(null);
 
   const saveMut = useSaveSetting(
-    () => { message.success('✅ Đã lưu cài đặt chung'); setForm(null); },
-    (e) => { message.error(`❌ ${e}`); },
+    () => { message.success('Đã lưu cài đặt chung'); setForm(null); },
+    (e) => { message.error(String(e)); },
   );
 
   const set = (k, v) => setForm(f => ({ ...(f ?? merged), [k]: v }));
@@ -243,8 +243,8 @@ function TabEmail() {
   const set = (k, v) => setForm(f => ({ ...(f ?? merged), [k]: v }));
 
   const saveMut = useSaveSetting(
-    () => { message.success('✅ Đã lưu cài đặt Email'); setForm(null); },
-    (e) => { message.error(`❌ ${e}`); },
+    () => { message.success('Đã lưu cài đặt Email'); setForm(null); },
+    (e) => { message.error(String(e)); },
   );
 
   const handleSave = () => {
@@ -368,8 +368,8 @@ function TabPayment() {
   const set = (k, v) => setForm(f => ({ ...(f ?? merged), [k]: v }));
 
   const saveMut = useSaveSetting(
-    () => { message.success('✅ Đã lưu cài đặt thanh toán'); setForm(null); },
-    (e) => { message.error(`❌ ${e}`); },
+    () => { message.success('Đã lưu cài đặt thanh toán'); setForm(null); },
+    (e) => { message.error(String(e)); },
   );
 
   const handleSave = () => {
@@ -518,8 +518,8 @@ function TabSecurity() {
   const set = (k, v) => setForm(f => ({ ...(f ?? merged), [k]: v }));
 
   const saveMut = useSaveSetting(
-    () => { message.success('✅ Đã lưu cài đặt bảo mật'); setForm(null); },
-    (e) => { message.error(`❌ ${e}`); },
+    () => { message.success('Đã lưu cài đặt bảo mật'); setForm(null); },
+    (e) => { message.error(String(e)); },
   );
 
   const handleSave = () => {
@@ -744,9 +744,9 @@ function TabAdvanced() {
       qc.invalidateQueries({ queryKey: ['settings'] });
       qc.invalidateQueries({ queryKey: ['settings-advanced'] });
       setEditTarget(null);
-      message.success('✅ Đã lưu cài đặt');
+      message.success('Đã lưu cài đặt');
     },
-    onError: (e) => message.error(`❌ ${e?.response?.data?.message || 'Lỗi'}`),
+    onError: (e) => message.error(e?.response?.data?.message || 'Lỗi'),
   });
 
   const deleteMut = useMutation({
@@ -755,9 +755,9 @@ function TabAdvanced() {
       qc.invalidateQueries({ queryKey: ['settings'] });
       qc.invalidateQueries({ queryKey: ['settings-advanced'] });
       setDeleteTarget(null);
-      message.success('✅ Đã xoá cài đặt');
+      message.success('Đã xoá cài đặt');
     },
-    onError: (e) => message.error(`❌ ${e?.response?.data?.message || 'Lỗi'}`),
+    onError: (e) => message.error(e?.response?.data?.message || 'Lỗi'),
   });
 
   const isSecret = (item) =>
@@ -920,7 +920,7 @@ function AdminSettingsInner() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-white">⚙️ Cài đặt hệ thống</h1>
+        <h1 className="text-2xl font-black text-white">Cài đặt hệ thống</h1>
         <p className="text-sm text-gray-400 mt-0.5">Quản lý toàn bộ tham số vận hành của hệ thống</p>
       </div>
 

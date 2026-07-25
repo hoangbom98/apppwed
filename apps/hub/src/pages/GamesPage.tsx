@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
+import { PlayCircleOutlined } from '@ant-design/icons';
 import * as hubApi from '@/api/hub';
 import { useGameStore } from '@/store/gameStore';
 
@@ -70,7 +71,7 @@ export default function GamesPage() {
     <div className="hub-page">
       {/* Title + search */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <h1 className="hub-page-title" style={{ margin: 0 }}>🎮 Games</h1>
+        <h1 className="hub-page-title" style={{ margin: 0 }}><PlayCircleOutlined /> Games</h1>
         <div style={{ position: 'relative' }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--hub-text-muted)' }} />
           <input
@@ -120,7 +121,7 @@ export default function GamesPage() {
               className="hub-game-card">
               {g.image
                 ? <img src={g.image} alt={g.name} className="hub-game-thumb" loading="lazy" />
-                : <div className="hub-game-no-img">🎮</div>
+                : <div className="hub-game-no-img"><PlayCircleOutlined style={{ fontSize: 28, color: '#9ca3af' }} /></div>
               }
               <div className="hub-game-info">
                 <p className="hub-game-name">{g.name}</p>

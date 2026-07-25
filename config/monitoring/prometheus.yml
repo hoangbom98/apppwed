@@ -11,8 +11,8 @@
 #
 # Installation (Ubuntu/Debian):
 #   apt install -y prometheus
-#   cp source/monitoring/prometheus.yml /etc/prometheus/prometheus.yml
-#   cp source/monitoring/prometheus/alerts.yml /etc/prometheus/alerts.yml
+#   cp config/monitoring/prometheus.yml /etc/prometheus/prometheus.yml
+#   cp config/monitoring/prometheus/alerts.yml /etc/prometheus/alerts.yml
 #   systemctl restart prometheus
 
 global:

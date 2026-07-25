@@ -234,48 +234,99 @@ async function syncTradePrices() {
   }
 }
 
-// ── Job: Sports live-score stub — every 1 minute ─────────────────────────────
-// Randomly generates goal events for LIVE matches.
-// Replace body with a real provider (Football-Data.org) once API key is set.
+// ── Job: Sports live-score sync — every 1 minute ─────────────────────────────
+// Uses SportsDataSyncService → ApiFootball when API key is configured.
+// Falls back to the random stub when the service is unavailable (dev / no key).
 async function syncSportsLiveScores() {
   try {
-    const { getPrismaClient }  = require('./databases');
-    const { emitMatchUpdate }  = require('../shared/socket/handlers');
-    const notifSvc             = require('../shared/services/notificationService');
-    const sportsPrisma         = getPrismaClient('sports');
-    const io                   = notifSvc._io;
-
-    const liveMatches = await sportsPrisma.match.findMany({
-      where: { status: 'live' },
-      select: { id: true, homeScore: true, awayScore: true },
-    });
-
-    for (const match of liveMatches) {
-      const delta = Math.random() < 0.1; // 10% chance per tick
-      if (!delta) continue;
-
-      const homeGoal = Math.random() < 0.5;
-      const newHome  = (match.homeScore ?? 0) + (homeGoal ? 1 : 0);
-      const newAway  = (match.awayScore ?? 0) + (!homeGoal ? 1 : 0);
-
-      await sportsPrisma.$transaction([
-        sportsPrisma.match.update({ where: { id: match.id }, data: { homeScore: newHome, awayScore: newAway } }),
-        sportsPrisma.liveScore.create({
-          data: { matchId: match.id, homeScore: newHome, awayScore: newAway, event: homeGoal ? 'GOAL_HOME' : 'GOAL_AWAY', eventDetail: `Score: ${newHome}-${newAway}` },
-        }),
-        sportsPrisma.liveUpdate.create({
-          data: { matchId: match.id, type: 'goal', team: homeGoal ? 'home' : 'away', description: `Goal! Score now ${newHome}-${newAway}`, time: String(Math.floor(Math.random() * 90) + 1) },
-        }),
-      ]);
-
-      if (io) {
-        if (emitMatchUpdate) emitMatchUpdate(io, match.id, { homeScore: newHome, awayScore: newAway, event: homeGoal ? 'GOAL_HOME' : 'GOAL_AWAY' });
-        else io.to(`match_${match.id}`).emit('match_update', { matchId: match.id, homeScore: newHome, awayScore: newAway });
-      }
-    }
-    if (liveMatches.length > 0) logger.debug(`[SportsCron] processed ${liveMatches.length} live matches`);
+    const { getPrismaClient } = require('./databases');
+    const sportsPrisma        = getPrismaClient('sports');
+    const SportsDataSyncService = require('../modules/sports/services/sportsDataSyncService');
+    const svc = new SportsDataSyncService(sportsPrisma);
+    await svc.syncLiveScores();
   } catch (err) {
-    logger.error('syncSportsLiveScores failed', { err: err.message });
+    // Service unavailable (no API key) — fall back to random stub so dev still works
+    logger.warn('[SportsCron] syncLiveScores via SportsDataSyncService unavailable, using stub', { err: err.message });
+    try {
+      const { getPrismaClient }  = require('./databases');
+      const { emitMatchUpdate }  = require('../shared/socket/handlers');
+      const notifSvc             = require('../shared/services/notificationService');
+      const sportsPrisma         = getPrismaClient('sports');
+      const io                   = notifSvc._io;
+
+      const liveMatches = await sportsPrisma.match.findMany({
+        where: { status: 'live' },
+        select: { id: true, homeScore: true, awayScore: true },
+      });
+
+      for (const match of liveMatches) {
+        if (Math.random() >= 0.1) continue; // 10% chance per tick
+        const homeGoal = Math.random() < 0.5;
+        const newHome  = (match.homeScore ?? 0) + (homeGoal ? 1 : 0);
+        const newAway  = (match.awayScore ?? 0) + (!homeGoal ? 1 : 0);
+
+        await sportsPrisma.$transaction([
+          sportsPrisma.match.update({ where: { id: match.id }, data: { homeScore: newHome, awayScore: newAway } }),
+          sportsPrisma.liveScore.create({
+            data: { matchId: match.id, homeScore: newHome, awayScore: newAway, event: homeGoal ? 'GOAL_HOME' : 'GOAL_AWAY', eventDetail: `Score: ${newHome}-${newAway}` },
+          }),
+          sportsPrisma.liveUpdate.create({
+            data: { matchId: match.id, type: 'goal', team: homeGoal ? 'home' : 'away', description: `Goal! Score now ${newHome}-${newAway}`, time: String(Math.floor(Math.random() * 90) + 1) },
+          }),
+        ]);
+
+        if (io) {
+          if (emitMatchUpdate) emitMatchUpdate(io, match.id, { homeScore: newHome, awayScore: newAway, event: homeGoal ? 'GOAL_HOME' : 'GOAL_AWAY' });
+          else io.to(`match_${match.id}`).emit('match_update', { matchId: match.id, homeScore: newHome, awayScore: newAway });
+        }
+      }
+      if (liveMatches.length > 0) logger.debug(`[SportsCron:stub] processed ${liveMatches.length} live matches`);
+    } catch (stubErr) {
+      logger.error('syncSportsLiveScores stub failed', { err: stubErr.message });
+    }
+  }
+}
+
+// ── Job: Sports fixtures sync — every 6 hours ────────────────────────────────
+// Syncs today + tomorrow fixtures from ApiFootball into sports_db.
+async function syncSportsFixtures() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const sportsPrisma        = getPrismaClient('sports');
+    const SportsDataSyncService = require('../modules/sports/services/sportsDataSyncService');
+    const svc = new SportsDataSyncService(sportsPrisma);
+    const result = await svc.syncFixtures(1);
+    logger.info(`[SportsCron] fixtures sync: ${JSON.stringify(result)}`);
+  } catch (err) {
+    logger.warn('[SportsCron] syncFixtures unavailable', { err: err.message });
+  }
+}
+
+// ── Job: Sports standings sync — daily 03:00 ─────────────────────────────────
+async function syncSportsStandings() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const sportsPrisma        = getPrismaClient('sports');
+    const SportsDataSyncService = require('../modules/sports/services/sportsDataSyncService');
+    const svc = new SportsDataSyncService(sportsPrisma);
+    const result = await svc.syncStandings();
+    logger.info(`[SportsCron] standings sync: ${JSON.stringify(result)}`);
+  } catch (err) {
+    logger.warn('[SportsCron] syncStandings unavailable', { err: err.message });
+  }
+}
+
+// ── Job: Sports news sync — every 30 minutes ─────────────────────────────────
+async function syncSportsNews() {
+  try {
+    const { getPrismaClient } = require('./databases');
+    const sportsPrisma        = getPrismaClient('sports');
+    const SportsDataSyncService = require('../modules/sports/services/sportsDataSyncService');
+    const svc = new SportsDataSyncService(sportsPrisma);
+    const result = await svc.syncNews('vi', 10);
+    logger.debug(`[SportsCron] news sync: ${JSON.stringify(result)}`);
+  } catch (err) {
+    logger.warn('[SportsCron] syncNews unavailable', { err: err.message });
   }
 }
 
@@ -301,6 +352,17 @@ async function tradeLiquidationCheck() {
     await runLiquidationCheck(tradePrisma, notifSvc._io || null);
   } catch (err) {
     logger.error('tradeLiquidationCheck failed', { err: err.message });
+  }
+}
+
+// ── Job: Game Yuebao — daily interest 00:05 UTC ──────────────────────────────
+// Dispatch via BullMQ (falls back to inline if Redis unavailable)
+async function gameYuebaoInterest() {
+  try {
+    const { dispatchYuebaoInterest } = require('../modules/workers/yuebao-interest.worker');
+    await dispatchYuebaoInterest();
+  } catch (err) {
+    logger.error('gameYuebaoInterest failed', { err: err.message });
   }
 }
 
@@ -338,6 +400,32 @@ async function tradeYuebaoSettlement() {
     await runYuebaoSettlement(tradePrisma, require('../shared/services/notificationService')._io || null);
   } catch (err) {
     logger.error('tradeYuebaoSettlement failed', { err: err.message });
+  }
+}
+
+// ── Job: Agent settlement — daily commission calc 00:05 UTC (previous day) ───
+async function agentSettlementDaily() {
+  try {
+    const { enqueueAgentSettlement } = require('../modules/workers/agent-settlement.worker');
+    const yesterday = (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().split('T')[0];
+    })();
+    await enqueueAgentSettlement(yesterday);
+  } catch (err) {
+    logger.error('agentSettlementDaily failed', { err: err.message });
+  }
+}
+
+// ── Job: Robot bets — every 30s trigger simulated bets ───────────────────────
+async function robotBetTick() {
+  if (process.env.ENABLE_ROBOT_BETS !== 'true') return;
+  try {
+    const { enqueueAllRobotBets } = require('../modules/workers/robot-bet.worker');
+    await enqueueAllRobotBets();
+  } catch (err) {
+    logger.error('robotBetTick failed', { err: err.message });
   }
 }
 
@@ -465,15 +553,28 @@ function register() {
   // 6-part expression (node-cron ≥ 3): seconds-level scheduling
   schedule('*/30 * * * * *', 'trade-price-feed',         syncTradePrices);
   schedule('* * * * *',      'sports-live-scores',       syncSportsLiveScores);
+  schedule('0 */6 * * *',    'sports-fixtures',          syncSportsFixtures);
+  schedule('0 3 * * *',      'sports-standings',         syncSportsStandings);
+  schedule('*/30 * * * *',   'sports-news',              syncSportsNews);
   schedule('*/30 * * * * *', 'trade-liquidation',        tradeLiquidationCheck);
   schedule('5 0 * * *',      'trade-profit-distribution', tradeProfitDistribution);
   schedule('0 1 * * *',      'trade-mining-distribution', tradeMiningDistribution);
   schedule('0 2 * * *',      'trade-yuebao-settlement',   tradeYuebaoSettlement);
-  // Game rebate (learned from BoYue RebateService)
+  // Game rebate (learned from BoYue RebateService) — dispatches to BullMQ game-rebate queue
   schedule('55 23 * * *',    'game-rebate-calculate',    gameRebateCalculate);
   schedule('0 1 * * *',      'game-rebate-settle',       gameRebateSettle);
   schedule('30 2 * * *',     'game-vip-check',           gameVipLevelCheck);
-  logger.info('All cron jobs registered (risk + price-feed + live-scores + trade + mining + yuebao + game-rebate + vip-check)');
+  // Game Yuebao interest — dispatches to BullMQ game-yuebao-interest queue
+  schedule('5 0 * * *',      'game-yuebao-interest',     gameYuebaoInterest);
+  schedule('10 0 * * *',     'agent-settlement-daily',   agentSettlementDaily);
+  // Robot bets — only active when ENABLE_ROBOT_BETS=true (6-part for sub-minute)
+  schedule('*/30 * * * * *', 'robot-bet-tick',            robotBetTick);
+  logger.info(
+    'Cron jobs registered: risk | price-feed | sports-sync | ' +
+    'trade-profit | trade-mining | trade-yuebao | ' +
+    'game-rebate-calculate | game-rebate-settle | game-vip-check | ' +
+    'game-yuebao-interest | agent-settlement | robot-bet'
+  );
 }
 
 module.exports = { register };

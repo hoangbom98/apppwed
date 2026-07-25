@@ -159,14 +159,14 @@ export default function FinanceSummary() {
 
       {/* Trend chart */}
       {trend.length > 0 && (
-        <Card title="📈 Xu hướng 7 ngày gần nhất">
+        <Card title="Xu hướng 7 ngày gần nhất">
           <MiniChart data={trend} />
         </Card>
       )}
 
       {/* Channel breakdown */}
       {channels.length > 0 && (
-        <Card title="🏦 Phân bổ kênh nạp">
+        <Card title="Phân bổ kênh nạp">
           <div className="space-y-3">
             {channels.map((c, i) => {
               const total = channels.reduce((s, x) => s + (x.total || 0), 0);

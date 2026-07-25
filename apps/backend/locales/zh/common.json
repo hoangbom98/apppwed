@@ -1,0 +1,21 @@
+{
+  "welcome": "欢迎来到系统",
+  "error": {
+    "generic": "发生错误，请稍后再试",
+    "unauthorized": "您尚未登录或会话已过期",
+    "forbidden": "您无权访问此资源",
+    "not_found": "未找到请求的资源",
+    "validation": "输入数据无效"
+  },
+  "success": "成功",
+  "user": {
+    "not_found": "用户不存在",
+    "email_exist": "邮箱已被注册",
+    "invalid_credentials": "邮箱或密码不正确",
+    "balance_updated": "余额更新成功",
+    "status_updated": "用户状态已更改",
+    "not_allowed_self_adjustment": "您不能自行调整自己的角色或状态",
+    "updated": "用户信息更新成功",
+    "insufficient_balance": "账户余额不足以完成扣款"
+  }
+}

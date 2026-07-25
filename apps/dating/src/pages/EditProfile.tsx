@@ -20,8 +20,8 @@ const FIELDS = [
 ];
 
 const MARRIAGE_OPTIONS = ['Độc thân', 'Đang hẹn hò', 'Đã kết hôn', 'Ly hôn'];
-const SMOKING_OPTIONS = ['Không', 'Thỉnh thoảng', 'Thường xuyên'];
-const DRINKING_OPTIONS = ['Không', 'Thỉnh thoảng', 'Thường xuyên'];
+const _SMOKING_OPTIONS = ['Không', 'Thỉnh thoảng', 'Thường xuyên'];
+const _DRINKING_OPTIONS = ['Không', 'Thỉnh thoảng', 'Thường xuyên'];
 
 export default function EditProfile() {
   const navigate = useNavigate();

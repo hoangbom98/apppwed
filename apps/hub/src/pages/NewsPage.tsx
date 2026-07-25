@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import * as hubApi from '@/api/hub';
@@ -17,7 +17,7 @@ export default function NewsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-black mb-6">📰 Tin tức</h1>
+      <h1 className="text-2xl font-black mb-6">Tin tức</h1>
       {isLoading ? (
         <div className="grid md:grid-cols-3 gap-6">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-64 bg-gray-800 rounded-xl animate-pulse" />)}</div>
       ) : (
@@ -41,7 +41,7 @@ export default function NewsPage() {
       <Pagination
         page={page}
         totalPages={meta?.pages || meta?.totalPages || 1}
-        onPageChange={(p) => setPage(p)}
+        onPageChange={(p: number) => setPage(p)}
       />
     </div>
   );

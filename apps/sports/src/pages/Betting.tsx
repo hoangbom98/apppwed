@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBettingEvents, getMyBets, placeBet } from '@/api/sports';
+import { getBettingEvents, placeBet } from '@/api/sports';
 import { useAuthStore } from '@/store/authStore';
 import { Trophy, TrendingUp, AlertCircle, Clock, Zap, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useToast } from '@ui/hooks/useToast';
+import { useToast } from '@ui';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type BetEvent = {
@@ -144,7 +144,7 @@ export default function BettingPage() {
             className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
               filter === f ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'
             }`}>
-            {f === 'all' ? '🏆 Tất cả' : f === 'live' ? <><Zap size={10} className="inline mr-1" />Trực tiếp</> : <><Clock size={10} className="inline mr-1" />Sắp diễn ra</>}
+            {f === 'all' ? 'Tất cả' : f === 'live' ? <><Zap size={10} className="inline mr-1" />Trực tiếp</> : <><Clock size={10} className="inline mr-1" />Sắp diễn ra</>}
           </button>
         ))}
       </div>
@@ -169,7 +169,6 @@ export default function BettingPage() {
         <div className="space-y-3">
           {displayItems.length === 0 ? (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
-              <div className="text-3xl mb-2">⚽</div>
               <p className="text-gray-400 text-sm">Không có trận đấu nào khả dụng</p>
             </div>
           ) : (

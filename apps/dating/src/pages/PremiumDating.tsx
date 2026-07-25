@@ -1,6 +1,5 @@
 import React from 'react';
 import PageHeader from '@/components/common/PageHeader';
-import { Users, MapPin, Heart, Video, Mic } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MODES = [

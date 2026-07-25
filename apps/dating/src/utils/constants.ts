@@ -40,11 +40,11 @@ export const ROUTES = {
 } as const;
 
 export const PAYMENT_METHODS = [
-  { id: 'momo',    label: 'MoMo',        icon: '💜', color: '#a50064' },
-  { id: 'zalopay', label: 'ZaloPay',     icon: '💙', color: '#0068FF' },
-  { id: 'vnpay',   label: 'VNPay',       icon: '🔴', color: '#e41c1c' },
-  { id: 'bank',    label: 'Ngân hàng',   icon: '🏦', color: '#1a56db' },
-  { id: 'qr',      label: 'QR Code',     icon: '📱', color: '#0ea5e9' },
+  { id: 'momo',    label: 'MoMo',        icon: 'MoMo',    color: '#a50064' },
+  { id: 'zalopay', label: 'ZaloPay',     icon: 'ZaloPay', color: '#0068FF' },
+  { id: 'vnpay',   label: 'VNPay',       icon: 'VNPay',   color: '#e41c1c' },
+  { id: 'bank',    label: 'Ngân hàng',   icon: 'Bank',    color: '#1a56db' },
+  { id: 'qr',      label: 'QR Code',     icon: 'QR',      color: '#0ea5e9' },
 ];
 
 export const QUICK_AMOUNTS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000];

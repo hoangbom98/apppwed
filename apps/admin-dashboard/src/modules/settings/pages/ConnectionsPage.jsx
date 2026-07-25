@@ -155,7 +155,7 @@ function TabTelegram({ settings }) {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id, text: '✅ Test kết nối Telegram thành công từ Admin Panel!' }),
+        body: JSON.stringify({ chat_id, text: 'Test kết nối Telegram thành công từ Admin Panel!' }),
       });
       const json = await res.json();
       if (json.ok) {
@@ -211,8 +211,8 @@ function TabTelegram({ settings }) {
         name="api_server"
       >
         <Select>
-          <Select.Option value="official">🌐 Official (api.telegram.org)</Select.Option>
-          <Select.Option value="proxy">🔀 Proxy / Mirror server</Select.Option>
+          <Select.Option value="official">Official (api.telegram.org)</Select.Option>
+          <Select.Option value="proxy">Proxy / Mirror server</Select.Option>
         </Select>
       </Form.Item>
       <Space>
@@ -277,7 +277,7 @@ function TabGoogleLogin({ settings }) {
           }
         />
         <Text type="danger" style={{ fontSize: 12 }}>
-          ⚠️ Thêm URI trên vào "Authorized redirect URIs" trong Google Cloud Console
+          Thêm URI trên vào "Authorized redirect URIs" trong Google Cloud Console
         </Text>
       </Form.Item>
       <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={save.isPending}>
@@ -335,7 +335,7 @@ function TabChatGPT({ settings }) {
       </Form.Item>
       <Form.Item label="Model AI" name="model">
         <Select>
-          <Select.Option value="gpt-4o-mini">🔥 GPT-4o Mini — $0.15/$0.60 per 1M tokens (tiết kiệm nhất)</Select.Option>
+          <Select.Option value="gpt-4o-mini">GPT-4o Mini — $0.15/$0.60 per 1M tokens (tiết kiệm nhất)</Select.Option>
           <Select.Option value="gpt-4o">GPT-4o — đa năng, chất lượng cao</Select.Option>
           <Select.Option value="gpt-3.5-turbo">GPT-3.5 Turbo — nhanh, rẻ</Select.Option>
           <Select.Option value="deepseek-chat">DeepSeek Chat — chi phí cực thấp</Select.Option>
@@ -353,10 +353,10 @@ function ConnectionsInner() {
   const { data: settings, isLoading } = useConnectionSettings();
 
   const tabs = [
-    { key: 'smtp',     label: '📧 SMTP Email',   children: <TabSMTP settings={settings} /> },
-    { key: 'telegram', label: '✈️ Telegram Bot',  children: <TabTelegram settings={settings} /> },
-    { key: 'google',   label: '🔑 Google Login',  children: <TabGoogleLogin settings={settings} /> },
-    { key: 'ai',       label: '🤖 AI / ChatGPT',  children: <TabChatGPT settings={settings} /> },
+    { key: 'smtp',     label: 'SMTP Email',   children: <TabSMTP settings={settings} /> },
+    { key: 'telegram', label: 'Telegram Bot',  children: <TabTelegram settings={settings} /> },
+    { key: 'google',   label: 'Google Login',  children: <TabGoogleLogin settings={settings} /> },
+    { key: 'ai',       label: 'AI / ChatGPT',  children: <TabChatGPT settings={settings} /> },
   ];
 
   return (

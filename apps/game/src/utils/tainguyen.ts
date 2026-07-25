@@ -229,29 +229,9 @@ export const PLACEHOLDER_BANNERS = [
   { id: 3, gradient: 'from-amber-600 via-orange-500 to-red-500', title: 'VIP Rewards', description: 'Nhận thưởng cao nhất cùng VIP Diamond', link: '/vip' },
 ];
 
-// ── Vietnamese banks list ─────────────────────────────────────────────────
-export const VN_BANKS = [
-  { code: 'VCB',  name: 'Vietcombank' },
-  { code: 'TCB',  name: 'Techcombank' },
-  { code: 'MBB',  name: 'MB Bank' },
-  { code: 'CTG',  name: 'VietinBank' },
-  { code: 'BID',  name: 'BIDV' },
-  { code: 'AGB',  name: 'Agribank' },
-  { code: 'STB',  name: 'Sacombank' },
-  { code: 'ACB',  name: 'ACB' },
-  { code: 'TPB',  name: 'TPBank' },
-  { code: 'VPB',  name: 'VPBank' },
-  { code: 'HDB',  name: 'HDBank' },
-  { code: 'MSB',  name: 'Maritime Bank (MSB)' },
-  { code: 'OCB',  name: 'OCB' },
-  { code: 'SCB',  name: 'Saigon Commercial Bank (SCB)' },
-  { code: 'EIB',  name: 'Eximbank' },
-  { code: 'VIB',  name: 'VIB' },
-  { code: 'NAB',  name: 'Nam A Bank' },
-  { code: 'PVC',  name: 'PVcombank' },
-  { code: 'BAB',  name: 'Bắc Á Bank' },
-  { code: 'KLB',  name: 'Kiên Long Bank' },
-];
+// ── Vietnamese banks list — re-export từ @lkvip/constants (single source of truth) ─
+export type { VNBank } from '@lkvip/types';
+export { VN_BANKS, VN_BANK_MAP, VN_BANKS_TRANSFER } from '@lkvip/constants';
 
 // ── Game providers list with real logos ───────────────────────────────────
 export const GAME_PROVIDERS = [

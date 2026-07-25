@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Wallet, Crown, LogOut, CreditCard, PiggyBank, Cpu, RefreshCw, Gift } from 'lucide-react';
+import { User, Wallet, Crown, LogOut, CreditCard, PiggyBank, Cpu, RefreshCw, Gift, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { updateProfile, changePassword } from '@/api/apiXacThuc';
 import { useAuthStore } from '@/store/authStore';
@@ -27,14 +27,14 @@ type ProfileValues = yup.InferType<typeof profileSchema>;
 type PwdValues     = yup.InferType<typeof pwdSchema>;
 
 export default function Profile() {
-  const { user, logout, setUser } = useAuthStore();
+  const { user, logout, setUser } = useAuthStore() as any;
   const { balance } = useWalletStore();
   const navigate = useNavigate();
   const [tab, setTab] = useState<'info' | 'pwd'>('info');
 
   const profileForm = useForm<ProfileValues>({
     resolver: yupResolver(profileSchema),
-    defaultValues: { full_name: user?.full_name || '', phone: user?.phone || '' },
+    defaultValues: { full_name: (user as any)?.full_name || (user as any)?.fullName || '', phone: (user as any)?.phone || '' },
   });
 
   const pwdForm = useForm<PwdValues>({
@@ -75,7 +75,7 @@ export default function Profile() {
           {user.username.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-xl font-black text-gray-900 dark:text-white">{user.full_name || user.username}</h1>
+          <h1 className="text-xl font-black text-gray-900 dark:text-white">{(user as any).full_name || (user as any).fullName || user.username}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">ID: {user.id} · {user.email}</p>
           <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary dark:text-secondary font-bold">{user.role}</span>
         </div>
@@ -167,6 +167,20 @@ export default function Profile() {
         <div className="flex-1">
           <p className="text-sm font-bold text-gray-900 dark:text-white">Máy đào</p>
           <p className="text-[10px] text-gray-400">Đầu tư máy đào thu nhập hàng ngày</p>
+        </div>
+        <span className="text-gray-400 text-sm">›</span>
+      </Link>
+
+      {/* Security Center */}
+      <Link to="/security"
+        className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary dark:hover:border-secondary transition-colors mb-2"
+      >
+        <div className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center">
+          <Shield className="w-5 h-5 text-green-500" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-bold text-gray-900 dark:text-white">Bảo mật tài khoản</p>
+          <p className="text-[10px] text-gray-400">Mật khẩu, điện thoại, email, 2FA</p>
         </div>
         <span className="text-gray-400 text-sm">›</span>
       </Link>

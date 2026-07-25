@@ -1,42 +1,23 @@
+// trade/src/store/tradeStore.ts
 import { create } from 'zustand';
-
-interface Pair {
-  id:           number;
-  symbol:       string;
-  baseAsset:    string;
-  quoteAsset:   string;
-  lastPrice:    number;
-  priceChange:  number;
-  volume24h:    number;
-  high24h:      number;
-  low24h:       number;
-}
-
-interface Order {
-  id:          number;
-  symbol:      string;
-  side:        'buy' | 'sell';
-  type:        string;
-  price:       number;
-  quantity:    number;
-  filled:      number;
-  status:      string;
-  createdAt:   string;
-}
-
-interface Balance { asset: string; free: number; locked: number; }
+import type { TradePair, TradeOrder, AssetBalance, PriceUpdatePayload } from '@/types';
 
 interface TradeStore {
-  pairs:        Pair[];
-  selectedPair: Pair | null;
-  orders:       Order[];
-  balances:     Balance[];
+  pairs:        TradePair[];
+  selectedPair: TradePair | null;
+  orders:       TradeOrder[];
+  balances:     AssetBalance[];
 
-  setPairs:        (pairs: Pair[]) => void;
-  selectPair:      (pair: Pair) => void;
-  updatePairPrice: (symbol: string, update: Partial<Omit<Pair, 'id' | 'symbol' | 'baseAsset' | 'quoteAsset'>>) => void;
-  setOrders:       (orders: Order[]) => void;
-  setBalances:     (balances: Balance[]) => void;
+  setPairs:        (pairs: TradePair[]) => void;
+  selectPair:      (pair: TradePair)   => void;
+  /**
+   * Patch price fields on a single pair by symbol.
+   * Called from useTradeWebSocket on every `trade:price_update` event.
+   */
+  updatePairPrice: (symbol: string, update: PriceUpdatePayload) => void;
+  setOrders:       (orders: TradeOrder[]) => void;
+  updateOrder:     (id: TradeOrder['id'], patch: Partial<TradeOrder>) => void;
+  setBalances:     (balances: AssetBalance[]) => void;
 }
 
 export const useTradeStore = create<TradeStore>()((set) => ({
@@ -49,23 +30,27 @@ export const useTradeStore = create<TradeStore>()((set) => ({
 
   selectPair: (pair) => set({ selectedPair: pair }),
 
-  /** Patch price fields on a single pair by symbol (for WebSocket updates) */
   updatePairPrice: (symbol, update) =>
-    set(state => {
-      const idx = state.pairs.findIndex(p => p.symbol === symbol);
+    set((state) => {
+      const idx = state.pairs.findIndex((p) => p.symbol === symbol);
       if (idx === -1) return {};
       const pairs = [...state.pairs];
       pairs[idx] = { ...pairs[idx], ...update };
-
-      // Also update selectedPair if it matches
       const selectedPair =
         state.selectedPair?.symbol === symbol
           ? { ...state.selectedPair, ...update }
           : state.selectedPair;
-
       return { pairs, selectedPair };
     }),
 
-  setOrders:   (orders)   => set({ orders }),
+  setOrders: (orders) => set({ orders }),
+
+  updateOrder: (id, patch) =>
+    set((state) => ({
+      orders: state.orders.map((o) =>
+        o.id === id ? { ...o, ...patch } : o
+      ),
+    })),
+
   setBalances: (balances) => set({ balances }),
 }));

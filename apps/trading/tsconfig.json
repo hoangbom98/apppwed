@@ -3,10 +3,11 @@
   "compilerOptions": {
     "typeRoots": ["./node_modules/@types"],
     "paths": {
-      "@/*":        ["./src/*"],
-      "@ui":        ["../shared-ui"],
-      "@ui/*":      ["../shared-ui/*"],
-      "@lkvip/types": ["../../shared-types/src/index.ts"]
+      "@/*":              ["./src/*"],
+      "@ui":              ["../../packages/ui/src/index.ts"],
+      "@ui/*":            ["../../packages/ui/src/*"],
+      "@lkvip/types":     ["../../packages/types/src/index.ts"],
+      "@lkvip/constants": ["../../packages/constants/dist/index.d.ts"]
     }
   },
   "include": ["src"]

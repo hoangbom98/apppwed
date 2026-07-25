@@ -17,61 +17,43 @@ Nền tảng giải trí trực tuyến gồm **6 sub-projects** độc lập v�
 ## 📁 Cấu trúc thư mục
 
 ```
-/var/LKVIP/
+/var/LKVIP/                          ← Monorepo root
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml           # Lint + Typecheck + Test (on PR & push)
-│   │   ├── deploy.yml       # Auto-deploy on push to main
-│   │   └── prisma-check.yml # Validate Prisma schemas on change
+│   │   ├── ci.yml            # Lint + Typecheck + Test (on PR & push)
+│   │   ├── deploy.yml        # Auto-deploy on push to main
+│   │   └── prisma-check.yml  # Validate Prisma schemas on change
 │   └── pull_request_template.md
-├── docs/                    # Architecture, API, deployment guides
-│   ├── ARCHITECTURE.md
-│   ├── API_ENDPOINTS.md
-│   ├── DEPLOYMENT.md
-│   ├── MIGRATION_GUIDE.md
-│   ├── MODULES.md
-│   ├── NFR.md
-│   ├── OPERATIONS.md
-│   ├── RISK_SYSTEM.md
-│   ├── SETUP.md
-│   ├── STANDARDIZATION.md
-│   └── VPS_DEPLOYMENT.md
-├── source/
-│   ├── code/                ⭐ ALL SOURCE CODE (pnpm workspace)
-│   │   ├── backend/         # Express API — TypeScript + Prisma
-│   │   ├── frontend/
-│   │   │   ├── admin-dashboard/  # Admin Portal (port 5180)
-│   │   │   ├── hub/              # Hub Portal (port 5173)
-│   │   │   ├── game/             # Game Center (port 5174)
-│   │   │   ├── dating/           # Dating App (port 5176)
-│   │   │   ├── trade/            # Trade Platform (port 5177)
-│   │   │   ├── sports/           # Sports Live (port 5178)
-│   │   │   ├── shared-ui/        # Shared React components & hooks
-│   │   │   └── _template/        # Starter template for new SPAs
-│   │   ├── packages/
-│   │   │   ├── constants/        # @lkvip/constants
-│   │   │   ├── shared-utils/     # @lkvip/utils
-│   │   │   └── mobile/           # @lkvip/mobile (Capacitor)
-│   │   ├── shared-types/         # @lkvip/types — shared TypeScript interfaces
-│   │   ├── tests/
-│   │   │   ├── integration/
-│   │   │   └── load/
-│   │   ├── package.json          # Workspace root scripts
-│   │   └── pnpm-workspace.yaml
-│   └── config/
-│       ├── nginx/                # Nginx reverse proxy configs
-│       ├── database/             # DB init scripts & indexes
-│       └── monitoring/           # Monitoring configs
-├── .env.example             # Environment template
+├── apps/                     ⭐ ALL RUNNABLE APPLICATIONS
+│   ├── backend/              # Express API — TypeScript + Prisma (port 5000)
+│   ├── hub/                  # Hub Portal — @lkvip/hub (port 5173)
+│   ├── game/                 # Game Center — @lkvip/game (port 5174)
+│   ├── dating/               # Dating App — @lkvip/dating (port 5176)
+│   ├── trading/              # Trade Platform — @lkvip/trade (port 5177)
+│   ├── sports/               # Sports Live — @lkvip/sports (port 5178)
+│   ├── admin-dashboard/      # Admin Portal — @lkvip/admin (port 5180)
+│   └── _template/            # Starter template for new SPAs
+├── packages/                 ⭐ SHARED LIBRARIES (no runnable server)
+│   ├── constants/            # @lkvip/constants
+│   ├── shared-types/         # @lkvip/types — shared TypeScript interfaces
+│   ├── shared-ui/            # @lkvip/ui — shared React components & hooks
+│   ├── shared-utils/         # @lkvip/utils
+│   └── mobile/               # @lkvip/mobile — Capacitor
+├── config/                   # Infrastructure configs (Nginx, DB, monitoring)
+├── data/                     # Runtime data (uploads, cache)
+├── docs/                     # Architecture, API, deployment guides
+├── logs/                     # PM2 log output
+├── scripts/                  # Root CLI scripts
+├── tests/                    # Integration / load tests
+├── archives/                 # Old code (not part of active build)
+├── .env.example              # Environment template
 ├── .editorconfig
 ├── .gitignore
-├── CONTRIBUTING.md
-├── LICENSE
-├── ecosystem.config.js      # PM2 config (points to code/backend)
-└── package.json             # Root convenience scripts
+├── ecosystem.config.js       # PM2 config (points to apps/backend)
+├── package.json              # Root convenience scripts + devDependencies
+├── pnpm-workspace.yaml       # pnpm workspace definition
+└── tsconfig.base.json        # Shared TypeScript config
 ```
-
-> **Source code thực nằm hoàn toàn trong `code/`.** Root chỉ chứa meta files và configs.
 
 ---
 
@@ -94,11 +76,10 @@ git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
 
 # Cấu hình môi trường
-cp .env.example code/backend/.env
+cp .env.example apps/backend/.env
 # → Điền DATABASE_URL_*, JWT_SECRET, REDIS_URL...
 
-# Cài dependencies (pnpm workspace)
-cd code
+# Cài dependencies (pnpm workspace — chạy từ root)
 pnpm install
 
 # Tạo Prisma clients + chạy migrations + seed
@@ -110,7 +91,7 @@ pnpm --filter lkvip-backend run seed:all
 ### 3. Chạy development
 
 ```bash
-cd code
+# Từ root /var/LKVIP
 
 # Backend (port 5000)
 pnpm dev:backend
@@ -124,8 +105,8 @@ pnpm dev:trade    # :5177
 pnpm dev:sports   # :5178
 ```
 
-**API:** `http://localhost:5000`  
-**Swagger:** `http://localhost:5000/api/docs`  
+**API:** `http://localhost:5000`
+**Swagger:** `http://localhost:5000/api/docs`
 **Health:** `http://localhost:5000/health`
 
 ---
@@ -151,12 +132,12 @@ Internet (HTTPS)
        │
   [Nginx] ── SSL termination, gzip, rate limit
        │
-       ├─ hub.domain.com    → frontend/hub/dist/
-       ├─ game.domain.com   → frontend/game/dist/
-       ├─ trade.domain.com  → frontend/trade/dist/
-       ├─ dating.domain.com → frontend/dating/dist/
-       ├─ sports.domain.com → frontend/sports/dist/
-       ├─ admin.domain.com  → frontend/admin-dashboard/dist/
+       ├─ hub.domain.com    → apps/hub/dist/
+       ├─ game.domain.com   → apps/game/dist/
+       ├─ trade.domain.com  → apps/trading/dist/
+       ├─ dating.domain.com → apps/dating/dist/
+       ├─ sports.domain.com → apps/sports/dist/
+       ├─ admin.domain.com  → apps/admin-dashboard/dist/
        └─ api.domain.com    → proxy → :5000
 
 [PM2 Cluster — Node.js + Express + TypeScript]
@@ -198,7 +179,7 @@ Internet (HTTPS)
 3 apps: Hub, Game, Dating — build bằng Capacitor.
 
 ```bash
-cd code
+# Từ root /var/LKVIP
 pnpm mobile:sync           # Sync web assets to native
 pnpm mobile:open:android   # Open Android Studio
 pnpm mobile:open:ios       # Open Xcode (macOS only)
@@ -210,11 +191,11 @@ pnpm mobile:open:ios       # Open Xcode (macOS only)
 
 ```bash
 # Setup VPS lần đầu (Ubuntu 22.04)
-bash source/config/nginx/setup.sh yourdomain.com admin@yourdomain.com
+bash config/nginx/setup.sh yourdomain.com admin@yourdomain.com
 
 # Deploy code (sau lần đầu)
 git pull origin main
-cd code && pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile
 pnpm --filter lkvip-backend run build
 pnpm run build:frontends
 pm2 reload lkvip-api --update-env

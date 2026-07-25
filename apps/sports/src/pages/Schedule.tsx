@@ -75,7 +75,6 @@ export default function SchedulePage() {
 
         {!isLoading && Object.keys(grouped).length === 0 && (
           <div className="text-center py-16 text-gray-500">
-            <p className="text-3xl mb-3">📅</p>
             <p>Không có trận đấu nào ngày {formatDate(selected)}</p>
           </div>
         )}

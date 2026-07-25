@@ -14,6 +14,7 @@
 
 module.exports = {
   aiService: require('./aiService'),
+  currencyService: require('./currencyService'),          // ← Multi-currency engine
   analyticsService: require('./analyticsService'),      // ← Tầng 6: cross-project analytics
   archiveService: require('./archiveService'),        // ← Tầng 2: cold storage
   auditService: require('./auditService'),

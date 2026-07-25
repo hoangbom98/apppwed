@@ -38,14 +38,22 @@ exports.getProfile = async (req, res) => {
   } catch (e) { return error(res, e.message, 500); }
 };
 
+const { logAdminAction } = require('../../../shared/services/auditLogger.service');
+const { success, error, notFound } = require('../../../shared/utils/response');
+
 exports.updateProfile = async (req, res) => {
   try {
-    const item = await req.prisma.user.update({ where: { id: req.params.id }, data: req.body });
-    return ok(res, item, 'Profile updated');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
-  }
+    const { id } = req.params;
+    const oldUser = await req.prisma.user.findUnique({ where: { id } });
+    if (!oldUser) return notFound(res);
+    
+    const updatedUser = await req.prisma.user.update({ where: { id }, data: req.body });
+    
+    // Audit log
+    await logAdminAction(req.user.id, 'updateProfile', id, oldUser, updatedUser, req.ip, req.prisma);
+    
+    return success(res, updatedUser, 'Profile updated');
+  } catch (e) { return error(res, e.message, 500); }
 };
 
 exports.deleteProfile = async (req, res) => {

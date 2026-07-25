@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getStories, viewStory } from '@/api/stories';
-import { X, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 
 export default function Stories() {
   const navigate = useNavigate();

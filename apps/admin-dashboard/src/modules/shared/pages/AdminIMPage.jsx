@@ -264,7 +264,7 @@ function BroadcastTab() {
 
       <Modal
         open={preview}
-        title="📢 Xác nhận Broadcast"
+        title="Xác nhận Broadcast"
         onOk={() => broadMut.mutate()}
         onCancel={() => setPreview(false)}
         okText="Gửi ngay" cancelText="Huỷ"
@@ -278,7 +278,7 @@ function BroadcastTab() {
           </Descriptions.Item>
         </Descriptions>
         <Text type="warning" style={{ fontSize: 12, display: 'block', marginTop: 12 }}>
-          ⚠️ Tin sẽ được gửi tới TẤT CẢ phòng chat của nhóm "{segment}". Không thể thu hồi.
+          Tin sẽ được gửi tới TẤT CẢ phòng chat của nhóm "{segment}". Không thể thu hồi.
         </Text>
       </Modal>
     </div>
@@ -288,9 +288,9 @@ function BroadcastTab() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminIMPage() {
   const TAB_ITEMS = [
-    { key: 'rooms',     label: '💬 Phòng Chat',       children: <RoomsTab /> },
-    { key: 'tickets',   label: '🎫 Support Tickets',  children: <TicketsTab /> },
-    { key: 'broadcast', label: '📢 Broadcast',        children: <BroadcastTab /> },
+    { key: 'rooms',     label: 'Phòng Chat',       children: <RoomsTab /> },
+    { key: 'tickets',   label: 'Support Tickets',  children: <TicketsTab /> },
+    { key: 'broadcast', label: 'Broadcast',        children: <BroadcastTab /> },
   ];
 
   return (

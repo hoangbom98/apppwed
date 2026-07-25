@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
+import { CameraOutlined, CheckCircleOutlined, ClockCircleOutlined, MailOutlined, LockOutlined } from '@ant-design/icons';
 
 // ── Status helpers — matches backend kycStatus: pending | approved | rejected ─
 // User hasn't submitted yet → kycStatus = "pending" (default), Kyc record = null
@@ -51,7 +52,7 @@ function FileUploader({
           <img src={preview} alt={label} className="h-full w-full object-cover rounded-xl" />
         ) : (
           <>
-            <span className="text-3xl text-gray-600">📷</span>
+            <CameraOutlined className="text-3xl text-gray-600" />
             <span className="text-xs text-gray-500 mt-1">Nhấn để chọn ảnh</span>
           </>
         )}
@@ -100,7 +101,7 @@ export default function KYC() {
   });
 
   const kycStatus    = profile?.kycStatus ?? 'pending';
-  const statusInfo   = STATUS_MAP[kycStatus] || STATUS_MAP.pending;
+  const _statusInfo  = STATUS_MAP[kycStatus] || STATUS_MAP.pending;
 
   // ── Submit mutation ──────────────────────────────────────────────────────────
   const mutation = useMutation({
@@ -138,7 +139,7 @@ export default function KYC() {
     return (
       <div className="py-8 px-4 flex items-center justify-center min-h-[60vh]">
         <div className="w-full max-w-md rounded-2xl p-7 text-center space-y-4 bn-surface">
-          <div className="text-5xl">✅</div>
+          <div className="text-5xl"><CheckCircleOutlined className="text-green-400" /></div>
           <h2 className="text-xl font-bold text-white">Tài khoản đã được xác minh</h2>
           <p className="text-sm bn-muted">Hồ sơ KYC của bạn đã được phê duyệt. Bạn có đầy đủ quyền truy cập nền tảng.</p>
           {kycRecord?.reviewedAt && (
@@ -157,7 +158,7 @@ export default function KYC() {
     return (
       <div className="py-8 px-4 flex items-center justify-center min-h-[60vh]">
         <div className="w-full max-w-md rounded-2xl p-7 text-center space-y-4 bn-surface">
-          <div className="text-5xl">⏳</div>
+          <div className="text-5xl"><ClockCircleOutlined className="text-yellow-400" /></div>
           <h2 className="text-xl font-bold text-white">Đang chờ xét duyệt</h2>
           <p className="text-sm bn-muted">
             Hồ sơ của bạn đã được gửi và đang chờ bộ phận kiểm duyệt xem xét (thường 1–2 ngày làm việc).
@@ -172,7 +173,7 @@ export default function KYC() {
     return (
       <div className="py-8 px-4 flex items-center justify-center min-h-[60vh]">
         <div className="w-full max-w-md rounded-2xl p-7 text-center space-y-4 bn-surface">
-          <div className="text-5xl">📨</div>
+          <div className="text-5xl"><MailOutlined className="text-blue-400" /></div>
           <h2 className="text-xl font-bold text-white">Hồ sơ đã được gửi</h2>
           <p className="text-sm bn-muted">
             Chúng tôi sẽ xem xét hồ sơ và thông báo kết quả qua email trong vòng 1–2 ngày làm việc.
@@ -304,7 +305,7 @@ export default function KYC() {
 
           {/* Privacy notice */}
           <p className="text-xs text-gray-500">
-            🔒 Thông tin của bạn được mã hóa và chỉ được sử dụng cho mục đích xác minh danh tính theo quy định pháp luật.
+            <LockOutlined style={{ marginRight: 4 }} />Thông tin của bạn được mã hóa và chỉ được sử dụng cho mục đích xác minh danh tính theo quy định pháp luật.
           </p>
 
           {/* Error */}

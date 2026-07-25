@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TrendingUp, Clock, CheckCircle, XCircle, PackageOpen } from 'lucide-react';
+import { TrendingUp, PackageOpen } from 'lucide-react';
 import {
   getInvestmentPackages,
   getMyInvestments,
@@ -39,13 +39,13 @@ export default function InvestmentPage() {
     enabled:  !!user,
   });
 
-  const packages   = pkgData?.data  ?? pkgData  ?? [];
-  const myInvs     = myData?.data   ?? myData   ?? [];
+  const packages   = pkgData?.data  ?? [];
+  const myInvs     = myData?.data   ?? [];
 
   const buyMut = useMutation({
     mutationFn: (vars: { packageId: string; amount: number }) => buyInvestment(vars),
     onSuccess: () => {
-      setMsg('✅ Đầu tư thành công!');
+      setMsg('Đầu tư thành công!');
       setAmount('');
       setSelectedPkg(null);
       qc.invalidateQueries({ queryKey: ['my-investments'] });
@@ -85,7 +85,7 @@ export default function InvestmentPage() {
               tab === t ? 'bg-purple-700 text-white' : 'text-gray-400 hover:text-white'
             }`}
           >
-            {t === 'packages' ? '📦 Gói đầu tư' : '📋 Đầu tư của tôi'}
+            {t === 'packages' ? 'Gói đầu tư' : 'Đầu tư của tôi'}
           </button>
         ))}
       </div>
@@ -140,7 +140,7 @@ export default function InvestmentPage() {
 
           {selectedPkg && (
             <div className="bg-gray-900 border border-purple-700/30 rounded-2xl p-5">
-              <h3 className="font-bold text-white mb-4">💰 Đầu tư vào: {selectedPkg.name}</h3>
+              <h3 className="font-bold text-white mb-4">Đầu tư vào: {selectedPkg.name}</h3>
               <label className="text-xs text-gray-500 mb-1 block">Số tiền đầu tư (USD)</label>
               <div className="relative mb-3">
                 <input
@@ -176,14 +176,14 @@ export default function InvestmentPage() {
               )}
               {msg && (
                 <div className={`mb-3 p-3 rounded-xl text-xs font-medium ${
-                  msg.startsWith('✅') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
+                  msg.startsWith('Đầu') ? 'bg-green-950 text-green-400 border border-green-900' : 'bg-red-950 text-red-400 border border-red-900'
                 }`}>{msg}</div>
               )}
               <button
                 onClick={handleBuy} disabled={buyMut.isPending}
                 className="w-full py-3 bg-purple-700 hover:bg-purple-600 text-white rounded-xl font-bold text-sm transition-colors disabled:opacity-50"
               >
-                {buyMut.isPending ? 'Đang xử lý...' : '🚀 Xác nhận đầu tư'}
+                {buyMut.isPending ? 'Đang xử lý...' : 'Xác nhận đầu tư'}
               </button>
             </div>
           )}

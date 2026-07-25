@@ -10,11 +10,11 @@ import { Skeleton } from '@/components/common/Skeleton';
 import { formatVND } from '@/utils/dinhDang';
 
 const TARGET_LABELS: Record<string, string> = {
-  LOGIN:   '🔑 Đăng nhập',
-  DEPOSIT: '💰 Nạp tiền',
-  BET:     '🎲 Đặt cược',
-  INVITE:  '👥 Mời bạn',
-  LOTTERY: '🎰 Chơi xổ số',
+  LOGIN:   'Đăng nhập',
+  DEPOSIT: 'Nạp tiền',
+  BET:     'Đặt cược',
+  INVITE:  'Mời bạn',
+  LOTTERY: 'Chơi xổ số',
 };
 
 const REWARD_LABELS: Record<string, string> = {
@@ -85,7 +85,7 @@ function MissionCard({ mission, onClaim, isClaiming }: { mission: any; onClaim: 
           disabled={isClaiming}
           className="mt-3 w-full py-2 bg-accent hover:bg-accent/90 text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50"
         >
-          {isClaiming ? 'Đang nhận...' : '🎁 Nhận thưởng'}
+          {isClaiming ? 'Đang nhận...' : 'Nhận thưởng'}
         </button>
       )}
     </div>

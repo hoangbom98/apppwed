@@ -136,7 +136,7 @@ function TemplateEditor({ tpl, onSaved }) {
       {preview && (
         <Card
           size="small"
-          title="👁️ Xem trước nội dung"
+          title="Xem trước nội dung"
           style={{ marginBottom: 16, background: '#1a1a2e' }}
         >
           <pre
@@ -195,7 +195,7 @@ function NotificationTemplatesInner() {
     key:      tpl.type,
     label:    (
       <span className={!tpl.isActive ? 'opacity-40' : ''}>
-        {tpl.isActive ? '🟢' : '⚪'} {tpl.name}
+        {tpl.name}
       </span>
     ),
     children: <TemplateEditor tpl={tpl} />,

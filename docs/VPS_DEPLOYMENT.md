@@ -67,8 +67,8 @@ Wait for DNS propagation before running certbot (usually < 5 minutes on most reg
 # SSH into VPS as root
 ssh root@<SERVER_IP>
 
-git clone https://github.com/your-user/kjc-platform.git /var/www/website-admin
-cd /var/www/website-admin
+git clone https://github.com/your-user/kjc-platform.git /var/LKVIP
+cd /var/LKVIP
 ```
 
 ---
@@ -78,12 +78,12 @@ cd /var/www/website-admin
 ```bash
 # Installs: Node 20, MySQL 8, Redis 7, Nginx, PM2, UFW, certbot
 # Creates: 6 databases, webadmin MySQL user, UFW rules, SSL certificates
-bash code/backend/scripts/setup.sh yourdomain.com admin@yourdomain.com
+bash config/scripts/setup.sh yourdomain.com admin@yourdomain.com
 ```
 
 This takes ~5 minutes. At the end, MySQL credentials are saved to:
 ```
-/var/www/website-admin/CREDENTIALS.txt   (chmod 600)
+/var/LKVIP/CREDENTIALS.txt   (chmod 600)
 ```
 
 ---
@@ -92,11 +92,11 @@ This takes ~5 minutes. At the end, MySQL credentials are saved to:
 
 ```bash
 # Copy template and fill in values
-cp /var/www/website-admin/code/backend/.env.example \
-   /var/www/website-admin/code/backend/.env
+cp /var/LKVIP/apps/backend/.env.example \
+   /var/LKVIP/apps/backend/.env
 
 # Edit .env — paste DB credentials from CREDENTIALS.txt
-nano /var/www/website-admin/code/backend/.env
+nano /var/LKVIP/apps/backend/.env
 ```
 
 Minimum required changes in `.env`:
@@ -114,7 +114,7 @@ Minimum required changes in `.env`:
 
 Verify all required vars are set:
 ```bash
-bash code/backend/scripts/check-env.sh code/backend/.env
+bash scripts/check-env.sh apps/backend/.env
 ```
 
 ---
@@ -123,7 +123,7 @@ bash code/backend/scripts/check-env.sh code/backend/.env
 
 ```bash
 # Installs deps, runs migrations, seeds data, builds 6 frontends, starts PM2
-bash code/backend/scripts/first-deploy.sh yourdomain.com
+bash scripts/first-deploy.sh yourdomain.com
 ```
 
 This takes 5–15 minutes depending on VPS speed (npm installs + 6 frontend builds).
@@ -158,19 +158,19 @@ systemctl status nginx
 ## Subsequent deploys
 
 ```bash
-cd /var/www/website-admin
+cd /var/LKVIP
 
 # Full deploy (git pull + build all + pm2 reload)
-bash code/backend/scripts/deploy.sh
+bash scripts/deploy.sh
 
 # Backend only (zero-downtime reload)
-bash code/backend/scripts/deploy.sh --module=backend
+bash scripts/deploy.sh --module=backend
 
 # Rebuild one frontend only
-bash code/backend/scripts/deploy.sh --module=hub
+bash scripts/deploy.sh --module=hub
 
 # Backend hot reload without rebuilding frontends
-bash code/backend/scripts/deploy.sh --skip-build
+bash scripts/deploy.sh --skip-build
 ```
 
 ---
@@ -183,8 +183,8 @@ pm2 logs api-server --lines 100      # tail logs
 pm2 monit                             # real-time monitoring
 pm2 reload api-server --update-env   # zero-downtime reload
 pm2 restart api-server               # hard restart (brief downtime)
-bash code/backend/scripts/start.sh stop    # stop
-bash code/backend/scripts/start.sh start   # start
+bash scripts/start.sh stop    # stop
+bash scripts/start.sh start   # start
 ```
 
 ---
@@ -193,16 +193,16 @@ bash code/backend/scripts/start.sh start   # start
 
 ```bash
 # Manual backup (all 6 databases)
-bash code/backend/scripts/backup.sh
+bash scripts/backup.sh
 
 # Backups are saved to: /var/backups/mysql/YYYYMMDD/
 # Retention: 30 days (configurable via BACKUP_RETENTION_DAYS in .env)
 
 # Install automated cron backups (02:00, 08:00, 14:00, 20:00 daily)
-sudo bash code/backend/scripts/cron-setup.sh
+sudo bash scripts/cron-setup.sh
 
 # Restore a database
-bash code/backend/scripts/restore.sh /var/backups/mysql/20260801/hub_db_20260801_020000.sql.gz hub_db
+bash scripts/restore.sh /var/backups/mysql/20260801/hub_db_20260801_020000.sql.gz hub_db
 ```
 
 ---
@@ -217,7 +217,7 @@ systemctl status certbot.timer
 
 Re-run manually if needed:
 ```bash
-bash code/backend/scripts/ssl-setup.sh yourdomain.com admin@yourdomain.com
+bash config/scripts/ssl-setup.sh yourdomain.com admin@yourdomain.com
 ```
 
 ---
@@ -244,7 +244,7 @@ tail -f /var/log/nginx/error.log
 ## File structure on VPS
 
 ```
-/var/www/website-admin/
+/var/LKVIP/
 ├── source/
 │   ├── backend/          ← Node.js app (PM2 runs server.js)
 │   │   ├── .env          ← Production secrets (chmod 600)

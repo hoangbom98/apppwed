@@ -1,0 +1,17 @@
+{
+  /**
+   * shared-ui/tsconfig.json
+   * ────────────────────────
+   * Source-direct package — không build ra dist, các SPA import trực tiếp từ src.
+   * Chỉ dùng cho editor type-checking và tsc --noEmit.
+   */
+  "extends": "../../tsconfig.frontend.base.json",
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "@lkvip/types": ["../../packages/types/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules"]
+}

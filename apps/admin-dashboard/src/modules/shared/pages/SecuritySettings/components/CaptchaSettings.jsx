@@ -218,7 +218,7 @@ export default function CaptchaSettings({ settings, onChange }) {
           </p>
           {enabledCount === 0 && (
             <p className="text-xs text-yellow-500">
-              ⚠ Chưa có module nào được chọn — Captcha sẽ không áp dụng dù đã bật.
+              Chưa có module nào được chọn — Captcha sẽ không áp dụng dù đã bật.
             </p>
           )}
           {/* Quick select buttons */}

@@ -1,17 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSwipeProfiles, likeUser, nopeUser, superLike } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
-import { Heart, X, Star, Zap, RotateCcw } from 'lucide-react';
+import { Heart, X, Star, Zap } from 'lucide-react';
+import { CheckOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import toast from 'react-hot-toast';
 
 function MatchPopup({ user, onClose }: { user: any; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-pink-500/90 to-rose-600/90 z-50 flex flex-col items-center justify-center px-8">
       <div className="text-center">
-        <div className="text-7xl mb-6 animate-bounce">💕</div>
+        <div className="mb-6 animate-bounce"><Heart size={72} className="text-pink-400 fill-pink-400" /></div>
         <h2 className="text-white text-3xl font-black mb-2">Match!</h2>
         <p className="text-white/80 text-base mb-8">Bạn và {user?.full_name} đã ghép đôi!</p>
         <div className="flex gap-4 justify-center mb-8">
@@ -22,7 +22,7 @@ function MatchPopup({ user, onClose }: { user: any; onClose: () => void }) {
         <div className="space-y-3 w-full max-w-xs">
           <button onClick={() => { onClose(); }}
             className="w-full py-3.5 bg-white text-pink-500 font-bold rounded-2xl shadow-lg">
-            💬 Nhắn tin ngay
+            Nhắn tin ngay
           </button>
           <button onClick={onClose} className="w-full py-3 text-white/80 text-sm">Tiếp tục swipe</button>
         </div>
@@ -78,9 +78,9 @@ function SwipeCard({ profile, onLike, onNope, onSuperLike, isTop }: {
         <div className="flex items-end gap-2 mb-2">
           <h2 className="text-white font-black text-2xl">{profile.full_name}</h2>
           <span className="text-white/80 text-xl font-semibold">{profile.age}</span>
-          {profile.is_verified && <span className="text-blue-400 text-lg">✓</span>}
+          {profile.is_verified && <CheckOutlined className="text-blue-400 text-lg" />}
         </div>
-        <p className="text-white/80 text-sm mb-2">📍 {profile.city}</p>
+        <p className="text-white/80 text-sm mb-2"><EnvironmentOutlined /> {profile.city}</p>
         {profile.bio && <p className="text-white/70 text-xs line-clamp-2">{profile.bio}</p>}
         {profile.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
@@ -123,7 +123,7 @@ export default function Swipe() {
       <div className="relative flex-1 mt-4 max-w-sm mx-auto w-full">
         {deck.length === 0 ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-6xl mb-4">🌸</div>
+            <div className="text-6xl mb-4"><Heart size={56} className="text-pink-200 fill-pink-100" /></div>
             <h3 className="text-gray-700 font-bold text-lg">Hết người rồi!</h3>
             <p className="text-gray-400 text-sm mt-1">Quay lại sau để xem thêm</p>
             <button onClick={() => qc.invalidateQueries({ queryKey: ['swipe-profiles'] })}

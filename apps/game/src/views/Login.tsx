@@ -28,7 +28,7 @@ export default function Login() {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await login(data);
+      await login(data as any);
       toast.success('Đăng nhập thành công!');
       navigate(redirect);
     } catch (e: any) {

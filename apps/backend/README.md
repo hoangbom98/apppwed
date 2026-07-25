@@ -66,15 +66,15 @@ Nginx (443/80)
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/lkvip-platform.git
-cd lkvip-platform/code/backend
+git clone https://github.com/your-org/lkvip-platform.git /var/LKVIP
+cd /var/LKVIP
 
-# Install dependencies
-npm install
+# Install workspace dependencies (từ root)
+pnpm install
 
 # Copy environment template and fill in values
-cp .env.example .env
-# Edit .env — at minimum set the 6 DATABASE_URLs and JWT_SECRET
+cp config/env/.env.example apps/backend/.env
+# Edit apps/backend/.env — at minimum set the 6 DATABASE_URLs and JWT_SECRET
 
 # Create local databases (MySQL must be running)
 mysql -u root -p <<'SQL'
@@ -87,16 +87,16 @@ CREATE DATABASE IF NOT EXISTS admin_db  CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 SQL
 
 # Generate all 6 Prisma clients
-npm run prisma:generate
+pnpm prisma:generate
 
 # Run migrations on all 6 DBs
-npm run prisma:migrate:all
+pnpm --filter lkvip-backend run prisma:migrate:all
 
 # Seed initial data
-npm run seed:all
+pnpm --filter lkvip-backend run seed:all
 
 # Start dev server (nodemon)
-npm run dev
+pnpm dev:backend
 ```
 
 Server starts at **http://localhost:5000** · Swagger UI at **http://localhost:5000/api/docs**
@@ -182,7 +182,7 @@ npm run dev
 npm run start
 
 # Production (PM2 cluster)
-pm2 start ecosystem.config.js --env production
+pm2 start config/pm2/ecosystem.config.js --env production
 pm2 save
 pm2 startup  # follow the printed command to persist across reboots
 ```
@@ -289,13 +289,12 @@ What `setup.sh` does:
 
 ```bash
 # On the VPS, as the deploy user (or root)
-cd /var/www
-git clone https://github.com/your-org/lkvip-platform.git
-cd lkvip-platform
+git clone https://github.com/your-org/lkvip-platform.git /var/LKVIP
+cd /var/LKVIP
 
 # Create .env from example, fill in values
-cp code/backend/.env.example code/backend/.env
-nano code/backend/.env
+cp config/env/.env.example apps/backend/.env
+nano apps/backend/.env
 
 # Run first-deploy
 bash scripts/first-deploy.sh
@@ -309,7 +308,7 @@ What `first-deploy.sh` does (9 steps):
 5. `seed:all` — seeds initial data
 6. Builds all 6 frontend SPAs
 7. Creates upload directories
-8. Starts PM2 (`pm2 start ecosystem.config.js --env production`)
+8. Starts PM2 (`pm2 start config/pm2/ecosystem.config.js --env production`)
 9. Patches Nginx config with your domain and reloads
 
 ### 11.3 SSL Setup
@@ -399,12 +398,12 @@ The Nginx config is at `config/nginx/nginx.conf`. It configures 7 server blocks:
 | Subdomain | Serves |
 |-----------|--------|
 | `api.yourdomain.com` | Reverse proxy → Express :5000 |
-| `hub.yourdomain.com` | Static SPA (`frontend/hub/dist/`) |
-| `game.yourdomain.com` | Static SPA (`frontend/game/dist/`) |
-| `trade.yourdomain.com` | Static SPA (`frontend/trade/dist/`) |
-| `dating.yourdomain.com` | Static SPA (`frontend/dating/dist/`) |
-| `sports.yourdomain.com` | Static SPA (`frontend/sports/dist/`) |
-| `admin.yourdomain.com` | Static SPA (`frontend/admin-dashboard/dist/`) |
+| `hub.yourdomain.com` | Static SPA (`apps/hub/dist/`) |
+| `game.yourdomain.com` | Static SPA (`apps/game/dist/`) |
+| `trade.yourdomain.com` | Static SPA (`apps/trading/dist/`) |
+| `dating.yourdomain.com` | Static SPA (`apps/dating/dist/`) |
+| `sports.yourdomain.com` | Static SPA (`apps/sports/dist/`) |
+| `admin.yourdomain.com` | Static SPA (`apps/admin-dashboard/dist/`) |
 
 ```bash
 # Test config
@@ -471,9 +470,9 @@ Backup retention is controlled by `BACKUP_RETENTION_DAYS` in `.env` (default `30
 
 | Location | Contents |
 |----------|----------|
-| `/var/log/pm2/lkvip-api-out.log` | stdout (Winston info/debug) |
-| `/var/log/pm2/lkvip-api-err.log` | stderr (Winston error/warn) |
-| `code/backend/logs/` | Local development logs |
+| `/var/LKVIP/logs/api-out.log` | stdout (Winston info/debug) |
+| `/var/LKVIP/logs/api-error.log` | stderr (Winston error/warn) |
+| `apps/backend/logs/` | Local development logs |
 
 ### Viewing Logs
 
@@ -496,13 +495,13 @@ tail -f /var/log/pm2/lkvip-api-out.log | grep ERROR
 
 ```bash
 # Check for syntax errors
-node code/backend/server.js
+node apps/backend/dist/server.js
 
 # Check PM2 error log
 pm2 logs lkvip-api --err --lines 50
 
 # Verify .env is present and readable
-cat code/backend/.env | head -5
+cat apps/backend/.env | head -5
 ```
 
 ### Database connection errors
@@ -512,10 +511,10 @@ cat code/backend/.env | head -5
 mysql -u lkvip_db -p -e "SHOW DATABASES;"
 
 # Verify DATABASE_URL in .env
-grep DATABASE_URL code/backend/.env
+grep DATABASE_URL apps/backend/.env
 
 # Check Prisma clients are generated
-ls code/backend/node_modules/.prisma/
+ls apps/backend/node_modules/.prisma/
 ```
 
 ### Redis connection errors
@@ -526,15 +525,15 @@ systemctl status redis
 redis-cli ping  # should return PONG
 
 # Verify REDIS_URL in .env
-grep REDIS_URL code/backend/.env
+grep REDIS_URL apps/backend/.env
 ```
 
 ### Prisma migration errors
 
 ```bash
 # Check migration status
-cd code/backend
-npm run prisma:status:all
+cd apps/backend
+pnpm run prisma:status:all
 
 # If migration table is out of sync
 npx prisma migrate resolve --applied "20250101000000_init_hub" --schema prisma/hub/schema.prisma
@@ -545,7 +544,7 @@ npx prisma migrate resolve --applied "20250101000000_init_hub" --schema prisma/h
 ```bash
 # Find and kill the occupying process
 lsof -ti:5000 | xargs kill -9
-pm2 start ecosystem.config.js --env production
+pm2 start config/pm2/ecosystem.config.js --env production
 ```
 
 ### CORS errors in browser
@@ -560,12 +559,12 @@ CORS_ORIGINS=https://hub.yourdomain.com,https://game.yourdomain.com,...
 ## Project Structure (Backend)
 
 ```
-code/backend/
-├── server.js                  # ← True entry point (PM2 runs this)
-├── ecosystem.config.js        # PM2 production config
+apps/backend/
+├── server.ts                  # ← Entry point (compiled to dist/server.js for PM2)
+├── config/pm2/ecosystem.config.js # PM2 production config
 ├── ecosystem.config.dev.js    # PM2 development config
 ├── package.json
-├── .env.example               # Environment template (commit this)
+├── config/env/.env.example    # Environment template (commit this)
 ├── .env                       # Actual secrets (DO NOT commit)
 ├── prisma/
 │   ├── admin/schema.prisma

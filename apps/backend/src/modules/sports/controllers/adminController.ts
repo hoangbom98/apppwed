@@ -26,10 +26,21 @@ exports.createLeague = async (req, res) => {
   } catch (e) { return error(res, e.message, 500); }
 };
 
+const { logAdminAction } = require('../../../shared/services/auditLogger.service');
+const { ok, created, error, paginate: paginateRes } = require('../../../shared/utils/response');
+
 exports.updateLeague = async (req, res) => {
   try {
-    const d = await req.prisma.league.update({ where: { id: req.params.id }, data: req.body });
-    return ok(res, d);
+    const { id } = req.params;
+    const oldData = await req.prisma.league.findUnique({ where: { id } });
+    if (!oldData) return error(res, 'League not found', 404);
+    
+    const d = await req.prisma.league.update({ where: { id }, data: req.body });
+    
+    // Audit log
+    await logAdminAction(req.user.id, 'updateLeague', id, oldData, d, req.ip, req.prisma);
+    
+    return ok(res, d, 'League updated');
   } catch (e) { return error(res, e.message, 500); }
 };
 

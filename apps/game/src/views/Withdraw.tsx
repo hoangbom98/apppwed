@@ -109,9 +109,9 @@ export default function Withdraw() {
               >
                 <option value="">-- Chọn tài khoản đã lưu --</option>
                 {bankAccounts.map((acc) => (
-                  <option key={acc.id} value={acc.account_number}>
-                    {acc.bank_name} – {acc.account_number} ({acc.account_holder})
-                    {acc.is_default ? ' ✓' : ''}
+                  <option key={acc.id} value={acc.accountNumber}>
+                    {acc.bankName} – {acc.accountNumber} ({acc.accountName})
+                    {acc.isDefault ? ' ✓' : ''}
                   </option>
                 ))}
                 <option value="__manual__">Nhập tay...</option>

@@ -5,13 +5,13 @@ import { sportsService } from '../services/sports.service';
 export class SportsController {
   async syncEvents(req: Request, res: Response) {
     const { date } = req.body;
-    const result = await sportsService.syncEvents(req.projectId, date);
+    const result = await sportsService.syncEvents((req as any).project, date);
     res.json(result);
   }
 
   async getEvents(req: Request, res: Response) {
     const filters = req.query;
-    const events = await sportsService.getEvents(req.projectId, filters);
+    const events = await sportsService.getEvents((req as any).project, filters);
     res.json(events);
   }
 }

@@ -2,10 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getVipPlans, subscribeVip } from '@/api/vip';
-import { VIP_NAMES } from '@/utils/constants';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/common/Button';
-import { Crown, Check, Infinity } from 'lucide-react';
+import { Crown, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const VIP_COLORS_BG: Record<string, string> = {
@@ -27,7 +26,7 @@ export default function Vip() {
 
   const subMut = useMutation({
     mutationFn: subscribeVip,
-    onSuccess: () => { toast.success('Nâng cấp VIP thành công! 🎉'); navigate('/profile'); },
+    onSuccess: () => { toast.success('Nâng cấp VIP thành công!'); navigate('/profile'); },
     onError: () => toast.error('Không đủ xu hoặc lỗi thanh toán'),
   });
 

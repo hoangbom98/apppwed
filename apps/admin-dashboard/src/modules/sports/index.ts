@@ -2,7 +2,7 @@
 // Sports module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';
 import {
-  Users, Trophy, TrendingUp, Newspaper, SlidersHorizontal,
+  LayoutDashboard, Users, Trophy, TrendingUp, Newspaper, SlidersHorizontal,
 } from 'lucide-react';
 
 registerModule({
@@ -14,6 +14,7 @@ registerModule({
       key:   'sports',
       label: 'Sports',
       items: [
+        { to: '/sports',          icon: LayoutDashboard,   label: 'Tổng quan' },
         { to: '/sports/users',    icon: Users,             label: 'Người dùng' },
         { to: '/sports/leagues',  icon: Trophy,            label: 'Giải đấu' },
         { to: '/sports/teams',    icon: Trophy,            label: 'Đội bóng' },

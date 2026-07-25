@@ -10,7 +10,7 @@
 
 ```bash
 # 1. Vào thư mục backend
-cd code/backend
+cd apps/backend
 
 # 2. Kiểm tra .env tồn tại và có đủ biến
 cat ../../.env | grep DATABASE_URL
@@ -30,7 +30,7 @@ cat ../../.env | grep DATABASE_URL
 
 ```sql
 -- Chạy file init-databases.sql
-mysql -u root -p < code/backend/init-databases.sql
+mysql -u root -p < apps/backend/init-databases.sql
 ```
 
 Hoặc thủ công:
@@ -70,7 +70,7 @@ FLUSH PRIVILEGES;
 ## 3. Chạy Prisma generate (tạo client)
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # ✅ Cách mới — dùng prisma-run.ts (tham số hóa, TypeScript)
 tsx scripts/prisma-run.ts generate           # tất cả 6 module
@@ -90,7 +90,7 @@ npm run prisma:generate:game                  # chỉ game
 > ⚠️ `migrate dev` sẽ xóa và tạo lại DB nếu có conflict. **Chỉ dùng cho dev/staging.**
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # ✅ Cách mới — chạy tất cả theo thứ tự chuẩn (admin → hub → game → dating → trade → sports)
 tsx scripts/prisma-run.ts migrate             # tất cả 6 module
@@ -107,7 +107,7 @@ tsx scripts/prisma-run.ts migrate dating
 > ✅ `migrate deploy` áp dụng các pending migrations **không reset data**.
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # ✅ Cách mới — 1 lệnh cho tất cả
 tsx scripts/prisma-run.ts deploy              # tất cả 6 module
@@ -122,7 +122,7 @@ tsx scripts/prisma-run.ts deploy sports
 ## 6. Chạy Seed data
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # Chạy tất cả seeds theo thứ tự (khuyến nghị)
 npm run seed:all
@@ -270,10 +270,10 @@ npm run seed:payment / seed:flags / seed:ui-config / seed:aggregators / seed:gam
 
 ```bash
 # Bước 1: Backup ALL databases trước
-bash code/backend/scripts/backup-db.sh
+bash scripts/backup-db.sh
 
 # Bước 2: Run migrations theo thứ tự
-cd code/backend
+cd apps/backend
 tsx scripts/prisma-run.ts deploy admin
 tsx scripts/prisma-run.ts deploy hub
 tsx scripts/prisma-run.ts deploy game
@@ -361,7 +361,7 @@ investments Investment[]
 ### Running the Trade v2.2 migration
 
 ```bash
-cd code/backend
+cd apps/backend
 
 # 1. Generate the updated trade Prisma client
 npm run prisma:generate:trade

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { completeOnboarding } from '@/api/auth';
-import { GOALS, INTERESTS, GENDERS } from '@/utils/constants';
+import { GOALS, INTERESTS } from '@/utils/constants';
 import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
+import { WomanOutlined, ManOutlined, TeamOutlined, RocketOutlined } from '@ant-design/icons';
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -41,14 +42,14 @@ export default function Onboarding() {
           <h2 className="text-2xl font-black text-gray-900 mb-2">Bạn tìm kiếm ai?</h2>
           <p className="text-gray-500 text-sm mb-8">Chọn đối tượng bạn muốn gặp gỡ</p>
           <div className="space-y-3">
-            {[
-              { value: 'female', label: '♀ Tìm bạn gái', emoji: '👩' },
-              { value: 'male',   label: '♂ Tìm bạn trai', emoji: '👨' },
-              { value: 'all',    label: '⚧ Tất cả mọi người', emoji: '🌈' },
-            ].map(opt => (
+            {([
+              { value: 'female', label: 'Tìm bạn gái',        icon: <WomanOutlined className="text-pink-500" /> },
+              { value: 'male',   label: 'Tìm bạn trai',        icon: <ManOutlined   className="text-blue-500" /> },
+              { value: 'all',    label: 'Tất cả mọi người',    icon: <TeamOutlined  className="text-purple-500" /> },
+            ] as { value: string; label: string; icon: React.ReactNode }[]).map(opt => (
               <button key={opt.value} onClick={() => setGenderPref(opt.value)}
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${genderPref === opt.value ? 'border-pink-400 bg-pink-50' : 'border-gray-200 bg-white'}`}>
-                <span className="text-3xl">{opt.emoji}</span>
+                <span className="text-3xl">{opt.icon}</span>
                 <span className="font-semibold text-gray-900">{opt.label}</span>
               </button>
             ))}
@@ -88,7 +89,7 @@ export default function Onboarding() {
             ))}
           </div>
           <Button onClick={handleFinish} fullWidth>
-            Bắt đầu khám phá 🚀
+            <RocketOutlined /> Bắt đầu khám phá
           </Button>
         </>
       )}

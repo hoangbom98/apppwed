@@ -3,7 +3,14 @@ import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
 import { adminLeagues } from '../api';
 
-const FIELDS = [
+const FIELDS: Array<{
+  key: string,
+  label: string,
+  type?: 'text'|'number'|'textarea'|'select',
+  options?: Array<{label:string, value:string}>,
+  required?: boolean,
+  listHide?: boolean,
+}> = [
   { key: 'name',    label: 'Tên giải đấu',   required: true },
   { key: 'slug',    label: 'Slug',            required: true },
   { key: 'country', label: 'Quốc gia' },

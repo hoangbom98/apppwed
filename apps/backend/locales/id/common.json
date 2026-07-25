@@ -1,0 +1,21 @@
+{
+  "welcome": "Selamat datang di sistem",
+  "error": {
+    "generic": "Terjadi kesalahan, silakan coba lagi nanti",
+    "unauthorized": "Anda belum masuk atau sesi Anda telah berakhir",
+    "forbidden": "Anda tidak memiliki izin untuk mengakses sumber daya ini",
+    "not_found": "Sumber daya yang diminta tidak ditemukan",
+    "validation": "Data masukan tidak valid"
+  },
+  "success": "Berhasil",
+  "user": {
+    "not_found": "Pengguna tidak ditemukan",
+    "email_exist": "Email sudah terdaftar",
+    "invalid_credentials": "Email atau kata sandi tidak benar",
+    "balance_updated": "Saldo berhasil diperbarui",
+    "status_updated": "Status pengguna berhasil diubah",
+    "not_allowed_self_adjustment": "Anda tidak diizinkan untuk menyesuaikan peran atau status Anda sendiri",
+    "updated": "Informasi pengguna berhasil diperbarui",
+    "insufficient_balance": "Saldo akun tidak mencukupi untuk pemotongan"
+  }
+}

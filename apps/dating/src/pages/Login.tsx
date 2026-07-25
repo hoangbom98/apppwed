@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { MobileOutlined, MailOutlined, ZhihuOutlined, FacebookOutlined, GoogleOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { sendOtp } from '@/api/auth';
-import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
 import { ASSET_UI } from '@/utils/constants';
 
@@ -78,7 +78,7 @@ export default function Login() {
                     ? 'bg-white/20 text-white border border-white/30'
                     : 'text-white/50'
                 }`}>
-                {t === 'phone' ? '📱 SĐT' : '✉️ Email'}
+                {t === 'phone' ? <><MobileOutlined /> SĐT</> : <><MailOutlined /> Email</>}
               </button>
             ))}
           </div>
@@ -138,17 +138,18 @@ export default function Login() {
 
           {/* Social */}
           <div className="w-full max-w-sm space-y-3">
-            {[
-              { icon: '🟢', label: 'Tiếp tục với Zalo',     cls: 'border-blue-400/40 text-blue-200',  provider: 'zalo'     },
-              { icon: '🔵', label: 'Tiếp tục với Facebook', cls: 'border-blue-500/40 text-blue-300',  provider: 'facebook' },
-              { icon: '🔴', label: 'Tiếp tục với Google',   cls: 'border-red-400/40 text-red-200',    provider: 'google'   },
-            ].map(s => (
-              <button key={s.label}
-                onClick={() => { window.location.href = `/api/dating/auth/social/${s.provider}`; }}
-                className={`w-full border ${s.cls} bg-black/20 rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-3 hover:bg-black/30 transition-colors`}>
-                <span className="text-xl">{s.icon}</span> {s.label}
-              </button>
-            ))}
+            <button onClick={() => { window.location.href = '/api/dating/auth/social/zalo'; }}
+              className="w-full border border-blue-400/40 text-blue-200 bg-black/20 rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-3 hover:bg-black/30 transition-colors">
+              <ZhihuOutlined className="text-xl" /> Tiếp tục với Zalo
+            </button>
+            <button onClick={() => { window.location.href = '/api/dating/auth/social/facebook'; }}
+              className="w-full border border-blue-500/40 text-blue-300 bg-black/20 rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-3 hover:bg-black/30 transition-colors">
+              <FacebookOutlined className="text-xl" /> Tiếp tục với Facebook
+            </button>
+            <button onClick={() => { window.location.href = '/api/dating/auth/social/google'; }}
+              className="w-full border border-red-400/40 text-red-200 bg-black/20 rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-3 hover:bg-black/30 transition-colors">
+              <GoogleOutlined className="text-xl" /> Tiếp tục với Google
+            </button>
           </div>
         </div>
 

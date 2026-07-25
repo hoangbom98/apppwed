@@ -10,7 +10,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AutoComplete } from '@ui';
-type AutoCompleteItem = { id: string; label: string; value?: any; image?: string; category?: string };
+import type { AutoCompleteItem } from '@ui';
 
 // Map source → route prefix
 const SOURCE_ROUTES: Record<string, string> = {
@@ -34,7 +34,7 @@ export default function SearchBar({ className = '', placeholder, onSearch }: Sea
     // Determine route from item id prefix: "game_123" → /games/slug
     const [src] = item.id.split('_');
     const base  = SOURCE_ROUTES[src];
-    const slug  = item.value?.slug;
+    const slug  = (item.value as any)?.slug ?? item.slug;
 
     if (base && slug) {
       navigate(`${base}/${slug}`);
@@ -61,13 +61,13 @@ export default function SearchBar({ className = '', placeholder, onSearch }: Sea
         onSelect={handleSelect}
         apiPrefix="/api/hub"
         source="all"
-        placeholder={placeholder ?? '🔍 Tìm game, tin tức, công cụ...'}
+        placeholder={placeholder ?? 'Tìm game, tin tức, công cụ...'}
         inputClassName="hub-search-input"
         className="hub-search-autocomplete"
         minChars={1}
         maxResults={10}
         debounceMs={280}
-        renderItem={(item, active) => (
+        renderItem={(item: AutoCompleteItem, active: boolean) => (
           <div
             style={{
               display: 'flex',

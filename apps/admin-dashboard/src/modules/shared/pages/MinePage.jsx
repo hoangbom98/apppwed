@@ -598,27 +598,27 @@ export default function MinePage() {
       <MenuList items={menuItems} />
 
       {/* ── Notifications ─────────────────────────────────────────── */}
-      <Section title="🔔 Thông báo mới">
+      <Section title="Thông báo mới">
         <NotificationsPanel />
       </Section>
 
       {/* ── Referrals ─────────────────────────────────────────────── */}
-      <Section title="👥 Giới thiệu bạn bè">
+      <Section title="Giới thiệu bạn bè">
         <ReferralPanel code={profileData?.referralCode} />
       </Section>
 
       {/* ── VIP Config Table ──────────────────────────────────────── */}
-      <Section title="⭐ Cấu hình VIP">
+      <Section title="Cấu hình VIP">
         <VipConfigTable />
       </Section>
 
       {/* ── Support Ticket ────────────────────────────────────────── */}
-      <Section title="🎫 Gửi yêu cầu hỗ trợ">
+      <Section title="Gửi yêu cầu hỗ trợ">
         <CreateTicketForm />
       </Section>
 
       {/* ── Devices ───────────────────────────────────────────────── */}
-      <Section title="📱 Thiết bị đăng nhập">
+      <Section title="Thiết bị đăng nhập">
         <DeviceList />
       </Section>
 

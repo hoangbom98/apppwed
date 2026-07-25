@@ -86,7 +86,7 @@ export default function LeaguesPage() {
                   <div className="flex flex-col items-center text-center gap-2">
                     {l.logo
                       ? <img src={l.logo} alt={l.name} className="w-12 h-12 object-contain" />
-                      : <div className="w-12 h-12 rounded-xl bg-green-600/20 flex items-center justify-center text-2xl">⚽</div>
+                      : <div className="w-12 h-12 rounded-xl bg-green-600/20 flex items-center justify-center text-xs font-bold text-green-400">Liga</div>
                     }
                     <div>
                       <p className="text-sm font-semibold text-white leading-tight">{l.name}</p>

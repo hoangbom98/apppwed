@@ -19,7 +19,7 @@ export default function GameDetailPage() {
   if (isLoading) return <Spinner />;
   if (isError || !game) return (
     <div className="text-center py-20 text-gray-400">
-      <p className="text-5xl mb-4">🎮</p>
+      <p className="text-sm text-gray-400 mb-4">Không tìm thấy game</p>
       <p>{t('common.not_found')}</p>
       <button onClick={() => navigate(-1)} className="mt-4 text-indigo-400 text-sm">{t('common.back')}</button>
     </div>

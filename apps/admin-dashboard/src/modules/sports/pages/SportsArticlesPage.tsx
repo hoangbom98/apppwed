@@ -3,7 +3,14 @@ import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
 import { adminArticles } from '../api';
 
-const FIELDS = [
+const FIELDS: Array<{
+  key: string,
+  label: string,
+  type?: 'text'|'number'|'textarea'|'select',
+  options?: Array<{label:string, value:string}>,
+  required?: boolean,
+  listHide?: boolean,
+}> = [
   { key: 'title',       label: 'Tiêu đề',     required: true },
   { key: 'slug',        label: 'Slug',          required: true },
   { key: 'category',    label: 'Danh mục',      type: 'select',

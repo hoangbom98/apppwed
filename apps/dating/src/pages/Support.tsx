@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageHeader from '@/components/common/PageHeader';
-import { ChevronDown, ChevronUp, MessageCircle, Phone, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { PhoneOutlined, MessageOutlined, MailOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
 const FAQS = [
   { q: 'Làm sao để nạp xu?', a: 'Vào Ví → Nạp xu, chọn phương thức thanh toán và mệnh giá. Hỗ trợ Momo, ZaloPay, VNPay, chuyển khoản ngân hàng.' },
@@ -20,13 +21,13 @@ export default function Support() {
       <div className="px-4 pb-8 space-y-6">
         {/* Contact channels */}
         <div>
-          <h3 className="font-bold text-gray-900 mb-3">📞 Liên hệ nhanh</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><PhoneOutlined /> Liên hệ nhanh</h3>
           <div className="grid grid-cols-3 gap-3">
-            {[
-              { icon: '💬', label: 'Live Chat', color: 'bg-pink-50 text-pink-600' },
-              { icon: '📱', label: 'Telegram', color: 'bg-blue-50 text-blue-600' },
-              { icon: '📧', label: 'Email', color: 'bg-green-50 text-green-600' },
-            ].map(c => (
+            {([
+              { icon: <MessageOutlined />, label: 'Live Chat', color: 'bg-pink-50 text-pink-600' },
+              { icon: <PhoneOutlined />,   label: 'Telegram',  color: 'bg-blue-50 text-blue-600' },
+              { icon: <MailOutlined />,    label: 'Email',     color: 'bg-green-50 text-green-600' },
+            ] as { icon: React.ReactNode; label: string; color: string }[]).map(c => (
               <button key={c.label} className={`flex flex-col items-center gap-2 p-4 ${c.color} rounded-2xl`}>
                 <span className="text-2xl">{c.icon}</span>
                 <span className="text-xs font-semibold">{c.label}</span>
@@ -37,7 +38,7 @@ export default function Support() {
 
         {/* FAQ */}
         <div>
-          <h3 className="font-bold text-gray-900 mb-3">❓ Câu hỏi thường gặp</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><QuestionCircleOutlined /> Câu hỏi thường gặp</h3>
           <div className="space-y-2">
             {FAQS.map((faq, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">

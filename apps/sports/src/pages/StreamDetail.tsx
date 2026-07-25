@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getStream, getStreamChat, joinStream, leaveStream } from '../api/sports';
 import { getSocket } from '../hooks/useSocket';
 import { useAuthStore } from '../store/authStore';
 import { Send, Eye } from 'lucide-react';
+import HlsPlayer from '../components/HlsPlayer';
 
 export default function StreamDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -68,24 +69,35 @@ export default function StreamDetailPage() {
     </div>
   );
 
+  // Determine playable URL: prefer hlsUrl, then streamUrl, then recordUrl
+  const videoSrc: string | null =
+    stream.hlsUrl ?? stream.streamUrl ?? stream.recordUrl ?? null;
+
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)]">
       {/* Video player */}
       <div className="relative bg-black aspect-video w-full">
-        {stream.recordUrl || stream.status === 'live' ? (
+        {videoSrc ? (
+          <HlsPlayer
+            src={videoSrc}
+            poster={stream.thumbnail ?? undefined}
+            autoPlay
+            className="aspect-video"
+          />
+        ) : stream.status === 'scheduled' ? (
           <div className="w-full h-full flex items-center justify-center bg-gray-900 text-gray-400">
             <div className="text-center">
-              <p className="text-2xl mb-1">📡</p>
-              <p className="text-xs">Stream đang phát</p>
-              {stream.status === 'live' && (
-                <span className="inline-block mt-1 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded animate-pulse">LIVE</span>
-              )}
+              <p className="text-2xl mb-1">⏳</p>
+              <p className="text-xs">Stream chưa bắt đầu</p>
             </div>
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-900 text-gray-400">
             <p className="text-sm">Stream đã kết thúc</p>
           </div>
+        )}
+        {stream.status === 'live' && (
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded animate-pulse">LIVE</span>
         )}
         <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
           <Eye size={10} /> {stream.viewers} đang xem

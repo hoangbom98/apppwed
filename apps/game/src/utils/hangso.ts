@@ -1,7 +1,7 @@
 export const PAYMENT_METHODS = [
-  { id: 'usdt',    label: 'USDT (TRC20)',           icon: '💰' },
-  { id: 'banking', label: 'Chuyển khoản ngân hàng', icon: '🏦' },
-  { id: 'momo',    label: 'MoMo',                   icon: '💜' },
+  { id: 'usdt',    label: 'USDT (TRC20)',           icon: 'USDT' },
+  { id: 'banking', label: 'Chuyển khoản ngân hàng', icon: 'Bank' },
+  { id: 'momo',    label: 'MoMo',                   icon: 'MoMo' },
 ];
 
 export const QUICK_DEPOSIT_AMOUNTS = [
@@ -17,14 +17,14 @@ export const VIP_COLORS: Record<number, string> = {
 };
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  slots:   '🎰',
-  casino:  '🃏',
-  sports:  '⚽',
-  lottery: '🎱',
-  fishing: '🐠',
-  cards:   '🎴',
-  live:    '📺',
-  all:     '🎮',
+  slots:   'Slots',
+  casino:  'Casino',
+  sports:  'Sports',
+  lottery: 'Lottery',
+  fishing: 'Fishing',
+  cards:   'Cards',
+  live:    'Live',
+  all:     'Tất cả',
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {

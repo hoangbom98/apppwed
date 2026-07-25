@@ -5,9 +5,8 @@
  * Route: /download  (public, outside Layout — no bottom nav)
  */
 import { AppDistributionPage } from '@ui';
-import type { AppConfig } from '@ui';
 
-const SPORTS_APP: AppConfig = {
+const SPORTS_APP: Record<string, any> = {
   // ── Branding ────────────────────────────────────────────────────────
   name:        'Sports Live',
   developer:   'Sports Live Entertainment',
@@ -33,14 +32,14 @@ const SPORTS_APP: AppConfig = {
 
   // ── Feature badges ───────────────────────────────────────────────────
   features: [
-    '⚽ Tỷ số trực tiếp 24/7',
-    '📺 Livestream HD miễn phí',
-    '🏆 400+ giải đấu thế giới',
-    '🔔 Thông báo khi có bàn thắng',
-    '🎬 Highlights & phân tích',
-    '📰 Tin tức bóng đá mới nhất',
-    '📊 Bảng xếp hạng cập nhật',
-    '🤝 Cộng đồng fans năng động',
+    'Tỷ số trực tiếp 24/7',
+    'Livestream HD miễn phí',
+    '400+ giải đấu thế giới',
+    'Thông báo khi có bàn thắng',
+    'Highlights & phân tích',
+    'Tin tức bóng đá mới nhất',
+    'Bảng xếp hạng cập nhật',
+    'Cộng đồng fans năng động',
   ],
 
   // ── Screenshots ──────────────────────────────────────────────────────
@@ -55,18 +54,18 @@ const SPORTS_APP: AppConfig = {
   // ── Description ──────────────────────────────────────────────────────
   description: `Sports Live là ứng dụng xem bóng đá hàng đầu Việt Nam — tỷ số trực tiếp, livestream HD và tin tức thể thao mới nhất mọi lúc mọi nơi.
 
-⚽ Tính năng nổi bật:
+Tính năng nổi bật:
 • Tỷ số trực tiếp 400+ giải đấu: Premier League, La Liga, Bundesliga, V.League
 • Livestream miễn phí chất lượng cao — không quảng cáo
 • Highlights chuyên nghiệp cập nhật ngay sau trận
 • Lịch thi đấu & nhắc nhở thông minh
 
-📊 Thống kê & Phân tích:
+Thống kê & Phân tích:
 • Bảng xếp hạng, chỉ số cầu thủ, form đội
 • Bình luận & dự đoán kết quả
 • Lịch sử đối đầu head-to-head
 
-🤝 Cộng đồng:
+Cộng đồng:
 • Kết nối với triệu fans bóng đá Việt Nam
 • Đặt cược dự đoán kết quả — nhận xu thưởng
 • Video ngắn & chia sẻ khoảnh khắc đỉnh cao`,

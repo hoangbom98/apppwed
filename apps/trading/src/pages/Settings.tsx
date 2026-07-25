@@ -22,17 +22,17 @@ export default function TradeSettingsPage() {
   const changePwdMut = useMutation({
     mutationFn: () => api.put('/trade/auth/password', { currentPassword: pwdForm.current, newPassword: pwdForm.next }),
     onSuccess: () => {
-      setMsg('✅ Đổi mật khẩu thành công!');
+      setMsg('OK Đổi mật khẩu thành công!');
       setPwdForm({ current: '', next: '', confirm: '' });
       setShowChangePwd(false);
     },
-    onError: (e: any) => setMsg(e.response?.data?.message || '❌ Đổi mật khẩu thất bại'),
+    onError: (e: any) => setMsg(e.response?.data?.message || 'ERR Đổi mật khẩu thất bại'),
   });
 
   const handleChangePwd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwdForm.next !== pwdForm.confirm) { setMsg('❌ Mật khẩu xác nhận không khớp'); return; }
-    if (pwdForm.next.length < 8) { setMsg('❌ Mật khẩu phải dài tối thiểu 8 ký tự'); return; }
+    if (pwdForm.next !== pwdForm.confirm) { setMsg('ERR Mật khẩu xác nhận không khớp'); return; }
+    if (pwdForm.next.length < 8) { setMsg('ERR Mật khẩu phải dài tối thiểu 8 ký tự'); return; }
     setMsg('');
     changePwdMut.mutate();
   };
@@ -144,7 +144,7 @@ export default function TradeSettingsPage() {
                 </div>
               ))}
               {msg && (
-                <p className={`text-xs p-2.5 rounded-xl ${msg.startsWith('✅') ? 'bg-green-950 text-green-400' : 'bg-red-950 text-red-400'}`}>{msg}</p>
+                <p className={`text-xs p-2.5 rounded-xl ${msg.startsWith('OK') ? 'bg-green-950 text-green-400' : 'bg-red-950 text-red-400'}`}>{msg.replace(/^(OK|ERR) /, '')}</p>
               )}
               <button type="submit" disabled={changePwdMut.isPending}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm disabled:opacity-50 transition-colors">

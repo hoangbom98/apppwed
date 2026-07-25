@@ -211,7 +211,7 @@ function FinanceTab({ type }) {
       {/* ── Single confirm modal ── */}
       <Modal
         open={!!confirming}
-        title={confirming?.action === 'approve' ? '✅ Xác nhận duyệt' : '❌ Xác nhận từ chối'}
+        title={confirming?.action === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}
         onOk={() => confirming?.action === 'approve' ? approveMut.mutate({ id: confirming.id }) : rejectMut.mutate({ id: confirming.id })}
         onCancel={() => { setConfirming(null); setNote(''); }}
         okText="Xác nhận" cancelText="Huỷ"
@@ -228,7 +228,7 @@ function FinanceTab({ type }) {
       {/* ── Bulk confirm modal ── */}
       <Modal
         open={!!bulkModal}
-        title={bulkModal === 'approve' ? `✅ Duyệt ${pendingSelected.length} giao dịch` : `❌ Từ chối ${pendingSelected.length} giao dịch`}
+        title={bulkModal === 'approve' ? `Duyệt ${pendingSelected.length} giao dịch` : `Từ chối ${pendingSelected.length} giao dịch`}
         onOk={() => bulkMut.mutate({ action: bulkModal })}
         onCancel={() => { setBulkModal(null); setBulkNote(''); }}
         okText="Xác nhận" cancelText="Huỷ"
@@ -252,15 +252,15 @@ const FinanceSummaryLazy = React.lazy(() => import('./FinanceSummary'));
 export default function Finance() {
   const TAB_ITEMS = [
     {
-      key: 'overview', label: '📊 Tổng quan',
+      key: 'overview', label: 'Tổng quan',
       children: (
         <React.Suspense fallback={<div className="text-gray-500 p-8 text-center">Đang tải...</div>}>
           <FinanceSummaryLazy />
         </React.Suspense>
       ),
     },
-    { key: 'deposit',  label: '💰 Nạp tiền', children: <FinanceTab type="deposit" /> },
-    { key: 'withdraw', label: '💸 Rút tiền',  children: <FinanceTab type="withdraw" /> },
+    { key: 'deposit',  label: 'Nạp tiền', children: <FinanceTab type="deposit" /> },
+    { key: 'withdraw', label: 'Rút tiền',  children: <FinanceTab type="withdraw" /> },
   ];
 
   return (

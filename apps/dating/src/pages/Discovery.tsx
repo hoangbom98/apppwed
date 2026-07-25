@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getDiscovery } from '@/api/users';
-import { Filter, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
 import UserBadges from '@/components/common/UserBadges';
 import BottomSheet from '@/components/common/BottomSheet';

@@ -46,7 +46,7 @@ export const BannerSlider: React.FC<BannerSliderProps> = ({
   const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
     touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
+    if (Math.abs(diff) > 40) { if (diff > 0) next(); else prev(); }
   };
 
   if (!banners.length) {

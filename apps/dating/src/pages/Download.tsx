@@ -5,9 +5,8 @@
  * Route: /download  (public, no DatingLayout)
  */
 import { AppDistributionPage } from '@ui';
-import type { AppConfig } from '@ui';
 
-const DATING_APP: AppConfig = {
+const DATING_APP: Record<string, any> = {
   // ── Branding ────────────────────────────────────────────────────────
   name:        'AppLive18',
   developer:   'AppLive18 Entertainment',
@@ -33,14 +32,14 @@ const DATING_APP: AppConfig = {
 
   // ── Feature badges ───────────────────────────────────────────────────
   features: [
-    '💘 Swipe & Kết đôi thông minh',
-    '📺 Live Stream tương tác',
-    '💬 Chat riêng tư & Video Call',
-    '🎁 Tặng quà ảo & Xu thưởng',
-    '👑 VIP & Hội viên đặc quyền',
-    '🎯 Bộ lọc nâng cao theo vị trí',
-    '🎉 Party Room & Sự kiện',
-    '🔒 Xác minh danh tính',
+    'Swipe & Kết đôi thông minh',
+    'Live Stream tương tác',
+    'Chat riêng tư & Video Call',
+    'Tặng quà ảo & Xu thưởng',
+    'VIP & Hội viên đặc quyền',
+    'Bộ lọc nâng cao theo vị trí',
+    'Party Room & Sự kiện',
+    'Xác minh danh tính',
   ],
 
   // ── Screenshots ──────────────────────────────────────────────────────
@@ -55,22 +54,22 @@ const DATING_APP: AppConfig = {
   // ── Description ──────────────────────────────────────────────────────
   description: `AppLive18 là nền tảng hẹn hò và livestream hàng đầu Việt Nam — kết nối hàng triệu người dùng qua AI matching thông minh và trải nghiệm tương tác phong phú.
 
-💘 Kết đôi thông minh:
+Kết đôi thông minh:
 • AI matching dựa trên sở thích, tính cách, vị trí
 • Swipe nhanh & Super Like không giới hạn (VIP)
 • Xem profile, ảnh, video trước khi kết nối
 
-📺 Live & Video:
+Live & Video:
 • Live Stream tương tác — tặng quà realtime
 • Video Call riêng tư — kết nối gương mặt
 • Shorts & Stories — chia sẻ khoảnh khắc
 
-🎁 Đặc quyền thành viên:
+Đặc quyền thành viên:
 • Xu thưởng hàng ngày — đổi quà hấp dẫn
 • VIP: xem profile ẩn danh, ưu tiên hiển thị
 • Party Room — chơi game nhóm vui nhộn
 
-🔐 An toàn & Uy tín:
+An toàn & Uy tín:
 • Xác minh danh tính qua CCCD/Passport
 • Mã hóa end-to-end mọi tin nhắn
 • Báo cáo & chặn tài khoản dễ dàng`,

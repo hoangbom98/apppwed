@@ -36,9 +36,9 @@ function applyDatingTheme(colors: any) {
 }
 
 export default function DatingLayout({ bottomNavItems }: { bottomNavItems: any[] }) {
-  const { user }    = useAuthStore();
+  useAuthStore();
   const unreadCount = useUnreadCount();
-  const { balance } = useWalletStore();
+  useWalletStore();
   const { data: colors } = useAppConfig('colors');
 
   // antd-mini ConfigProvider pattern: apply theme vars on config load

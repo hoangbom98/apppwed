@@ -3,9 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
+    "strict": false,
     "paths": {
-      "@/*": ["./src/*"],
-      "@admin/*": ["./src/*"]
+      "@/*":    ["./src/*"],
+      "@admin/*": ["./src/*"],
+      "@ui":    ["../../packages/ui/src/index.ts"],
+      "@ui/*":  ["../../packages/ui/src/*"]
     }
   },
   "include": ["src"],

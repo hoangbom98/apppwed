@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { TrendingUp, LineChart, BarChart2, Wallet, UserCheck, ArrowUpRight, Users } from 'lucide-react';
+import { TrendingUp, LineChart, BarChart2, Wallet, UserCheck, ArrowUpRight, Users, Landmark, Cpu, Gift } from 'lucide-react';
 
 const ITEMS = [
   { to: '/',           icon: TrendingUp,   label: 'Thị trường', end: true  },
@@ -9,6 +9,9 @@ const ITEMS = [
   { to: '/deposit',    icon: ArrowUpRight, label: 'Nạp tiền',   end: false },
   { to: '/wallet',     icon: Wallet,       label: 'Ví',         end: false },
   { to: '/investment', icon: BarChart2,    label: 'Đầu tư',     end: false },
+  { to: '/yuebao',     icon: Landmark,     label: 'Tiết kiệm',  end: false },
+  { to: '/mining',     icon: Cpu,          label: 'Máy đào',    end: false },
+  { to: '/prize',      icon: Gift,         label: 'Quay thưởng', end: false },
   { to: '/referral',   icon: Users,        label: 'Mời bạn',    end: false },
   { to: '/profile',    icon: UserCheck,    label: 'Tôi',        end: false },
 ];

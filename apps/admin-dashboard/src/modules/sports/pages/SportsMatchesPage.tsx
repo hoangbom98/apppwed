@@ -13,7 +13,7 @@ const STATUS_TAG: Record<string, string> = {
   postponed: 'warning',   cancelled: 'error',
 };
 const STATUS_LABEL: Record<string, string> = {
-  upcoming: 'Sắp diễn ra', live: '🔴 Live', finished: 'Kết thúc',
+  upcoming: 'Sắp diễn ra', live: 'Live', finished: 'Kết thúc',
   postponed: 'Hoãn',        cancelled: 'Huỷ',
 };
 

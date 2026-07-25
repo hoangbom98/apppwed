@@ -110,7 +110,7 @@ export default function FavoritesPage() {
                 className="flex items-center gap-3 p-3 bg-gray-800 rounded-xl border border-gray-700/50 hover:border-green-500/30 transition-colors">
                 {l.logo
                   ? <img src={l.logo} alt={l.name} className="w-8 h-8 object-contain" />
-                  : <div className="w-8 h-8 rounded-lg bg-green-600/20 flex items-center justify-center text-sm">⚽</div>
+                  : <div className="w-8 h-8 rounded-lg bg-green-600/20 flex items-center justify-center text-xs text-gray-400">Sport</div>
                 }
                 <div>
                   <p className="text-xs font-semibold text-white">{l.name}</p>

@@ -128,6 +128,60 @@ export function startGameWorkers(): void {
   if (_workersStarted || !REDIS_URL) return;
   _workersStarted = true;
 
+  // Worker 0: game-rebate — triggered by cron (calculate 23:55 + settle 01:00)
+  try {
+    const { startRebateWorker } = require('../../modules/workers/rebate.worker');
+    startRebateWorker();
+    logger.info('[GameWorkers] game-rebate worker delegated to rebate.worker.ts');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] rebate worker failed to start: ${err.message}`);
+  }
+
+  // Worker 0b: game-yuebao-interest — daily interest 00:05
+  try {
+    const { startYuebaoInterestWorker } = require('../../modules/workers/yuebao-interest.worker');
+    startYuebaoInterestWorker();
+    logger.info('[GameWorkers] game-yuebao-interest worker delegated to yuebao-interest.worker.ts');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] yuebao-interest worker failed to start: ${err.message}`);
+  }
+
+  // Worker 0c: lottery-settlement — async bet payout with Socket.IO realtime push
+  try {
+    const { startLotterySettlementWorker } = require('../../modules/workers/lottery-settlement.worker');
+    startLotterySettlementWorker();
+    logger.info('[GameWorkers] lottery-settlement worker started');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] lottery-settlement worker failed to start: ${err.message}`);
+  }
+
+  // Worker 0d: lkvip-webhook-retry — deposit/momo webhook retry + frozen-balance auto-expire
+  try {
+    const { startLkvipWebhookWorker } = require('../../modules/workers/lkvip-webhook-retry.worker');
+    startLkvipWebhookWorker();
+    logger.info('[GameWorkers] lkvip-webhook-retry worker started');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] lkvip-webhook-retry worker failed to start: ${err.message}`);
+  }
+
+  // Worker 0e: agent-settlement — commission calculation via event-bus + daily cron
+  try {
+    const { startAgentSettlementWorker } = require('../../modules/workers/agent-settlement.worker');
+    startAgentSettlementWorker();
+    logger.info('[GameWorkers] agent-settlement worker started');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] agent-settlement worker failed to start: ${err.message}`);
+  }
+
+  // Worker 0f: robot-bet — liquidity simulation with internal 30s scheduler
+  try {
+    const { startRobotBetWorker } = require('../../modules/workers/robot-bet.worker');
+    startRobotBetWorker();
+    logger.info('[GameWorkers] robot-bet worker started');
+  } catch (err: any) {
+    logger.warn(`[GameWorkers] robot-bet worker failed to start: ${err.message}`);
+  }
+
   // Worker 1: game-bet-stats — aggregate bet data into BetStats table
   try {
     new Worker<BetStatsJob>(
@@ -151,32 +205,4 @@ export function startGameWorkers(): void {
     logger.warn(`[GameWorkers] game-bet-stats worker failed to start: ${err.message}`);
   }
 
-  // Worker 2: game-rebate — triggered by cron to calculate/settle rebates
-  try {
-    new Worker(
-      'game-rebate',
-      async (job: Job) => {
-        const { action, betDate } = job.data;
-        const { getPrismaClient } = require('../../config/databases');
-        const RebateService = require('../services/rebateService');
-        const gamePrisma = getPrismaClient('game');
-        const rebateSvc  = new RebateService(gamePrisma, logger);
-
-        if (action === 'calculate') {
-          const { created, totalAmount } = await rebateSvc.calculateDailyRebates(betDate);
-          logger.info(`[RebateWorker] calculate job=${job.id} betDate=${betDate} created=${created} total=${totalAmount.toString()}`);
-        } else if (action === 'settle') {
-          const { settled, totalAmount } = await rebateSvc.settleDailyRebates(betDate);
-          logger.info(`[RebateWorker] settle job=${job.id} betDate=${betDate} settled=${settled} total=${totalAmount.toString()}`);
-        }
-      },
-      {
-        connection:  getConn(),
-        concurrency: 1, // rebate settlement is sequential — avoid double-settle
-      },
-    );
-    logger.info('[GameWorkers] game-rebate worker started (concurrency=1)');
-  } catch (err: any) {
-    logger.warn(`[GameWorkers] game-rebate worker failed to start: ${err.message}`);
-  }
 }

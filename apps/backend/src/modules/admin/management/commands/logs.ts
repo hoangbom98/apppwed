@@ -11,7 +11,9 @@
 import { Command } from 'commander';
 import { log, ok, warn, info, die, step } from '../utils/logger';
 import { runShellScript, BACKEND_DIR } from '../utils/shell';
-import { execa } from 'execa';
+// execa v8+ is ESM-only; use the CJS-compatible import pattern for CommonJS builds.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const execa = require('execa').execa ?? require('execa');
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -50,7 +52,7 @@ export function registerLogsCommand(program: Command): void {
           pm2Args.push('--nostream');
         }
 
-        step(`PM2 logs — api-server (last ${lines} lines)`);
+        log(`PM2 logs — api-server (last ${lines} lines)`);
         info('Press Ctrl+C to stop streaming\n');
 
         try {
@@ -58,7 +60,8 @@ export function registerLogsCommand(program: Command): void {
           await child;
         } catch (err: unknown) {
           // User pressed Ctrl+C — normal exit
-          if ((err as NodeJS.ErrnoException).signal === 'SIGINT') {
+          const anyErr = err as (Error & { signal?: string });
+          if (anyErr.signal === 'SIGINT') {
             process.exit(0);
           }
           die(`Failed to run pm2 logs: ${(err as Error).message}`);
@@ -79,9 +82,9 @@ export function registerLogsCommand(program: Command): void {
           warn(`Log file not found: ${logFile}`);
           continue;
         }
-        step(`── ${label} ──`);
+        log(`── ${label} ──`);
         try {
-          const content = fs.readFileSync(logFile, 'utf-8');
+          const content = fs.readFileSync(logFile, 'utf8');
           const logLines = content.split('\n');
           const tail = logLines.slice(-lines).join('\n');
           process.stdout.write(tail + '\n');

@@ -44,6 +44,7 @@ const Rebate          = lazy(() => import('./views/Rebate'));
 const Mining          = lazy(() => import('./views/Mining'));
 const Yuebao          = lazy(() => import('./views/Yuebao'));
 const Transfer        = lazy(() => import('./views/Transfer'));
+const SecurityCenter  = lazy(() => import('./views/SecurityCenter'));
 
 // ── Loading fallback ───────────────────────────────────────────────────────
 function LoadingFallback() {
@@ -62,7 +63,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { token, fetchProfile } = useAuthStore();
+  const { token, fetchProfile } = useAuthStore() as any;
 
   // Restore session on reload
   useEffect(() => {
@@ -135,6 +136,9 @@ export default function App() {
             <Route path="/so-du-bao"         element={<ProtectedRoute><Yuebao /></ProtectedRoute>} />
             <Route path="/transfer"          element={<ProtectedRoute><Transfer /></ProtectedRoute>} />
             <Route path="/chuyen-tien"       element={<ProtectedRoute><Transfer /></ProtectedRoute>} />
+            {/* ── Security center ───────────────────────────────────── */}
+            <Route path="/security"          element={<ProtectedRoute><SecurityCenter /></ProtectedRoute>} />
+            <Route path="/bao-mat"           element={<ProtectedRoute><SecurityCenter /></ProtectedRoute>} />
           </Route>
 
           {/* Fallback → Home */}

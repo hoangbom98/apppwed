@@ -5,9 +5,10 @@ import { getEvents } from '@/api/community';
 import PageHeader from '@/components/common/PageHeader';
 import { Calendar, Trophy, Users } from 'lucide-react';
 import { formatDate } from '@/utils/formatters';
+import { GiftOutlined } from '@ant-design/icons';
 
 export default function Events() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // used for navigation on item click
   const { data, isLoading } = useQuery({ queryKey: ['events'], queryFn: getEvents });
   const events = data?.events || [];
 
@@ -21,7 +22,7 @@ export default function Events() {
         </div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center py-16">
-          <div className="text-5xl mb-3">🎉</div>
+          <div className="text-5xl mb-3"><GiftOutlined style={{ fontSize: 48, color: '#d1d5db' }} /></div>
           <p className="text-gray-400">Chưa có sự kiện nào</p>
         </div>
       ) : (

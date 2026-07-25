@@ -37,7 +37,7 @@ export default function HomePage() {
     <div className="pt-2 pb-2">
       {/* Live matches strip */}
       {liveMatches.length > 0 && (
-        <Section title={`⚽ Đang diễn ra (${liveMatches.length})`} to="/schedule">
+        <Section title={`Đang diễn ra (${liveMatches.length})`} to="/schedule">
           <div className="px-4 space-y-2">
             {liveMatches.map((m: any) => <MatchCard key={m.id} match={m} />)}
           </div>
@@ -46,7 +46,7 @@ export default function HomePage() {
 
       {/* Live streams */}
       {liveStreams.length > 0 && (
-        <Section title="📺 Livestream" to="/streams">
+        <Section title="Livestream" to="/streams">
           <div className="flex gap-3 px-4 overflow-x-auto no-scrollbar">
             {liveStreams.map((s: any) => (
               <Link key={s.id} to={`/streams/${s.id}`} className="flex-shrink-0 w-40">
@@ -64,7 +64,7 @@ export default function HomePage() {
 
       {/* Today matches */}
       {todayMatches.length > 0 && (
-        <Section title="📅 Hôm nay" to="/schedule">
+        <Section title="Hôm nay" to="/schedule">
           <div className="px-4 space-y-2">
             {todayMatches.map((m: any) => <MatchCard key={m.id} match={m} />)}
           </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
 
       {/* Highlights row */}
       {highlights.length > 0 && (
-        <Section title="🎬 Highlights" to="/highlights">
+        <Section title="Highlights" to="/highlights">
           <div className="flex gap-3 px-4 overflow-x-auto no-scrollbar">
             {highlights.map((h: any) => (
               <div key={h.id} className="flex-shrink-0 w-52">
@@ -86,7 +86,7 @@ export default function HomePage() {
 
       {/* News */}
       {articles.length > 0 && (
-        <Section title="📰 Tin tức" to="/news">
+        <Section title="Tin tức" to="/news">
           <div className="px-4 space-y-2">
             {articles.map((a: any) => <NewsCard key={a.id} article={a} />)}
           </div>
@@ -98,16 +98,16 @@ export default function HomePage() {
         <section className="mx-4 mb-4 mt-2">
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 to-emerald-900 p-5">
             <div className="relative z-10">
-              <p className="font-black text-white text-base mb-1">📱 Tải app Sports Live</p>
+              <p className="font-black text-white text-base mb-1">Tải app Sports Live</p>
               <p className="text-green-200 text-xs mb-4">Xem tỷ số trực tiếp, livestream HD — miễn phí 100%</p>
               <div className="flex gap-2">
                 <Link to="/download"
                   className="flex items-center gap-1.5 px-3 py-2 bg-white text-green-800 rounded-xl text-xs font-bold transition-opacity hover:opacity-90">
-                  <span>🤖</span> Android
+                  Android
                 </Link>
                 <Link to="/download"
                   className="flex items-center gap-1.5 px-3 py-2 bg-white text-green-800 rounded-xl text-xs font-bold transition-opacity hover:opacity-90">
-                  <span>🍎</span> iOS
+                  iOS
                 </Link>
               </div>
             </div>

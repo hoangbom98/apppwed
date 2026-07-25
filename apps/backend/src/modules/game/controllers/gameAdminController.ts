@@ -13,15 +13,29 @@ exports.listRounds = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
     const where = {};
-    if (req.query.status)     where.status     = req.query.status;
-    if (req.query.userId)     where.userId      = req.query.userId;
-    if (req.query.gameId)     where.gameId      = req.query.gameId;
-    if (req.query.provider)   where.provider    = req.query.provider;
+    if (req.query.status)   where.status   = req.query.status;
+    if (req.query.userId)   where.userId   = req.query.userId;
+    if (req.query.gameId)   where.gameId   = req.query.gameId;
+    if (req.query.provider) where.provider = req.query.provider;
+    if (req.query.gameType) where.gameType = req.query.gameType;
+    if (req.query.search) {
+      // search by username (join via user relation) or gameCode
+      where.OR = [
+        { user:     { username: { contains: req.query.search } } },
+        { gameCode: { contains: req.query.search } },
+        { gameName: { contains: req.query.search } },
+      ];
+    }
+    if (req.query.from || req.query.to) {
+      where.createdAt = {};
+      if (req.query.from) where.createdAt.gte = new Date(req.query.from);
+      if (req.query.to)   where.createdAt.lte = new Date(req.query.to + 'T23:59:59Z');
+    }
     const [data, total] = await Promise.all([
       req.prisma.gameSession.findMany({
         where, skip, take,
         orderBy: { createdAt: 'desc' },
-        include: { user: { select: { username: true } } },
+        include: { user: { select: { username: true, email: true } } },
       }),
       req.prisma.gameSession.count({ where }),
     ]);

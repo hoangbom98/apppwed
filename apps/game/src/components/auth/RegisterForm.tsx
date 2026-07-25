@@ -18,7 +18,7 @@ type FormValues = yup.InferType<typeof schema>;
 
 export const RegisterForm: React.FC = () => {
   const [showPwd, setShowPwd] = useState(false);
-  const { register: registerUser, isLoading } = useAuthStore();
+  const { register: registerUser, isLoading } = useAuthStore() as any;
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({

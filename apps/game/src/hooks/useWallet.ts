@@ -3,12 +3,13 @@ import { useWalletStore } from '@/store/walletStore';
 import { useAuthStore } from '@/store/authStore';
 
 export const useWallet = () => {
-  const { balance, isLoading, fetchBalance, setBalance } = useWalletStore();
+  const store = useWalletStore() as any;
+  const { balance, isLoading, setBalance, fetchBalance, reset } = store;
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (user) fetchBalance();
-  }, [user]);
+    if (user && fetchBalance) fetchBalance();
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { balance, isLoading, fetchBalance, setBalance };
+  return { balance, isLoading, fetchBalance, setBalance, reset };
 };

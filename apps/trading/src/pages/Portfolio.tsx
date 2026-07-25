@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPortfolio, getOrders } from '@/api/trade';
+import { getPortfolio } from '@/api/trade';
 import { useAuthStore } from '@/store/authStore';
 import { fmt, fmtPct } from '@/utils/formatters';
 import { TrendingUp, TrendingDown, BarChart3, Wallet, ArrowRight, Loader2 } from 'lucide-react';
@@ -23,22 +23,24 @@ export default function PortfolioPage() {
     refetchInterval: 10_000,
   });
 
-  const portfolio = portfolioData?.data ?? portfolioData ?? null;
+  const portfolio = portfolioData?.data ?? null;
 
   // Portfolio endpoint returns: balance, frozen, openPositions (count), openOrders (count),
   // unrealisedPnl, totalTxns, positions (array), orders (array)
-  const balance        = parseFloat(portfolio?.balance ?? 0);
-  const frozen         = parseFloat(portfolio?.frozen  ?? 0);
-  const unrealisedPnl  = parseFloat(portfolio?.unrealisedPnl ?? 0);
-  const openPositions: any[] = portfolio?.positions ?? [];
+  const balance        = parseFloat(String(portfolio?.balance ?? 0));
+  const frozen         = parseFloat(String(portfolio?.frozen  ?? 0));
+  const unrealisedPnl  = parseFloat(String(portfolio?.unrealisedPnl ?? 0));
+  const openPositions  = portfolio?.positions ?? [];
   const openOrdersCount: number = portfolio?.openOrders ?? 0;
 
-  const totalValue = balance + Math.abs(unrealisedPnl);
+  const _totalValue = balance + Math.abs(unrealisedPnl);
 
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-5xl mb-4">📊</div>
+        <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center mb-4">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
         <h2 className="text-xl font-bold text-white mb-2">Chưa đăng nhập</h2>
         <p className="text-sm bn-muted mb-6">Đăng nhập để xem danh mục đầu tư</p>
         <Link to="/login" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">Đăng nhập</Link>
@@ -62,7 +64,7 @@ export default function PortfolioPage() {
           <p className="text-xs bn-muted mb-1">Tổng tài sản</p>
           <p className="text-4xl font-black text-white">{fmt(balance, 2)} <span className="text-xl text-gray-400">USD</span></p>
           {frozen > 0 && (
-            <p className="text-xs text-yellow-400 mt-1">🔒 {fmt(frozen, 2)} USD đang khóa trong lệnh</p>
+            <p className="text-xs text-yellow-400 mt-1">{fmt(frozen, 2)} USD đang khóa trong lệnh</p>
           )}
           {unrealisedPnl !== 0 && (
             <div className={`flex items-center gap-2 mt-2 ${unrealisedPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -103,7 +105,7 @@ export default function PortfolioPage() {
 
         {openPositions.length === 0 ? (
           <div className="py-16 text-center bn-muted">
-            <p className="text-4xl mb-3">📋</p>
+            <p className="text-sm text-gray-500">Không có vị thế nào</p>
             <p>Không có vị thế nào đang mở</p>
           </div>
         ) : (

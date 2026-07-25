@@ -1,14 +1,14 @@
 import { Worker } from 'bullmq';
-import { PrismaClient } from '@prisma/client';
 import { redis } from '../../utils/redis';
 import { logger } from '../../shared/logger';
 
-const prisma = new PrismaClient();
+const { getPrismaClient } = require('../../config/databases');
+const prisma = getPrismaClient('admin');
 
 // Worker chạy định kỳ để quét gian lận
 export const fraudWorker = new Worker(
   'fraud-detection',
-  async (job) => {
+  async (_job) => {
     // Lấy danh sách user chưa bị khóa
     const users = await prisma.user.findMany({
       where: { isLocked: false },
@@ -17,7 +17,7 @@ export const fraudWorker = new Worker(
 
     for (const user of users) {
       const fraudScore = await calculateFraudScore(user.id, user.ip || '');
-      
+
       if (fraudScore >= 80) {
         // Tự động khóa tài khoản
         await prisma.user.update({
@@ -47,11 +47,11 @@ async function calculateFraudScore(userId: string, ip: string): Promise<number> 
   const usersWithSameIp = await prisma.user.count({ where: { ip } });
   if (usersWithSameIp > 5) score += (usersWithSameIp - 5) * 10;
 
-  // 2. Kiểm tra số lần đăng nhập thất bại từ Redis (giả định có lưu key này)
+  // 2. Kiểm tra số lần đăng nhập thất bại từ Redis
   const failedAttempts = await redis.get(`login:fail:${userId}`);
   if (failedAttempts && parseInt(failedAttempts) > 5) score += parseInt(failedAttempts) * 5;
 
-  // 3. Tỷ lệ thắng bất thường (Ví dụ: > 90% trên 50 giao dịch)
+  // 3. Tỷ lệ thắng bất thường (> 90% trên 50 giao dịch)
   const totalTxs = await prisma.walletTransaction.count({ where: { userId, type: 'bet' } });
   if (totalTxs > 50) {
     const winTxs = await prisma.walletTransaction.count({ where: { userId, type: 'win' } });

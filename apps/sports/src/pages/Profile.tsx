@@ -65,13 +65,14 @@ export default function ProfilePage() {
       {/* Menu */}
       <div className="space-y-2">
         {[
-          { label: '🔔 Thông báo', to: '/notifications' },
-          { label: '❤️ Yêu thích', to: '/schedule' },
-          { label: '🎬 Video của tôi', to: '/videos' },
-          { label: '⚙️ Cài đặt', to: '/settings' },
-          { label: '💬 Hỗ trợ', to: '/support' },
-          { label: '❓ FAQ', to: '/knowledge' },
-          { label: '📱 Tải ứng dụng', to: '/download' },
+          { label: 'Thông báo', to: '/notifications' },
+          { label: 'Yêu thích', to: '/schedule' },
+          { label: 'Video của tôi', to: '/videos' },
+          { label: 'Cài đặt', to: '/settings' },
+          { label: 'Hỗ trợ', to: '/support' },
+          { label: 'FAQ', to: '/knowledge' },
+          { label: 'Tải ứng dụng', to: '/download' },
+          ...(user?.role === 'admin' ? [{ label: 'Admin Sports', to: '/admin' }] : []),
         ].map(m => (
           <Link key={m.to} to={m.to} className="flex items-center justify-between bg-gray-800 rounded-xl px-4 py-3">
             <span className="text-sm">{m.label}</span>
@@ -83,7 +84,7 @@ export default function ProfilePage() {
           onClick={() => { logout(); }}
           className="w-full bg-red-900/30 border border-red-800/30 text-red-400 rounded-xl px-4 py-3 text-sm font-medium mt-4"
         >
-          🚪 Đăng xuất
+          Đăng xuất
         </button>
       </div>
     </div>

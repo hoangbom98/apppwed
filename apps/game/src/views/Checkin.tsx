@@ -10,9 +10,9 @@ import { Skeleton } from '@/components/common/Skeleton';
 import { formatVND } from '@/utils/dinhDang';
 
 const REWARD_ICONS: Record<string, string> = {
-  coin:      '🪙',
-  free_spin: '🎰',
-  bonus:     '🎁',
+  coin:      'Coin',
+  free_spin: 'Free Spin',
+  bonus:     'Bonus',
 };
 
 export default function Checkin() {
@@ -43,7 +43,6 @@ export default function Checkin() {
   const nextDay     = status?.nextDay ?? 1;
 
   // Build 7-day grid from config + mark claimed days from weekHistory
-  const claimedDates = new Set<string>((status?.weekHistory ?? []).map((r: any) => r.checkinDate));
 
   return (
     <div className="max-w-lg mx-auto space-y-5">
@@ -85,7 +84,7 @@ export default function Checkin() {
                   <CheckCircle className="absolute top-1 right-1 w-3 h-3 text-green-500" />
                 )}
                 <span className="text-xs font-bold text-gray-500">Ngày {c.day}</span>
-                <span className="text-lg">{REWARD_ICONS[c.rewardType] ?? '🎁'}</span>
+                <span className="text-xs font-semibold text-gray-500">{REWARD_ICONS[c.rewardType] ?? 'Bonus'}</span>
                 <span className={`text-[10px] font-bold ${isCurrent ? 'text-orange-600' : 'text-gray-600 dark:text-gray-400'}`}>
                   {formatVND(Number(c.rewardAmount))}
                 </span>
@@ -126,7 +125,7 @@ export default function Checkin() {
       {/* Next reward info */}
       {!todayClaimed && status?.nextReward && (
         <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-3">
-          <span className="text-2xl">{REWARD_ICONS[status.nextReward.rewardType] ?? '🎁'}</span>
+          <span className="text-xs font-bold text-orange-600">{REWARD_ICONS[status.nextReward.rewardType] ?? 'Bonus'}</span>
           <div>
             <p className="text-xs text-orange-700 dark:text-orange-400 font-bold">Phần thưởng hôm nay</p>
             <p className="text-sm font-black text-gray-900 dark:text-white">

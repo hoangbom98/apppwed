@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getCommunityTopics, getPosts } from '@/api/community';
+import { getPosts } from '@/api/community';
 import { COMMUNITY_TOPICS } from '@/utils/constants';
 import PageHeader from '@/components/common/PageHeader';
 import Avatar from '@/components/common/Avatar';
 import { Heart, MessageCircle, Plus } from 'lucide-react';
+import { GlobalOutlined, MessageOutlined } from '@ant-design/icons';
 import { formatTime } from '@/utils/formatters';
 
 export default function Community() {
@@ -27,7 +28,7 @@ export default function Community() {
       <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-none">
         <button onClick={() => setTopic('')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap ${!topic ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
-          🌐 Tất cả
+          <GlobalOutlined /> Tất cả
         </button>
         {COMMUNITY_TOPICS.map(t => (
           <button key={t.id} onClick={() => setTopic(t.id)}
@@ -39,7 +40,7 @@ export default function Community() {
 
       {posts.length === 0 ? (
         <div className="flex flex-col items-center py-16">
-          <div className="text-5xl mb-3">💬</div>
+          <div className="text-5xl mb-3"><MessageOutlined style={{ fontSize: 48, color: '#d1d5db' }} /></div>
           <p className="text-gray-400 text-sm">Chưa có bài viết</p>
         </div>
       ) : (

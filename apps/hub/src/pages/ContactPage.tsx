@@ -22,7 +22,7 @@ export default function ContactPage() {
       <h1 className="text-2xl font-bold text-white">Liên hệ / Phản hồi</h1>
       {done ? (
         <div className="bg-green-900/40 border border-green-700 rounded-lg p-6 text-green-400 text-center">
-          ✅ Cảm ơn! Chúng tôi đã nhận được phản hồi của bạn.
+            Cảm ơn! Chúng tôi đã nhận được phản hồi của bạn.
         </div>
       ) : (
         <form onSubmit={submit} className="bg-gray-800 rounded-xl p-6 space-y-4">

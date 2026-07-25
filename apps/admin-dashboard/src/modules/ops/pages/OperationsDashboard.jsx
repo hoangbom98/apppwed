@@ -8,7 +8,7 @@ import {
 } from 'antd';
 import {
   TeamOutlined, CheckSquareOutlined, AlertOutlined, ReloadOutlined, PlayCircleOutlined,
-  TrendingUpOutlined,
+  RiseOutlined,
 } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -147,7 +147,7 @@ export default function OperationsDashboard() {
       <Card title="Hành động nhanh" size="small">
         <Space wrap>
           <Button type="primary" icon={<PlayCircleOutlined />} onClick={() => runCampaigns.mutate()} loading={runCampaigns.isPending}>Chạy Campaign</Button>
-          <Button icon={<TrendingUpOutlined />} onClick={() => runMarketing.mutate()} loading={runMarketing.isPending}>Marketing tự động</Button>
+          <Button icon={<RiseOutlined />} onClick={() => runMarketing.mutate()} loading={runMarketing.isPending}>Marketing tự động</Button>
           <Button danger icon={<AlertOutlined />} onClick={() => runChurn.mutate()} loading={runChurn.isPending}>Quét Churn</Button>
           <Button icon={<ReloadOutlined />} onClick={() => runRebalance.mutate()} loading={runRebalance.isPending}>Cân bằng Task</Button>
         </Space>

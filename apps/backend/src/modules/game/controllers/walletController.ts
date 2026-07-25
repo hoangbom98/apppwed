@@ -248,3 +248,117 @@ exports.rejectWithdraw = async (req, res) => {
     return success(res, null, 'Đã từ chối và hoàn tiền');
   } catch (e) { return error(res, e.message, 500); }
 };
+
+// ── POST /game/wallet/transfer — chuyển tiền ví chính ↔ ví game ───────────────
+// Vì hệ thống dùng seamless wallet (user.balance = ví duy nhất),
+// transfer 'in'/'out' chỉ ghi log; không thay đổi balance thực.
+exports.transfer = async (req, res) => {
+  try {
+    const { direction, amount } = req.body;
+    if (!direction || !amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      return error(res, 'direction (in|out) và amount là bắt buộc', 400);
+    }
+    if (!['in', 'out'].includes(direction)) {
+      return error(res, 'direction phải là in hoặc out', 400);
+    }
+
+    const numAmount = parseFloat(amount);
+    const user = await req.prisma.user.findUnique({
+      where:  { id: req.user.id },
+      select: { balance: true, frozen: true },
+    });
+    if (!user) return error(res, 'Không tìm thấy tài khoản', 404);
+
+    const available = parseFloat(user.balance) - parseFloat(user.frozen || 0);
+    if (available < numAmount) return error(res, 'Số dư khả dụng không đủ', 400);
+
+    const note = direction === 'in'
+      ? `Chuyển vào ví game: ${numAmount.toLocaleString('vi-VN')} VND`
+      : `Chuyển ra ví chính: ${numAmount.toLocaleString('vi-VN')} VND`;
+
+    await req.prisma.transaction.create({
+      data: {
+        userId:        req.user.id,
+        type:          direction === 'in' ? 'transfer_in' : 'transfer_out',
+        amount:        direction === 'in' ? -numAmount : numAmount,
+        balanceBefore: parseFloat(user.balance),
+        balanceAfter:  parseFloat(user.balance),
+        referenceType: 'transfer',
+        note,
+      },
+    });
+
+    return success(res, { transferred: true, direction, amount: numAmount }, note);
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+// ── POST /game/wallet/transfer-user — chuyển tiền P2P giữa 2 user ────────────
+exports.transferUser = async (req, res) => {
+  try {
+    const { toUsername, amount, tradingPassword } = req.body;
+    if (!toUsername || !amount || Number(amount) <= 0) {
+      return error(res, 'toUsername và amount là bắt buộc', 400);
+    }
+    if (!tradingPassword || String(tradingPassword).length < 4) {
+      return error(res, 'Mật khẩu giao dịch không hợp lệ', 400);
+    }
+
+    const numAmount = parseFloat(amount);
+    const sender    = await req.prisma.user.findUnique({
+      where:  { id: req.user.id },
+      select: { balance: true, frozen: true, tradingPassword: true, username: true },
+    });
+    if (!sender) return error(res, 'Không tìm thấy tài khoản', 404);
+
+    // Kiểm tra mật khẩu giao dịch (lưu hash — so sánh plain nếu chưa hash)
+    if (sender.tradingPassword && sender.tradingPassword !== String(tradingPassword)) {
+      return error(res, 'Mật khẩu giao dịch không đúng', 400);
+    }
+
+    const available = parseFloat(sender.balance) - parseFloat(sender.frozen || 0);
+    if (available < numAmount) return error(res, 'Số dư khả dụng không đủ', 400);
+
+    const receiver = await req.prisma.user.findFirst({
+      where:  { OR: [{ username: toUsername }, { email: toUsername }] },
+      select: { id: true, username: true, balance: true },
+    });
+    if (!receiver) return error(res, 'Không tìm thấy người nhận', 404);
+    if (receiver.id === req.user.id) return error(res, 'Không thể tự chuyển cho mình', 400);
+
+    const senderNewBal   = parseFloat(sender.balance)   - numAmount;
+    const receiverNewBal = parseFloat(receiver.balance) + numAmount;
+    const ref = `p2p_${Date.now()}`;
+
+    await req.prisma.$transaction([
+      req.prisma.user.update({ where: { id: req.user.id },  data: { balance: senderNewBal } }),
+      req.prisma.user.update({ where: { id: receiver.id },  data: { balance: receiverNewBal } }),
+      req.prisma.transaction.create({ data: {
+        userId:        req.user.id,
+        type:          'transfer_out',
+        amount:        -numAmount,
+        balanceBefore: parseFloat(sender.balance),
+        balanceAfter:  senderNewBal,
+        referenceId:   ref,
+        referenceType: 'p2p_transfer',
+        note:          `Chuyển tiền → ${receiver.username}: ${numAmount.toLocaleString('vi-VN')} VND`,
+      }}),
+      req.prisma.transaction.create({ data: {
+        userId:        receiver.id,
+        type:          'transfer_in',
+        amount:        numAmount,
+        balanceBefore: parseFloat(receiver.balance),
+        balanceAfter:  receiverNewBal,
+        referenceId:   ref,
+        referenceType: 'p2p_transfer',
+        note:          `Nhận tiền ← ${sender.username}: ${numAmount.toLocaleString('vi-VN')} VND`,
+      }}),
+    ]);
+
+    notifSvc.sendToUser(receiver.id, 'notification', {
+      title:   'Nhận tiền chuyển khoản',
+      content: `${sender.username} đã chuyển ${numAmount.toLocaleString('vi-VN')} VND cho bạn`,
+    });
+
+    return success(res, { newBalance: senderNewBal, toUser: receiver.username, amount: numAmount }, 'Chuyển tiền thành công');
+  } catch (e) { return error(res, e.message, 500); }
+};

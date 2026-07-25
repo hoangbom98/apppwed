@@ -1,0 +1,401 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>LKVIP Project Map</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 13px; line-height: 1.6; background: #ffffff; color: #1f2328; padding: 24px; }
+  h1  { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
+  .sub { color: #57606a; font-size: 12px; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+  .card { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+  .card-header { padding: 9px 14px; font-weight: 700; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .card-body  { padding: 12px 14px; }
+  .tree { list-style: none; }
+  .tree li { padding: 2px 0; display: flex; gap: 6px; align-items: flex-start; }
+  .tree li::before { content: "│"; color: #d1d5db; flex-shrink: 0; }
+  .tree li:last-child::before { content: "└"; color: #d1d5db; }
+  .tree .dir  { font-weight: 600; color: #1f2328; }
+  .tree .file { color: #57606a; }
+  .tree .badge { font-size: 10px; padding: 1px 6px; border-radius: 999px; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+  .badge-gray   { background: #f3f4f6; color: #374151; }
+  .badge-pink   { background: #fce7f3; color: #9d174d; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  /* header colours */
+  .hdr-backend  { background: #dbeafe; color: #1e40af; }
+  .hdr-frontend { background: #d1fae5; color: #065f46; }
+  .hdr-admin    { background: #ede9fe; color: #5b21b6; }
+  .hdr-infra    { background: #fef3c7; color: #92400e; }
+  .hdr-packages { background: #fce7f3; color: #9d174d; }
+  .hdr-misc     { background: #f3f4f6; color: #374151; }
+  .hdr-data     { background: #fee2e2; color: #991b1b; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 8px 0; }
+  .note { font-size: 11px; color: #57606a; margin-top: 4px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #57606a; margin: 0 0 8px; }
+  .full { grid-column: 1 / -1; }
+  .mono { font-family: "Consolas","Courier New",monospace; font-size: 11.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f7f8fa; text-align: left; padding: 6px 10px; font-weight: 700; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 5px 10px; border-bottom: 1px solid #f0f1f3; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .url { color: #3b82d4; font-family: monospace; font-size: 11px; }
+  footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 11px; color: #57606a; }
+</style>
+</head>
+<body>
+
+<h1>🗺️ LKVIP Group — Bản đồ cấu trúc dự án</h1>
+<p class="sub">Monorepo tại <code>/var/LKVIP</code>  |  Node 20+  ·  pnpm workspace  ·  TypeScript strict</p>
+
+
+<div style="margin-bottom:20px">
+  <p class="section-title">Tổng quan nhanh</p>
+  <table>
+    <thead><tr><th>Thư mục gốc</th><th>Vai trò</th><th>Ghi chú</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">apps/</td><td>Các ứng dụng chính</td><td>8 app — backend + 6 frontend SPA + admin</td></tr>
+      <tr><td class="mono">packages/</td><td>Shared libraries</td><td>types, UI components, utils, constants, mobile</td></tr>
+      <tr><td class="mono">config/</td><td>Cấu hình hạ tầng</td><td>Nginx, PM2, env, DB, ESLint, monitoring</td></tr>
+      <tr><td class="mono">scripts/</td><td>DevOps scripts</td><td>deploy.sh, vps-setup.sh, ssl-setup.sh, prisma-run.ts</td></tr>
+      <tr><td class="mono">docs/</td><td>Tài liệu kỹ thuật</td><td>Architecture, API, Deployment, Risk, NFR…</td></tr>
+      <tr><td class="mono">data/</td><td>Runtime data</td><td>backups/, logs/, uploads/</td></tr>
+      <tr><td class="mono">tests/</td><td>Kiểm thử</td><td>integration/, load/</td></tr>
+      <tr><td class="mono">.backups/</td><td>Auto-backups</td><td>(trống)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="grid">
+
+
+<div class="card">
+  <div class="card-header hdr-backend">⚙️ apps/backend — API Server (Express + TypeScript)</div>
+  <div class="card-body">
+    <p class="section-title">src/</p>
+    <ul class="tree mono">
+      <li><span class="dir">config/</span> <span class="badge badge-blue">10 files</span></li>
+      <li style="padding-left:14px"><span class="file">databases.ts · cron.ts · redis.ts · socket.ts</span></li>
+      <li style="padding-left:14px"><span class="file">swagger.ts · logger.ts · i18n.ts · index.ts</span></li>
+      <li><span class="dir">modules/</span> <span class="badge badge-blue">7 modules</span></li>
+      <li style="padding-left:14px"><span class="dir">admin/</span> controllers · routes · services · validators</li>
+      <li style="padding-left:14px"><span class="dir">sports/</span> 23 controllers · 10 services · routes/index.ts</li>
+      <li style="padding-left:14px"><span class="dir">game/</span> 20 controllers · services · routes</li>
+      <li style="padding-left:14px"><span class="dir">hub/ · trade/ · dating/ · lkvip/</span></li>
+      <li style="padding-left:14px"><span class="dir">workers/</span> <span class="badge badge-amber">12 BullMQ workers</span></li>
+      <li><span class="dir">shared/</span></li>
+      <li style="padding-left:14px"><span class="file">services/</span> <span class="badge badge-gray">43 services</span></li>
+      <li style="padding-left:14px"><span class="file">middlewares/</span> <span class="badge badge-gray">20 files</span></li>
+      <li style="padding-left:14px"><span class="file">socket/ · payment/ · queue/ · utils/</span></li>
+      <li><span class="dir">third-parties/</span></li>
+      <li style="padding-left:14px"><span class="file">core/</span> BaseProvider · ServiceRegistry · interfaces</li>
+      <li style="padding-left:14px"><span class="file">providers/</span> ApiFootball · GNews · TheSportsDB</li>
+      <li style="padding-left:14px"><span class="file">providers/</span> GSC · Goldgate · TCGaming · Binance</li>
+      <li><span class="dir">risk/</span> <span class="badge badge-red">14 files</span></li>
+      <li style="padding-left:14px"><span class="file">riskScorer · fraudDetector · botDetector</span></li>
+      <li style="padding-left:14px"><span class="file">ddosDetector · adaptiveLimits · complianceMonitor</span></li>
+      <li><span class="dir">automation/</span> businessEvents · depositSyncWorker</li>
+    </ul>
+    <hr class="divider" />
+    <p class="section-title">prisma/</p>
+    <ul class="tree mono">
+      <li><span class="dir">hub/ game/ trade/ dating/ sports/ admin/</span> — mỗi cái có schema.prisma + migrations/</li>
+      <li><span class="dir">seeds/</span> <span class="badge badge-green">15 seed files</span></li>
+      <li style="padding-left:14px"><span class="file">index.ts (master) + admin/hub/game/trade/dating/sports</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-frontend">🖥️ apps/sports — Sports Live SPA (React + Vite)</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">src/pages/</span> <span class="badge badge-green">28 trang</span></li>
+      <li style="padding-left:14px"><span class="file">Home · Schedule · MatchDetail · Standings</span></li>
+      <li style="padding-left:14px"><span class="file">Highlights · VideoFeed · News · ArticleDetail</span></li>
+      <li style="padding-left:14px"><span class="file">Community · Streams · StreamDetail · Betting</span></li>
+      <li style="padding-left:14px"><span class="file">WalletPage · Profile · Favorites · Leagues · Teams</span></li>
+      <li style="padding-left:14px"><span class="file">Search · Settings · Support · Knowledge · Promotions</span></li>
+      <li style="padding-left:14px"><span class="file">Login · Register · Download</span></li>
+      <li><span class="dir">src/components/</span> <span class="badge badge-green">6 files</span></li>
+      <li style="padding-left:14px"><span class="file">HlsPlayer ✨ · MatchCard · HighlightCard</span></li>
+      <li style="padding-left:14px"><span class="file">NewsCard · PostCard · CommentItem</span></li>
+      <li><span class="dir">src/api/</span> client.ts · sports.ts</li>
+      <li><span class="dir">src/store/</span> authStore · bettingStore · sportsStore · uiStore</li>
+      <li><span class="dir">src/hooks/</span> useSocket · useDebounce</li>
+    </ul>
+    <p class="note">🆕 hls.js v1.6 installed · HlsPlayer component mới</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header hdr-frontend">🖥️ apps/hub — Hub Portal SPA</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">src/pages/</span> các trang nội dung, game list, news</li>
+      <li><span class="dir">src/components/</span> shared UI components</li>
+      <li><span class="dir">src/store/</span> · <span class="dir">src/hooks/</span> · <span class="dir">src/i18n/</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header hdr-frontend">🎮 apps/game — Game SPA</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">src/views/</span> lobby, game room, wallet, vip, missions</li>
+      <li><span class="dir">src/components/</span> · <span class="dir">src/store/</span> · <span class="dir">src/hooks/</span></li>
+      <li><span class="dir">src/layout/</span> main layout</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header hdr-frontend">📈 apps/trading — Trading SPA</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">src/pages/</span> chart, orders, wallet, kyc, yuebao, mine</li>
+      <li><span class="dir">src/components/</span> · <span class="dir">src/store/</span> · <span class="dir">src/types/</span></li>
+      <li><span class="dir">src/constants/</span> · <span class="dir">src/utils/</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header hdr-frontend">💑 apps/dating — Dating SPA</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">src/pages/</span> feed, profile, match, gifts, moments, vip</li>
+      <li><span class="dir">src/components/</span> · <span class="dir">src/layouts/</span> · <span class="dir">src/hooks/</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-admin">🛡️ apps/admin-dashboard — Admin Panel (Ant Design)</div>
+  <div class="card-body">
+    <p class="section-title">src/core/</p>
+    <ul class="tree mono">
+      <li><span class="dir">routes/index.tsx</span> <span class="badge badge-purple">toàn bộ routing</span></li>
+      <li><span class="dir">layouts/</span> AdminLayout · AuthLayout · MainLayout</li>
+      <li><span class="dir">hooks/</span> useAdminSocket · useWebSocket · useSiteConfig</li>
+    </ul>
+    <hr class="divider" />
+    <p class="section-title">src/modules/</p>
+    <ul class="tree mono">
+      <li><span class="dir">shared/</span> Dashboard · Users · Finance · CrudPage…</li>
+      <li><span class="dir">hub/</span> Games · Banners · SEO · News · Pages…</li>
+      <li><span class="dir">game/</span> Deposits · Rounds · Providers · Lottery…</li>
+      <li><span class="dir">dating/</span> Profiles · Matches · Gifts · Reports…</li>
+      <li><span class="dir">trade/</span> KYC · Orders · Wallets · Investments…</li>
+      <li><span class="dir">sports/</span> <span class="badge badge-purple">7 pages ✨</span></li>
+      <li style="padding-left:14px"><span class="file">SportsOverviewPage ✨ (stats dashboard)</span></li>
+      <li style="padding-left:14px"><span class="file">SportsMatchesPage · SportsBetsPage</span></li>
+      <li style="padding-left:14px"><span class="file">SportsLeaguesPage · SportsTeamsPage</span></li>
+      <li style="padding-left:14px"><span class="file">SportsArticlesPage · SportsConfig</span></li>
+      <li><span class="dir">settings/</span> General · Connections · CronJobs · Widgets</li>
+      <li><span class="dir">ops/</span> Operations · Tasks · Segments · Campaigns</li>
+      <li><span class="dir">realtime/</span> WebSocket monitor</li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-packages">📦 packages/ — Shared Libraries (workspace:*)</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Package</th><th>Nội dung</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">shared-types</td><td>TypeScript interfaces: User, Payment, Game, Trade, Transaction, API…</td></tr>
+        <tr><td class="mono">shared-ui</td><td>React components dùng chung: Button, Card, Modal, Table, Form, Auth, Payment, Knowledge, Notification…</td></tr>
+        <tr><td class="mono">shared-utils</td><td>Hàm tiện ích dùng chung</td></tr>
+        <tr><td class="mono">constants</td><td>Hằng số toàn hệ thống</td></tr>
+        <tr><td class="mono">mobile</td><td>Capacitor mobile wrapper</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-infra">⚙️ config/ — Hạ tầng &amp; Cấu hình</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">nginx/</span></li>
+      <li style="padding-left:14px"><span class="file">nginx.conf · group.conf · lkvip-http.conf · tc-gaming.conf</span></li>
+      <li><span class="dir">pm2/</span></li>
+      <li style="padding-left:14px"><span class="file">ecosystem.config.js — tất cả processes + workers</span></li>
+      <li><span class="dir">env/</span></li>
+      <li style="padding-left:14px"><span class="file">.env.example (mirror của apps/backend/.env.example)</span></li>
+      <li><span class="dir">database/ · eslint/ · monitoring/</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-infra">🚀 scripts/ — DevOps</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="file">vps-setup.sh</span> — cài Node, MySQL, Redis, Nginx</li>
+      <li><span class="file">deploy.sh</span> — pull → build → migrate → pm2 reload</li>
+      <li><span class="file">ssl-setup.sh</span> — certbot, tất cả subdomain</li>
+      <li><span class="file">prisma-run.ts</span> — generate/migrate/deploy tất cả schemas</li>
+      <li><span class="file">migrate-storage.ts</span> — local → S3/R2</li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-misc">📄 docs/ — Tài liệu kỹ thuật</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="file">ARCHITECTURE.md</span> — thiết kế tổng thể</li>
+      <li><span class="file">API_ENDPOINTS.md</span> — danh sách 100+ routes</li>
+      <li><span class="file">DEPLOYMENT.md / VPS_DEPLOYMENT.md</span></li>
+      <li><span class="file">SETUP.md</span> — hướng dẫn cài đặt local (Windows)</li>
+      <li><span class="file">RISK_SYSTEM.md</span> — hệ thống phòng chống gian lận</li>
+      <li><span class="file">NFR.md</span> — yêu cầu phi chức năng</li>
+      <li><span class="file">MODULES.md · OPERATIONS.md · MIGRATION_GUIDE.md</span></li>
+      <li><span class="dir">plans/</span> PLAN-INDEX.md</li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-header hdr-data">💾 data/ &amp; logs/ — Runtime</div>
+  <div class="card-body">
+    <ul class="tree mono">
+      <li><span class="dir">data/backups/</span> — MySQL dump tự động</li>
+      <li><span class="dir">data/logs/</span> — Winston log files</li>
+      <li><span class="dir">data/uploads/</span> — user-uploaded files</li>
+      <li><span class="dir">logs/</span> — PM2 combined logs</li>
+    </ul>
+    <hr class="divider" />
+    <p class="section-title">Root files cần chú ý</p>
+    <ul class="tree mono">
+      <li><span class="file">pnpm-workspace.yaml</span> — định nghĩa workspace packages</li>
+      <li><span class="file">tsconfig.base.json</span> — shared TS base config</li>
+      <li><span class="file">tsconfig.frontend.base.json</span> — frontend TS base</li>
+      <li><span class="file">monorepo-standardize-plan.md</span> — kế hoạch chuẩn hoá</li>
+      <li><span class="file">lkvip-*.html</span> — báo cáo HTML lưu trữ (có thể xoá)</li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="card full">
+  <div class="card-header hdr-backend">⏱️ Cron Jobs đang chạy (apps/backend/src/config/cron.ts)</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Job</th><th>Lịch</th><th>Mô tả</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">sports-live-scores ✨</td><td>mỗi 1 phút</td><td>SportsDataSyncService → ApiFootball live score, fallback về stub random</td></tr>
+        <tr><td class="mono">sports-fixtures ✨</td><td>mỗi 6 giờ</td><td>Sync lịch thi đấu hôm nay + ngày mai từ ApiFootball</td></tr>
+        <tr><td class="mono">sports-standings ✨</td><td>03:00 hàng ngày</td><td>Sync BXH các giải từ ApiFootball</td></tr>
+        <tr><td class="mono">sports-news ✨</td><td>mỗi 30 phút</td><td>Sync tin tức thể thao từ GNews API</td></tr>
+        <tr><td class="mono">trade-price-feed</td><td>mỗi 30 giây</td><td>CoinGecko crypto + Alpha Vantage forex (khi ENABLE_PRICE_FEED=true)</td></tr>
+        <tr><td class="mono">trade-liquidation</td><td>mỗi 30 giây</td><td>Kiểm tra liquidation vị thế Trade</td></tr>
+        <tr><td class="mono">trade-profit-distribution</td><td>00:05 UTC</td><td>Phân phối lợi nhuận đầu tư Trade</td></tr>
+        <tr><td class="mono">trade-mining-distribution</td><td>01:00 UTC</td><td>Thu nhập đào coin hàng ngày</td></tr>
+        <tr><td class="mono">trade-yuebao-settlement</td><td>02:00 UTC</td><td>Tất toán Yuebao đáo hạn</td></tr>
+        <tr><td class="mono">game-rebate-calculate</td><td>23:55 UTC</td><td>Tính hoàn trả cược Game cuối ngày</td></tr>
+        <tr><td class="mono">game-rebate-settle</td><td>01:00 UTC</td><td>Trả hoàn trả cho người dùng</td></tr>
+        <tr><td class="mono">game-vip-check</td><td>02:30 UTC</td><td>Nâng VIP level tự động</td></tr>
+        <tr><td class="mono">game-yuebao-interest</td><td>00:05 UTC</td><td>Lãi suất Yuebao hàng ngày</td></tr>
+        <tr><td class="mono">batch-risk-scoring</td><td>mỗi 30 phút</td><td>Tính risk score người dùng</td></tr>
+        <tr><td class="mono">vip-expiry</td><td>mỗi 1 giờ</td><td>Hết hạn VIP Dating</td></tr>
+        <tr><td class="mono">clean-audit-logs</td><td>03:00 UTC</td><td>Xoá log audit &gt;90 ngày</td></tr>
+        <tr><td class="mono">clean-security-logs</td><td>04:00 UTC</td><td>Xoá security log &gt;30 ngày</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="card full">
+  <div class="card-header hdr-backend">🗄️ 6 Prisma Schemas — MySQL Databases</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>DB</th><th>Schema path</th><th>Client path</th><th>Env var</th></tr></thead>
+      <tbody>
+        <tr><td><strong>hub_db</strong></td><td class="mono">prisma/hub/schema.prisma</td><td class="mono">node_modules/.prisma/hub-client</td><td class="mono">HUB_DATABASE_URL</td></tr>
+        <tr><td><strong>game_db</strong></td><td class="mono">prisma/game/schema.prisma</td><td class="mono">node_modules/.prisma/game-client</td><td class="mono">GAME_DATABASE_URL</td></tr>
+        <tr><td><strong>trade_db</strong></td><td class="mono">prisma/trade/schema.prisma</td><td class="mono">node_modules/.prisma/trade-client</td><td class="mono">TRADE_DATABASE_URL</td></tr>
+        <tr><td><strong>dating_db</strong></td><td class="mono">prisma/dating/schema.prisma</td><td class="mono">node_modules/.prisma/dating-client</td><td class="mono">DATING_DATABASE_URL</td></tr>
+        <tr><td><strong>sports_db</strong></td><td class="mono">prisma/sports/schema.prisma</td><td class="mono">node_modules/.prisma/sports-client</td><td class="mono">SPORTS_DATABASE_URL</td></tr>
+        <tr><td><strong>admin_db</strong></td><td class="mono">prisma/admin/schema.prisma</td><td class="mono">node_modules/.prisma/admin-client</td><td class="mono">ADMIN_DATABASE_URL</td></tr>
+      </tbody>
+    </table>
+    <p class="note">⚠️ Bug đã fix: <code>databases.ts</code> dùng <code>../../node_modules/.prisma</code> (đúng) thay vì <code>../../../</code> (sai — trỏ ra apps/node_modules)</p>
+  </div>
+</div>
+
+
+<div class="card full">
+  <div class="card-header hdr-infra">🔑 Biến môi trường quan trọng (apps/backend/.env.example)</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Nhóm</th><th>Biến</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>Core</td><td class="mono">JWT_SECRET · JWT_REFRESH_SECRET</td><td>Bắt buộc, random 48 bytes</td></tr>
+        <tr><td>Database</td><td class="mono">*_DATABASE_URL (6 cái)</td><td>MySQL 8, connection_limit theo số core VPS</td></tr>
+        <tr><td>Cache</td><td class="mono">REDIS_URL</td><td>redis://127.0.0.1:6379</td></tr>
+        <tr><td rowspan="2">Sports ✨</td><td class="mono">RAPIDAPI_KEY · API_FOOTBALL_KEY</td><td>Live scores + fixtures từ api-football.com</td></tr>
+        <tr><td class="mono">GNEWS_API_KEY · THESPORTSDB_API_KEY</td><td>Tin tức + metadata backup</td></tr>
+        <tr><td>Trade</td><td class="mono">ALPHA_VANTAGE_API_KEY · ENABLE_PRICE_FEED</td><td>Forex feed, bật bằng flag</td></tr>
+        <tr><td>Game</td><td class="mono">GSC_* · GOLDGATE_* · TCGAMING_*</td><td>3 game providers</td></tr>
+        <tr><td>Payment</td><td class="mono">MOMO_* · ZALOPAY_* · VNPAY_*</td><td>Vietnam payment gateways</td></tr>
+        <tr><td>Push</td><td class="mono">FIREBASE_SERVICE_ACCOUNT · VAPID_*</td><td>FCM + Web Push</td></tr>
+        <tr><td>Risk</td><td class="mono">ENCRYPTION_KEY · MAX_LOGIN_ATTEMPTS</td><td>Bảo mật</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="card full">
+  <div class="card-header hdr-misc">🧹 Files dư thừa ở root — nên dọn dẹp</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>File</th><th>Vấn đề</th><th>Đề xuất</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">lkvip-b-o-c-o-c-p-nh-t-game-admin.html</td>
+          <td>Báo cáo HTML cũ lưu ở root</td>
+          <td>Chuyển vào <code>docs/reports/</code> hoặc xoá</td>
+        </tr>
+        <tr>
+          <td class="mono">lkvip-game-b-o-c-o-h-c-t-p-k-t-n-i-t-var-www.html</td>
+          <td>Báo cáo HTML cũ lưu ở root</td>
+          <td>Chuyển vào <code>docs/reports/</code> hoặc xoá</td>
+        </tr>
+        <tr>
+          <td class="mono">monorepo-standardize-plan.md</td>
+          <td>Kế hoạch tạm thời để ở root</td>
+          <td>Chuyển vào <code>docs/plans/</code></td>
+        </tr>
+        <tr>
+          <td class="mono">.pnpm-store/</td>
+          <td>Cache pnpm nên nằm ngoài repo</td>
+          <td>Thêm vào <code>.gitignore</code> (đã có?), cân nhắc chuyển ra ngoài</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<footer>Made with IBM Bob</footer>
+</body>
+</html>

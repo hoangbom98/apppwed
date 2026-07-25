@@ -4,18 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { getMatches, getFavorites, getWhoLikedMe } from '@/api/match';
 import { useAuthStore } from '@/store/authStore';
 import Avatar from '@/components/common/Avatar';
-import { Heart, Star, Clock, Eye, Crown } from 'lucide-react';
+import { Heart, Eye, Crown } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
 
 const TABS = [
-  { id: 'match',   label: '💘 Match',       icon: Heart },
-  { id: 'liked',   label: '❤️ Thích tôi',  icon: Eye },
-  { id: 'fav',     label: '⭐ Yêu thích',  icon: Star },
+  { id: 'match',   label: 'Match',     icon: Heart },
+  { id: 'liked',   label: 'Thích tôi', icon: Eye },
+  { id: 'fav',     label: 'Yêu thích', icon: Star },
 ];
 
 export default function Matches() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  useAuthStore();
   const [tab, setTab] = useState('match');
 
   const { data: matchData } = useQuery({ queryKey: ['matches'], queryFn: getMatches, enabled: tab === 'match' });
@@ -29,7 +29,7 @@ export default function Matches() {
   return (
     <div>
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-2xl font-black text-gray-900">💘 Ghép đôi</h1>
+        <h1 className="text-2xl font-black text-gray-900"><Heart size={22} className="inline text-pink-500 fill-pink-500 mr-2" />Ghép đôi</h1>
       </div>
 
       {/* Tabs */}
@@ -60,7 +60,7 @@ export default function Matches() {
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="text-6xl mb-4">🌸</div>
+          <div className="text-6xl mb-4"><Heart size={56} className="text-pink-200 fill-pink-100" /></div>
           <p className="text-gray-500">Chưa có {tab === 'match' ? 'match' : 'ai'} nào</p>
           <button onClick={() => navigate('/swipe')} className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-xl text-sm font-semibold">
             Swipe ngay

@@ -3,20 +3,24 @@
 ## Monorepo Layout
 
 ```
-source/
+apps/
 ├── backend/
 │   ├── src/
-│   │   ├── core/            # Config, Auth, Cache (Redis), Queue (BullMQ), Event bus
-│   │   ├── shared/          # Cross-cutting services: Notification, Email, SMS, Ledger
-│   │   ├── modules/         # Business modules (one directory per domain)
-│   │   │   ├── user/
-│   │   │   ├── wallet/
-│   │   │   ├── payment/
-│   │   │   ├── investment/
-│   │   │   ├── referral/
-│   │   │   └── admin/
-│   │   ├── adapters/        # Payment, Storage, Notification adapters
-│   │   ├── jobs/            # Cron jobs & BullMQ workers
+│   │   ├── config/          # DB factory, Redis, Socket.IO, Cron, i18n, Swagger
+│   │   ├── core/            # Event bus, lottery strategies, distributed lock
+│   │   ├── shared/          # Cross-cutting: Auth, Wallet, Rebate, Notification, Settlement
+│   │   ├── modules/
+│   │   │   ├── admin/       # Admin portal: users, finance, lottery, agents, risk, ops
+│   │   │   ├── game/        # Game sub-project: sessions, lottery, VIP, rebate, gifts
+│   │   │   ├── hub/         # Hub portal: CMS, news, banners
+│   │   │   ├── trade/       # Trading sub-project: investments, yuebao
+│   │   │   ├── dating/      # Dating sub-project
+│   │   │   ├── sports/      # Sports betting sub-project
+│   │   │   ├── lkvip/       # LKvip payment gateway (internal)
+│   │   │   └── workers/     # BullMQ workers (rebate, agent-settlement, lottery, etc.)
+│   │   ├── risk/            # Risk detection & AML engine
+│   │   ├── automation/      # Deposit sync, business events
+│   │   ├── third-parties/   # GSC, Goldgate, TCGaming adapters
 │   │   ├── app.ts
 │   │   └── server.ts
 │   ├── prisma/              # One schema per sub-project
@@ -27,11 +31,13 @@ source/
 │   │   ├── dating/schema.prisma
 │   │   └── sports/schema.prisma
 │   └── package.json
-└── frontend/
-    ├── hub/          game/          trading/
-    ├── dating/       sports/        admin-dashboard/
-    ├── shared-ui/    (Button, Card, Modal, Table, Layout, …)
-    └── shared-types/ (interfaces shared between FE and BE)
+├── hub/           game/          trading/
+├── dating/        sports/        admin-dashboard/   mobile/
+packages/
+├── constants/     # Shared enums, error codes, project IDs, roles
+├── types/         # Shared TypeScript interfaces (User, Transaction, Lottery, Agent…)
+├── ui/            # Shared React components
+└── utils/         # Shared utility functions
 ```
 
 ## Per-Module Structure

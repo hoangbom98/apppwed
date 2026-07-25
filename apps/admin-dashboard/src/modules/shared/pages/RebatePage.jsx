@@ -254,7 +254,7 @@ function ClaimsTab() {
 
       <Modal
         open={!!confirming}
-        title={confirming?.action === 'approve' ? '✅ Xác nhận duyệt hoàn trả' : '❌ Xác nhận từ chối'}
+        title={confirming?.action === 'approve' ? 'Xác nhận duyệt hoàn trả' : 'Xác nhận từ chối'}
         onOk={() => confirming?.action === 'approve' ? approveMut.mutate({ id: confirming.id }) : rejectMut.mutate({ id: confirming.id })}
         onCancel={() => { setConf(null); setNote(''); }}
         okText="Xác nhận" cancelText="Huỷ"
@@ -274,9 +274,9 @@ function ClaimsTab() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function RebatePage() {
   const TAB_ITEMS = [
-    { key: 'stats',  label: '📊 Tổng quan',       children: <StatsPanel /> },
-    { key: 'rules',  label: '⚙️ Luật hoàn trả',   children: <RulesTab /> },
-    { key: 'claims', label: '💰 Yêu cầu duyệt',   children: <ClaimsTab /> },
+    { key: 'stats',  label: 'Tổng quan',       children: <StatsPanel /> },
+    { key: 'rules',  label: 'Luật hoàn trả',   children: <RulesTab /> },
+    { key: 'claims', label: 'Yêu cầu duyệt',   children: <ClaimsTab /> },
   ];
 
   return (

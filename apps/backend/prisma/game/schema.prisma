@@ -19,31 +19,31 @@ datasource db {
 // =============================================================================
 
 model User {
-  id           String    @id @default(cuid())
-  email        String?   @unique @db.VarChar(191)
-  phone        String?   @unique @db.VarChar(20)
-  username     String?   @unique @db.VarChar(50)
-  password     String    @db.VarChar(255)
-  fullName     String?   @db.VarChar(100)
-  avatar       String?   @db.VarChar(500)
+  id                 String    @id @default(cuid())
+  email              String?   @unique @db.VarChar(191)
+  phone              String?   @unique @db.VarChar(20)
+  username           String?   @unique @db.VarChar(50)
+  password           String    @db.VarChar(255)
+  fullName           String?   @db.VarChar(100)
+  avatar             String?   @db.VarChar(500)
   // user | agent | admin
-  role         String    @default("user") @db.VarChar(20)
+  role               String    @default("user") @db.VarChar(20)
   // active | suspended | banned
-  status       String    @default("active") @db.VarChar(20)
-  balance      Decimal   @default(0) @db.Decimal(18, 2)
-  frozen       Decimal   @default(0) @db.Decimal(18, 2)   // locked in pending withdrawals
-  totalDeposit Decimal   @default(0) @db.Decimal(18, 2)
-  totalBet     Decimal   @default(0) @db.Decimal(18, 2)
-  totalWin     Decimal   @default(0) @db.Decimal(18, 2)
-  vipLevel     Int       @default(1)
-  referralCode        String?   @unique @db.VarChar(30)
-  referredBy          String?   @db.VarChar(30)
-  agentId             String?   @db.VarChar(30)                   // FK-style ref (same table)
-  lastLogin           DateTime?
-  lastDailyClaimAt    DateTime?                               // VIP daily reward last claimed
-  lastMonthlyClaimAt  DateTime?                               // VIP monthly reward last claimed
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  status             String    @default("active") @db.VarChar(20)
+  balance            Decimal   @default(0) @db.Decimal(18, 2)
+  frozen             Decimal   @default(0) @db.Decimal(18, 2) // locked in pending withdrawals
+  totalDeposit       Decimal   @default(0) @db.Decimal(18, 2)
+  totalBet           Decimal   @default(0) @db.Decimal(18, 2)
+  totalWin           Decimal   @default(0) @db.Decimal(18, 2)
+  vipLevel           Int       @default(1)
+  referralCode       String?   @unique @db.VarChar(30)
+  referredBy         String?   @db.VarChar(30)
+  agentId            String?   @db.VarChar(30) // FK-style ref (same table)
+  lastLogin          DateTime?
+  lastDailyClaimAt   DateTime? // VIP daily reward last claimed
+  lastMonthlyClaimAt DateTime? // VIP monthly reward last claimed
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   depositOrders      DepositOrder[]
   withdrawOrders     WithdrawOrder[]
@@ -58,8 +58,8 @@ model User {
   interestHistory    InterestHistory[]
   promotionClaims    PromotionClaim[]
   notifications      Notification[]
-  referrals          Referral[]        @relation("Referrer")
-  referredByUser     Referral[]        @relation("Referee")
+  referrals          Referral[]          @relation("Referrer")
+  referredByUser     Referral[]          @relation("Referee")
   agentProfile       Agent?
   betStats           BetStats[]
   rebates            Rebate[]
@@ -83,7 +83,7 @@ model Referral {
   refereeId  String   @unique @db.VarChar(30)
   referee    User     @relation("Referee", fields: [refereeId], references: [id])
   bonus      Decimal  @default(0) @db.Decimal(18, 2)
-  status     String   @default("active") @db.VarChar(20)  // active | expired
+  status     String   @default("active") @db.VarChar(20) // active | expired
   createdAt  DateTime @default(now())
 
   @@index([referrerId])
@@ -95,21 +95,21 @@ model Referral {
 // =============================================================================
 
 model Agent {
-  id             String    @id @default(cuid())
-  userId         String    @unique @db.VarChar(30)
-  user           User      @relation(fields: [userId], references: [id])
+  id              String   @id @default(cuid())
+  userId          String   @unique @db.VarChar(30)
+  user            User     @relation(fields: [userId], references: [id])
   // Referential parent agent — stored as plain string to avoid circular Prisma FK issues
-  parentAgentId  String?   @db.VarChar(30)
+  parentAgentId   String?  @db.VarChar(30)
   // 1 | 2 | 3 (nesting level)
-  level          Int       @default(1)
-  commissionRate Decimal   @default(0) @db.Decimal(5, 4)   // e.g. 0.0500 = 5%
+  level           Int      @default(1)
+  commissionRate  Decimal  @default(0) @db.Decimal(5, 4) // e.g. 0.0500 = 5%
   totalCommission Decimal  @default(0) @db.Decimal(18, 2)
   // active | suspended
-  status         String    @default("active") @db.VarChar(20)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  status          String   @default("active") @db.VarChar(20)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  commissions    Commission[]
+  commissions Commission[]
 
   @@index([parentAgentId])
   @@index([status])
@@ -117,20 +117,20 @@ model Agent {
 }
 
 model Commission {
-  id           String   @id @default(cuid())
-  agentId      String   @db.VarChar(30)
-  agent        Agent    @relation(fields: [agentId], references: [id])
+  id        String    @id @default(cuid())
+  agentId   String    @db.VarChar(30)
+  agent     Agent     @relation(fields: [agentId], references: [id])
   // e.g. "2025-06" monthly or "2025-01-15" daily
-  period       String   @db.VarChar(20)
-  totalBet     Decimal  @default(0) @db.Decimal(18, 2)
-  netProfit    Decimal  @default(0) @db.Decimal(18, 2)
-  rate         Decimal  @db.Decimal(5, 4)
-  amount       Decimal  @default(0) @db.Decimal(18, 2)
+  period    String    @db.VarChar(20)
+  totalBet  Decimal   @default(0) @db.Decimal(18, 2)
+  netProfit Decimal   @default(0) @db.Decimal(18, 2)
+  rate      Decimal   @db.Decimal(5, 4)
+  amount    Decimal   @default(0) @db.Decimal(18, 2)
   // pending | paid | cancelled
-  status       String   @default("pending") @db.VarChar(20)
-  settledAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status    String    @default("pending") @db.VarChar(20)
+  settledAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([agentId, period])
   @@index([agentId, status])
@@ -142,35 +142,35 @@ model Commission {
 // =============================================================================
 
 model VipLevel {
-  id             String   @id @default(cuid())
-  level          Int      @unique
-  name           String   @db.VarChar(50)             // Bronze | Silver | Gold | Platinum | Diamond
-  icon           String?  @db.VarChar(500)
-  minTotalDeposit Decimal @default(0) @db.Decimal(18, 2)
-  cashbackRate   Decimal  @default(0) @db.Decimal(5, 4)  // weekly cashback %
-  interestRate   Decimal  @default(0) @db.Decimal(5, 4)  // daily balance interest %
-  withdrawLimit  Decimal  @default(0) @db.Decimal(18, 2) // daily withdraw cap
-  freeSpins      Int      @default(0)
-  benefits       Json?
+  id              String   @id @default(cuid())
+  level           Int      @unique
+  name            String   @db.VarChar(50) // Bronze | Silver | Gold | Platinum | Diamond
+  icon            String?  @db.VarChar(500)
+  minTotalDeposit Decimal  @default(0) @db.Decimal(18, 2)
+  cashbackRate    Decimal  @default(0) @db.Decimal(5, 4) // weekly cashback %
+  interestRate    Decimal  @default(0) @db.Decimal(5, 4) // daily balance interest %
+  withdrawLimit   Decimal  @default(0) @db.Decimal(18, 2) // daily withdraw cap
+  freeSpins       Int      @default(0)
+  benefits        Json?
   // active | inactive
-  status         String   @default("active") @db.VarChar(20)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status          String   @default("active") @db.VarChar(20)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  userVips       UserVip[]
+  userVips UserVip[]
 
   @@map("vip_levels")
 }
 
 model UserVip {
-  id          String   @id @default(cuid())
-  userId      String   @unique @db.VarChar(30)
-  user        User     @relation(fields: [userId], references: [id])
-  levelId     String   @db.VarChar(30)
-  level       VipLevel @relation(fields: [levelId], references: [id])
-  totalDeposit Decimal @default(0) @db.Decimal(18, 2)
-  totalBet    Decimal  @default(0) @db.Decimal(18, 2)
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String   @unique @db.VarChar(30)
+  user         User     @relation(fields: [userId], references: [id])
+  levelId      String   @db.VarChar(30)
+  level        VipLevel @relation(fields: [levelId], references: [id])
+  totalDeposit Decimal  @default(0) @db.Decimal(18, 2)
+  totalBet     Decimal  @default(0) @db.Decimal(18, 2)
+  updatedAt    DateTime @updatedAt
 
   @@map("user_vips")
 }
@@ -181,7 +181,7 @@ model CashbackHistory {
   user      User     @relation(fields: [userId], references: [id])
   amount    Decimal  @db.Decimal(18, 2)
   rate      Decimal  @db.Decimal(5, 4)
-  period    String   @db.VarChar(20)            // e.g. "2025-W01" weekly
+  period    String   @db.VarChar(20) // e.g. "2025-W01" weekly
   status    String   @default("paid") @db.VarChar(20)
   paidAt    DateTime @default(now())
   createdAt DateTime @default(now())
@@ -196,8 +196,8 @@ model InterestHistory {
   user      User     @relation(fields: [userId], references: [id])
   amount    Decimal  @db.Decimal(18, 2)
   rate      Decimal  @db.Decimal(5, 4)
-  balance   Decimal  @db.Decimal(18, 2)         // balance at time of calc
-  date      String   @db.VarChar(10)             // "2025-01-15"
+  balance   Decimal  @db.Decimal(18, 2) // balance at time of calc
+  date      String   @db.VarChar(10) // "2025-01-15"
   createdAt DateTime @default(now())
 
   @@index([userId, date])
@@ -209,31 +209,31 @@ model InterestHistory {
 // =============================================================================
 
 model Promotion {
-  id          String   @id @default(cuid())
+  id              String    @id @default(cuid())
   // welcome | deposit | cashback | free_spin | event | referral
-  type        String   @db.VarChar(30)
-  title       String   @db.VarChar(255)
-  slug        String   @unique @db.VarChar(255)
-  description String?  @db.Text
-  image       String?  @db.VarChar(500)
+  type            String    @db.VarChar(30)
+  title           String    @db.VarChar(255)
+  slug            String    @unique @db.VarChar(255)
+  description     String?   @db.Text
+  image           String?   @db.VarChar(500)
   // bonus_percent | bonus_fixed | free_spin | cashback
-  bonusType   String   @db.VarChar(30)
-  bonusValue  Decimal  @db.Decimal(10, 2)
-  minDeposit  Decimal  @default(0) @db.Decimal(18, 2)
-  maxBonus    Decimal? @db.Decimal(18, 2)
-  wagerMultiplier Decimal @default(1) @db.Decimal(5, 2)  // rollover requirement
-  maxUses     Int?                                         // null = unlimited
-  usedCount   Int      @default(0)
-  maxUsesPerUser Int   @default(1)
+  bonusType       String    @db.VarChar(30)
+  bonusValue      Decimal   @db.Decimal(10, 2)
+  minDeposit      Decimal   @default(0) @db.Decimal(18, 2)
+  maxBonus        Decimal?  @db.Decimal(18, 2)
+  wagerMultiplier Decimal   @default(1) @db.Decimal(5, 2) // rollover requirement
+  maxUses         Int? // null = unlimited
+  usedCount       Int       @default(0)
+  maxUsesPerUser  Int       @default(1)
   // active | inactive | expired
-  status      String   @default("active") @db.VarChar(20)
-  startDate   DateTime?
-  endDate     DateTime?
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status          String    @default("active") @db.VarChar(20)
+  startDate       DateTime?
+  endDate         DateTime?
+  sortOrder       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  claims      PromotionClaim[]
+  claims PromotionClaim[]
 
   @@index([status, startDate, endDate])
   @@map("promotions")
@@ -271,8 +271,8 @@ model DepositOrder {
   amount      Decimal   @db.Decimal(18, 2)
   currency    String    @default("VND") @db.VarChar(10)
   fee         Decimal   @default(0) @db.Decimal(18, 2)
-  txRef       String?   @db.VarChar(100)         // payment provider ref
-  proof       String?   @db.VarChar(500)         // uploaded proof image
+  txRef       String?   @db.VarChar(100) // payment provider ref
+  proof       String?   @db.VarChar(500) // uploaded proof image
   note        String?   @db.VarChar(500)
   adminNote   String?   @db.VarChar(500)
   // pending | success | failed | expired | cancelled
@@ -297,11 +297,11 @@ model WithdrawOrder {
   user        User      @relation(fields: [userId], references: [id])
   amount      Decimal   @db.Decimal(18, 2)
   fee         Decimal   @default(0) @db.Decimal(18, 2)
-  netAmount   Decimal   @default(0) @db.Decimal(18, 2)  // amount - fee; set by application
+  netAmount   Decimal   @default(0) @db.Decimal(18, 2) // amount - fee; set by application
   // bank | usdt | momo | okpay
   method      String    @db.VarChar(30)
   address     String?   @db.VarChar(200)
-  bankInfo    Json?     // { bankName, accountNumber, accountName }
+  bankInfo    Json? // { bankName, accountNumber, accountName }
   txHash      String?   @db.VarChar(200)
   note        String?   @db.VarChar(500)
   adminNote   String?   @db.VarChar(500)
@@ -330,8 +330,8 @@ model Transaction {
   amount        Decimal  @db.Decimal(18, 2)
   balanceBefore Decimal  @db.Decimal(18, 2)
   balanceAfter  Decimal  @db.Decimal(18, 2)
-  referenceId   String?  @db.VarChar(30)    // deposit_order.id / session.id / etc.
-  referenceType String?  @db.VarChar(30)    // deposit_order | withdraw_order | game_session | lottery_bet
+  referenceId   String?  @db.VarChar(30) // deposit_order.id / session.id / etc.
+  referenceType String?  @db.VarChar(30) // deposit_order | withdraw_order | game_session | lottery_bet
   note          String?  @db.VarChar(255)
   createdAt     DateTime @default(now())
 
@@ -400,7 +400,7 @@ model GameAggregator {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  products    GameProduct[]
+  products GameProduct[]
 
   @@map("game_aggregators")
 }
@@ -417,32 +417,32 @@ model GameAggregator {
 // =============================================================================
 
 model GameProduct {
-  id             String        @id @default(cuid())
-  aggregatorId   String        @db.VarChar(30)
-  aggregator     GameAggregator @relation(fields: [aggregatorId], references: [id])
+  id           String         @id @default(cuid())
+  aggregatorId String         @db.VarChar(30)
+  aggregator   GameAggregator @relation(fields: [aggregatorId], references: [id])
   // Aggregator-specific code:
   //   GSC:      numeric ID as string (e.g. "1009" = CQ9, "1007" = PG Soft)
   //   Goldgate: vendorCode string (e.g. "casino-evolution", "pg-soft")
   //   TCGaming: numeric code as string (e.g. "16" = CQ9, "151" = UG2 Sports)
-  productCode    String        @db.VarChar(50)
+  productCode  String         @db.VarChar(50)
   // Short abbreviation (e.g. "CQ9", "PG", "SBO", "BTI")
-  abbrev         String?       @db.VarChar(30)
+  abbrev       String?        @db.VarChar(30)
   // Display name (e.g. "CQ9 Gaming", "PG Soft", "SBOBET Sports")
-  name           String        @db.VarChar(150)
+  name         String         @db.VarChar(150)
   // slot | live | fishing | pvp | sports | esports | lottery
-  gameTypes      Json?         // array: ["rng", "fish"]
+  gameTypes    Json? // array: ["rng", "fish"]
   // transfer | seamless | both
-  walletType     String        @default("transfer") @db.VarChar(20)
+  walletType   String         @default("transfer") @db.VarChar(20)
   // active | inactive | maintenance | delisted
-  status         String        @default("active") @db.VarChar(20)
-  thumbnail      String?       @db.VarChar(500)
-  sortOrder      Int           @default(0)
+  status       String         @default("active") @db.VarChar(20)
+  thumbnail    String?        @db.VarChar(500)
+  sortOrder    Int            @default(0)
   // Extra: { minBet, maxBet, currencies, regions }
-  config         Json?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  config       Json?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
-  games          Game[]
+  games Game[]
 
   @@unique([aggregatorId, productCode])
   @@index([aggregatorId, status])
@@ -477,16 +477,16 @@ model GameProvider {
 // =============================================================================
 
 model GameCategory {
-  id        String @id @default(cuid())
-  name      String @db.VarChar(100)
-  slug      String @unique @db.VarChar(100)
-  icon      String? @db.VarChar(255)
-  sortOrder Int    @default(0)
-  status    String @default("active") @db.VarChar(20)
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  icon      String?  @db.VarChar(255)
+  sortOrder Int      @default(0)
+  status    String   @default("active") @db.VarChar(20)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  games     Game[]
+  games Game[]
 
   @@map("game_categories")
 }
@@ -496,37 +496,37 @@ model GameCategory {
 // =============================================================================
 
 model Game {
-  id            String        @id @default(cuid())
+  id               String       @id @default(cuid())
   // New: belongs to a GameProduct (vendor within an aggregator)
-  productId     String?       @db.VarChar(30)
-  product       GameProduct?  @relation(fields: [productId], references: [id])
-  categoryId    String        @db.VarChar(30)
-  category      GameCategory  @relation(fields: [categoryId], references: [id])
+  productId        String?      @db.VarChar(30)
+  product          GameProduct? @relation(fields: [productId], references: [id])
+  categoryId       String       @db.VarChar(30)
+  category         GameCategory @relation(fields: [categoryId], references: [id])
   // Game code as returned by aggregator (e.g. Goldgate gameCode, GSC gameCode, TCGaming game_code)
-  code          String        @db.VarChar(100)
+  code             String       @db.VarChar(100)
   // Aggregator-specific game ID if provided (Goldgate: gameId field)
-  externalId    String?       @db.VarChar(100)
-  name          String        @db.VarChar(150)
-  slug          String        @unique @db.VarChar(150)
-  description   String?       @db.Text
-  thumbnail     String?       @db.VarChar(500)
+  externalId       String?      @db.VarChar(100)
+  name             String       @db.VarChar(150)
+  slug             String       @unique @db.VarChar(150)
+  description      String?      @db.Text
+  thumbnail        String?      @db.VarChar(500)
   // slot | live_casino | fishing | card | sports | lottery | esports
-  type          String        @db.VarChar(30)
-  isFeatured    Boolean       @default(false)
-  isHot         Boolean       @default(false)
-  isNew         Boolean       @default(false)
-  underMaintenance Boolean    @default(false)
-  tags          Json?
-  minBet        Decimal       @default(0) @db.Decimal(18, 2)
-  maxBet        Decimal       @default(0) @db.Decimal(18, 2)
-  rtp           Decimal?      @db.Decimal(5, 2)   // Return To Player %
-  status        String        @default("active") @db.VarChar(20)
-  sortOrder     Int           @default(0)
-  config        Json?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  type             String       @db.VarChar(30)
+  isFeatured       Boolean      @default(false)
+  isHot            Boolean      @default(false)
+  isNew            Boolean      @default(false)
+  underMaintenance Boolean      @default(false)
+  tags             Json?
+  minBet           Decimal      @default(0) @db.Decimal(18, 2)
+  maxBet           Decimal      @default(0) @db.Decimal(18, 2)
+  rtp              Decimal?     @db.Decimal(5, 2) // Return To Player %
+  status           String       @default("active") @db.VarChar(20)
+  sortOrder        Int          @default(0)
+  config           Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
-  sessions      GameSession[]
+  sessions GameSession[]
 
   @@index([productId])
   @@index([categoryId])
@@ -548,7 +548,7 @@ model GameSession {
   providerSessionId String?   @db.VarChar(100)
   betAmount         Decimal   @db.Decimal(18, 2)
   winAmount         Decimal   @default(0) @db.Decimal(18, 2)
-  netPnl            Decimal   @default(0) @db.Decimal(18, 2)  // winAmount - betAmount
+  netPnl            Decimal   @default(0) @db.Decimal(18, 2) // winAmount - betAmount
   result            Json?
   // playing | finished | cancelled | error
   status            String    @default("playing") @db.VarChar(20)
@@ -557,7 +557,7 @@ model GameSession {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  gameTransactions  GameTransaction[]
+  gameTransactions GameTransaction[]
 
   @@index([userId, status])
   @@index([userId, createdAt])
@@ -571,32 +571,32 @@ model GameSession {
 // =============================================================================
 
 model GameTransaction {
-  id              String       @id @default(cuid())
-  userId          String       @db.VarChar(30)
+  id             String       @id @default(cuid())
+  userId         String       @db.VarChar(30)
   // sessionId is optional — seamless callbacks don't always have a session
-  sessionId       String?      @db.VarChar(30)
-  session         GameSession? @relation(fields: [sessionId], references: [id])
+  sessionId      String?      @db.VarChar(30)
+  session        GameSession? @relation(fields: [sessionId], references: [id])
   // Seamless wallet fields (from gscSeamlessController)
-  externalId      String?      @unique @db.VarChar(100) // GSC transaction id (for idempotency)
-  action          String?      @db.VarChar(50)           // e.g. "DEBIT", "CREDIT", "SETTLE"
-  wagerCode       String?      @db.VarChar(100)
-  wagerStatus     String?      @db.VarChar(30)
-  roundId         String?      @db.VarChar(100)
-  productCode     String?      @db.VarChar(50)           // GSC product_code
-  gameCode        String?      @db.VarChar(100)
-  gameType        String?      @db.VarChar(30)
-  wagerType       String?      @db.VarChar(30)           // NORMAL | FRB | etc.
-  betAmount       Decimal      @default(0) @db.Decimal(18, 2)
-  validBetAmount  Decimal      @default(0) @db.Decimal(18, 2)
-  prizeAmount     Decimal      @default(0) @db.Decimal(18, 2)
-  settledAt       DateTime?
+  externalId     String?      @unique @db.VarChar(100) // GSC transaction id (for idempotency)
+  action         String?      @db.VarChar(50) // e.g. "DEBIT", "CREDIT", "SETTLE"
+  wagerCode      String?      @db.VarChar(100)
+  wagerStatus    String?      @db.VarChar(30)
+  roundId        String?      @db.VarChar(100)
+  productCode    String?      @db.VarChar(50) // GSC product_code
+  gameCode       String?      @db.VarChar(100)
+  gameType       String?      @db.VarChar(30)
+  wagerType      String?      @db.VarChar(30) // NORMAL | FRB | etc.
+  betAmount      Decimal      @default(0) @db.Decimal(18, 2)
+  validBetAmount Decimal      @default(0) @db.Decimal(18, 2)
+  prizeAmount    Decimal      @default(0) @db.Decimal(18, 2)
+  settledAt      DateTime?
   // bet | win | refund | bonus | cancel
-  type            String       @db.VarChar(20)
-  amount          Decimal      @db.Decimal(18, 2)
-  balanceBefore   Decimal      @default(0) @db.Decimal(18, 2)
-  balanceAfter    Decimal      @db.Decimal(18, 2)
-  note            String?      @db.VarChar(255)
-  createdAt       DateTime     @default(now())
+  type           String       @db.VarChar(20)
+  amount         Decimal      @db.Decimal(18, 2)
+  balanceBefore  Decimal      @default(0) @db.Decimal(18, 2)
+  balanceAfter   Decimal      @db.Decimal(18, 2)
+  note           String?      @db.VarChar(255)
+  createdAt      DateTime     @default(now())
 
   @@index([userId, type])
   @@index([userId, createdAt])
@@ -612,26 +612,26 @@ model GameTransaction {
 // =============================================================================
 
 model GameWager {
-  id              String    @id @default(cuid())
-  memberAccount   String    @db.VarChar(100)     // GSC member_account
-  wagerCode       String    @unique @db.VarChar(100)
-  wagerStatus     String    @db.VarChar(30)       // PENDING | WIN | LOSE | VOID | CANCELLED
-  wagerType       String    @default("NORMAL") @db.VarChar(30)
-  roundId         String    @db.VarChar(100)
-  channelCode     String    @default("gscp") @db.VarChar(20)
-  gameType        String?   @db.VarChar(30)
-  productCode     String    @db.VarChar(50)
-  gameCode        String?   @db.VarChar(100)
-  currency        String    @default("VND") @db.VarChar(10)
-  betAmount       Decimal   @default(0) @db.Decimal(18, 2)
-  validBetAmount  Decimal   @default(0) @db.Decimal(18, 2)
-  prizeAmount     Decimal   @default(0) @db.Decimal(18, 2)
-  tipAmount       Decimal   @default(0) @db.Decimal(18, 2)
-  settledAt       DateTime?
-  placedAt        DateTime  @default(now())
-  payload         String?   @db.Text             // raw JSON snapshot from GSC
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  memberAccount  String    @db.VarChar(100) // GSC member_account
+  wagerCode      String    @unique @db.VarChar(100)
+  wagerStatus    String    @db.VarChar(30) // PENDING | WIN | LOSE | VOID | CANCELLED
+  wagerType      String    @default("NORMAL") @db.VarChar(30)
+  roundId        String    @db.VarChar(100)
+  channelCode    String    @default("gscp") @db.VarChar(20)
+  gameType       String?   @db.VarChar(30)
+  productCode    String    @db.VarChar(50)
+  gameCode       String?   @db.VarChar(100)
+  currency       String    @default("VND") @db.VarChar(10)
+  betAmount      Decimal   @default(0) @db.Decimal(18, 2)
+  validBetAmount Decimal   @default(0) @db.Decimal(18, 2)
+  prizeAmount    Decimal   @default(0) @db.Decimal(18, 2)
+  tipAmount      Decimal   @default(0) @db.Decimal(18, 2)
+  settledAt      DateTime?
+  placedAt       DateTime  @default(now())
+  payload        String?   @db.Text // raw JSON snapshot from GSC
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([memberAccount])
   @@index([wagerStatus])
@@ -645,21 +645,21 @@ model GameWager {
 // =============================================================================
 
 model LotteryType {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   // PC28 | MARK6 | K3 | KENO | etc.
-  code        String       @unique @db.VarChar(30)
-  name        String       @db.VarChar(100)
-  description String?      @db.Text
-  icon        String?      @db.VarChar(500)
-  status      String       @default("active") @db.VarChar(20)
+  code        String   @unique @db.VarChar(30)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  icon        String?  @db.VarChar(500)
+  status      String   @default("active") @db.VarChar(20)
   // { drawInterval: 300, maxBet: 10000, betTypes: [...] }
   config      Json?
-  sortOrder   Int          @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  draws       LotteryDraw[]
-  bets        LotteryBet[]
+  draws LotteryDraw[]
+  bets  LotteryBet[]
 
   @@map("lottery_types")
 }
@@ -672,8 +672,8 @@ model LotteryDraw {
   period         String      @unique @db.VarChar(30)
   drawTime       DateTime
   isClosed       Boolean     @default(false)
-  resultPreset   Json?       // Admin preset before draw
-  resultOfficial Json?       // Official result after draw
+  resultPreset   Json? // Admin preset before draw
+  resultOfficial Json? // Official result after draw
   // WAITING | DRAWN | CANCELLED
   status         String      @default("WAITING") @db.VarChar(20)
   totalBetAmount Decimal     @default(0) @db.Decimal(18, 2)
@@ -681,7 +681,7 @@ model LotteryDraw {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  bets           LotteryBet[]
+  bets LotteryBet[]
 
   @@index([typeId, status])
   @@index([typeId, drawTime])
@@ -735,28 +735,28 @@ model OddsSetting {
 // =============================================================================
 
 model VirtualAccount {
-  id             String    @id @default(cuid())
-  userId         String    @db.VarChar(30)
-  user           User      @relation(fields: [userId], references: [id])
+  id             String   @id @default(cuid())
+  userId         String   @db.VarChar(30)
+  user           User     @relation(fields: [userId], references: [id])
   // VA number — unique identifier sent to user for bank transfer reference
-  vaNumber       String    @unique @db.VarChar(30)
-  bankBin        String    @db.VarChar(20)
-  bankName       String    @db.VarChar(100)
+  vaNumber       String   @unique @db.VarChar(30)
+  bankBin        String   @db.VarChar(20)
+  bankName       String   @db.VarChar(100)
   // accountNumber = the internal receiving bank account number
-  accountNumber  String    @db.VarChar(30)
-  accountName    String    @db.VarChar(100)
+  accountNumber  String   @db.VarChar(30)
+  accountName    String   @db.VarChar(100)
   // QR code data URL (base64 PNG) for display in frontend
-  qrDataUrl      String?   @db.Text
+  qrDataUrl      String?  @db.Text
   // Expected amount (null = any amount accepted)
-  expectedAmount Decimal?  @db.Decimal(18, 2)
+  expectedAmount Decimal? @db.Decimal(18, 2)
   // Actual matched amount after webhook confirmation
-  actualAmount   Decimal?  @db.Decimal(18, 2)
-  transactionRef String?   @db.VarChar(100) // bank transaction reference
+  actualAmount   Decimal? @db.Decimal(18, 2)
+  transactionRef String?  @db.VarChar(100) // bank transaction reference
   // pending | completed | expired | cancelled
-  status         String    @default("pending") @db.VarChar(20)
+  status         String   @default("pending") @db.VarChar(20)
   expiredAt      DateTime
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([userId, status])
   @@index([vaNumber])
@@ -808,9 +808,9 @@ model SupportRoom {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  participants  SupportParticipant[]
-  messages      SupportMessage[]
-  tickets       SupportTicket[]
+  participants SupportParticipant[]
+  messages     SupportMessage[]
+  tickets      SupportTicket[]
 
   @@map("support_rooms")
 }
@@ -870,7 +870,7 @@ model SupportTicket {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  replies     SupportTicketReply[]
+  replies SupportTicketReply[]
 
   @@index([userId, status])
   @@index([status, createdAt])
@@ -978,7 +978,7 @@ model FileUpload {
 
 model CheckinConfig {
   id           String   @id @default(cuid())
-  day          Int      @unique                          // 1–7 (streak day)
+  day          Int      @unique // 1–7 (streak day)
   rewardType   String   @default("coin") @db.VarChar(20) // coin | free_spin | bonus
   rewardAmount Decimal  @default(0) @db.Decimal(18, 2)
   isActive     Boolean  @default(true)
@@ -991,8 +991,8 @@ model CheckinConfig {
 model UserCheckin {
   id           String   @id @default(cuid())
   userId       String   @db.VarChar(30)
-  checkinDate  String   @db.VarChar(10)                 // "2025-01-15" — date string for uniqueness
-  day          Int                                       // streak day 1–7
+  checkinDate  String   @db.VarChar(10) // "2025-01-15" — date string for uniqueness
+  day          Int // streak day 1–7
   rewardType   String   @db.VarChar(20)
   rewardAmount Decimal  @db.Decimal(18, 2)
   createdAt    DateTime @default(now())
@@ -1009,7 +1009,7 @@ model UserCheckin {
 
 model MissionTemplate {
   id           String   @id @default(cuid())
-  code         String   @unique @db.VarChar(50)          // e.g. "daily_login", "daily_bet_3"
+  code         String   @unique @db.VarChar(50) // e.g. "daily_login", "daily_bet_3"
   title        String   @db.VarChar(100)
   description  String?  @db.VarChar(500)
   // daily | weekly
@@ -1031,18 +1031,18 @@ model MissionTemplate {
 }
 
 model UserMission {
-  id          String           @id @default(cuid())
-  userId      String           @db.VarChar(30)
-  templateId  String           @db.VarChar(30)
-  template    MissionTemplate  @relation(fields: [templateId], references: [id])
-  date        String           @db.VarChar(10)           // "2025-01-15" — the day this mission belongs to
-  progress    Int              @default(0)
-  completed   Boolean          @default(false)
-  claimed     Boolean          @default(false)
+  id          String          @id @default(cuid())
+  userId      String          @db.VarChar(30)
+  templateId  String          @db.VarChar(30)
+  template    MissionTemplate @relation(fields: [templateId], references: [id])
+  date        String          @db.VarChar(10) // "2025-01-15" — the day this mission belongs to
+  progress    Int             @default(0)
+  completed   Boolean         @default(false)
+  claimed     Boolean         @default(false)
   completedAt DateTime?
   claimedAt   DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@unique([userId, templateId, date])
   @@index([userId, date])
@@ -1055,16 +1055,16 @@ model UserMission {
 // =============================================================================
 
 model LuckyWheelConfig {
-  id               String   @id @default(cuid())
-  name             String   @db.VarChar(100)
-  spinCost         Decimal  @default(0) @db.Decimal(18, 2)  // 0 = free
-  maxFreeSpinsPerDay Int     @default(3)
-  resetHour        Int      @default(0)                      // UTC hour when free spins reset (0 = midnight)
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  name               String   @db.VarChar(100)
+  spinCost           Decimal  @default(0) @db.Decimal(18, 2) // 0 = free
+  maxFreeSpinsPerDay Int      @default(3)
+  resetHour          Int      @default(0) // UTC hour when free spins reset (0 = midnight)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  prizes     WheelPrize[]
+  prizes      WheelPrize[]
   spinHistory SpinHistory[]
 
   @@map("lucky_wheel_configs")
@@ -1074,11 +1074,11 @@ model WheelPrize {
   id          String           @id @default(cuid())
   wheelId     String           @db.VarChar(30)
   wheel       LuckyWheelConfig @relation(fields: [wheelId], references: [id])
-  label       String           @db.VarChar(100)             // "500 Coin", "Free Spin"
+  label       String           @db.VarChar(100) // "500 Coin", "Free Spin"
   // COIN | BONUS | FREE_SPIN | NOTHING
   rewardType  String           @db.VarChar(20)
   rewardValue Decimal          @default(0) @db.Decimal(18, 2)
-  probability Decimal          @db.Decimal(8, 6)             // 0.000000–1.000000; all prizes must sum to 1
+  probability Decimal          @db.Decimal(8, 6) // 0.000000–1.000000; all prizes must sum to 1
   color       String           @default("#FF6B6B") @db.VarChar(20) // hex color for segment
   icon        String?          @db.VarChar(100)
   sortOrder   Int              @default(0)
@@ -1115,21 +1115,21 @@ model SpinHistory {
 /// LKvip internal transaction ledger (supplement to general Transaction model)
 /// Used by lkvip module for its own deposit/withdraw/adjustment flow
 model LkvipTransaction {
-  id            String    @id @default(cuid())
-  userId        String    @db.VarChar(30)
-  user          User      @relation(fields: [userId], references: [id])
+  id            String   @id @default(cuid())
+  userId        String   @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id])
   // deposit | withdraw | refund | adjustment | bonus | commission
-  type          String    @db.VarChar(30)
-  amount        Decimal   @db.Decimal(18, 2)
-  balanceBefore Decimal   @default(0) @db.Decimal(18, 2)
-  balanceAfter  Decimal   @default(0) @db.Decimal(18, 2)
-  referenceType String?   @db.VarChar(30)  // va | withdrawal | deposit_order
-  referenceId   String?   @db.VarChar(60)
-  description   String?   @db.VarChar(500)
+  type          String   @db.VarChar(30)
+  amount        Decimal  @db.Decimal(18, 2)
+  balanceBefore Decimal  @default(0) @db.Decimal(18, 2)
+  balanceAfter  Decimal  @default(0) @db.Decimal(18, 2)
+  referenceType String?  @db.VarChar(30) // va | withdrawal | deposit_order
+  referenceId   String?  @db.VarChar(60)
+  description   String?  @db.VarChar(500)
   // pending | completed | failed
-  status        String    @default("completed") @db.VarChar(20)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  status        String   @default("completed") @db.VarChar(20)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([userId, type])
   @@index([userId, createdAt])
@@ -1151,7 +1151,7 @@ model WithdrawalRequest {
   // pending | processing | completed | rejected | cancelled
   status            String    @default("pending") @db.VarChar(20)
   rejectionReason   String?   @db.VarChar(500)
-  transferId        String?   @db.VarChar(100)  // external payment reference
+  transferId        String?   @db.VarChar(100) // external payment reference
   processedAt       DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -1162,35 +1162,36 @@ model WithdrawalRequest {
 }
 
 // =============================================================================
-// REBATE / CASHBACK (game rebate — learned from BoYue RebateService pattern)
+// REBATE / CASHBACK
 //
 // Rebate is calculated T+1 (next day) based on validBet per game type.
-// Rates are configured per VIP level in VipLevel.cashbackRate.
-// Settlement: cron job runs daily 01:00 — computes pending → claimable → paid.
+// Rates are configured per VIP level — see DEFAULT_VIP_REBATE_RATES in @lkvip/types.
+// Admin can override rates via RebateRule records in admin_db.
+// Settlement cron: 23:55 UTC calculate → 01:00 UTC settle (pending → claimable → claimed).
 //
-// gameType mapping:
-//   live     → live casino (evolution, goldgate live)
-//   slot     → RNG / slot / fishing (CQ9, PG Soft, JILI, JDB)
-//   lottery  → lottery / lotto products (TCG LOTTO, PC28, KENO)
-//   sports   → sports / esports (BTI, SBO, UG2, CMD368)
+// gameType values (align with GameTypeKey enum in @lkvip/constants):
+//   'live'    → live casino (Evolution, Goldgate Live)
+//   'slot'    → RNG / slot / fishing (CQ9, PG Soft, JILI, JDB)
+//   'lottery' → lottery products (PC28, KENO, TCG LOTTO)
+//   'sports'  → sports / esports (BTI, SBO, UG2, CMD368)
 // =============================================================================
 
 model BetStats {
-  id          String   @id @default(cuid())
-  userId      String   @db.VarChar(30)
-  user        User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(cuid())
+  userId     String   @db.VarChar(30)
+  user       User     @relation(fields: [userId], references: [id])
   // Date string "2025-01-15" — one row per user per date per gameType
-  date        String   @db.VarChar(10)
+  date       String   @db.VarChar(10)
   // live | slot | lottery | sports
-  gameType    String   @db.VarChar(20)
+  gameType   String   @db.VarChar(20)
   // aggregator: GSC | GOLDGATE | TCGAMING
-  aggregator  String   @default("") @db.VarChar(30)
-  validBet    Decimal  @default(0) @db.Decimal(18, 2)  // valid wager (unsettled excluded)
-  totalBet    Decimal  @default(0) @db.Decimal(18, 2)  // gross bet placed
-  totalWin    Decimal  @default(0) @db.Decimal(18, 2)  // gross win received
-  roundCount  Int      @default(0)                      // number of rounds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  aggregator String   @default("") @db.VarChar(30)
+  validBet   Decimal  @default(0) @db.Decimal(18, 2) // valid wager (unsettled excluded)
+  totalBet   Decimal  @default(0) @db.Decimal(18, 2) // gross bet placed
+  totalWin   Decimal  @default(0) @db.Decimal(18, 2) // gross win received
+  roundCount Int      @default(0) // number of rounds
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([userId, date, gameType, aggregator])
   @@index([userId, date])
@@ -1199,27 +1200,175 @@ model BetStats {
 }
 
 model Rebate {
-  id          String   @id @default(cuid())
-  userId      String   @db.VarChar(30)
-  user        User     @relation(fields: [userId], references: [id])
+  id        String    @id @default(cuid())
+  userId    String    @db.VarChar(30)
+  user      User      @relation(fields: [userId], references: [id])
   // "2025-01-15" — the betting date this rebate is for (T)
-  betDate     String   @db.VarChar(10)
+  betDate   String    @db.VarChar(10)
   // live | slot | lottery | sports
-  gameType    String   @db.VarChar(20)
-  validBet    Decimal  @db.Decimal(18, 2)   // total valid bet on betDate
-  rate        Decimal  @db.Decimal(6, 4)    // rebate rate applied (e.g. 0.0050 = 0.5%)
-  amount      Decimal  @db.Decimal(18, 2)   // rebate amount = validBet × rate
-  vipLevel    Int      @default(1)
+  gameType  String    @db.VarChar(20)
+  validBet  Decimal   @db.Decimal(18, 2) // total valid bet on betDate
+  rate      Decimal   @db.Decimal(6, 4) // rebate rate applied (e.g. 0.0050 = 0.5%)
+  amount    Decimal   @db.Decimal(18, 2) // rebate amount = validBet × rate
+  vipLevel  Int       @default(1)
   // pending (T+0 night) | claimable (after T+1 cron) | claimed | expired
-  status      String   @default("pending") @db.VarChar(20)
-  claimedAt   DateTime?
-  settledAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status    String    @default("pending") @db.VarChar(20)
+  claimedAt DateTime?
+  settledAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([userId, betDate, gameType])
   @@index([userId, status])
   @@index([betDate, status])
   @@index([status, createdAt])
   @@map("rebates")
+}
+
+// =============================================================================
+// SAVINGS VAULT — Money Market
+// Named "Savings Vault" in code/API; displayed as "Tiết kiệm" in VI, "Savings" in EN.
+// BoYue equivalent: caipiao_yeb_config / caipiao_yeb_record / yzz_yuebao_holding.
+// Daily interest is calculated via BullMQ game-savingsVault-interest queue at 00:05 UTC.
+// =============================================================================
+
+model SavingsVaultProduct {
+  id           String   @id @default(cuid())
+  title        String   @db.VarChar(100) // "Flexible" | "7 Days" | "30 Days" | "VIP 90 Days"
+  days         Int // lock period in days (0 = flexible)
+  interestRate Decimal  @db.Decimal(6, 4) // daily rate, e.g. 0.0012 = 0.12%/day
+  minAmount    Decimal  @db.Decimal(18, 2) // minimum investment
+  maxAmount    Decimal? @db.Decimal(18, 2) // null = unlimited
+  stars        Int      @default(0) // display stars (0–5)
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  holdings SavingsVaultHolding[]
+
+  @@map("savings_vault_products")
+}
+
+model SavingsVaultHolding {
+  id         String              @id @default(cuid())
+  userId     String              @db.VarChar(30)
+  productId  String              @db.VarChar(30)
+  product    SavingsVaultProduct @relation(fields: [productId], references: [id])
+  amount     Decimal             @db.Decimal(18, 2) // principal invested
+  profitPaid Decimal             @default(0) @db.Decimal(18, 2) // total interest paid out
+  startDate  DateTime            @default(now())
+  endDate    DateTime? // null for flexible
+  // active | completed | cancelled
+  status     String              @default("active") @db.VarChar(20)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([userId, status])
+  @@index([status, endDate])
+  @@map("savings_vault_holdings")
+}
+
+// =============================================================================
+// MINING MACHINE — Machine investments yielding daily income
+// BoYue equivalent: investment machine concept (daily fixed income model).
+// Income distributed via BullMQ mining-distribution worker at 01:00 UTC daily.
+//
+// MiningMachine  — admin-configured products (price, daily income, duration)
+// MiningHolding  — user's active purchased machines
+// =============================================================================
+
+model MiningMachine {
+  id           String   @id @default(cuid())
+  title        String   @db.VarChar(100)
+  description  String?  @db.VarChar(500)
+  image        String?  @db.VarChar(500)
+  price        Decimal  @db.Decimal(18, 2) // cost to buy (stake)
+  dayIncome    Decimal  @db.Decimal(18, 2) // income per day per machine
+  duration     Int      @default(0) // 0 = unlimited, N = N days
+  totalStock   Int      @default(0) // 0 = unlimited
+  stock        Int      @default(0) // remaining stock
+  perUserLimit Int      @default(0) // 0 = unlimited
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  holdings MiningHolding[]
+
+  @@map("mining_machines")
+}
+
+model MiningHolding {
+  id         String        @id @default(cuid())
+  userId     String        @db.VarChar(30)
+  machineId  String        @db.VarChar(30)
+  machine    MiningMachine @relation(fields: [machineId], references: [id])
+  quantity   Int           @default(1)
+  deposit    Decimal       @db.Decimal(18, 2) // total stake (price × quantity)
+  dayIncome  Decimal       @db.Decimal(18, 2) // daily income (machine.dayIncome × quantity)
+  profitPaid Decimal       @default(0) @db.Decimal(18, 2)
+  startDate  DateTime      @default(now())
+  endDate    DateTime? // null = unlimited duration
+  // active | completed | cancelled
+  status     String        @default("active") @db.VarChar(20)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([status, endDate])
+  @@map("mining_holdings")
+}
+
+// =============================================================================
+// GIFT CODE — Promotional redemption codes (Mã quà tặng)
+// BoYue equivalent: caipiao_giftcode / caipiao_cdkey
+//
+// Admin creates GiftCode records; users redeem them via POST /game/giftcode/redeem.
+// On redemption: balance credited + GiftCodeRedemption record created.
+// Duplicate prevention: unique(giftCodeId, userId).
+// =============================================================================
+
+model GiftCode {
+  id            String   @id @default(cuid())
+  /// Unique alphanumeric code entered by user, e.g. "LKVIP2025"
+  code          String   @unique @db.VarChar(50)
+  /// Reward type: balance | bonus | free_spin | vip_exp
+  rewardType    String   @db.VarChar(20)
+  rewardAmount  Decimal  @db.Decimal(18, 2)
+  /// Total redemption cap (null = unlimited)
+  maxUses       Int?
+  /// Per-user redemption limit (default 1)
+  maxPerUser    Int      @default(1)
+  usedCount     Int      @default(0)
+  /// Minimum VIP level required (0 = any)
+  minVipLevel   Int      @default(0)
+  startDate     DateTime?
+  endDate       DateTime?
+  /// active | inactive | depleted | expired
+  status        String   @default("active") @db.VarChar(20)
+  note          String?  @db.VarChar(500)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  redemptions   GiftCodeRedemption[]
+
+  @@index([code])
+  @@index([status, startDate, endDate])
+  @@map("gift_codes")
+}
+
+/// One row per user per gift code — prevents duplicate redemption.
+model GiftCodeRedemption {
+  id           String    @id @default(cuid())
+  giftCodeId   String    @db.VarChar(30)
+  giftCode     GiftCode  @relation(fields: [giftCodeId], references: [id])
+  userId       String    @db.VarChar(30)
+  rewardAmount Decimal   @db.Decimal(18, 2)
+  redeemedAt   DateTime  @default(now())
+
+  @@unique([giftCodeId, userId])
+  @@index([userId])
+  @@index([giftCodeId])
+  @@map("gift_code_redemptions")
 }

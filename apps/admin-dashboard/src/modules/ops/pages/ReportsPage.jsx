@@ -3,7 +3,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Button, Card, Alert, App, Typography, Row, Col, Statistic } from 'antd';
-import { ReloadOutlined, TrendingUpOutlined } from '@ant-design/icons';
+import { ReloadOutlined, RiseOutlined } from '@ant-design/icons';
 import { opsApi } from '../api';
 
 const { Title, Text } = Typography;
