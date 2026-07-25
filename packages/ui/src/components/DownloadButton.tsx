@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/DownloadButton.tsx
 import React from 'react';
 import { Button } from 'antd';

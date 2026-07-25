@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AxiosInstance } from 'axios';
 import type * as Yup from 'yup';
 

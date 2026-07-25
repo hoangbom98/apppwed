@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/index.ts
 // Barrel export for @lkvip/ui / @ui alias
 

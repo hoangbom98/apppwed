@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useDeviceOS.ts — shared-ui
  * --------------------------

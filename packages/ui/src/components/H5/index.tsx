@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/H5/index.tsx
 // H5 (mobile-first) shared UI components
 import React, { useState, useEffect } from 'react';

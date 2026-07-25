@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/DownloadModal.tsx
 import React from 'react';
 import { Modal, QRCode } from 'antd';

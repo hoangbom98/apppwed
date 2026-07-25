@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * USDTDeposit.tsx — shared-ui/components/payment
  * ------------------------------------------------

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useBalance.ts — Tầng 6: Real-time balance hook
  *

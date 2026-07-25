@@ -12,6 +12,6 @@
       "@lkvip/types": ["../../packages/types/src/index.ts"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

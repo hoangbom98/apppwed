@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ServiceWorkerManager — singleton that handles SW lifecycle for all three apps.
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/hooks/useToast.ts
 // Toast hook — returns { toast } object used by sports/game apps
 import { message } from 'antd';

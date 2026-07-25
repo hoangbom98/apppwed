@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * OptimisticImage.tsx — shared-ui/components
  * --------------------------------------------

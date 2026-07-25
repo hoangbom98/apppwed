@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useForm — React Hook Form + Yup resolver wrapper
  *

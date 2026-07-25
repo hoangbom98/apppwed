@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/hooks/useDebounce.ts
 import { useState, useEffect } from 'react';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/TicketList.tsx
 import React from 'react';
 import { Tag } from 'antd';

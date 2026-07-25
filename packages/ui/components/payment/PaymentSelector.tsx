@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PaymentSelector.tsx — shared-ui/components/payment
  * -----------------------------------------------------

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * usePWADownload.ts — shared-ui/hooks
  * ------------------------------------

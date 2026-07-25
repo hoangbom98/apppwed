@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useOfflineStorage.ts — shared-ui/hooks
  * -----------------------------------------

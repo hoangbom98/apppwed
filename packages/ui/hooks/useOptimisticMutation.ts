@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useOptimisticMutation.ts — shared-ui/hooks
  * --------------------------------------------

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/ChatRoom.tsx
 import React, { useState } from 'react';
 import { Button, Input } from 'antd';

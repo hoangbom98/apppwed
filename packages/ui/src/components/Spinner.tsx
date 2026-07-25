@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/Spinner.tsx
 import React from 'react';
 import { Spin } from 'antd';

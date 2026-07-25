@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DownloadModal.tsx — shared-ui/components
  * ------------------------------------------

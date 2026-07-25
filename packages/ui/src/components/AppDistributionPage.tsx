@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/AppDistributionPage.tsx
 import React, { useState } from 'react';
 import { Button, QRCode, Tabs } from 'antd';

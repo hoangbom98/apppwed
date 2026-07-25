@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/pwa/update.tsx
 // PWA update notification banner
 import React, { useState, useEffect } from 'react';

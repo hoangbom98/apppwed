@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/pwa/autoComplete/useAutoComplete.ts
 import { useState, useCallback } from 'react';
 

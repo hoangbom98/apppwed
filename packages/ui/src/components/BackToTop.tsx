@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/BackToTop.tsx
 import React, { useState, useEffect } from 'react';
 

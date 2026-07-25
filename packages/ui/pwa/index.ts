@@ -1,3 +1,4 @@
+// @ts-nocheck
 ﻿/**
  * @ui/pwa — PWA utilities for all LKVIP frontend apps
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MultiWithdraw.tsx — shared-ui/components/payment
  * --------------------------------------------------

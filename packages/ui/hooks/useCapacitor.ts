@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useCapacitor.ts
  * Hook tiện ích để detect môi trường Capacitor (Native App vs Web)

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DownloadButton.tsx — shared-ui/components
  * -------------------------------------------

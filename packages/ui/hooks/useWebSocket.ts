@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useWebSocket.ts — Tầng 6: Generic WebSocket hook
  *

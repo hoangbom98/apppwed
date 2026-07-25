@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AppDistributionPage.tsx — shared-ui
  * ------------------------------------

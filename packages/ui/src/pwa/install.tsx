@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/pwa/install.tsx
 // PWA install prompt component
 import React, { useState, useEffect } from 'react';

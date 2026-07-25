@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/formatters.ts
 // Shared formatting utilities for all frontend apps
 

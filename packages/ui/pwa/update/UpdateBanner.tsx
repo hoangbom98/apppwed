@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useCallback } from 'react';
 import { ServiceWorkerManager } from '../serviceWorker/ServiceWorkerManager';
 

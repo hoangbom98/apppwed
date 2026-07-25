@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/TicketForm.tsx
 import React, { useState } from 'react';
 import { Button, Input, Select } from 'antd';

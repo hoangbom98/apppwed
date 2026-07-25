@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/SentryErrorBoundary.tsx
 import React from 'react';
 

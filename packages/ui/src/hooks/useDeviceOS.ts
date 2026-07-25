@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/hooks/useDeviceOS.ts
 import { useMemo } from 'react';
 

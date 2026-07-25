@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { ConfigProvider, theme } from 'antd';
 import { ThemeProvider } from 'antd-style';

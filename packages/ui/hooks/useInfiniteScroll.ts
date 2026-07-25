@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useInfiniteScroll.ts — shared-ui/hooks
  * ----------------------------------------

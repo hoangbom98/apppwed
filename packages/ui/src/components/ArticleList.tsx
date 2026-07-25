@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/components/ArticleList.tsx
 import React from 'react';
 

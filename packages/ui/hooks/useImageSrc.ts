@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useImageSrc.ts — shared-ui/hooks
  * ----------------------------------

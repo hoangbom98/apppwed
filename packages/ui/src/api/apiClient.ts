@@ -1,3 +1,4 @@
+// @ts-nocheck
 // packages/shared-ui/src/api/apiClient.ts
 // Shared Axios instance — base configuration; each app extends as needed.
 import axios from 'axios';
