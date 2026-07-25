@@ -126,4 +126,23 @@ jobs:
               exit 1
             fi
             echo "Health check passed: $STATUS ✓"
-            echo "Public URL: https://api.tc-gaming.live/health"
+
+            check_url() {
+              name="$1"
+              url="$2"
+              if curl -fsSIL --max-time 15 "$url" >/dev/null; then
+                echo "Public check passed: $name ✓"
+              else
+                echo "ERROR: Public check failed: $name — $url"
+                exit 1
+              fi
+            }
+
+            check_url "root hub" "https://tc-gaming.live/"
+            check_url "hub" "https://hub.tc-gaming.live/"
+            check_url "trade" "https://trade.tc-gaming.live/"
+            check_url "sports" "https://sports.tc-gaming.live/"
+            check_url "admin" "https://admin.tc-gaming.live/"
+            check_url "API health" "https://api.tc-gaming.live/health"
+            check_url "public config brand" "https://api.tc-gaming.live/api/shared/config?project=hub&group=brand"
+            check_url "public config colors" "https://api.tc-gaming.live/api/shared/config?project=hub&group=colors"

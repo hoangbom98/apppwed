@@ -1,5 +1,6 @@
 // @ts-nocheck
 const path = require('path');
+const { applyEncryptionMiddleware } = require('../shared/prisma/encryptionMiddleware');
 
 /** @type {Record<string, import('@prisma/client').PrismaClient>} */
 const clients = {};
@@ -42,7 +43,10 @@ function getPrismaClient(project) {
       __dirname, '../../node_modules/.prisma', `${project}-client`
     );
     const { PrismaClient } = require(clientPath);
-    clients[project] = new PrismaClient();
+    const client = new PrismaClient();
+    // Apply field-level encryption middleware for sensitive fields
+    applyEncryptionMiddleware(client);
+    clients[project] = client;
   }
   return clients[project];
 }

@@ -59,6 +59,16 @@ info()  { echo -e "${GREEN}[deploy]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[deploy]${NC} $*"; }
 error() { echo -e "${RED}[deploy]${NC} $*" >&2; }
 step()  { echo -e "\n${CYAN}━━━ $* ━━━${NC}"; }
+check_url() {
+  local name="$1"
+  local url="$2"
+  if curl -fsSIL --max-time 15 "$url" >/dev/null; then
+    info "Public check OK: $name"
+  else
+    error "Public check failed: $name — $url"
+    return 1
+  fi
+}
 
 TS="$(date +%Y%m%d_%H%M%S)"
 ROLLBACK_NEEDED=false
@@ -206,7 +216,9 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     pnpm run build:frontends
     info "Frontend builds complete"
     info "  hub      → apps/hub/dist/"
+    info "  game     → apps/game/dist/ (not public-routed unless DNS/Nginx enabled)"
     info "  trading  → apps/trading/dist/"
+    info "  dating   → apps/dating/dist/ (not public-routed unless DNS/Nginx enabled)"
     info "  sports   → apps/sports/dist/"
     info "  admin    → apps/admin-dashboard/dist/"
   fi
@@ -261,12 +273,29 @@ step "Health check"
 
 if [[ "$FRONTEND_ONLY" != "true" ]]; then
   sleep 4
-  HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" || echo '000')"
-  if [[ "$HTTP_CODE" == "200" ]]; then
-    info "Health check OK (HTTP $HTTP_CODE) — $HEALTH_URL"
+  STATUS="$(curl -sf --max-time 10 "$HEALTH_URL" \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" \
+    2>/dev/null || echo 'error')"
+  if [[ "$STATUS" == "healthy" ]]; then
+    info "Health check OK ($STATUS) — $HEALTH_URL"
   else
-    warn "Health check returned HTTP $HTTP_CODE — check: pm2 logs $PM2_APP_NAME"
+    error "Health check failed ($STATUS) — check: pm2 logs $PM2_APP_NAME"
+    exit 1
   fi
+fi
+
+if [[ "$BACKEND_ONLY" != "true" ]]; then
+  check_url "root hub" "https://tc-gaming.live/"
+  check_url "hub" "https://hub.tc-gaming.live/"
+  check_url "trade" "https://trade.tc-gaming.live/"
+  check_url "sports" "https://sports.tc-gaming.live/"
+  check_url "admin" "https://admin.tc-gaming.live/"
+fi
+
+if [[ "$FRONTEND_ONLY" != "true" ]]; then
+  check_url "public API health" "https://api.tc-gaming.live/health"
+  check_url "public config brand" "https://api.tc-gaming.live/api/shared/config?project=hub&group=brand"
+  check_url "public config colors" "https://api.tc-gaming.live/api/shared/config?project=hub&group=colors"
 fi
 
 # =============================================================================

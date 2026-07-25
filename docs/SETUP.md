@@ -1,58 +1,46 @@
-# Setup Guide — KJC Platform v2.0
+# Setup Guide — LKVIP
 
-**Prerequisite OS:** Ubuntu 20.04+ / macOS / WSL2 Windows
-
----
+Hướng dẫn setup local cho monorepo `/var/LKVIP`.
 
 ## 1. Prerequisites
 
 | Tool | Version | Check |
 |------|---------|-------|
-| Node.js | 20 LTS | `node --version` |
-| npm | 10+ | `npm --version` |
+| Node.js | >=20 | `node --version` |
+| pnpm | >=9 | `pnpm --version` |
 | MySQL | 8.0 | `mysql --version` |
-| Redis | 7.x | `redis-server --version` |
+| Redis | 7.x | `redis-cli ping` |
 | Git | 2.x+ | `git --version` |
-| PM2 (production) | latest | `pm2 --version` |
+| PM2 | production only | `pm2 --version` |
 
-> **Docker alternative:** Nếu không muốn cài MySQL/Redis thủ công, xem [§6 Docker Quick Start](#6-docker-quick-start).
-
----
-
-## 2. Clone & Install
+## 2. Clone và install
 
 ```bash
-# 1. Clone
-git clone https://github.com/your-org/website-admin.git
-cd website-admin
-
-# 2. Copy env template
-cp .env.example apps/backend/.env
-
-# 3. Chỉnh sửa .env — xem §3 Environment Variables
-nano apps/backend/.env
-
-# 4. Install backend dependencies
-cd apps/backend
-npm install
+git clone <repo-url> /var/LKVIP
+cd /var/LKVIP
+pnpm install
 ```
 
----
+## 3. Environment
 
-## 3. Environment Variables
+Backend đọc env từ `apps/backend/.env`.
 
-File: `apps/backend/.env`
+```bash
+cp config/env/.env.example apps/backend/.env
+```
 
-### Bắt buộc (không có thì app không khởi động)
+Nếu template nằm ở vị trí khác trong nhánh hiện tại, copy từ template `.env.example` đang có trong repo sang `apps/backend/.env`.
+
+Biến bắt buộc tối thiểu:
 
 ```env
-# ── JWT ───────────────────────────────────────────────────────────────────────
-JWT_SECRET=your_jwt_secret_minimum_64_characters_random_string_here_xxxxxxxx
-JWT_REFRESH_SECRET=your_refresh_secret_minimum_64_characters_random_string_xxxxxxxx
-JWT_EXPIRES_IN=2h
-JWT_REFRESH_EXPIRES_IN=30d
+NODE_ENV=development
+PORT=5000
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5180
 
-# ── Database URLs (Prisma connection strings) ────────────────────────────────
+JWT_SECRET=<random-string-at-least-32-chars>
+ENCRYPTION_KEY=<random-string-at-least-32-chars>
+
 HUB_DATABASE_URL=mysql://user:password@127.0.0.1:3306/hub_db
 GAME_DATABASE_URL=mysql://user:password@127.0.0.1:3306/game_db
 TRADE_DATABASE_URL=mysql://user:password@127.0.0.1:3306/trade_db
@@ -60,177 +48,124 @@ DATING_DATABASE_URL=mysql://user:password@127.0.0.1:3306/dating_db
 SPORTS_DATABASE_URL=mysql://user:password@127.0.0.1:3306/sports_db
 ADMIN_DATABASE_URL=mysql://user:password@127.0.0.1:3306/admin_db
 
-# ── Redis ──────────────────────────────────────────────────────────────────
 REDIS_URL=redis://127.0.0.1:6379
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
 ```
 
-### Tùy chọn (có giá trị mặc định)
+Không commit hoặc paste giá trị secret thật vào issue/chat/docs.
 
-```env
-# ── Server ────────────────────────────────────────────────────────────────
-PORT=5000
-NODE_ENV=development
-APP_NAME=KJC-Platform
-LOG_LEVEL=debug                # debug | info | warn | error
+## 4. Database local
 
-# ── CORS — danh sách frontend URLs được phép ──────────────────────────────
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5180
-
-# ── Mã hóa PII (AES-256-CBC) — 64 ký tự hex ──────────────────────────────
-ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
-
-# ── Email (Nodemailer) ────────────────────────────────────────────────────
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-SMTP_FROM=noreply@kjc-platform.com
-
-# ── Upload ────────────────────────────────────────────────────────────────
-MAX_FILE_SIZE=10485760         # 10MB in bytes
-UPLOAD_PATH=./uploads
-
-# ── Keep-alive (chỉ cần trên Render free tier) ───────────────────────────
-APP_URL=https://your-app.onrender.com
-```
-
----
-
-## 4. Database Setup
-
-### 4.1 Tạo databases trong MySQL
+Tạo 6 databases:
 
 ```sql
--- Chạy trong MySQL client (mysql -u root -p)
-CREATE DATABASE IF NOT EXISTS hub_db     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS game_db    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS trade_db   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS dating_db  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS sports_db  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS admin_db   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Tạo user (thay thế password)
-CREATE USER IF NOT EXISTS 'webadmin'@'localhost' IDENTIFIED BY 'StrongPassword@2024';
-GRANT ALL PRIVILEGES ON hub_db.*     TO 'webadmin'@'localhost';
-GRANT ALL PRIVILEGES ON game_db.*    TO 'webadmin'@'localhost';
-GRANT ALL PRIVILEGES ON trade_db.*   TO 'webadmin'@'localhost';
-GRANT ALL PRIVILEGES ON dating_db.*  TO 'webadmin'@'localhost';
-GRANT ALL PRIVILEGES ON sports_db.*  TO 'webadmin'@'localhost';
-GRANT ALL PRIVILEGES ON admin_db.*   TO 'webadmin'@'localhost';
-FLUSH PRIVILEGES;
+CREATE DATABASE IF NOT EXISTS hub_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS game_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS trade_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS dating_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS sports_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS admin_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 4.2 Chạy Prisma migrations
+Generate Prisma clients, migrate, seed:
 
 ```bash
-cd apps/backend
-
-# Generate tất cả 6 Prisma clients
-npm run prisma:generate
-
-# Chạy migrations (lần đầu hoặc có schema mới)
-npm run prisma:migrate:all
+pnpm prisma:generate
+pnpm --filter lkvip-backend run prisma:migrate:all
+pnpm --filter lkvip-backend run seed:all
 ```
 
-### 4.3 Seed dữ liệu mẫu
+Seed admin mặc định nếu seed script có bật dữ liệu mẫu:
 
-```bash
-# Seed tất cả modules (admin → game → hub → dating → trade → sports)
-npm run seed:all
-
-# Hoặc seed từng module riêng lẻ
-npm run seed:admin    # Tạo tài khoản superadmin mặc định
-npm run seed:game     # Dữ liệu mẫu game
-npm run seed:hub      # Dữ liệu mẫu hub
+```text
+Email: admin@admin.com
+Password: Admin@123456
 ```
 
-> **Tài khoản mặc định sau seed:admin:**
-> - Email: `admin@admin.com`
-> - Password: `Admin@123456`
-> - **⚠️ PHẢI đổi password trước khi deploy production.**
+Đổi mật khẩu trước production.
 
----
+## 5. Chạy development
 
-## 5. Chạy Development Server
+Chạy từng service từ root:
 
 ```bash
-cd apps/backend
+pnpm dev:backend   # API :5000
+pnpm dev:hub       # :5173
+pnpm dev:game      # :5174
+pnpm dev:dating    # :5176
+pnpm dev:trade     # :5177
+pnpm dev:sports    # :5178
+pnpm dev:admin     # :5180
+```
 
-# Backend API (port 5000)
-npm run dev
+Hoặc chạy nhóm:
 
-# Kiểm tra API docs
+```bash
+pnpm dev:frontend
+pnpm dev:all
+```
+
+Kiểm tra backend:
+
+```bash
+curl http://localhost:5000/health
 open http://localhost:5000/api/docs
-
-# Health check
-curl http://localhost:5000/health/live
 ```
 
-### Chạy frontend (từ thư mục apps/<project>)
+## 6. Build và kiểm tra
 
 ```bash
-# Admin dashboard (port 5180)
-cd apps/admin-dashboard
-npm install && npm run dev
+pnpm lint:all
+pnpm typecheck:all
+pnpm test
 
-# Hub (port 5173)
-cd apps/hub
-npm install && npm run dev
+pnpm build:packages
+pnpm build:frontends
+pnpm build:all
 ```
 
----
-
-## 6. Docker Quick Start
-
-Cách nhanh nhất — không cần cài MySQL/Redis thủ công:
+Build từng app:
 
 ```bash
-# 1. Copy env
-cp .env.example apps/backend/.env
-# Sửa JWT_SECRET trong .env
-
-# 2. Khởi động stack (MySQL 8 + Redis 7 + Backend API)
-cd source
-docker-compose up -d
-
-# 3. Chạy migrations và seed
-docker-compose exec api npm run prisma:migrate:all
-docker-compose exec api npm run seed:all
-
-# Backend tại: http://localhost:5000
-# API Docs tại: http://localhost:5000/api/docs
+pnpm build:hub
+pnpm build:game
+pnpm build:dating
+pnpm build:trade
+pnpm build:sports
+pnpm build:admin
+pnpm --filter lkvip-backend run build
 ```
 
----
+## 7. Public config và Live Preview
 
-## 7. Kiểm tra sau khi cài xong
+Admin theme settings nằm tại `/config/general` trong admin dashboard.
 
-```bash
-# 1. Server health
-curl http://localhost:5000/health/live
-# Expected: {"status":"ok","uptime":...}
+Public app đọc config non-secret qua:
 
-# 2. Admin login
-curl -X POST http://localhost:5000/api/admin/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@admin.com","password":"Admin@123456"}'
-# Expected: {"success":true,"data":{"access_token":"..."}}
-
-# 3. Chạy test suite
-cd apps/backend
-npm test
+```text
+/api/shared/config?project=hub&group=brand
+/api/shared/config?project=hub&group=colors
 ```
 
----
+Khi kiểm tra local, backend phải chạy trước. Nếu endpoint lỗi 500, kiểm tra `apps/backend/.env`, Redis, DB, Prisma clients.
 
-## 8. Xử lý lỗi phổ biến
+## 8. Docker
 
-| Lỗi | Nguyên nhân | Giải pháp |
-|-----|-------------|-----------|
-| `Can't connect to MySQL` | MySQL chưa chạy hoặc sai URL | Kiểm tra `MYSQL_DATABASE_URL` trong `.env` |
-| `Prisma client not generated` | Chưa chạy `prisma:generate` | `npm run prisma:generate` |
-| `JWT_SECRET too short` | Secret < 32 chars | Dùng string ngẫu nhiên ≥ 64 ký tự |
-| `Redis connection refused` | Redis chưa chạy | `redis-server` hoặc `docker-compose up redis` |
-| `EADDRINUSE :5000` | Port đã bị dùng | `lsof -i :5000 && kill -9 <PID>` |
+Docker local chưa được chuẩn hóa làm đường chính trong repo hiện tại. Ưu tiên setup trực tiếp bằng MySQL/Redis local và pnpm workspace scripts ở trên.
+
+## 9. Lỗi phổ biến
+
+| Lỗi | Nguyên nhân | Cách xử lý |
+|-----|-------------|------------|
+| `Missing required environment variables` | Thiếu biến trong `apps/backend/.env` | Bổ sung các biến bắt buộc |
+| `Secrets too short` | `JWT_SECRET` hoặc `ENCRYPTION_KEY` dưới 32 ký tự | Dùng chuỗi đủ dài |
+| `Can't connect to MySQL` | DB chưa chạy/sai URL | Kiểm tra 6 `*_DATABASE_URL` |
+| `Prisma client not generated` | Chưa generate client | `pnpm prisma:generate` |
+| `Redis connection refused` | Redis chưa chạy/sai `REDIS_URL` | Start Redis, kiểm tra URL |
+| `EADDRINUSE :5000` | Port backend bị dùng | Dừng process đang chiếm port hoặc đổi `PORT` đồng bộ |
+| Frontend gọi config 404 | Backend chưa mount/chưa chạy | Kiểm tra backend và `/api/shared/config` |
+
+## 10. Bước tiếp theo
+
+- Đọc `docs/ONBOARDING.md` để nắm tổng quan.
+- Đọc `docs/ARCHITECTURE.md` để hiểu kiến trúc.
+- Đọc `CONTRIBUTING.md` trước khi mở PR.

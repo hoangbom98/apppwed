@@ -25,6 +25,7 @@ import {
   Button,
 } from 'antd';
 import api from '@admin/api/client';
+import ThemeLivePreview from '../components/ThemeLivePreview';
 
 const PROJECTS = [
   { code: 'hub',    label: 'Hub Portal' },
@@ -47,7 +48,16 @@ const GROUP_LABELS = {
   feature: 'Tính năng',
 };
 
-// ── Type-aware input ───────────────────────────────────────────────────────────
+function buildPreviewConfig(configs, changes) {
+  return (configs ?? []).reduce((acc, item) => {
+    const group = item.group || item.module || 'general';
+    if (!acc[group]) acc[group] = {};
+    acc[group][item.key] = changes[item.id] !== undefined ? changes[item.id] : item.value;
+    return acc;
+  }, {});
+}
+
+// ── Type-aware input ─────────────────────────────────────────────────────────���─
 function ConfigInput({ item, value, onChange }) {
   if (item.type === 'boolean') {
     return <Switch checked={value} onChange={onChange} />;
@@ -146,6 +156,7 @@ function GeneralConfigInner() {
   });
 
   const hasChanges = Object.keys(changes).length > 0;
+  const previewConfig = useMemo(() => buildPreviewConfig(configs, changes), [configs, changes]);
 
   const collapseItems = sections.map(sec => {
     const secKey   = `${sec.module}||${sec.group}`;
@@ -212,10 +223,17 @@ function GeneralConfigInner() {
       )}
 
       {!isLoading && sections.length > 0 && (
-        <Collapse
-          defaultActiveKey={sections.map(sec => `${sec.module}||${sec.group}`)}
-          items={collapseItems}
-        />
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-5 items-start">
+          <div className="min-w-0">
+            <Collapse
+              defaultActiveKey={sections.map(sec => `${sec.module}||${sec.group}`)}
+              items={collapseItems}
+            />
+          </div>
+          <div className="xl:sticky xl:top-20">
+            <ThemeLivePreview config={previewConfig} project={project} />
+          </div>
+        </div>
       )}
 
       {!isLoading && sections.length > 0 && (

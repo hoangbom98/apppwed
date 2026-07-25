@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { getAlbum, getProfileStats } from '@/api/profile';
-import { Settings, Edit, Crown, Shield, Grid3X3 } from 'lucide-react';
+import { Settings, Edit, Crown, Shield, Grid3X3, Gem } from 'lucide-react';
 import {
   CreditCardOutlined, CrownOutlined, GiftOutlined, RocketOutlined,
   CalendarOutlined, UsergroupAddOutlined, GlobalOutlined,
-  SettingOutlined, MobileOutlined, DollarOutlined, DiamondOutlined,
+  SettingOutlined, MobileOutlined, DollarOutlined,
 } from '@ant-design/icons';
 import { VIP_NAMES } from '@/utils/constants';
 import { formatAge } from '@/utils/formatters';
@@ -84,7 +84,7 @@ export default function Profile() {
             <span className="font-bold text-amber-700 text-sm">{user.coins.toLocaleString()} xu</span>
           </div>
           <div className="flex items-center gap-1.5 bg-blue-50 rounded-xl px-4 py-2">
-            <DiamondOutlined className="text-blue-500" />
+            <Gem size={16} className="text-blue-500" />
             <span className="font-bold text-blue-700 text-sm">{user.diamonds.toLocaleString()} kim cương</span>
           </div>
         </div>

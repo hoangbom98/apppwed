@@ -30,7 +30,8 @@ class WalletService {
 }
 ```
 
-All credit/debit calls write to `Ledger` (immutable) and update `Wallet` balance atomically inside a Prisma `$transaction`.
+All credit/debit calls write to `Ledger` (immutable) and update `Wallet` balance atomically inside a Prisma `$transaction`.  
+Use `decimal.js` (from `@lkvip/utils`) for all monetary arithmetic — never `Number` or `BigInt` for money.
 
 ## PaymentService
 
@@ -79,11 +80,12 @@ class NotificationService {
 }
 ```
 
-Uses socket.io `emit` for realtime delivery; falls back to DB insert for offline users.
+Uses Socket.IO `emit` for realtime delivery; falls back to DB insert for offline users.  
+Push notifications via Firebase Admin SDK (`firebase-admin`).
 
 ## PaymentAdapter Interface
 
-Every gateway implements this contract. Register via `AdapterRegistry.register(gateway, adapter)`.
+Every gateway implements this contract. Factory: `src/shared/payment/PaymentFactory.ts`.
 
 ```typescript
 interface PaymentAdapter {
@@ -93,18 +95,55 @@ interface PaymentAdapter {
   verifySignature(payload: unknown, signature: string): boolean;
 }
 
-type GatewayType = 'USDT' | 'Bank' | 'Momo' | 'LKvip' | 'VNPay';
+// Registered adapter keys (6 adapters in src/shared/payment/adapters/):
+type GatewayType = 'MoMo' | 'USDT' | 'OKPay' | 'Pay818' | 'GoPay' | 'LKvipInternal';
 ```
 
 ## Background Jobs (BullMQ)
 
-All scheduled or heavy async work goes into a named queue — never inline with `setTimeout`.
+All scheduled or heavy async work goes into a named queue — never inline with `setTimeout`.  
+Workers live in `src/modules/workers/`. Each file is a self-contained BullMQ worker.
 
-| Queue name | Trigger | Worker responsibility |
+| Worker file | Queue / Trigger | Responsibility |
 |---|---|---|
-| `payment.webhook` | Gateway POST webhook | Verify sig → complete deposit → credit wallet → trigger commission |
-| `investment.settle` | Cron: daily | Find matured orders → settle → credit wallet |
-| `notification.send` | Event bus | Deliver notification via socket / email / SMS |
-| `referral.commission` | After deposit confirmed | Walk referral chain → credit commissions |
+| `deposit-auto.worker.ts` | Deposit webhook / cron | Auto-process pending deposits, credit wallet |
+| `withdraw-auto.worker.ts` | Cron | Auto-approve/reject withdrawals below threshold |
+| `lottery-settlement.worker.ts` | After draw closes | Settle bets, calculate payouts, credit winners |
+| `agent-settlement.worker.ts` | Cron: daily/weekly | Calculate & pay agent commissions |
+| `rebate.worker.ts` | Cron: daily | Calculate rebate per user, write claimable records |
+| `robot-bet.worker.ts` | Cron: every 30s | Simulate robot bets (liquidity, when `ENABLE_ROBOT_BETS=true`) |
+| `fraud-auto.worker.ts` | Risk event bus | Auto-flag / suspend fraudulent accounts |
+| `interest-payout.worker.ts` | Cron: daily | Pay interest on savings vault holdings |
+| `savingsVault-interest.worker.ts` | Cron | Compound interest for savings vault |
+| `ticket-auto.worker.ts` | Ticket events | Auto-respond / route support tickets |
+| `health-monitor.worker.ts` | Cron | Check DB/Redis/queue health, alert on failure |
+| `lkvip-webhook-retry.worker.ts` | Failed webhook queue | Retry failed outbound webhook calls |
+| `test.worker.ts` | Manual trigger | Development/testing only |
 
-Workers live in `src/jobs/`. Each worker file exports a single `registerWorker(queue: Queue)` function.
+## Shared Services (44 services in `src/shared/services/`)
+
+Key services available across all modules:
+
+| Service | Purpose |
+|---|---|
+| `authService` | Registration, login, JWT, 2FA |
+| `walletService` | Balance CRUD, credit/debit, transfer |
+| `paymentService` | Deposit/withdraw orchestration |
+| `ledgerService` | Immutable transaction ledger |
+| `transactionService` | Transaction history, search |
+| `settlementService` | Game/lottery settlement |
+| `rebateService` | Rebate calculation and payout |
+| `loyaltyService` | Loyalty points management |
+| `vipEngineService` | VIP tier upgrades and benefits |
+| `referralService` | Referral chain, commission distribution |
+| `notificationService` | In-app, push, email, SMS notifications |
+| `cacheService` | Redis cache abstraction |
+| `configService` | Dynamic system config from DB |
+| `kycService` | KYC verification flow |
+| `twoFactorService` | TOTP 2FA setup and verification |
+| `uploadService` | File upload (local or S3) via `storageAdapter` |
+| `aiService` | DeepSeek/OpenAI translation and AI tasks |
+| `analyticsService` | Business analytics and reporting |
+| `auditService` | Admin action audit trail |
+| `riskService` / `riskCheck.service` | Risk scoring, AML, compliance checks |
+| `whiteLabelService` | Multi-brand / white-label support |

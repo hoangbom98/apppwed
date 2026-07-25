@@ -5,7 +5,7 @@ import { deposit } from '@/api/wallet';
 import { formatVND } from '@/utils/formatters';
 import PageHeader from '@/components/common/PageHeader';
 import toast from 'react-hot-toast';
-import { ChevronRight, Gift, Shield, Clock } from 'lucide-react';
+import { ChevronRight, Gift, Shield, Clock, Gem } from 'lucide-react';
 
 import { BankOutlined, DollarCircleOutlined, MobileOutlined, CreditCardOutlined, DollarOutlined } from '@ant-design/icons';
 
@@ -77,7 +77,7 @@ export default function Recharge() {
                 )}
                 {pkg.premium && (
                   <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] font-bold rounded-full whitespace-nowrap">
-                    <DiamondOutlined /> VIP
+                    <Gem size={12} className="inline" /> VIP
                   </span>
                 )}
                 <p className="text-2xl font-black text-amber-500"><DollarOutlined /> {pkg.coins.toLocaleString()}</p>

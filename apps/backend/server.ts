@@ -144,6 +144,7 @@ mountSwagger(app);
 
 // ── Module routes ──────────────────────────────────────────────────────────
 app.use('/api/auth',   require('./src/shared/routes/auth.routes').default || require('./src/shared/routes/auth.routes'));
+app.use('/api/shared', require('./src/shared/routes/configPublicRoutes'));
 app.use('/api/hub',    require('./src/modules/hub/routes/index'));
 app.use('/api/game',   require('./src/modules/game/routes/index'));
 app.use('/api/trade',  require('./src/modules/trade/routes/index'));

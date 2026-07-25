@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
+    // Vite transform cache dùng chung toàn monorepo — React/antd chỉ transform 1 lần
+    cacheDir: '../../node_modules/.vite-cache',
     plugins: [
         react(),
         VitePWA({
@@ -81,8 +83,8 @@ export default defineConfig({
     resolve: {
         alias: {
             '@admin': path.resolve(__dirname, './src'),
-            '@ui': path.resolve(__dirname, '../../packages/shared-ui/src'),
-            '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
+            '@ui': path.resolve(__dirname, '../../packages/ui/src'),
+            '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
         },
         dedupe: ['react', 'react-dom', 'react-router-dom'],
     },
@@ -99,10 +101,12 @@ export default defineConfig({
     },
     build: {
         outDir: 'dist',
+        sourcemap: false,
         minify: 'esbuild',
-        chunkSizeWarningLimit: 1200, // antd bundle is larger than lucide
+        cssCodeSplit: true,
+        chunkSizeWarningLimit: 1200,
         rollupOptions: {
-            treeshake: true,
+            treeshake: { moduleSideEffects: false },
             output: {
                 manualChunks: (id) => {
                     // ── Core React ───────────────────────────────────────────────────────

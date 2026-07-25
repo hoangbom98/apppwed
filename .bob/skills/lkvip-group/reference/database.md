@@ -2,7 +2,7 @@
 
 ## Multi-Database Setup
 
-Six MySQL databases, one per domain. Each has its own Prisma schema file.
+Six MySQL 8 databases, one per domain. Each has its own Prisma 5 schema file under `apps/backend/prisma/`.
 
 | Database | Schema path | Used by |
 |---|---|---|
@@ -12,6 +12,12 @@ Six MySQL databases, one per domain. Each has its own Prisma schema file.
 | `trade_db` | `prisma/trade/schema.prisma` | Investment packages, orders, price data |
 | `dating_db`| `prisma/dating/schema.prisma`| Profiles, matches, messages |
 | `sports_db`| `prisma/sports/schema.prisma`| Events, odds, bet slips |
+
+### Read Replica & Sharding
+
+- **Read Replica**: All 6 databases support optional read replicas via `prismaReplica.ts`. Set `HUB_REPLICA_DATABASE_URL`, `GAME_REPLICA_DATABASE_URL`, etc. in `.env` to activate. Falls back to master when not set.
+- **Sharding**: `trade_db` supports horizontal sharding when `TRADE_SHARD_COUNT > 0`. Set `TRADE_DB_SHARD_0_URL`, `TRADE_DB_SHARD_1_URL`, … accordingly. Enable only when `trade_db` exceeds 100M rows.
+- **Field-level encryption**: Sensitive Prisma fields (private keys, bank info) are encrypted at rest via `src/shared/middlewares/prismaEncryption.ts` using AES-256-GCM with `ENCRYPTION_KEY`.
 
 ---
 
@@ -189,15 +195,24 @@ import {
 
 1. One migration per logical change — never batch unrelated changes.
 2. Name migrations descriptively: `add_gift_code`, `add_rebate_vip_rates`.
-3. Run per-schema:
+3. Run per-schema (from `apps/backend/`):
    ```bash
+   npx tsx scripts/prisma-run.ts migrate <module>
+   # e.g.: npx tsx scripts/prisma-run.ts migrate game
+   # Or directly:
    npx prisma migrate dev --name <description> --schema=prisma/<project>/schema.prisma
    ```
-4. Never edit a committed migration file — create a new one to fix mistakes.
-5. Seeds must be **idempotent** — use `upsert`, never bare `create`.
-6. Seed command per schema:
+4. Deploy migrations to production:
    ```bash
-   npx ts-node prisma/seeds/<project>.seed.ts
+   pnpm run prisma:deploy   # runs prisma migrate deploy for all 6 schemas
+   ```
+5. Never edit a committed migration file — create a new one to fix mistakes.
+6. Seeds must be **idempotent** — use `upsert`, never bare `create`.
+7. Seed commands:
+   ```bash
+   pnpm --filter lkvip-backend run seed:all          # all schemas
+   pnpm --filter lkvip-backend run seed:game         # single schema
+   pnpm --filter lkvip-backend run seed:admin        # etc.
    ```
 
 ---
@@ -208,5 +223,9 @@ All code must obtain a client via the factory — never instantiate directly:
 
 ```typescript
 import { getPrismaClient } from '@/config/databases';
-const prisma = getPrismaClient('admin'); // or 'game' | 'hub' | 'trade' | 'dating' | 'sports'
+// Keys: 'admin' | 'game' | 'hub' | 'trade' | 'dating' | 'sports'
+const prisma = getPrismaClient('admin');
 ```
+
+Factory file: `apps/backend/src/config/databases.ts`
+Replica client: `apps/backend/src/config/prismaReplica.ts` (for read-heavy queries)

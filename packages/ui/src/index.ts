@@ -28,6 +28,7 @@ export * from './hooks/useTradingViewSymbol';
 export * from './hooks/useDebounce';
 export * from './hooks/useToast';
 export * from './hooks/useSocket';
+export * from './hooks/useForm';
 
 // ── Stores ────────────────────────────────────────────────────────────────────
 export { useAuthStore, useUIStore, useWalletStore } from './stores/sharedStores';

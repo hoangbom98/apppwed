@@ -68,7 +68,7 @@ const SYSTEM_GROUP: MenuGroup = {
   label: 'Hệ thống',
   items: [
     { to: '/payment-gateways',         icon: CreditCard,        label: 'Cổng thanh toán' },
-    { to: '/config/general',           icon: Palette,           label: 'Giao diện' },
+    { to: '/config/general',           icon: Palette,           label: 'Giao diện & Live Preview' },
     { to: '/config',                   icon: SlidersHorizontal, label: 'Cấu hình' },
     { to: '/settings',                 icon: Settings,          label: 'Cài đặt' },
     { to: '/settings/general',         icon: Settings2,         label: 'Cài đặt chung' },

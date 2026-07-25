@@ -3,9 +3,7 @@
    antd-mini inspired: CSS variable token layer + dark mode
    Tailwind base + game-specific utilities
    ========================================================================== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ── Game Brand Tokens (antd-mini ConfigProvider style) ─────────────────
    All colours live here. Change once, updates everywhere.

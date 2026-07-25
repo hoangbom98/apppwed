@@ -5,7 +5,7 @@ description: Use when the user wants to code, design, debug, set up, scan, or de
 
 # LKVIP Group — Full-Stack Developer Assistant (V2)
 
-You are acting as **Senior Architect & Developer** for the LKVIP Group Platform — a monorepo of 5 independent sub-projects (Hub, Game, Trading, Dating, Sports) plus a shared Admin portal, backed by a single Node.js/Express/TypeScript API and a multi-database MySQL setup.
+You are acting as **Senior Architect & Developer** for the LKVIP Group Platform — a monorepo of 6 independent sub-projects (Hub, Game, Trading, Dating, Sports, Admin Dashboard) plus a shared backend API, built on Node.js 20 / Express 4 / TypeScript 6 with a 6-database MySQL setup.
 
 Always read the relevant reference file before producing code or instructions. All reference files live alongside this `SKILL.md` in `.bob/skills/lkvip-group/reference/`.
 
@@ -19,7 +19,7 @@ Every task — no matter how small — follows these five steps in order. Do not
 Before anything else, check what currently exists:
 - Use `list_files` or `grep` to confirm the relevant module/file exists.
 - If the user types `/scan`, run the full project audit (see the `/scan` section below).
-- Identify any TypeScript errors in affected files using `execute_command` with `npx tsc --noEmit 2>&1 | head -30`.
+- Identify any TypeScript errors in affected files using `execute_command` with `cd apps/backend && npx tsc --noEmit 2>&1 | head -30`.
 
 **Step 2 — Requirement Analysis**
 - Identify which module(s) are affected.
@@ -53,22 +53,22 @@ When the user types `/scan`, execute these commands and produce a structured sta
 
 ```bash
 # Directory structure
-Get-ChildItem source/backend/src -Recurse -Directory | Select-Object FullName
+find apps/backend/src -type d | sort
 
 # Package scripts
-node -e "const p=require('./source/backend/package.json'); console.log(JSON.stringify(p.scripts,null,2))"
+node -e "const p=require('./apps/backend/package.json'); console.log(JSON.stringify(p.scripts,null,2))"
 
 # TypeScript errors
-cd source/backend; npx tsc --noEmit 2>&1 | head -40
+cd apps/backend && npx tsc --noEmit 2>&1 | head -40
 
 # Prisma schemas present
-Get-ChildItem source/backend/prisma -Recurse -Filter schema.prisma | Select-Object FullName
+find apps/backend/prisma -name "schema.prisma"
 
 # Module index files
-Get-ChildItem source/backend/src/modules -Recurse -Filter index.ts | Select-Object FullName
+find apps/backend/src/modules -name "index.ts" | sort
 
 # Frontend SPAs present
-Get-ChildItem source/frontend -Directory | Select-Object Name
+ls apps/
 ```
 
 Format the output as:
@@ -121,7 +121,7 @@ Identify the category, then follow the matching steps. A single request may span
    - Success: `{ success: true, data: T, message?: string }`
    - Error:   `{ success: false, error: { code: string, message: string } }`
 4. All routes must include middleware in order: `authenticate` → `projectAccessGuard` → `rateLimiter`.
-5. Validate inputs with Zod **before** calling any service method.
+5. Validate backend inputs with **Joi** before calling any service method. Frontend forms use **Yup** (with React Hook Form). Do **not** use Zod — it is not in the codebase.
 6. Use Dependency Injection via class constructors — never instantiate dependencies inside a service body.
 7. When implementing a new payment gateway, implement the `PaymentAdapter` interface (see `reference/services.md`).
 
@@ -143,9 +143,9 @@ Identify the category, then follow the matching steps. A single request may span
 ## Category C — Dev Environment (Windows)
 
 1. Read `reference/dev-setup.md` for the full tool list and version requirements.
-2. Confirm Node.js 20+, MySQL 8, Redis 7, and pnpm are installed before proceeding.
-3. Walk through: clone → `.env` setup → create 6 databases → `prisma migrate dev` (all schemas) → `pnpm run dev`.
-4. For `.env` issues, check `DATABASE_URL` format: `mysql://user:pass@127.0.0.1:port/db_name`.
+2. Confirm Node.js 20+, MySQL 8, Redis 7, and pnpm 9+ are installed before proceeding.
+3. Walk through: clone → copy `apps/backend/.env.example` → fill `.env` → create 6 databases → `pnpm run prisma:generate` → `pnpm run prisma:migrate:all` → `pnpm run dev:all`.
+4. For `.env` issues, check `DATABASE_URL` format: `mysql://user:pass@127.0.0.1:3306/db_name?connection_limit=8`.
 
 ---
 
@@ -153,12 +153,12 @@ Identify the category, then follow the matching steps. A single request may span
 
 1. Read `reference/deploy.md` for PM2 ecosystem config, Nginx server blocks, and the GitHub Actions workflow template.
 2. Deployment order:
-   1. SSH to VPS → pull latest → `pnpm install` → `pnpm run build`
-   2. Run all Prisma migrations
-   3. `pm2 reload lkvip-backend`
+   1. SSH to VPS → `cd /var/LKVIP` → `git pull` → `pnpm install` → `pnpm run build:all`
+   2. Run all Prisma migrations: `pnpm run prisma:deploy`
+   3. `pm2 reload lkvip-api --update-env` (process name is `lkvip-api`, not `lkvip-backend`)
    4. `nginx -t && nginx -s reload`
 3. SSL: always use `certbot --nginx` and include all 7 subdomains in one command.
-4. Never hard-code secrets in `ecosystem.config.js` — use `.env.production` outside the repo.
+4. Never hard-code secrets in `ecosystem.config.js` — use a `.env` file at `/var/LKVIP/apps/backend/.env`.
 
 ---
 
@@ -189,16 +189,19 @@ For frontend bugs: check network tab response → TanStack Query cache state →
 | **F1** | Prefer editing an existing file over creating a new one. |
 | **F2** | Maximum 2 new files per feature. If more are needed, split the feature. |
 | **F3** | Every new module must have an `index.ts` that exports its public surface. |
-| **F4** | Every new module must have `validators/` (Zod schemas) and `dto/` (TypeScript interfaces). |
+| **F4** | Every new module must have `validators/` (Joi schemas for backend, Yup for frontend) and `dto/` (TypeScript interfaces). |
 | **F5** | Never create a file without first checking whether a similar file already exists using `grep` or `list_files`. |
 
 ---
 
 ## General Rules (apply to all tasks)
 
-- **TypeScript**: `strict: true`. No `any`. No plain `.js` files in `src/`.
+- **TypeScript**: `strict: true` (TS 6.0.2). No `any`. No plain `.js` files in `src/`.
 - **File names**: kebab-case for files, PascalCase for React components and classes.
 - **No business logic in controllers** — controllers only validate, delegate, and respond.
-- **Prisma clients** are obtained via the factory in `src/config/databases.ts` — never `new PrismaClient()` directly.
-- **Background work** goes to a BullMQ queue — never `setTimeout` for async side-effects.
+- **Prisma clients** are obtained via the factory in `apps/backend/src/config/databases.ts` — never `new PrismaClient()` directly.
+- **Background work** goes to a BullMQ queue (13 workers in `src/modules/workers/`) — never `setTimeout` for async side-effects.
+- **Validation**: backend → **Joi**; frontend forms → **Yup** + React Hook Form. Never suggest Zod.
+- **UI**: all SPAs use **Tailwind CSS v4 + Lucide React**; Admin Dashboard also uses **Ant Design v6**; no Vant UI, no Iconify, no crypto-js.
+- **Linting**: all frontend SPAs use **OXLint** (`oxlint src`), not ESLint. Backend uses ESLint.
 - **Read before editing** — always read the target file before proposing a change. Never speculate about code you have not opened.

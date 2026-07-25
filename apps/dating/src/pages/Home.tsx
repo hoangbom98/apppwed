@@ -9,10 +9,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getHomeData } from '@/api/users';
 import { getStories } from '@/api/stories';
 import { useAuthStore } from '@/store/authStore';
-import { MapPin, Zap, Crown, Users, Star, Heart } from 'lucide-react';
+import { MapPin, Zap, Crown, Users, Star, Heart, Gem } from 'lucide-react';
 import {
   HeartOutlined, GiftOutlined, PlaySquareOutlined, StarFilled,
-  MobileOutlined, TeamOutlined, RocketOutlined, DiamondOutlined,
+  MobileOutlined, TeamOutlined, RocketOutlined,
   FireOutlined, CheckCircleFilled, EnvironmentOutlined, StarOutlined,
   CrownOutlined,
 } from '@ant-design/icons';
@@ -202,7 +202,7 @@ const QUICK_ACTIONS: { icon: React.ReactNode; label: string; path: string }[] = 
   { icon: <MobileOutlined />,     label: 'Shorts',    path: '/shorts' },
   { icon: <TeamOutlined />,       label: 'Cộng đồng', path: '/community' },
   { icon: <RocketOutlined />,     label: 'Sự kiện',   path: '/events' },
-  { icon: <DiamondOutlined />,    label: 'Nạp xu',    path: '/recharge' },
+  { icon: <Gem size={22} />,      label: 'Nạp xu',    path: '/recharge' },
 ];
 
 /* ══════════════════════════════════════════════════════════════════════════

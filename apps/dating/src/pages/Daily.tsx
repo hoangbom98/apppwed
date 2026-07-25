@@ -6,7 +6,7 @@ import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
 import { CheckCircle, Circle, RotateCw } from 'lucide-react';
 import {
-  DollarOutlined, DiamondOutlined, GiftOutlined, StarOutlined,
+  DollarOutlined, GiftOutlined, StarOutlined,
   CloseCircleOutlined, CalendarOutlined, CheckOutlined, PlaySquareOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';

@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getLevel, getAchievements } from '@/api/gamification';
 import PageHeader from '@/components/common/PageHeader';
 import { useAuthStore } from '@/store/authStore';
-import { Zap } from 'lucide-react';
+import { Gem, Medal, Zap } from 'lucide-react';
 import {
-  MedalOutlined, StarOutlined, DiamondOutlined, TrophyOutlined,
+  StarOutlined, TrophyOutlined,
   FireOutlined, HeartOutlined, StarFilled, PlaySquareOutlined,
   CheckOutlined,
 } from '@ant-design/icons';
@@ -38,11 +38,11 @@ export default function Level() {
 
         {/* Badges */}
         <div>
-          <h3 className="font-bold text-gray-900 mb-3"><MedalOutlined /> Huy hiệu</h3>
+          <h3 className="font-bold text-gray-900 mb-3"><Medal size={16} className="inline" /> Huy hiệu</h3>
           <div className="grid grid-cols-4 gap-3">
             {([
               { icon: <StarOutlined />,      name: 'Ngôi sao', desc: 'Lv.5+' },
-              { icon: <DiamondOutlined />,   name: 'Kim cương', desc: 'VIP' },
+              { icon: <Gem size={24} />,     name: 'Kim cương', desc: 'VIP' },
               { icon: <TrophyOutlined />,    name: 'Champion', desc: 'Top 10' },
               { icon: <FireOutlined />,      name: 'Hot', desc: '50 match' },
               { icon: <HeartOutlined />,     name: 'Tình nhân', desc: '100 like' },

@@ -3,9 +3,7 @@
    antd-mini inspired: CSS variable token system + dark mode auto-switch
    Tailwind base + custom hub-* component classes (WAP dark theme)
    ========================================================================== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ── Hub Brand Token Layer (antd-mini style ConfigProvider pattern) ───────
    Override any token at runtime via applyColorConfig() or in app.less.

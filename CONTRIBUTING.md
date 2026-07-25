@@ -1,184 +1,133 @@
 # Contributing to LKVIP Platform
 
-Cảm ơn bạn đã quan tâm đến dự án! Tài liệu này mô tả quy trình đóng góp code để đảm bảo chất lượng và nhất quán.
-
----
-
-## Mục lục
-
-- [Môi trường phát triển](#môi-trường-phát-triển)
-- [Quy tắc branch](#quy-tắc-branch)
-- [Quy tắc commit](#quy-tắc-commit)
-- [Quy trình Pull Request](#quy-trình-pull-request)
-- [Code style](#code-style)
-- [Tests](#tests)
-- [Database schema](#database-schema)
-- [Review checklist](#review-checklist)
-
----
+Quy trình đóng góp cho monorepo LKVIP. Đọc `docs/ONBOARDING.md` và `docs/SETUP.md` trước khi bắt đầu.
 
 ## Môi trường phát triển
 
 ```bash
-# 1. Clone & cd
 git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
-
-# 2. Copy env
-cp .env.example apps/backend/.env
-# Điền JWT_SECRET, DATABASE_URLs...
-
-# 3. Install (pnpm workspace — chạy từ root)
 pnpm install
 
-# 4. Tạo Prisma clients + migrate + seed
-pnpm --filter lkvip-backend run prisma:generate
+cp config/env/.env.example apps/backend/.env
+# Điền env local; không commit hoặc paste secret thật.
+
+pnpm prisma:generate
 pnpm --filter lkvip-backend run prisma:migrate:all
 pnpm --filter lkvip-backend run seed:all
 
-# 5. Chạy backend
 pnpm dev:backend
-# → API: http://localhost:5000
-# → Swagger: http://localhost:5000/api/docs
+pnpm dev:admin
 ```
 
----
-
-## Quy tắc branch
+## Branch và PR
 
 | Tiền tố | Dùng cho | Ví dụ |
-|---------|---------|-------|
-| `feature/` | Tính năng mới | `feature/ops-dashboard` |
+|---------|----------|-------|
+| `feature/` | Tính năng mới | `feature/theme-live-preview` |
 | `fix/` | Sửa lỗi | `fix/auth-token-expiry` |
-| `chore/` | Cấu hình, dependencies, CI | `chore/update-prisma-5.16` |
-| `docs/` | Chỉ thay đổi tài liệu | `docs/api-endpoints` |
-| `refactor/` | Cải thiện code | `refactor/wallet-service` |
+| `docs/` | Tài liệu | `docs/onboarding-standardization` |
+| `chore/` | CI/build/dependency | `chore/update-prisma` |
+| `refactor/` | Refactor không đổi behavior | `refactor/shared-formatters` |
+| `perf/` | Hiệu năng | `perf/reduce-bundle-size` |
 
-**Không push trực tiếp vào `main`.** Tất cả thay đổi phải qua Pull Request.
+`main` là branch deploy production. Không push trực tiếp vào `main`; mở PR và chờ CI/review.
 
-```bash
-git checkout develop
-git checkout -b feature/my-feature
-# ... code ...
-git push origin feature/my-feature
-# Mở PR vào develop trên GitHub
-```
+## Commit
 
----
+Dùng Conventional Commits:
 
-## Quy tắc commit
-
-Dự án dùng **Conventional Commits**:
-
-```
+```text
 <type>(<scope>): <mô tả ngắn>
 ```
 
-| Type | Dùng cho |
-|------|---------|
-| `feat` | Tính năng mới |
-| `fix` | Sửa lỗi |
-| `chore` | Maintenance, CI, build |
-| `docs` | Tài liệu |
-| `refactor` | Refactor code |
-| `test` | Thêm hoặc sửa tests |
-| `perf` | Cải thiện hiệu năng |
+Ví dụ:
 
-**Ví dụ:**
-
+```text
+feat(admin): thêm live preview cấu hình giao diện
+fix(dating): thay icon không tồn tại
+docs: chuẩn hóa onboarding LKVIP
 ```
-feat(admin): thêm trang Operations Dashboard
-fix(auth): xử lý refresh token hết hạn trả về 401
-chore(ci): thêm coverage threshold vào jest config
-```
-
----
-
-## Quy trình Pull Request
-
-1. **Tạo PR vào branch `develop`**, không vào `main`.
-2. **Điền đầy đủ mô tả PR**: tóm tắt thay đổi, lý do, cách test.
-3. **CI phải pass**: lint và tests phải xanh.
-4. **Ít nhất 1 reviewer** phải approve.
-
----
 
 ## Code style
 
-### Backend (TypeScript / Express)
+### Frontend
 
-- Export dùng ES modules hoặc CommonJS theo từng file pattern
-- Response luôn dùng helpers từ `src/shared/utils/response.ts`
-- Không hardcode credentials — dùng `process.env.*`
+- React + TypeScript.
+- Tailwind CSS ưu tiên cho layout/style app H5.
+- Ant Design dùng nhiều ở admin/trading.
+- Icon mới ưu tiên `lucide-react`; `@ant-design/icons` vẫn được dùng ở app/admin hiện hữu.
+- Validation frontend dùng Yup. Không thêm Zod cho phần mới.
 
-### Lint & Format
+### Backend
+
+- Backend nằm tại `apps/backend`.
+- Package/filter: `lkvip-backend`.
+- Prisma schema: `apps/backend/prisma/<project>/schema.prisma`.
+- Response/helper/middleware nên theo pattern hiện có trong `apps/backend/src/shared`.
+- Không hardcode credential, token, API key.
+
+### Shared packages
+
+- UI/hooks dùng chung: `packages/ui`.
+- Types dùng chung: `packages/types`.
+- Helpers pure: `packages/utils`.
+- Constants/enums/project IDs: `packages/constants`.
+
+Không tạo package shared mới nếu bốn package hiện có đủ dùng.
+
+## Checks trước PR
 
 ```bash
-# Từ root /var/LKVIP
-
-# Kiểm tra toàn bộ
 pnpm lint:all
 pnpm typecheck:all
-
-# Backend riêng
-pnpm --filter lkvip-backend run lint
-pnpm --filter lkvip-backend run type-check
-```
-
----
-
-## Tests
-
-Tests backend nằm tại `apps/backend/src/__tests__/`.
-
-```bash
-# Từ root /var/LKVIP
-
-# Chạy tất cả tests
 pnpm test
-
-# Watch mode
-pnpm --filter lkvip-backend run test:watch
-
-# Coverage
-pnpm --filter lkvip-backend run test:coverage
+pnpm build:frontends
+pnpm --filter lkvip-backend run build
 ```
 
-**Quy tắc:**
-- Mock Prisma bằng `jest.fn()` — không cần DB thực để chạy unit tests
-- Thêm test khi bổ sung logic mới vào `shared/utils/` hoặc `shared/services/`
-
----
+Nếu chỉ sửa docs, không cần chạy full build; vẫn cần kiểm tra link/nội dung tài liệu đã đổi.
 
 ## Database schema
 
-Khi thay đổi Prisma schema (`apps/backend/prisma/*/schema.prisma`):
+Khi đổi Prisma schema:
 
-```bash
-cd apps/backend
+1. Sửa đúng schema trong `apps/backend/prisma/<project>/schema.prisma`.
+2. Tạo migration bằng Prisma cho schema tương ứng.
+3. Commit cả schema và migration.
+4. Không dùng `prisma db push` cho staging/production.
+5. Cập nhật docs nếu đổi env/API/luồng dữ liệu.
 
-# 1. Sửa file schema
-# 2. Tạo migration file
-npx prisma migrate dev --schema prisma/admin/schema.prisma --name add_user_field
+## Dependencies
 
-# 3. Commit cả schema + migration file cùng nhau
-git add prisma/admin/schema.prisma prisma/admin/migrations/
-git commit -m "chore(db): thêm model UserSegment vào admin schema"
-```
+- Không thêm dependency mới nếu dependency hiện có giải quyết được.
+- Nếu thêm dependency, nêu rõ lý do trong PR.
+- Ưu tiên dùng catalog trong `pnpm-workspace.yaml` cho version shared.
+- Không xóa dependency chỉ dựa trên depcheck; xác minh import/build/runtime trước.
 
-**Không dùng `prisma db push` trên staging/production** — chỉ dùng `prisma migrate deploy`.
+## Docs checklist
 
----
+Cập nhật tài liệu cùng PR nếu thay đổi:
 
-## Review checklist
+- App path/package/script: `README.md`, `docs/ONBOARDING.md`, `docs/SETUP.md`.
+- Kiến trúc/backend/runtime config: `docs/ARCHITECTURE.md`.
+- API route/response: `docs/API_ENDPOINTS.md`.
+- Deploy/health/domain/PM2/Nginx: `docs/DEPLOYMENT.md`.
+- Scan/tối ưu/shared packages: `docs/CODEBASE_SCAN.md`.
 
-Trước khi tạo PR, kiểm tra:
+## Security checklist
 
-- [ ] `pnpm lint:all` pass, không có warning
-- [ ] `pnpm test` pass
-- [ ] Không commit file `.env` hay bất kỳ secret nào
-- [ ] Không hardcode IP, password, hay API key trong code
-- [ ] Prisma migration đi kèm nếu schema thay đổi
-- [ ] `.env.example` được cập nhật nếu thêm biến môi trường mới
-- [ ] Response dùng helpers, không `res.json()` trực tiếp
-- [ ] `console.log` debug đã được xóa (dùng `logger.debug()` thay thế)
+- [ ] Không commit `.env`, private key, credential, token.
+- [ ] Không paste secret thật vào docs/log/issue/chat.
+- [ ] Không log PII hoặc secrets.
+- [ ] Public endpoint không trả config secret.
+- [ ] Production health/deploy không mở port nội bộ trực tiếp.
+
+## Optimization checklist
+
+Khi refactor giảm trùng lặp:
+
+- [ ] Chạy scan theo `docs/CODEBASE_SCAN.md` nếu phạm vi lớn.
+- [ ] Không đổi behavior UI/API ngoài phạm vi.
+- [ ] Shared extraction chỉ làm khi có reuse thật.
+- [ ] Build/typecheck app bị ảnh hưởng.

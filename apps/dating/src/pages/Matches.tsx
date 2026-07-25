@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMatches, getFavorites, getWhoLikedMe } from '@/api/match';
 import { useAuthStore } from '@/store/authStore';
 import Avatar from '@/components/common/Avatar';
-import { Heart, Eye, Crown } from 'lucide-react';
+import { Heart, Eye, Crown, Star } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
 
 const TABS = [
