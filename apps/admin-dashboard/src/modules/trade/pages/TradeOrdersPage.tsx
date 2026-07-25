@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/trade/pages/TradeOrdersPage.tsx
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';

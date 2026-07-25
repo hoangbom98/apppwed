@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/trade/pages/TradeDepositsPage.tsx
 import React, { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

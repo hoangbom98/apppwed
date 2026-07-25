@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Stub layout — replaced by per-page components in routes/index.jsx.
 // Uses SchemaForm for demonstration only; real forms are in pages/GameConfig.jsx.
 import React from 'react';

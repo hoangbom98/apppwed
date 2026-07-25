@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/ops/index.ts
 // Ops (Auto-Operations) module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';

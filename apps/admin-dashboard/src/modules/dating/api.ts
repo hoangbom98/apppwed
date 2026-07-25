@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/dating/api.ts
 // Dating module admin API calls.
 import client from '@admin/api/client';

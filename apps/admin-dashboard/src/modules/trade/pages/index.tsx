@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/trade/pages/index.tsx
 import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';

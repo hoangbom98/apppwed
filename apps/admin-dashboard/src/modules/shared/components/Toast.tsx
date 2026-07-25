@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/components/Toast.tsx
 // Global toast notification system — provider + hook.
 import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';

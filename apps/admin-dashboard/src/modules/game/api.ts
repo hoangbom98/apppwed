@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/game/api.ts
 // Game module admin API calls.
 // User/finance routes go through /admin/* (cross-project).

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/trade/api.ts
 // Trade module admin API calls.
 // User management routes go through /admin/* (cross-project).

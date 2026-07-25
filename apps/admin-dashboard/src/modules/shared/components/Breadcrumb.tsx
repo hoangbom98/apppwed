@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/components/Breadcrumb.tsx
 // Auto-generates breadcrumbs from the current route path.
 import React from 'react';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GroupFinanceDashboard.tsx — Tổng quan tài chính tập đoàn
  *

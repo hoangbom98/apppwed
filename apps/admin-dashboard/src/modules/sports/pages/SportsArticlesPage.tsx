@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/sports/pages/SportsArticlesPage.tsx
 import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';

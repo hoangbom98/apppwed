@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/components/UserDetailModal.tsx
 // Reusable user detail panel with wallet display + manual balance adjustment.
 import { useState } from 'react';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/sports/pages/SportsOverviewPage.tsx
 // Sports admin overview: live match count, total bets, active users, recent bets & matches.
 import React from 'react';

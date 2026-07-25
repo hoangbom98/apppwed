@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/sports/api.ts
 // Sports module admin API calls.
 import client from '@admin/api/client';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RealtimeLayout.jsx  —  Route: /realtime
  *

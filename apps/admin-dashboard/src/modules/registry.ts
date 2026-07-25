@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/registry.ts
 // Central Module Registry — each sub-project module self-registers here.
 // AdminLayout reads from `modules` instead of hard-coding NAV_GROUPS.

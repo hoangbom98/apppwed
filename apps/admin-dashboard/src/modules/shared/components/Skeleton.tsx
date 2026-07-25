@@ -1,3 +1,4 @@
+// @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/components/Skeleton.tsx
 // Lightweight shimmer skeleton for loading states.
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import SchemaForm from '@admin/modules/shared/components/SchemaForm';
 

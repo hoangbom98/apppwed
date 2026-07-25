@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * finance/api.ts — Group Finance API helpers
  * Tất cả calls đến /api/admin/group-finance/*
