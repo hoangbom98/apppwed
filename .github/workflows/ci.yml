@@ -49,8 +49,8 @@ jobs:
       - name: TypeScript typecheck
         run: pnpm type-check
 
-      - name: Unit tests
-        run: pnpm test --ci --forceExit
+      - name: Unit tests + coverage
+        run: pnpm test --ci --forceExit --coverage
         env:
           NODE_ENV: test
           JWT_SECRET: test-secret-key-minimum-32-characters-long
@@ -63,6 +63,14 @@ jobs:
           SPORTS_DATABASE_URL: mysql://test:test@localhost:3306/sports_test
           ADMIN_DATABASE_URL: mysql://test:test@localhost:3306/admin_test
           REDIS_URL: redis://localhost:6379
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/backend/coverage/
+          retention-days: 7
 
   # ── Frontend: typecheck + build (per SPA) ───────────────────────────────────
   frontend:

@@ -17,6 +17,23 @@ const updateSetting = Joi.object({
   note:  Joi.string().max(500).optional().allow(''),
 });
 
+const bulkUpsertSettings = Joi.object({
+  settings: Joi.array().items(
+    Joi.object({
+      key:         Joi.string().max(150).required(),
+      value:       Joi.any().required(),
+      group:       Joi.string().max(60).optional(),
+      description: Joi.string().max(500).optional().allow('', null),
+    })
+  ).min(1).max(200).required(),
+});
+
+const testIntegration = Joi.object({
+  key:    Joi.string().max(150).required(),
+  value:  Joi.string().allow('').required(),
+  chatId: Joi.string().optional().allow('', null),
+});
+
 const createAnnouncement = Joi.object({
   title:     Joi.string().min(5).max(300).required(),
   content:   Joi.string().min(10).required(),
@@ -40,4 +57,4 @@ const batchUpdateUsers = Joi.object({
   reason:  Joi.string().max(500).optional().allow(''),
 });
 
-module.exports = { updateSetting, createAnnouncement, updateGameConfig, batchUpdateUsers };
+module.exports = { updateSetting, createAnnouncement, updateGameConfig, batchUpdateUsers, bulkUpsertSettings, testIntegration };

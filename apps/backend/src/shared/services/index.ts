@@ -13,17 +13,21 @@
  */
 
 module.exports = {
-  aiService: require('./aiService'),
-  currencyService: require('./currencyService'),          // ← Multi-currency engine
+  aiService: require('./aiService'),                    // ← Groq + DeepSeek + OpenAI
+  avatarService: require('./avatarService'),            // ← Dicebear default avatars
+  contentModerationService: require('./contentModerationService'), // ← Perspective API
+  currencyService: require('./currencyService'),        // ← Multi-currency engine
   analyticsService: require('./analyticsService'),      // ← Tầng 6: cross-project analytics
-  archiveService: require('./archiveService'),        // ← Tầng 2: cold storage
+  archiveService: require('./archiveService'),          // ← Tầng 2: cold storage
   auditService: require('./auditService'),
   authService: require('./authService'),
   bannerService: require('./bannerService'),
   cacheService: require('./cacheService'),
   configService: require('./configService'),
+  emailGuardService: require('./emailGuardService'),    // ← Disify disposable email filter
   emailService: require('./emailService'),
   exportService: require('./exportService'),
+  ipGuardService: require('./ipGuardService'),          // ← AbuseIPDB + ipapi.co geo
   kycService: require('./kycService'),
   logger: require('./logger'),
   loyaltyService: require('./loyaltyService'),
@@ -33,14 +37,15 @@ module.exports = {
   queueService: require('./queueService'),
   referralService: require('./referralService'),
   riskService: require('./riskService'),
-  sessionService: require('./sessionService'),        // ← Redis-backed sessions
+  sessionService: require('./sessionService'),          // ← Redis-backed sessions
   smsService: require('./smsService'),
   socketService: require('./socketService'),
   storageAdapter: require('./storageAdapter'),
   supportChatService: require('./supportChatService'),
   supportService: require('./supportService'),
+  telegramAlertService: require('./telegramAlertService'), // ← Telegram admin alerts
   ticketService: require('./ticketService'),
-  transactionService: require('./transactionService'),    // ← Prisma $transaction helper
+  transactionService: require('./transactionService'),  // ← Prisma $transaction helper
   translationService: require('./translationService'),
   twoFactorService: require('./twoFactorService'),
   uploadService: require('./uploadService'),

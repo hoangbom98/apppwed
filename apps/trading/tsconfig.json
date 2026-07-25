@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.frontend.base.json",
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*":              ["./src/*"],
       "@ui":              ["../../packages/ui/src/index.ts"],
@@ -10,5 +11,6 @@
       "@lkvip/constants": ["../../packages/constants/dist/index.d.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

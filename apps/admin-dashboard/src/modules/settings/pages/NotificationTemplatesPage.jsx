@@ -2,6 +2,7 @@
 // Route: /settings/notification-tpl
 // Quản lý template nội dung thông báo (Telegram + Email)
 import React from 'react';
+import DOMPurify from 'dompurify';
 import {
   App, Card, Tabs, Form, Input, Select, Switch, Button,
   Alert, Space, Tag, Spin, Typography, Divider,
@@ -141,7 +142,7 @@ function TemplateEditor({ tpl, onSaved }) {
         >
           <pre
             style={{ whiteSpace: 'pre-wrap', fontSize: 13, color: '#e2e8f0', margin: 0 }}
-            dangerouslySetInnerHTML={{ __html: contentValue }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentValue ?? '') }}
           />
         </Card>
       )}

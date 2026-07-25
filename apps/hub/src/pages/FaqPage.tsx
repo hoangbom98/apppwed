@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 const FAQS = [
   {
-    q: 'OKVIP Hub là gì?',
-    a: 'OKVIP Hub là cổng thông tin tổng hợp cung cấp danh sách games, websites, công cụ hữu ích và tin tức được cập nhật liên tục.',
+    q: 'LKVIP Hub là gì?',
+    a: 'LKVIP Hub là cổng thông tin tổng hợp cung cấp danh sách games, websites, công cụ hữu ích và tin tức được cập nhật liên tục.',
   },
   {
     q: 'Tôi cần đăng ký tài khoản không?',

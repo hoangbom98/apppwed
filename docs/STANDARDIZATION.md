@@ -1,52 +1,83 @@
-# 📋 STANDARDIZATION.md — LKVIP GROUP
+# LKVIP Standardization
 
-> Trạng thái: **Đã chuẩn hóa** · Cập nhật lần cuối: 2026-07-24
-> Cấu trúc: Monorepo dựa trên `pnpm workspace` — apps tại `apps/`, shared libraries tại `packages/`.
-
----
+Trạng thái: chuẩn hóa theo pnpm monorepo hiện tại.
 
 ## 1. Nguyên tắc cốt lõi
 
-1. **Separation of Concerns**: Runnable apps (`apps/`), shared libraries (`packages/`), infrastructure configs (`config/`), và runtime data (`data/`) phải được tách biệt hoàn toàn.
-2. **Zero Hardcoded Paths**: Tuyệt đối không hardcode đường dẫn tuyệt đối. Sử dụng biến môi trường.
-3. **Automated Scripts**: Mọi thao tác vận hành phải thông qua Node.js CLI (trong `scripts/`) thay vì Shell script tuỳ tiện.
+1. Runnable apps nằm trong `apps/`.
+2. Shared libraries nằm trong `packages/`.
+3. Infrastructure config nằm trong `config/`.
+4. Runtime data/logs nằm trong `data/` và `logs/`.
+5. Lệnh dev/build/check chạy từ root `/var/LKVIP` bằng pnpm workspace.
+6. Không dùng Docker làm workflow chuẩn của dự án.
+7. Không thêm dependency mới nếu dependency hiện có giải quyết được.
+8. Khi đổi app/package/script/API/deploy, cập nhật docs canonical cùng PR.
 
-## 2. Cấu trúc thư mục chuẩn
+## 2. Cấu trúc chuẩn
 
 ```text
 /var/LKVIP/
-├── apps/               # Tất cả runnable applications (pnpm workspace)
-│   ├── backend/        # Express API — lkvip-backend
-│   ├── hub/            # Hub Portal — @lkvip/hub
-│   ├── game/           # Game Center — @lkvip/game
-│   ├── dating/         # Dating App — @lkvip/dating
-│   ├── trading/        # Trade Platform — @lkvip/trade
-│   ├── sports/         # Sports Betting — @lkvip/sports
-│   └── admin-dashboard/# Admin Portal — @lkvip/admin
-├── packages/           # Shared libraries (pnpm workspace)
-│   ├── constants/      # @lkvip/constants — enums, error codes, project IDs
-│   ├── shared-types/   # @lkvip/types — TypeScript interfaces
-│   ├── shared-ui/      # @lkvip/ui — React components, hooks, PWA utils
-│   ├── shared-utils/   # @lkvip/utils — helper functions
-│   └── mobile/         # @lkvip/mobile — Capacitor iOS/Android
-├── config/             # Infrastructure (Nginx, Database init, Monitoring)
-├── data/               # Runtime data (uploads, cache) — gitignored
-├── logs/               # PM2 log output — gitignored
-├── scripts/            # Root CLI scripts
-├── docs/               # Documentation
-└── .gitignore          # Chặn /data/, /logs/, /node_modules/, .env
+├── apps/
+│   ├── backend/              # lkvip-backend
+│   ├── hub/                  # @lkvip/hub
+│   ├── game/                 # @lkvip/game
+│   ├── trading/              # @lkvip/trade
+│   ├── dating/               # @lkvip/dating
+│   ├── sports/               # @lkvip/sports
+│   ├── admin-dashboard/      # @lkvip/admin
+│   └── mobile/               # @lkvip/mobile
+├── packages/
+│   ├── ui/                   # @lkvip/ui
+│   ├── types/                # @lkvip/types
+│   ├── utils/                # @lkvip/utils
+│   └── constants/            # @lkvip/constants
+├── config/
+├── docs/
+├── scripts/
+├── data/
+└── logs/
 ```
 
-## 3. Quy tắc workspace
+## 3. Workspace rules
 
-- `pnpm-workspace.yaml` khai báo: `packages/*` và `apps/*` (trừ `_template`)
-- Tất cả lệnh pnpm chạy **từ root** `/var/LKVIP` — không `cd` vào subdirectory trừ khi cần thiết
-- Lock file (`pnpm-lock.yaml`) nằm **tại root** — commit vào git
+- Workspace source of truth: `pnpm-workspace.yaml`.
+- Root scripts source of truth: `package.json`.
+- App folder `apps/trading` maps to package `@lkvip/trade`.
+- Backend package name is `lkvip-backend`.
+- Lockfile `pnpm-lock.yaml` stays at repo root.
 
-## 4. Quy chuẩn phát triển
+## 4. Shared code placement
 
-- **Backend**: TypeScript + Express + Prisma. Mỗi module có schema Prisma riêng tại `apps/backend/prisma/<module>/schema.prisma`.
-- **Frontend**: React 19 + Vite + TailwindCSS. Cấu trúc SPA với `views/`, `components/`, `api/`, `store/`, `hooks/`.
-- **Communication**: Tất cả API gọi qua `api.domain.com` (hoặc `localhost:5000` trong dev).
-- **Security**: AES-256-CBC encryption cho data nhạy cảm (PII), JWT cho authentication.
-- **Shared code**: Đặt trong `packages/` — không duplicate logic giữa các apps.
+| Loại | Vị trí chuẩn |
+|------|--------------|
+| UI component/hook React dùng chung | `packages/ui` |
+| Pure helper/formatter/validator helper | `packages/utils` |
+| Type/interface shared FE/BE | `packages/types` |
+| Project IDs/enums/config keys/constants | `packages/constants` |
+
+Chỉ đưa code vào shared khi có reuse thật. Ba đoạn giống nhau chưa đủ nếu behavior khác nhau.
+
+## 5. Công nghệ chuẩn
+
+- React + Vite + TypeScript cho frontend.
+- Tailwind CSS + Ant Design.
+- Lucide React ưu tiên cho icon mới; `@ant-design/icons` vẫn tồn tại trong app/admin.
+- Yup cho frontend validation, Joi cho backend validation.
+- Express + Prisma + MySQL + Redis + BullMQ + Socket.IO cho backend.
+
+Không dùng Vant UI, Iconify, Zod cho phần mới.
+
+## 6. Docs canonical
+
+| Chủ đề | File chuẩn |
+|--------|------------|
+| Người mới | `docs/ONBOARDING.md` |
+| Setup local | `docs/SETUP.md` |
+| Kiến trúc | `docs/ARCHITECTURE.md` |
+| API | `docs/API_ENDPOINTS.md` |
+| Deploy | `docs/DEPLOYMENT.md` |
+| Scan/tối ưu | `docs/CODEBASE_SCAN.md` |
+| Ứng phó sự cố | `docs/INCIDENT_RESPONSE.md` |
+| Đóng góp | `CONTRIBUTING.md` |
+
+Tránh duy trì nhiều docs có cùng nội dung. Nếu cần giữ file cũ vì link ngoài, biến thành stub trỏ về file canonical.

@@ -148,9 +148,9 @@ Public app đọc config non-secret qua:
 
 Khi kiểm tra local, backend phải chạy trước. Nếu endpoint lỗi 500, kiểm tra `apps/backend/.env`, Redis, DB, Prisma clients.
 
-## 8. Docker
+## 8. Không dùng Docker
 
-Docker local chưa được chuẩn hóa làm đường chính trong repo hiện tại. Ưu tiên setup trực tiếp bằng MySQL/Redis local và pnpm workspace scripts ở trên.
+Docker không phải workflow chuẩn của LKVIP. Ưu tiên setup trực tiếp bằng MySQL/Redis local và pnpm workspace scripts ở trên.
 
 ## 9. Lỗi phổ biến
 

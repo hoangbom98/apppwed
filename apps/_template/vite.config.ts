@@ -11,10 +11,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@':          path.resolve(__dirname, './src'),
-      // shared-ui — source-direct, no build step
-      '@ui':        path.resolve(__dirname, '../shared-ui'),
-      // shared TypeScript types — source-direct via tsconfig paths
-      '@lkvip/types': path.resolve(__dirname, '../../shared-types/src'),
+      // @lkvip/ui — shared UI package, source-direct via packages/ui
+      '@ui':          path.resolve(__dirname, '../../packages/ui/src'),
+      // @lkvip/types — shared types package, source-direct
+      '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
       // Force peer deps to resolve from THIS SPA's node_modules.
       // This prevents React/Zustand/Axios from being duplicated when
       // shared-ui imports them.

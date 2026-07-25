@@ -1,24 +1,36 @@
 // @ts-nocheck
 /* eslint-disable */
 
-const { hashPassword, comparePassword, generateTokens } = require('../../../shared/services/authService');
+const { hashPassword, comparePassword, generateTokens, checkNewPassword } = require('../../../shared/services/authService');
 const { success, created, error, unauthorized } = require('../../../shared/utils/response');
+const emailGuard     = require('../../../shared/services/emailGuardService');
+const ipGuard        = require('../../../shared/services/ipGuardService');
+const auditService   = require('../../../shared/services/auditService');
+const sessionService = require('../../../shared/services/sessionService');
 
 exports.register = async (req, res) => {
   try {
     const { email, password, fullName, phone, referralCode } = req.body;
     if (!email || !password) return error(res, 'Email và password là bắt buộc');
+
+    // ── NIST SP 800-63B: password policy ──────────────────────────────────
+    const pwError = await checkNewPassword(password);
+    if (pwError) return error(res, pwError, 400);
+
+    const [emailCheck, ipCheck] = await Promise.all([
+      emailGuard.checkEmail(email),
+      ipGuard.checkIp(req.ip || req.headers['x-forwarded-for']),
+    ]);
+    if (emailCheck.blocked) return error(res, emailCheck.reason, 400);
+    if (ipCheck.blocked)    return error(res, 'Yêu cầu bị từ chối', 403);
+
     if (await req.prisma.user.findUnique({ where: { email } })) return error(res, 'Email đã tồn tại');
 
-    // Resolve referrer by referralCode (derived as md5(userId).slice(0,8).toUpperCase())
+    // Resolve referrer by referralCode — stored directly on user record (OWASP A04: removed MD5)
     let referrerId = null;
     if (referralCode) {
-      const crypto = require('crypto');
-      const allUsers = await req.prisma.user.findMany({ select: { id: true } });
-      for (const u of allUsers) {
-        const code = crypto.createHash('md5').update(u.id).digest('hex').slice(0, 8).toUpperCase();
-        if (code === referralCode.toUpperCase()) { referrerId = u.id; break; }
-      }
+      const ref = await req.prisma.user.findFirst({ where: { referralCode: referralCode.toUpperCase() } });
+      if (ref) referrerId = ref.id;
     }
 
     // Resolve register bonus from SystemConfig
@@ -85,6 +97,9 @@ exports.register = async (req, res) => {
     }
 
     const tokens = generateTokens({ id: user.id, email: user.email, role: user.role, project: 'trade' });
+    await sessionService.create('trade', user.id, { ip: req.ip, ua: req.get('user-agent'), role: user.role });
+    await sessionService.bindRefreshToken('trade', user.id, tokens.refresh_token);
+    auditService.logSecurity({ project: 'trade', userId: user.id, event: 'register', ip: req.ip, ua: req.get('user-agent'), meta: { email } });
     return created(res, { user: { id: user.id, email: user.email, fullName: user.fullName }, ...tokens });
   } catch (e) { return error(res, e.message, 500); }
 };
@@ -93,9 +108,15 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await req.prisma.user.findUnique({ where: { email } });
-    if (!user || !(await comparePassword(password, user.password))) return unauthorized(res, 'Sai thông tin đăng nhập');
+    if (!user || !(await comparePassword(password, user.password))) {
+      auditService.logSecurity({ project: 'trade', userId: null, event: 'login_failed', ip: req.ip, ua: req.get('user-agent'), meta: { email } });
+      return unauthorized(res, 'Sai thông tin đăng nhập');
+    }
     if (user.status !== 'active') return unauthorized(res, 'Tài khoản bị khóa');
     const tokens = generateTokens({ id: user.id, email: user.email, role: user.role, project: 'trade' });
+    await sessionService.create('trade', user.id, { ip: req.ip, ua: req.get('user-agent'), role: user.role });
+    await sessionService.bindRefreshToken('trade', user.id, tokens.refresh_token);
+    auditService.logSecurity({ project: 'trade', userId: user.id, event: 'login_success', ip: req.ip, ua: req.get('user-agent'), meta: {} });
     return success(res, { user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, ...tokens });
   } catch (e) { return error(res, e.message, 500); }
 };
@@ -131,16 +152,26 @@ exports.refresh = async (req, res) => {
     const { refresh_token } = req.body;
     if (!refresh_token) return unauthorized(res, 'Thiếu refresh token');
     const payload = verifyRefreshToken(refresh_token);
-    // Re-validate user status in DB — prevents banned/suspended users from refreshing
+    const tokenValid = await sessionService.verifyRefreshToken('trade', payload.id, refresh_token);
+    if (!tokenValid) return unauthorized(res, 'Refresh token đã bị thu hồi');
     const user = await req.prisma.user.findUnique({
       where:  { id: payload.id },
       select: { id: true, email: true, role: true, status: true },
     });
     if (!user || user.status !== 'active') return unauthorized(res, 'Tài khoản không hợp lệ hoặc đã bị khóa');
     const tokens  = generateTokens({ id: user.id, email: user.email, role: user.role, project: 'trade' });
+    await sessionService.revokeRefreshToken('trade', user.id);
+    await sessionService.bindRefreshToken('trade', user.id, tokens.refresh_token);
     return success(res, tokens);
   } catch (e) { return unauthorized(res, 'Refresh token không hợp lệ hoặc đã hết hạn'); }
 };
 
 // ── Logout ────────────────────────────────────────────────────────
-exports.logout = async (_req, res) => success(res, null, 'Đăng xuất thành công');
+exports.logout = async (req, res) => {
+  if (req.user?.id) {
+    await sessionService.revokeRefreshToken('trade', req.user.id).catch(() => {});
+    await sessionService.destroy('trade', req.user.id).catch(() => {});
+    auditService.logSecurity({ project: 'trade', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+  }
+  return success(res, null, 'Đăng xuất thành công');
+};

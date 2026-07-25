@@ -93,7 +93,7 @@ export default function HomePage() {
               poster="/assets/png/bg-banner.png"
             />
             <div className="hub-banner-overlay">
-              <h1 className="hub-banner-title">OKVIP HUB</h1>
+              <h1 className="hub-banner-title">LKVIP HUB</h1>
               <p className="hub-banner-sub">Cổng giải trí hàng đầu Việt Nam</p>
               <div className="hub-banner-btns">
                 <button onClick={() => navigate('/games')}
@@ -251,7 +251,7 @@ export default function HomePage() {
                     <img src={img} alt={`Tin tức ${i + 1}`} className="hub-news-img" loading="lazy" />
                     <div className="hub-news-body">
                       <p className="hub-news-title">Tin tức nổi bật #{i + 1}</p>
-                      <p className="hub-news-summary">Cập nhật tin tức mới nhất từ OKVIP...</p>
+                      <p className="hub-news-summary">Cập nhật tin tức mới nhất từ LKVIP...</p>
                     </div>
                   </button>
                 ))
@@ -265,7 +265,7 @@ export default function HomePage() {
           <div className="hub-cta-text">
             <p className="hub-cta-title flex items-center gap-2">
               <Smartphone size={16} />
-              Tải App OKVIP
+              Tải App LKVIP
             </p>
             <p className="hub-cta-sub">Android APK · iOS Enterprise · Tự động nhận diện</p>
           </div>

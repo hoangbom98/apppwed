@@ -1,4 +1,4 @@
-# Database Reference — LKVIP Group
+# Database Reference — LKVIP Group  (updated: 2027-01 standardization)
 
 ## Multi-Database Setup
 
@@ -12,6 +12,17 @@ Six MySQL 8 databases, one per domain. Each has its own Prisma 5 schema file und
 | `trade_db` | `prisma/trade/schema.prisma` | Investment packages, orders, price data |
 | `dating_db`| `prisma/dating/schema.prisma`| Profiles, matches, messages |
 | `sports_db`| `prisma/sports/schema.prisma`| Events, odds, bet slips |
+
+## Financial Data Standards (MANDATORY)
+
+| Concern | Standard | Rationale |
+|---|---|---|
+| **Money & balances** | `DECIMAL(19,4)` | Eliminates floating-point rounding errors; 19 digits prevents overflow on large VND sums |
+| **Crypto/high-precision qty** | `DECIMAL(19,8)` | Used in trade_db Order/Position quantity fields |
+| **Timestamps** | `DateTime @default(now())` → `@db.Timestamp(6)` | Use `TIMESTAMP(6)` for microsecond precision on financial events |
+| **Wallet Optimistic Lock** | `version Int @default(0)` on every Wallet/User balance table | Prevents race conditions on concurrent balance writes; always `WHERE version = $old AND id = $id` |
+| **Transaction Idempotency** | `referenceId @unique` on every Transaction table | Prevents double-charge from network retries; DB-level guarantee |
+| **String enums** | Import from `@lkvip/constants` | Never use raw literals |
 
 ### Read Replica & Sharding
 

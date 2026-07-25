@@ -87,6 +87,21 @@ router.use('/', supportRoutes);
 // ── Shared: Push Notifications ────────────────────────────────────
 router.use('/', require('../../../shared/routes/push.routes'));
 
+// ── Core: Referral (shared) ───────────────────────────────────────
+router.use('/', require('../../../shared/routes/referral.routes'));
+
+// ── Core: Loyalty (shared) ───────────────────────────────────────
+router.use('/', require('../../../shared/routes/loyalty.routes'));
+
+// ── Core: Affiliate (shared) ─────────────────────────────────────
+router.use('/', require('../../../shared/routes/affiliate.routes'));
+
+// ── Core: Leaderboard (shared) ───────────────────────────────────
+router.use('/', require('../../../shared/routes/leaderboard.routes'));
+
+// ── Core: Marketing Campaigns (admin, shared) ─────────────────────
+router.use('/', require('../../../shared/routes/campaign.routes'));
+
 // ── App Catalog (public — reads from admin_db, no auth required) ───
 router.get('/app-catalog',   httpCache(300), appCatalogCtrl.publicList);
 

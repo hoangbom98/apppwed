@@ -2,7 +2,8 @@ import { Worker } from 'bullmq';
 import { redis } from '../../utils/redis';
 import { logger } from '../../shared/logger';
 
-const { getPrismaClient } = require('../../config/databases');
+const { getPrismaClient }   = require('../../config/databases');
+const tg                    = require('../../shared/services/telegramAlertService');
 const prisma = getPrismaClient('admin');
 
 // Worker chạy định kỳ để quét gian lận
@@ -29,11 +30,10 @@ export const fraudWorker = new Worker(
           },
         });
         logger.warn(`User ${user.id} auto-locked. Fraud score: ${fraudScore}`);
-        // TODO: Gửi alert cho admin
+        await tg.alertFraud({ userId: user.id, amount: 'N/A', score: fraudScore, project: 'admin' });
       } else if (fraudScore >= 50) {
-        // Gửi cảnh báo cho admin
         logger.info(`User ${user.id} has high fraud risk. Score: ${fraudScore}`);
-        // TODO: Gửi alert cho admin
+        await tg.alertWithLevel('MEDIUM', 'High Fraud Risk', { 'User ID': user.id, Score: fraudScore });
       }
     }
   },

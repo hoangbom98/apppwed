@@ -1,5 +1,5 @@
 /**
- * GamesPage — nâng cấp theme OKVIP
+ * GamesPage — nâng cấp theme LKVIP
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';

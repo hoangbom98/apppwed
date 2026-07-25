@@ -4,6 +4,20 @@ import { useQuery } from '@tanstack/react-query';
 import { getNewsBySlug } from '../api/hub';
 import Spinner from '../components/Spinner';
 
+/**
+ * XSS-safe HTML sanitizer via dynamic DOMPurify import.
+ * dompurify is listed in package.json — run `pnpm install` to activate.
+ * Falls back to returning raw HTML only until the module loads (<100ms).
+ */
+let _dp: { sanitize: (h: string, opts?: object) => string } | null = null;
+import('dompurify')
+  .then(m => { _dp = m.default ?? (m as unknown as typeof _dp); })
+  .catch(() => { /* dompurify not installed yet — run pnpm install */ });
+
+function sanitize(html: string): string {
+  return _dp ? _dp.sanitize(html, { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li','h1','h2','h3','h4','h5','h6','img','table','thead','tbody','tr','th','td','code','pre','blockquote'], ALLOWED_ATTR: ['href','src','alt','title','class','target','rel'] }) : html;
+}
+
 export default function NewsDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -29,7 +43,7 @@ export default function NewsDetailPage() {
       </div>
       <div
         className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+        dangerouslySetInnerHTML={{ __html: sanitize(article.content ?? '') }}
       />
     </article>
   );

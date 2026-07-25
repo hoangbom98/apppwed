@@ -161,4 +161,19 @@ router.patch('/admin/reports/:id',    auth, adminGuard, auditLogger, adminCtrl.u
 router.get('/admin/live',             auth, adminGuard, adminCtrl.listLive);
 router.delete('/admin/live/:id',      auth, adminGuard, auditLogger, adminCtrl.deleteLive);
 
+// ── Core: Referral (shared) ───────────────────────────────────────
+router.use('/', require('../../../shared/routes/referral.routes'));
+
+// ── Core: Loyalty (shared) ───────────────────────────────────────
+router.use('/', require('../../../shared/routes/loyalty.routes'));
+
+// ── Core: Affiliate (shared) ─────────────────────────────────────
+router.use('/', require('../../../shared/routes/affiliate.routes'));
+
+// ── Core: Leaderboard (shared) ───────────────────────────────────
+router.use('/', require('../../../shared/routes/leaderboard.routes'));
+
+// ── Core: Marketing Campaigns (admin, shared) ─────────────────────
+router.use('/', require('../../../shared/routes/campaign.routes'));
+
 module.exports = router;

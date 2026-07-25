@@ -1,226 +1,168 @@
-# Operations Guide — KJC Platform v2.0
+# Operations Guide — LKVIP
 
----
+Runbook vận hành production trên VPS native. Không dùng Docker.
 
-## 1. SLA & Uptime Targets
+## 1. Mục tiêu vận hành
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Uptime | 99.9% | ≤ 8.7 giờ downtime/năm |
-| API Response (p95) | < 500ms | Cho endpoints authenticated |
-| API Response (p95) | < 200ms | Cho health check, login |
-| RTO (Recovery Time Objective) | < 4 giờ | Thời gian phục hồi sau sự cố |
-| RPO (Recovery Point Objective) | < 24 giờ | Mất dữ liệu tối đa |
-| Backup Frequency | Daily (2 AM) | Tự động, giữ 30 bản |
+| Metric | Target |
+|--------|--------|
+| Uptime production | 99.9% |
+| API p95 | < 500ms |
+| Health/login p95 | < 200ms |
+| RTO | < 4 giờ |
+| RPO | < 24 giờ |
+| Backup | Hàng ngày, giữ theo policy hiện hành |
 
----
+## 2. Incident severity
 
-## 2. On-call Runbook
+| Cấp độ | Mô tả | Response |
+|--------|-------|----------|
+| P1 | Production down, API/DB unreachable | < 15 phút |
+| P2 | Chức năng chính lỗi: login/payment/config/deploy | < 1 giờ |
+| P3 | Chậm, lỗi một phần, regression nhỏ | < 4 giờ |
+| P4 | Typo/cosmetic/docs | < 1 ngày |
 
-### Incident Severity Levels
-
-| Cấp độ | Mô tả | Ví dụ | Response SLA |
-|--------|-------|-------|--------------|
-| **P1 — Critical** | Production down hoàn toàn | Server crash, DB unreachable | < 15 phút |
-| **P2 — High** | Feature chính không hoạt động | Login fail, payment stuck | < 1 giờ |
-| **P3 — Medium** | Ảnh hưởng một phần | Slow API, minor UI bug | < 4 giờ |
-| **P4 — Low** | Cosmetic, không ảnh hưởng user | Text typo, minor display | < 1 ngày |
-
-### P1 Response Checklist
+## 3. P1 checklist
 
 ```bash
-# 1. Kiểm tra process status
 pm2 status
-
-# 2. Kiểm tra logs gần nhất
-pm2 logs kjc-api --lines 100
-
-# 3. Kiểm tra resources
-free -h && df -h && top -bn1 | head -20
-
-# 4. Kiểm tra MySQL
+pm2 logs lkvip-api --lines 100
+free -h
+df -h
+ss -tlnp
+redis-cli ping
 mysql -u root -p -e "SHOW STATUS LIKE 'Threads_connected';"
-
-# 5. Kiểm tra Redis
-redis-cli ping && redis-cli info | grep used_memory_human
-
-# 6. Restart nếu cần
-pm2 reload ecosystem.config.js --update-env
-
-# 7. Nếu không phục hồi — rollback
-cd /var/LKVIP
-git log --oneline -5
-# git reset --hard <previous-commit>
+curl -sf http://127.0.0.1:5000/health
 ```
 
----
-
-## 3. Security Patch Schedule
-
-| Loại | Tần suất | Quy trình |
-|------|----------|-----------|
-| **Critical security patch** (CVE HIGH/CRITICAL) | Trong 24 giờ | Hot-fix branch → test → deploy ngay |
-| **Dependencies update** (`npm audit`) | Hàng tuần (Thứ 2) | PR → CI → review → merge → deploy |
-| **Minor feature / bug fix** | Bi-weekly | PR → CI → staging → production |
-| **Major version** | Quarterly | RFC → testing period 2 tuần → deploy |
-
-### Kiểm tra security hàng tuần
+Nếu backend không healthy:
 
 ```bash
-cd apps/backend
-
-# Kiểm tra vulnerabilities
-npm audit
-
-# Tự động fix các lỗi không breaking
-npm audit fix
-
-# Xem chi tiết
-npm audit --audit-level=moderate
+pm2 reload lkvip-api --update-env
+pm2 logs lkvip-api --lines 100
 ```
 
----
+Trước mọi rollback/destructive git command, kiểm tra trạng thái và xác nhận phạm vi ảnh hưởng.
 
-## 4. Log Management
+## 4. Logs
 
-### Vị trí logs
+| Log | Vị trí |
+|-----|--------|
+| PM2 app | `pm2 logs lkvip-api` |
+| Project logs | `/var/LKVIP/logs/` |
+| Nginx access/error | `/var/log/nginx/` |
+| MySQL slow log | `/var/log/mysql/` nếu bật |
+| Admin audit | `admin_db.audit_logs` |
+| Security logs | `admin_db.security_logs` |
 
-| Log | Đường dẫn | Retention |
-|-----|-----------|-----------|
-| Application (PM2) | `./logs/combined.log` | 30 ngày |
-| Error | `./logs/error.log` | 90 ngày |
-| Audit log (DB) | `admin_db.audit_logs` | 90 ngày (auto-clean) |
-| Security log (DB) | `admin_db.security_logs` | 30 ngày (auto-clean) |
-| Nginx access | `/var/log/nginx/access.log` | 14 ngày (logrotate) |
-| MySQL slow query | `/var/log/mysql/slow.log` | 7 ngày |
-
-### Xem logs thường dùng
+Lệnh thường dùng:
 
 ```bash
-# Xem logs realtime
-pm2 logs kjc-api
-
-# Xem logs lỗi
-pm2 logs kjc-api --err --lines 50
-
-# Tìm lỗi trong log file
-grep "ERROR" ./logs/error.log | tail -50
-
-# Audit logs của admin (qua API)
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:5000/api/admin/logs/audit?limit=50
-```
-
----
-
-## 5. Database Maintenance
-
-### Kiểm tra health MySQL
-
-```bash
-# Connections đang active
-mysql -u root -p -e "SHOW PROCESSLIST;"
-
-# Table sizes
-mysql -u root -p -e "
-SELECT table_name, ROUND(data_length/1024/1024, 2) AS 'Data (MB)',
-       ROUND(index_length/1024/1024, 2) AS 'Index (MB)'
-FROM information_schema.tables
-WHERE table_schema = 'game_db'
-ORDER BY data_length DESC LIMIT 20;"
-
-# Slow queries (cần enable slow query log)
-tail -n 100 /var/log/mysql/slow.log
-```
-
-### Backup thủ công khẩn cấp
-
-```bash
-# Backup ngay lập tức
-cd /var/LKVIP/apps/backend
-npm run backup
-
-# Hoặc mysqldump trực tiếp
-mysqldump -u root -p --all-databases | gzip > /tmp/emergency-backup-$(date +%Y%m%d-%H%M).sql.gz
-```
-
-### Restore từ backup
-
-```bash
-# Restore một database cụ thể
-mysql -u root -p game_db < /path/to/backup.sql
-
-# Restore tất cả (dùng script)
-cd apps/backend
-npm run restore -- --file=./backups/backup-YYYY-MM-DD.sql.gz
-```
-
----
-
-## 6. Performance Monitoring
-
-### Key metrics cần theo dõi
-
-| Metric | Ngưỡng cảnh báo | Hành động |
-|--------|-----------------|-----------|
-| CPU > 80% kéo dài > 5 phút | Warning | Scale PM2 instances |
-| Memory > 85% | Warning | Restart PM2, kiểm tra leak |
-| MySQL connections > 80% max | Warning | Tăng `max_connections` |
-| Redis memory > 80% | Warning | Review eviction policy |
-| Disk usage > 80% | Warning | Xóa logs cũ, cleanup |
-| Error rate > 5% | Alert | Kiểm tra logs ngay |
-| Response time p95 > 1s | Alert | Kiểm tra slow queries |
-
-### Xem health system
-
-```bash
-# PM2 monitor (realtime CPU/RAM)
+pm2 logs lkvip-api --lines 100
 pm2 monit
+tail -f /var/LKVIP/logs/lkvip-api-out.log
+```
 
-# Node.js memory snapshot
-pm2 logs kjc-api | grep health_snapshot
+## 5. Health và metrics
 
-# Redis info
-redis-cli info stats | grep -E 'total_commands|instantaneous_ops'
+```bash
+curl -sf http://127.0.0.1:5000/health
+curl -sf https://api.tc-gaming.live/health
+curl -sf http://127.0.0.1:5000/metrics
+```
 
-# MySQL connections
+Health deploy chỉ OK khi JSON có `status: "healthy"`.
+
+## 6. Database maintenance
+
+```bash
+mysql -u root -p -e "SHOW PROCESSLIST;"
 mysql -u root -p -e "SHOW STATUS LIKE 'Max_used_connections';"
 ```
 
----
+Schema paths:
 
-## 7. Rolling Update (Zero-downtime)
-
-```bash
-# PM2 reload — không có downtime (cluster mode)
-pm2 reload ecosystem.config.js --update-env
-
-# Kiểm tra sau reload
-pm2 status
-curl http://localhost:5000/health/live
-
-# Nếu reload fail — restart hard
-pm2 restart kjc-api
+```text
+apps/backend/prisma/hub/schema.prisma
+apps/backend/prisma/game/schema.prisma
+apps/backend/prisma/trade/schema.prisma
+apps/backend/prisma/dating/schema.prisma
+apps/backend/prisma/sports/schema.prisma
+apps/backend/prisma/admin/schema.prisma
 ```
 
----
+Migrations production:
 
-## 8. User Support & Complaint Handling
+```bash
+pnpm prisma:deploy
+```
 
-### Quy trình xử lý khiếu nại
+Không dùng `prisma db push` trên staging/production.
 
-1. User gửi ticket qua hệ thống → `support_tickets` table trong admin_db
-2. Admin nhận thông báo → xem tại `/api/admin/support/tickets`
-3. Admin phản hồi qua hệ thống → cập nhật status: `open` → `in_progress` → `resolved`
-4. SLA phản hồi: P1 < 2h, P2 < 8h, P3 < 24h
+## 7. Deploy operations
 
-### Admin actions audit
+Canonical deploy docs: `docs/DEPLOYMENT.md`.
 
-Mọi hành động của admin (approve/reject giao dịch, thay đổi setting, khóa user) đều được ghi vào `audit_logs` với:
-- `adminId` — ai thực hiện
-- `action` — hành động gì
-- `resource` — tác động lên đối tượng nào
-- `ipAddress` — IP của admin
-- `createdAt` — thời điểm
+```bash
+sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh
+sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh --backend-only
+sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh --frontend-only
+```
 
-Xem audit log tại: `GET /api/admin/logs/audit`
+Sau deploy:
+
+```bash
+pm2 status
+curl -sf https://api.tc-gaming.live/health
+curl -fsSIL https://admin.tc-gaming.live/
+```
+
+## 8. Monitoring thresholds
+
+| Metric | Cảnh báo | Hành động |
+|--------|----------|-----------|
+| CPU > 80% kéo dài | Warning | Xem PM2/top, kiểm tra traffic |
+| Memory > 85% | Warning | Kiểm tra leak/OOM, PM2 memory restart |
+| Disk > 80% | Warning | Dọn logs/cache/backups cũ an toàn |
+| MySQL connections > 80% max | Warning | Xem slow query/pool |
+| Redis memory > 80% | Warning | Review cache/queue |
+| Error rate > 5% | Alert | Xem PM2/Nginx/backend logs |
+| p95 > 1s | Alert | Xem DB latency, cache, external APIs |
+
+## 9. Security operations
+
+- Không paste secret thật vào logs/docs/chat.
+- `.env` production chmod `600`.
+- Không expose MySQL/Redis/backend port trực tiếp public.
+- Public config API chỉ trả non-secret config.
+- Khi đổi CORS/domain/deploy health, cập nhật `docs/DEPLOYMENT.md`.
+
+## 10. Backup & Restore
+
+```bash
+# Chạy backup thủ công (chạy như user lkvip)
+sudo -u lkvip bash /var/LKVIP/scripts/backup.sh
+
+# Test khả năng restore từ backup gần nhất (không ảnh hưởng production)
+sudo -u lkvip bash /var/LKVIP/scripts/backup.sh --restore-test
+
+# Xem log backup
+tail -50 /var/LKVIP/logs/backup.log
+```
+
+Crontab backup tự động (`sudo -u lkvip crontab -l`):
+
+```text
+0 2 * * *   bash /var/LKVIP/scripts/backup.sh >> /var/LKVIP/logs/backup.log 2>&1
+0 3 * * 0   bash /var/LKVIP/scripts/backup.sh --restore-test >> /var/LKVIP/logs/backup.log 2>&1
+```
+
+Backup lưu tại `/var/LKVIP/.backups/<YYYY-MM-DD>/`, giữ 7 ngày. Thông báo qua Telegram khi backup hoàn tất hoặc thất bại (cần `TELEGRAM_BOT_TOKEN` + `TELEGRAM_ALERT_CHAT_ID` trong `.env`).
+
+## 11. Incident Response
+
+Khi có sự cố production, làm theo `docs/INCIDENT_RESPONSE.md`.
+
+## 12. Support và audit
+
+Admin actions cần có audit trail trong `admin_db.audit_logs`. Support tickets/complaints xử lý qua admin module nếu tính năng tương ứng đang bật.

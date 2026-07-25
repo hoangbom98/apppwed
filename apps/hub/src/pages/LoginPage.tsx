@@ -1,5 +1,5 @@
 /**
- * LoginPage — theme OKVIP tối, logo gif
+ * LoginPage — theme LKVIP tối, logo gif
  */
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -8,10 +8,25 @@ import { useAuthStore } from '@/store/authStore';
 import * as hubApi from '@/api/hub';
 import toast from 'react-hot-toast';
 
+/** Validate redirect URL to prevent open-redirect attacks (OWASP A01) */
+function safeRedirect(raw: string | null): string {
+  const target = raw ?? '/';
+  // Only allow same-origin relative paths (must start with /)
+  if (!target.startsWith('/') || target.startsWith('//')) return '/';
+  try {
+    // Reject anything that resolves to a different origin
+    const resolved = new URL(target, window.location.origin);
+    if (resolved.origin !== window.location.origin) return '/';
+    return target;
+  } catch {
+    return '/';
+  }
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
+  const redirect = safeRedirect(searchParams.get('redirect'));
   const { setAuth } = useAuthStore();
 
   const [email,    setEmail]    = useState('');
@@ -25,9 +40,9 @@ export default function LoginPage() {
     try {
       const res = await hubApi.login({ email, password });
       const d   = res.data;
+      // setAuth handles token storage through the shared @ui store
+      // Do NOT store JWT in localStorage — setAuth uses the secure store
       setAuth(d.user, d.access_token, d.refresh_token);
-      localStorage.setItem('hub_access_token',  d.access_token);
-      localStorage.setItem('hub_refresh_token', d.refresh_token);
       toast.success('Đăng nhập thành công!');
       navigate(redirect);
     } catch (err: any) {
@@ -43,10 +58,10 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="/assets/gif/header-logo.gif" alt="OKVIP Logo"
+          <img src="/assets/gif/header-logo.gif" alt="LKVIP Logo"
             style={{ height: 48, margin: '0 auto 12px' }}
             onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 4px' }}>OKVIP Hub</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 4px' }}>LKVIP Hub</h1>
           <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>Đăng nhập tài khoản</p>
         </div>
 

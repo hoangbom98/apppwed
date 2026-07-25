@@ -36,7 +36,7 @@ model User {
   status          String    @default("active") @db.VarChar(20)
   tradingFrozen   Boolean   @default(false)    // isjy — freeze trading only
   memberLevel     Int       @default(1)        // VIP membership level 1-10
-  integral        Decimal   @default(0) @db.Decimal(18, 2)  // points balance
+  integral        Decimal   @default(0) @db.Decimal(19, 4)  // points balance
   referralCode    String?   @unique @db.VarChar(20)         // user's own referral code
   lastLogin       DateTime?
   createdAt       DateTime  @default(now())
@@ -166,11 +166,11 @@ model Order {
   side        String   @db.VarChar(10)
   // market | limit | stop_loss | take_profit | trailing_stop
   type        String   @db.VarChar(30)
-  price       Decimal  @db.Decimal(18, 8)
-  quantity    Decimal  @db.Decimal(18, 8)
-  executedQty Decimal  @default(0) @db.Decimal(18, 8)
-  avgPrice    Decimal? @db.Decimal(18, 8)
-  stopPrice   Decimal? @db.Decimal(18, 8)
+  price       Decimal   @db.Decimal(19, 8)
+  quantity    Decimal   @db.Decimal(19, 8)
+  executedQty Decimal   @default(0) @db.Decimal(19, 8)
+  avgPrice    Decimal?  @db.Decimal(19, 8)
+  stopPrice   Decimal?  @db.Decimal(19, 8)
   leverage    Int      @default(1)
   // pending | partial | filled | cancelled | expired | rejected
   status      String   @default("pending") @db.VarChar(20)
@@ -227,8 +227,9 @@ model Wallet {
   id        String   @id @default(cuid())
   userId    String   @unique @db.VarChar(30)
   user      User     @relation(fields: [userId], references: [id])
-  balance   Decimal  @default(0) @db.Decimal(18, 2)
-  frozen    Decimal  @default(0) @db.Decimal(18, 2)   // locked in open orders/positions
+  balance   Decimal  @default(0) @db.Decimal(19, 4)
+  frozen    Decimal  @default(0) @db.Decimal(19, 4)   // locked in open orders/positions
+  version   Int      @default(0)                       // Optimistic lock — increment on every balance write
   currency  String   @default("USD") @db.VarChar(10)
   updatedAt DateTime @updatedAt
 
@@ -243,9 +244,9 @@ model Withdrawal {
   id          String    @id @default(cuid())
   userId      String    @db.VarChar(30)
   user        User      @relation(fields: [userId], references: [id])
-  amount      Decimal   @db.Decimal(18, 2)
-  fee         Decimal   @default(0) @db.Decimal(18, 2)
-  netAmount   Decimal   @db.Decimal(18, 2)
+  amount      Decimal   @db.Decimal(19, 4)
+  fee         Decimal   @default(0) @db.Decimal(19, 4)
+  netAmount   Decimal   @db.Decimal(19, 4)
   // bank | usdt | skrill | neteller | wire
   method      String    @db.VarChar(30)
   address     String?   @db.VarChar(200)
@@ -298,14 +299,14 @@ model Transaction {
   id            String   @id @default(cuid())
   userId        String   @db.VarChar(30)
   user          User     @relation(fields: [userId], references: [id])
-  amount        Decimal  @db.Decimal(18, 2)
+  amount        Decimal  @db.Decimal(19, 4)
   // deposit | withdraw | trade_open | trade_close | fee | bonus | referral
   type          String   @db.VarChar(30)
-  referenceId   String?  @db.VarChar(30)
+  referenceId   String?  @unique @db.VarChar(30)    // Idempotency key — unique per external transaction
   referenceType String?  @db.VarChar(30)
   note          String?  @db.VarChar(500)
-  balanceBefore Decimal  @default(0) @db.Decimal(18, 2)
-  balanceAfter  Decimal  @db.Decimal(18, 2)
+  balanceBefore Decimal  @default(0) @db.Decimal(19, 4)
+  balanceAfter  Decimal  @db.Decimal(19, 4)
   createdAt     DateTime @default(now())
 
   @@index([userId, type])
@@ -567,7 +568,7 @@ model FileUpload {
 model Deposit {
   id          String    @id @default(cuid())
   userId      String    @db.VarChar(30)
-  amount      Decimal   @db.Decimal(18, 2)
+  amount      Decimal   @db.Decimal(19, 4)
   method      String    @db.VarChar(30)       // bank | usdt | momo | qr
   txHash      String?   @db.VarChar(200)       // crypto tx hash
   proof       String?   @db.VarChar(500)       // uploaded screenshot
@@ -596,8 +597,8 @@ model InvestmentPackage {
   id           String   @id @default(cuid())
   name         String   @db.VarChar(100)
   description  String?  @db.Text
-  minAmount    Decimal  @default(0) @db.Decimal(18, 2)
-  maxAmount    Decimal  @default(0) @db.Decimal(18, 2)   // 0 = unlimited
+  minAmount    Decimal  @default(0) @db.Decimal(19, 4)
+  maxAmount    Decimal  @default(0) @db.Decimal(19, 4)   // 0 = unlimited
   dailyProfit  Decimal  @db.Decimal(8, 4)                // % per day
   duration     Int                                         // days
   totalSlots   Int      @default(0)                       // 0 = unlimited
@@ -622,8 +623,8 @@ model Investment {
   id          String            @id @default(cuid())
   userId      String            @db.VarChar(30)
   packageId   String            @db.VarChar(30)
-  amount      Decimal           @db.Decimal(18, 2)
-  profitPaid  Decimal           @default(0) @db.Decimal(18, 2)
+  amount      Decimal           @db.Decimal(19, 4)
+  profitPaid  Decimal           @default(0) @db.Decimal(19, 4)
   startDate   DateTime          @default(now())
   endDate     DateTime
   lastPaidAt  DateTime?
@@ -651,7 +652,7 @@ model InvestmentSchedule {
   investmentId String     @db.VarChar(30)
   investment   Investment @relation(fields: [investmentId], references: [id])
   dueDate      DateTime
-  amount       Decimal    @db.Decimal(18, 2)
+  amount       Decimal    @db.Decimal(19, 4)
   paidAt       DateTime?
   // pending | paid | skipped
   status       String     @default("pending") @db.VarChar(20)
@@ -686,7 +687,7 @@ model CommissionLog {
   id         String    @id @default(cuid())
   userId     String    @db.VarChar(30)     // earner
   fromUserId String    @db.VarChar(30)     // activity source
-  amount     Decimal   @db.Decimal(18, 2)
+  amount     Decimal   @db.Decimal(19, 4)
   level      Int                            // 1 or 2
   // investment | trade
   source     String    @db.VarChar(30)
@@ -784,8 +785,8 @@ model YuebaoProduct {
   description  String?  @db.Text
   interestRate Decimal  @db.Decimal(8, 4)   // % per annum or per term
   days         Int                            // term length in days
-  minAmount    Decimal  @db.Decimal(18, 2)
-  maxAmount    Decimal  @default(0) @db.Decimal(18, 2)  // 0 = unlimited
+  minAmount    Decimal  @db.Decimal(19, 4)
+  maxAmount    Decimal  @default(0) @db.Decimal(19, 4)  // 0 = unlimited
   stars        Int      @default(0)           // display rating 1-5
   // active | inactive | deleted
   status       String   @default("active") @db.VarChar(20)
@@ -808,8 +809,8 @@ model YuebaoInvestment {
   user        User          @relation(fields: [userId], references: [id])
   productId   String        @db.VarChar(30)
   product     YuebaoProduct @relation(fields: [productId], references: [id])
-  amount      Decimal       @db.Decimal(18, 2)
-  profitPaid  Decimal       @default(0) @db.Decimal(18, 2)
+  amount      Decimal       @db.Decimal(19, 4)
+  profitPaid  Decimal       @default(0) @db.Decimal(19, 4)
   startDate   DateTime      @default(now())
   endDate     DateTime
   settledAt   DateTime?
@@ -832,11 +833,11 @@ model MiningMachine {
   title       String   @db.VarChar(100)
   description String?  @db.Text
   image       String?  @db.VarChar(500)
-  price       Decimal  @db.Decimal(18, 2)    // purchase price / deposit
+  price       Decimal  @db.Decimal(19, 4)    // purchase price / deposit
   totalStock  Int      @default(0)            // 0 = unlimited
   stock       Int      @default(0)            // remaining stock
-  dayIncome   Decimal  @db.Decimal(18, 2)     // daily income per unit
-  cost        Decimal  @default(0) @db.Decimal(18, 2)  // daily operating cost
+  dayIncome   Decimal  @db.Decimal(19, 4)     // daily income per unit
+  cost        Decimal  @default(0) @db.Decimal(19, 4)  // daily operating cost
   duration    Int      @default(0)            // days (0 = indefinite)
   perUserLimit Int     @default(0)            // 0 = unlimited
   // active | inactive | deleted
@@ -861,9 +862,9 @@ model MiningInvestment {
   machineId String        @db.VarChar(30)
   machine   MiningMachine @relation(fields: [machineId], references: [id])
   quantity  Int           @default(1)
-  deposit   Decimal       @db.Decimal(18, 2)   // collateral returned on completion
-  dayIncome Decimal       @db.Decimal(18, 2)   // daily income snapshot
-  profitPaid Decimal      @default(0) @db.Decimal(18, 2)
+  deposit   Decimal       @db.Decimal(19, 4)   // collateral returned on completion
+  dayIncome Decimal       @db.Decimal(19, 4)   // daily income snapshot
+  profitPaid Decimal      @default(0) @db.Decimal(19, 4)
   startDate DateTime      @default(now())
   endDate   DateTime?
   lastPaidAt DateTime?
@@ -886,8 +887,8 @@ model Voucher {
   code       String    @unique @db.VarChar(30)
   // fixed | percent
   type       String    @default("fixed") @db.VarChar(20)
-  amount     Decimal   @db.Decimal(18, 2)    // discount amount or %
-  minPurchase Decimal  @default(0) @db.Decimal(18, 2)
+  amount     Decimal   @db.Decimal(19, 4)    // discount amount or %
+  minPurchase Decimal  @default(0) @db.Decimal(19, 4)
   maxUses    Int       @default(1)
   usedCount  Int       @default(0)
   expiresAt  DateTime?
@@ -922,7 +923,7 @@ model PrizeConfig {
   name      String    @db.VarChar(100)
   // cash | physical | points
   type      String    @default("cash") @db.VarChar(20)
-  amount    Decimal   @default(0) @db.Decimal(18, 2)
+  amount    Decimal   @default(0) @db.Decimal(19, 4)
   odds      Decimal   @db.Decimal(8, 4)   // probability 0-100
   sortOrder Int       @default(0)
   isActive  Boolean   @default(true)
@@ -990,7 +991,7 @@ model NewsArticle {
   views       Int       @default(0)
   // published | draft | hidden
   status      String    @default("published") @db.VarChar(20)
-  readReward  Decimal   @default(0) @db.Decimal(18, 2)  // reward for reading
+  readReward  Decimal   @default(0) @db.Decimal(19, 4)  // reward for reading
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -1006,7 +1007,7 @@ model NewsViewLog {
   articleId String      @db.VarChar(30)
   article   NewsArticle @relation(fields: [articleId], references: [id])
   userId    String      @db.VarChar(30)
-  reward    Decimal     @default(0) @db.Decimal(18, 2)
+  reward    Decimal     @default(0) @db.Decimal(19, 4)
   viewedAt  DateTime    @default(now())
 
   @@unique([articleId, userId])   // one reward per article per user
@@ -1023,11 +1024,11 @@ model ShopItem {
   title       String   @db.VarChar(100)
   description String?  @db.Text
   image       String?  @db.VarChar(500)
-  points      Decimal  @db.Decimal(18, 2)   // integral cost
+  points      Decimal  @db.Decimal(19, 4)   // integral cost
   stock       Int      @default(0)           // 0 = unlimited
   // physical | cash | coupon
   type        String   @default("physical") @db.VarChar(20)
-  cashValue   Decimal  @default(0) @db.Decimal(18, 2)  // if type=cash
+  cashValue   Decimal  @default(0) @db.Decimal(19, 4)  // if type=cash
   sortOrder   Int      @default(0)
   status      String   @default("active") @db.VarChar(20)
   createdAt   DateTime @default(now())
@@ -1044,7 +1045,7 @@ model ShopOrder {
   user      User     @relation(fields: [userId], references: [id])
   itemId    String   @db.VarChar(30)
   item      ShopItem @relation(fields: [itemId], references: [id])
-  points    Decimal  @db.Decimal(18, 2)
+  points    Decimal  @db.Decimal(19, 4)
   quantity  Int      @default(1)
   // pending | delivered | cancelled
   status    String   @default("pending") @db.VarChar(20)

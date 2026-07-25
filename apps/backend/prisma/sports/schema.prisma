@@ -36,11 +36,12 @@ model User {
   // vi | en | zh
   preferredLang String   @default("vi") @db.VarChar(10)
   // Wallet balance (direct on user, mirrors game_db pattern)
-  balance       Decimal  @default(0) @db.Decimal(18, 2)
-  frozen        Decimal  @default(0) @db.Decimal(18, 2)
-  totalDeposit  Decimal  @default(0) @db.Decimal(18, 2)
-  totalBet      Decimal  @default(0) @db.Decimal(18, 2)
-  totalWin      Decimal  @default(0) @db.Decimal(18, 2)
+  balance       Decimal  @default(0) @db.Decimal(19, 4)
+  frozen        Decimal  @default(0) @db.Decimal(19, 4)
+  version       Int      @default(0)                     // Optimistic lock — increment on every balance write
+  totalDeposit  Decimal  @default(0) @db.Decimal(19, 4)
+  totalBet      Decimal  @default(0) @db.Decimal(19, 4)
+  totalWin      Decimal  @default(0) @db.Decimal(19, 4)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -292,13 +293,13 @@ model BetSlip {
   user         User     @relation(fields: [userId], references: [id])
   // single | accumulator | system
   type         String   @default("single") @db.VarChar(20)
-  stake        Decimal  @db.Decimal(18, 2)
-  potentialWin Decimal  @db.Decimal(18, 2)
+  stake        Decimal  @db.Decimal(19, 4)
+  potentialWin Decimal  @db.Decimal(19, 4)
   totalOdds    Decimal  @db.Decimal(10, 4)
   // pending | won | lost | void | partial_void | cashout
   status       String   @default("pending") @db.VarChar(20)
-  actualPayout Decimal  @default(0) @db.Decimal(18, 2)
-  cashoutValue Decimal? @db.Decimal(18, 2)
+  actualPayout Decimal  @default(0) @db.Decimal(19, 4)
+  cashoutValue Decimal? @db.Decimal(19, 4)
   settledAt    DateTime?
   note         String?  @db.VarChar(500)
   createdAt    DateTime @default(now())
@@ -630,10 +631,10 @@ model Transaction {
   // deposit | withdraw | withdraw_request | bet | win | refund | bonus | adjustment
   // aggregator_transfer_out | aggregator_transfer_in | aggregator_transfer_rollback
   type          String   @db.VarChar(50)
-  amount        Decimal  @db.Decimal(18, 2)
-  balanceBefore Decimal  @default(0) @db.Decimal(18, 2)
-  balanceAfter  Decimal  @default(0) @db.Decimal(18, 2)
-  referenceId   String?  @db.VarChar(100)
+  amount        Decimal  @db.Decimal(19, 4)
+  balanceBefore Decimal  @default(0) @db.Decimal(19, 4)
+  balanceAfter  Decimal  @default(0) @db.Decimal(19, 4)
+  referenceId   String?  @unique @db.VarChar(100)         // Idempotency key — unique per external transaction
   referenceType String?  @db.VarChar(50)
   note          String?  @db.VarChar(500)
   metadata      Json?
@@ -651,7 +652,7 @@ model DepositOrder {
   user        User     @relation(fields: [userId], references: [id])
   // bank | momo | zalopay | vnpay
   method      String   @db.VarChar(30)
-  amount      Decimal  @db.Decimal(18, 2)
+  amount      Decimal  @db.Decimal(19, 4)
   currency    String   @default("VND") @db.VarChar(10)
   // pending | completed | rejected | expired
   status      String   @default("pending") @db.VarChar(20)
@@ -670,7 +671,7 @@ model WithdrawOrder {
   id          String   @id @default(cuid())
   userId      String   @db.VarChar(30)
   user        User     @relation(fields: [userId], references: [id])
-  amount      Decimal  @db.Decimal(18, 2)
+  amount      Decimal  @db.Decimal(19, 4)
   currency    String   @default("VND") @db.VarChar(10)
   bankName    String?  @db.VarChar(100)
   bankAccount String?  @db.VarChar(50)
@@ -891,8 +892,8 @@ model Promotion {
   description String?  @db.Text
   // lucky_money | bonus | freebet | rebate | deposit_bonus
   type        String   @db.VarChar(30)
-  value       Decimal  @db.Decimal(18, 2)
-  minBet      Decimal? @db.Decimal(18, 2)   // Min stake to qualify
+  value       Decimal  @db.Decimal(19, 4)
+  minBet      Decimal? @db.Decimal(19, 4)   // Min stake to qualify
   maxClaim    Int      @default(1)           // Max claims per user
   // active | inactive | expired
   isActive    Boolean  @default(true)
@@ -915,7 +916,7 @@ model PromotionClaim {
   promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   userId      String    @db.VarChar(30)
   user        User      @relation(fields: [userId], references: [id])
-  amount      Decimal   @db.Decimal(18, 2)
+  amount      Decimal   @db.Decimal(19, 4)
   // pending | approved | rejected
   status      String    @default("approved") @db.VarChar(20)
   claimedAt   DateTime  @default(now())

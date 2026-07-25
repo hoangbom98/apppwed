@@ -131,3 +131,25 @@ Khi refactor giảm trùng lặp:
 - [ ] Không đổi behavior UI/API ngoài phạm vi.
 - [ ] Shared extraction chỉ làm khi có reuse thật.
 - [ ] Build/typecheck app bị ảnh hưởng.
+
+## Backup cron setup (DevOps)
+
+Sau khi deploy lần đầu hoặc setup VPS mới, cài đặt cron backup tự động:
+
+```bash
+# Đăng nhập với user lkvip
+sudo -u lkvip crontab -e
+
+# Thêm dòng sau — chạy backup lúc 2:00 AM mỗi ngày
+0 2 * * * bash /var/LKVIP/scripts/backup.sh >> /var/LKVIP/logs/backup.log 2>&1
+
+# Chạy restore test hàng tuần (Chủ nhật 3:00 AM) để verify backup khả dụng
+0 3 * * 0 bash /var/LKVIP/scripts/backup.sh --restore-test >> /var/LKVIP/logs/backup.log 2>&1
+```
+
+Đặt `TELEGRAM_BOT_TOKEN` và `TELEGRAM_ALERT_CHAT_ID` trong `apps/backend/.env` để nhận thông báo backup qua Telegram.
+
+## Incident Response
+
+Khi xảy ra sự cố production, làm theo `docs/INCIDENT_RESPONSE.md`.
+Ghi lại mọi sự cố vào `docs/incidents/YYYY-MM-DD-<slug>.md` sau khi xử lý xong.

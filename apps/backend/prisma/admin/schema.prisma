@@ -303,8 +303,9 @@ model Wallet {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   currency  String   @default("VND") @db.VarChar(10)
-  balance   Decimal  @default(0)  @db.Decimal(18,2)
-  frozen    Decimal  @default(0)  @db.Decimal(18,2)
+  balance   Decimal  @default(0)  @db.Decimal(19,4)
+  frozen    Decimal  @default(0)  @db.Decimal(19,4)
+  version   Int      @default(0)                      // Optimistic lock — increment on every balance write
   updatedAt DateTime @updatedAt
 
   transactions Transaction[]
@@ -322,10 +323,10 @@ model Transaction {
   wallet        Wallet   @relation(fields: [walletId], references: [id])
   type          String   @db.VarChar(30)    // deposit|withdraw|transfer|bonus|commission|payment|refund|bet|win|fee|interest|rebate
   source        String   @default("HUB")   @db.VarChar(20)   // GAME|SPORTS|TRADE|DATING|HUB|ADMIN|SYSTEM
-  amount        Decimal  @db.Decimal(18,2)
-  fee           Decimal  @default(0) @db.Decimal(18,2)
+  amount        Decimal  @db.Decimal(19,4)
+  fee           Decimal  @default(0) @db.Decimal(19,4)
   status        String   @default("pending") @db.VarChar(20)
-  referenceId   String?  @db.VarChar(60)
+  referenceId   String?  @unique @db.VarChar(60)              // Idempotency key — unique per external transaction
   referenceType String?  @db.VarChar(30)
   description   String?  @db.VarChar(500)
   createdAt     DateTime @default(now())
@@ -351,9 +352,9 @@ model FeeConfig {
   txType      String    @db.VarChar(20)    // BET|WIN|WITHDRAW|DEPOSIT
   feeType     String    @db.VarChar(20)    // PERCENTAGE|FIXED
   value       Decimal   @db.Decimal(8,4)   // e.g. 2.5000 for 2.5% or 50000 for fixed VND
-  minAmount   Decimal?  @db.Decimal(18,2)  // minimum transaction amount to apply fee
-  maxAmount   Decimal?  @db.Decimal(18,2)  // maximum transaction amount to apply fee
-  maxFee      Decimal?  @db.Decimal(18,2)  // cap on the fee itself
+  minAmount   Decimal?  @db.Decimal(19,4)  // minimum transaction amount to apply fee
+  maxAmount   Decimal?  @db.Decimal(19,4)  // maximum transaction amount to apply fee
+  maxFee      Decimal?  @db.Decimal(19,4)  // cap on the fee itself
   isActive    Boolean   @default(true)
   startDate   DateTime?
   endDate     DateTime?
@@ -370,10 +371,10 @@ model FeeConfig {
 model ProjectBalance {
   id          String   @id @default(cuid())
   source      String   @unique @db.VarChar(20)  // GAME|SPORTS|TRADE|DATING|HUB
-  balance     Decimal  @default(0) @db.Decimal(18,2)  // net position (negative = in debt to group)
-  totalBet    Decimal  @default(0) @db.Decimal(18,2)
-  totalWin    Decimal  @default(0) @db.Decimal(18,2)
-  totalFee    Decimal  @default(0) @db.Decimal(18,2)
+  balance     Decimal  @default(0) @db.Decimal(19,4)  // net position (negative = in debt to group)
+  totalBet    Decimal  @default(0) @db.Decimal(19,4)
+  totalWin    Decimal  @default(0) @db.Decimal(19,4)
+  totalFee    Decimal  @default(0) @db.Decimal(19,4)
   updatedAt   DateTime @updatedAt
 
   @@map("project_balances")
@@ -383,12 +384,12 @@ model ProjectBalance {
 model InternalLoan {
   id           String    @id @default(cuid())
   source       String    @db.VarChar(20)    // borrowing project
-  amount       Decimal   @db.Decimal(18,2)  // principal borrowed
+  amount       Decimal   @db.Decimal(19,4)  // principal borrowed
   interestRate Decimal   @db.Decimal(7,4)   // daily rate e.g. 0.0005 = 0.05%/day
   startDate    DateTime  @default(now())
   endDate      DateTime?
   status       String    @default("ACTIVE") @db.VarChar(20)  // ACTIVE|PAID
-  totalInterest Decimal  @default(0) @db.Decimal(18,2)
+  totalInterest Decimal  @default(0) @db.Decimal(19,4)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -402,9 +403,9 @@ model FeeLog {
   userId      String   @db.VarChar(30)
   source      String   @db.VarChar(20)    // GAME|SPORTS|TRADE|DATING|HUB
   txType      String   @db.VarChar(20)    // BET|WIN|WITHDRAW
-  grossAmount Decimal  @db.Decimal(18,2)
-  feeAmount   Decimal  @db.Decimal(18,2)
-  netAmount   Decimal  @db.Decimal(18,2)
+  grossAmount Decimal  @db.Decimal(19,4)
+  feeAmount   Decimal  @db.Decimal(19,4)
+  netAmount   Decimal  @db.Decimal(19,4)
   referenceId String?  @db.VarChar(60)
   createdAt   DateTime @default(now())
 
@@ -439,7 +440,7 @@ model DepositOrder {
   user        User      @relation(fields: [userId], references: [id])
   gatewayId   String
   gateway     PaymentGateway @relation(fields: [gatewayId], references: [id])
-  amount      Decimal   @db.Decimal(18,2)
+  amount      Decimal   @db.Decimal(19,4)
   currency    String    @default("VND") @db.VarChar(10)
   status      String    @default("pending") @db.VarChar(20)
   txId        String?   @db.VarChar(255)
@@ -461,7 +462,7 @@ model WithdrawOrder {
   user        User      @relation(fields: [userId], references: [id])
   gatewayId   String
   gateway     PaymentGateway @relation(fields: [gatewayId], references: [id])
-  amount      Decimal   @db.Decimal(18,2)
+  amount      Decimal   @db.Decimal(19,4)
   currency    String    @default("VND") @db.VarChar(10)
   address     String?   @db.VarChar(500)
   bankInfo    Json?
@@ -485,8 +486,8 @@ model InternalTransfer {
   toUserId   String
   fromWallet String
   toWallet   String
-  amount     Decimal  @db.Decimal(18,2)
-  fee        Decimal  @default(0) @db.Decimal(18,2)
+  amount     Decimal  @db.Decimal(19,4)
+  fee        Decimal  @default(0) @db.Decimal(19,4)
   status     String   @default("pending") @db.VarChar(20)
   note       String?  @db.Text
   createdAt  DateTime @default(now())
@@ -644,7 +645,7 @@ model Referral {
   referee       User     @relation("Referee",  fields: [refereeId],  references: [id])
   sourceProject String?  @db.VarChar(20)
   status        String   @default("active") @db.VarChar(20)
-  commission    Decimal  @default(0) @db.Decimal(18,2)
+  commission    Decimal  @default(0) @db.Decimal(19,4)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -657,7 +658,7 @@ model Commission {
   referrerId    String
   referrer      User     @relation(fields: [referrerId], references: [id])
   refereeId     String
-  amount        Decimal  @db.Decimal(18,2)
+  amount        Decimal  @db.Decimal(19,4)
   type          String   @db.VarChar(40)
   sourceProject String   @db.VarChar(20)
   status        String   @default("pending") @db.VarChar(20)
@@ -1018,9 +1019,9 @@ model OpsUserSegment {
   mScore      Int      @default(1)
   recencyDays Float    @default(999)
   frequency   Int      @default(0)
-  monetary    Decimal  @default(0) @db.Decimal(18,2)
-  clv         Decimal  @default(0) @db.Decimal(18,2)
-  avgMonthly  Decimal  @default(0) @db.Decimal(18,2)
+  monetary    Decimal  @default(0) @db.Decimal(19,4)
+  clv         Decimal  @default(0) @db.Decimal(19,4)
+  avgMonthly  Decimal  @default(0) @db.Decimal(19,4)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 
@@ -1115,7 +1116,7 @@ model OpsAlert {
 model OpsExpenseRequest {
   id             Int       @id @default(autoincrement())
   title          String    @db.VarChar(255)
-  amount         Decimal   @db.Decimal(18,2)
+  amount         Decimal   @db.Decimal(19,4)
   category       String    @db.VarChar(60)
   note           String?   @db.Text
   status         String    @default("pending") @db.VarChar(20)   // pending|approved|rejected
@@ -1170,8 +1171,8 @@ model VipConfig {
   id           Int      @id @default(autoincrement())
   level        Int      @unique
   name         String   @db.VarChar(50)    // Member | V1 | V2 ... V10
-  betRequired  Decimal  @default(0) @db.Decimal(18,2)   // cumulative bet to reach this level
-  rewardAmount Decimal  @default(0) @db.Decimal(18,2)   // one-time level-up bonus
+  betRequired  Decimal  @default(0) @db.Decimal(19,4)   // cumulative bet to reach this level
+  rewardAmount Decimal  @default(0) @db.Decimal(19,4)   // one-time level-up bonus
   color        String?  @db.VarChar(20)
   iconUrl      String?  @db.VarChar(500)
   benefits     Json?    // extra perks JSON
@@ -1191,7 +1192,7 @@ model VipHistory {
   userId       String    @db.VarChar(30)
   oldLevel     Int
   newLevel     Int
-  rewardAmount Decimal   @default(0) @db.Decimal(18,2)
+  rewardAmount Decimal   @default(0) @db.Decimal(19,4)
   project      String    @default("game") @db.VarChar(20)
   configId     Int?
   config       VipConfig? @relation(fields: [configId], references: [id])
@@ -1292,6 +1293,62 @@ model ThirdPartyHealthSnapshot {
 
   @@index([providerCode, checkedAt])
   @@map("third_party_health_snapshots")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TELEGRAM BROADCAST & AUTO-REPLY  (v2.3)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Admin-composed Telegram broadcasts — one row per outgoing message batch.
+/// Targets: channel (public), group (community), admin (internal).
+model TelegramBroadcast {
+  id          Int      @id @default(autoincrement())
+  /// Target chat identifier stored in DB (e.g. @lkvip_channel or -100xxx)
+  target      String   @db.VarChar(100)   // channel | group | admin | custom
+  targetName  String   @default("channel") @db.VarChar(30)
+  /// Telegram parse mode: HTML | Markdown
+  parseMode   String   @default("HTML") @db.VarChar(10)
+  content     String   @db.Text
+  templateKey String?  @db.VarChar(60)    // optional ref to NotificationTemplate.type
+  variables   Json?                        // { key: value } substitutions used
+  /// pending | sent | failed
+  status      String   @default("pending") @db.VarChar(20)
+  sentBy      Int?                         // AdminUser.id
+  sentAt      DateTime?
+  error       String?  @db.Text
+  messageId   Int?                         // Telegram message_id returned on success
+  /// For scheduled sends — null = send immediately
+  scheduledAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([target, status])
+  @@index([createdAt])
+  @@map("telegram_broadcasts")
+}
+
+/// Auto-reply rules for the CSKH Telegram bot.
+/// When an incoming message matches the keyword (plain text or regex),
+/// the bot replies with the configured content.
+model TelegramAutoReply {
+  id          Int      @id @default(autoincrement())
+  /// Plain text phrase or regex pattern (if isRegex = true)
+  keyword     String   @db.VarChar(255)
+  isRegex     Boolean  @default(false)
+  ignoreCase  Boolean  @default(true)
+  /// Bot reply text — supports Telegram HTML
+  reply       String   @db.Text
+  /// Category for grouping in UI: greeting | finance | support | promo | fallback
+  category    String   @default("support") @db.VarChar(30)
+  isActive    Boolean  @default(true)
+  /// Higher priority = matched first
+  priority    Int      @default(0)
+  /// Number of times this rule has fired (stats)
+  hitCount    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, priority])
+  @@map("telegram_auto_replies")
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

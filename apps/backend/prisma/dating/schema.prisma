@@ -31,7 +31,7 @@ model User {
   location   String?   @db.VarChar(150)
   lat        Decimal?  @db.Decimal(10, 7)
   lng        Decimal?  @db.Decimal(10, 7)
-  coins      Decimal   @default(0) @db.Decimal(18, 2)
+  coins      Decimal   @default(0) @db.Decimal(19, 4)
   isVerified Boolean   @default(false)
   isVip      Boolean   @default(false)
   // user | moderator | admin
@@ -98,12 +98,12 @@ model Streamer {
   id             String   @id @default(cuid())
   userId         String   @db.VarChar(30)
   user           User     @relation(fields: [userId], references: [id])
-  pricePerMinute Decimal  @db.Decimal(18, 2)
+  pricePerMinute Decimal  @db.Decimal(19, 4)
   bio            String?  @db.Text
   avatarUrl      String?  @db.VarChar(500)
   // active | paused | suspended
   status         String   @default("active") @db.VarChar(20)
-  totalEarnings  Decimal  @default(0) @db.Decimal(18, 2)
+  totalEarnings  Decimal  @default(0) @db.Decimal(19, 4)
   rating         Decimal  @default(5.0) @db.Decimal(3, 1)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -125,7 +125,7 @@ model Video {
   title       String   @db.VarChar(255)
   description String?  @db.Text
   isPaid      Boolean  @default(false)
-  price       Decimal? @db.Decimal(18, 2)
+  price       Decimal? @db.Decimal(19, 4)
   url         String   @db.VarChar(500)
   thumbnail   String?  @db.VarChar(500)
   duration    Int?     // seconds
@@ -285,7 +285,7 @@ model Call {
   // ringing | ongoing | ended | missed | rejected
   status      String    @default("ringing") @db.VarChar(20)
   durationMin Decimal?  @db.Decimal(8, 2)
-  cost        Decimal?  @db.Decimal(18, 2)
+  cost        Decimal?  @db.Decimal(19, 4)
   startedAt   DateTime  @default(now())
   endedAt     DateTime?
 
@@ -309,7 +309,7 @@ model LiveStream {
   status      String    @default("scheduled") @db.VarChar(20)
   viewerCount Int       @default(0)
   peakViewers Int       @default(0)
-  coinsEarned Decimal   @default(0) @db.Decimal(18, 2)
+  coinsEarned Decimal   @default(0) @db.Decimal(19, 4)
   startedAt   DateTime?
   endedAt     DateTime?
   createdAt   DateTime  @default(now())
@@ -404,7 +404,7 @@ model Gift {
   id        String     @id @default(cuid())
   name      String     @db.VarChar(100)
   icon      String?    @db.VarChar(500)
-  coinCost  Decimal    @db.Decimal(18, 2)
+  coinCost  Decimal    @db.Decimal(19, 4)
   // normal | rare | epic | legendary
   category  String     @default("normal") @db.VarChar(30)
   // active | inactive
@@ -428,7 +428,7 @@ model GiftSend {
   liveStreamId String?     @db.VarChar(30)
   liveStream   LiveStream? @relation(fields: [liveStreamId], references: [id])
   quantity     Int         @default(1)
-  coinValue    Decimal     @db.Decimal(18, 2)
+  coinValue    Decimal     @db.Decimal(19, 4)
   createdAt    DateTime    @default(now())
 
   @@index([senderId])
@@ -445,8 +445,8 @@ model VipPlan {
   name        String    @db.VarChar(100)
   // duration in days
   duration    Int
-  price       Decimal   @db.Decimal(18, 2)
-  coinBonus   Decimal   @default(0) @db.Decimal(18, 2)
+  price       Decimal   @db.Decimal(19, 4)
+  coinBonus   Decimal   @default(0) @db.Decimal(19, 4)
   features    Json?
   sortOrder   Int       @default(0)
   // active | inactive
@@ -484,8 +484,8 @@ model Transaction {
   id        String   @id @default(cuid())
   userId    String   @db.VarChar(30)
   user      User     @relation(fields: [userId], references: [id])
-  amount    Decimal  @db.Decimal(18, 2)
-  coins     Decimal? @db.Decimal(18, 2)
+  amount    Decimal  @db.Decimal(19, 4)
+  coins     Decimal? @db.Decimal(19, 4)
   // deposit | withdraw | coin_purchase | coin_gift | vip_purchase | call_fee
   type      String   @db.VarChar(30)
   // pending | success | failed | cancelled
@@ -699,7 +699,7 @@ model DatingMission {
   slug        String   @unique @db.VarChar(100)
   title       String   @db.VarChar(255)
   description String?  @db.VarChar(500)
-  reward      Decimal  @default(0) @db.Decimal(18, 2)
+  reward      Decimal  @default(0) @db.Decimal(19, 4)
   // daily | weekly | one_time
   type        String   @default("daily") @db.VarChar(20)
   targetCount Int      @default(1)

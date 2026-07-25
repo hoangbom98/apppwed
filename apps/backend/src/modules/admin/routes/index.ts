@@ -38,6 +38,8 @@ const imCtrl               = require('../controllers/imController');
 const giftCodeCtrl         = require('../controllers/giftCodeController');
 // ── Group Finance (Gộp Vốn, Tách Lợi Nhuận) ──────────────────────────────────
 const groupFinanceCtrl     = require('../controllers/groupFinanceController');
+// ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
+const telegramCtrl         = require('../controllers/telegramBroadcastController');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 router.post('/auth/login',   authCtrl.login);
@@ -136,6 +138,12 @@ router.get('/settings/security',                 securityCtrl.get);
 router.post('/settings/security',                securityCtrl.save);
 router.post('/settings/security/reset',          securityCtrl.reset);
 router.post('/settings/security/test-captcha',   securityCtrl.testCaptcha);
+
+// ── Integration test (must be before /settings/:key) ─────────────────────────
+router.post('/settings/integration-test',        settingCtrl.testIntegration);
+
+// ── Bulk upsert (array save) ──────────────────────────────────────────────────
+router.post('/settings/bulk',                    settingCtrl.bulkUpsert);
 
 // ── System Settings ───────────────────────────────────────────────────────────
 router.get('/settings',                 settingCtrl.getAll);
@@ -308,6 +316,21 @@ router.get('/notification/templates/:type',      notifTplCtrl.getTemplate);
 router.put('/notification/templates/:type',      notifTplCtrl.updateTemplate);
 router.post('/notification/templates/seed',      notifTplCtrl.seedTemplates);
 router.get('/notification/logs',                 notifTplCtrl.listLogs);
+
+// ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
+router.get('/telegram/config',                   telegramCtrl.getConfig);
+router.post('/telegram/config/reload',           telegramCtrl.reloadConfig);
+// Broadcasts
+router.get('/telegram/broadcasts',               telegramCtrl.listBroadcasts);
+router.post('/telegram/broadcasts',              telegramCtrl.sendBroadcast);
+router.post('/telegram/broadcasts/preview',      telegramCtrl.previewBroadcast);
+router.delete('/telegram/broadcasts/:id',        telegramCtrl.deleteBroadcast);
+// Auto-reply rules
+router.get('/telegram/auto-replies',             telegramCtrl.listAutoReplies);
+router.post('/telegram/auto-replies',            telegramCtrl.createAutoReply);
+router.patch('/telegram/auto-replies/:id',       telegramCtrl.updateAutoReply);
+router.delete('/telegram/auto-replies/:id',      telegramCtrl.deleteAutoReply);
+router.post('/telegram/auto-replies/:id/test',   telegramCtrl.testAutoReply);
 
 // ── Cron Jobs ─────────────────────────────────────────────────────────────────
 router.post('/cron/seed',          cronCtrl.seed);

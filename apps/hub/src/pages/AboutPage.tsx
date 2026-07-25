@@ -16,15 +16,15 @@ export default function AboutPage() {
         ← Quay lại
       </button>
 
-      <h1 className="hub-page-title">Giới thiệu về OKVIP Hub</h1>
+      <h1 className="hub-page-title">Giới thiệu về LKVIP Hub</h1>
 
       {/* Brand block */}
       <div style={{ background: 'var(--hub-bg-secondary)', borderRadius: 14, padding: 20, marginBottom: 16 }}>
-        <img src="/assets/gif/header-logo.gif" alt="OKVIP Hub Logo"
+        <img src="/assets/gif/header-logo.gif" alt="LKVIP Hub Logo"
           style={{ height: 36, marginBottom: 14 }}
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--hub-text-secondary)', margin: '0 0 10px' }}>
-          <strong style={{ color: 'var(--hub-text)' }}>OKVIP Hub</strong> là cổng thông tin tổng hợp hàng đầu,
+          <strong style={{ color: 'var(--hub-text)' }}>LKVIP Hub</strong> là cổng thông tin tổng hợp hàng đầu,
           cung cấp đầy đủ thông tin về games, websites, công cụ hữu ích và tin tức mới nhất.
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--hub-text-secondary)', margin: 0 }}>
@@ -49,13 +49,13 @@ export default function AboutPage() {
       <div style={{ background: 'var(--hub-bg-secondary)', borderRadius: 14, padding: 16 }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--hub-primary)' }}>Liên hệ</h2>
         <p style={{ fontSize: 13, color: 'var(--hub-text-secondary)', margin: '0 0 6px', lineHeight: 1.6 }}>
-          Email: support@okviphub.com
+          Email: support@lkviphub.com
         </p>
         <p style={{ fontSize: 13, color: 'var(--hub-text-secondary)', margin: 0, lineHeight: 1.6 }}>
           Fanpage:{' '}
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
             style={{ color: 'var(--hub-primary)', fontWeight: 700 }}>
-            OKVIP Hub Official
+            LKVIP Hub Official
           </a>
         </p>
       </div>

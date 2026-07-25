@@ -3,9 +3,10 @@ import { redis } from '../../utils/redis';
 import { logger } from '../../shared/logger';
 
 const { getPrismaClient } = require('../../config/databases');
-const WalletService = require('../../shared/services/walletService');
-const notif = require('../../shared/services/notificationService');
-const riskService = require('../../shared/services/riskService');
+const WalletService       = require('../../shared/services/walletService');
+const notif               = require('../../shared/services/notificationService');
+const riskService         = require('../../shared/services/riskService');
+const tg                  = require('../../shared/services/telegramAlertService');
 
 const prisma = getPrismaClient('game');
 const walletService = new WalletService(prisma);
@@ -58,6 +59,12 @@ export const withdrawWorker = new Worker(
         data: { status: 'manual_review', reason: `High risk: ${riskResult.flags.join(', ')}` },
       });
       logger.warn(`Withdraw ${withdrawId} pushed to manual review. Score: ${riskResult.score}`);
+      await tg.alertWithLevel('HIGH', `Withdraw Manual Review`, {
+        'Withdraw ID': withdrawId,
+        'User ID':     withdraw.userId,
+        Amount:        withdraw.amount,
+        Score:         riskResult.score,
+      });
     }
   },
   { connection: redis, concurrency: 5 }

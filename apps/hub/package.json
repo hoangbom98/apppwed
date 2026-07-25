@@ -33,6 +33,7 @@
     "@capacitor/status-bar": "catalog:",
     "@tanstack/react-query": "catalog:",
     "axios": "catalog:",
+    "dompurify": "^3.2.6",
     "i18next": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "catalog:",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

@@ -1,5 +1,5 @@
 // frontend/hub/src/pages/ProfilePage.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile, changePassword } from '../api/hub';
 import Spinner from '../components/Spinner';
@@ -13,6 +13,16 @@ export default function ProfilePage() {
   const { data, isLoading } = useQuery({ queryKey: ['profile'], queryFn: getProfile });
   const profile = data?.data?.data;
 
+  // Controlled form state — initialized from profile once loaded (fixes uncontrolled/defaultValue mixing)
+  const [form, setForm] = useState({ full_name: '', lang: '' });
+
+  // Sync form when profile loads (only on first load via profile?.id change)
+  useEffect(() => {
+    if (profile) {
+      setForm({ full_name: profile.full_name ?? '', lang: profile.preferred_language ?? 'vi' });
+    }
+  }, [profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const updateMut = useMutation({
     mutationFn: updateProfile,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['profile'] }); setMsg('Đã cập nhật!'); },
@@ -22,8 +32,6 @@ export default function ProfilePage() {
     onSuccess: () => { setMsg('Đã đổi mật khẩu!'); setPw({ current_password: '', new_password: '' }); },
     onError: (e: any) => setMsg(e.response?.data?.message || 'Lỗi'),
   });
-
-  const [form, setForm] = useState<any>({});
 
   if (isLoading) return <Spinner />;
 
@@ -44,16 +52,24 @@ export default function ProfilePage() {
       {msg && <p className="text-green-400 text-sm">{msg}</p>}
 
       {tab === 'info' && profile && (
-        <form onSubmit={e => { e.preventDefault(); updateMut.mutate({ full_name: form.full_name ?? profile.full_name, preferred_language: form.lang ?? profile.preferred_language }); }}
+        <form onSubmit={e => {
+            e.preventDefault();
+            updateMut.mutate({ full_name: form.full_name, preferred_language: form.lang });
+          }}
           className="space-y-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Họ tên</label>
-            <input defaultValue={profile.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-sm text-gray-100 focus:outline-none" />
+            <input
+              value={form.full_name}
+              onChange={e => setForm({ ...form, full_name: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-sm text-gray-100 focus:outline-none"
+            />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Ngôn ngữ</label>
-            <select defaultValue={profile.preferred_language} onChange={e => setForm({ ...form, lang: e.target.value })}
+            <select
+              value={form.lang}
+              onChange={e => setForm({ ...form, lang: e.target.value })}
               className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-sm text-gray-100 focus:outline-none">
               <option value="vi">Tiếng Việt</option>
               <option value="en">English</option>

@@ -2,9 +2,13 @@
 /* eslint-disable */
 
 'use strict';
-const { hashPassword, comparePassword, generateTokens } = require('../../../shared/services/authService');
+const { hashPassword, comparePassword, generateTokens, checkNewPassword } = require('../../../shared/services/authService');
 const { success, created, error, unauthorized } = require('../../../shared/utils/response');
-const missionSvc = require('../services/missionService');
+const missionSvc     = require('../services/missionService');
+const emailGuard     = require('../../../shared/services/emailGuardService');
+const ipGuard        = require('../../../shared/services/ipGuardService');
+const auditService   = require('../../../shared/services/auditService');
+const sessionService = require('../../../shared/services/sessionService');
 
 const USER_SELECT = {
   id: true, email: true, username: true, fullName: true,
@@ -17,6 +21,18 @@ exports.register = async (req, res) => {
   try {
     const { email, password, username, fullName, phone } = req.body;
     if (!email || !password || !username) return error(res, 'Email, username và password là bắt buộc');
+
+    // ── NIST SP 800-63B: password policy ──────────────────────────────────
+    const pwError = await checkNewPassword(password);
+    if (pwError) return error(res, pwError, 400);
+
+    const [emailCheck, ipCheck] = await Promise.all([
+      emailGuard.checkEmail(email),
+      ipGuard.checkIp(req.ip || req.headers['x-forwarded-for']),
+    ]);
+    if (emailCheck.blocked) return error(res, emailCheck.reason, 400);
+    if (ipCheck.blocked)    return error(res, 'Yêu cầu bị từ chối', 403);
+
     const prisma = req.prisma;
     if (await prisma.user.findUnique({ where: { email } })) return error(res, 'Email đã tồn tại');
     if (await prisma.user.findFirst({ where: { username } })) return error(res, 'Username đã tồn tại');
@@ -24,6 +40,9 @@ exports.register = async (req, res) => {
       data: { email, password: await hashPassword(password), username, fullName, phone },
     });
     const tokens = generateTokens({ id: user.id, username: user.username, email: user.email, role: user.role, project: 'game' });
+    await sessionService.create('game', user.id, { ip: req.ip, ua: req.get('user-agent'), role: user.role });
+    await sessionService.bindRefreshToken('game', user.id, tokens.refresh_token);
+    auditService.logSecurity({ project: 'game', userId: user.id, event: 'register', ip: req.ip, ua: req.get('user-agent'), meta: { email } });
     return created(res, {
       user: { id: user.id, email: user.email, username: user.username, role: user.role },
       ...tokens,
@@ -39,13 +58,16 @@ exports.login = async (req, res) => {
       where: { OR: [{ username }, { email: username }] },
     });
     if (!user || !(await comparePassword(password, user.password))) {
+      auditService.logSecurity({ project: 'game', userId: null, event: 'login_failed', ip: req.ip, ua: req.get('user-agent'), meta: { username } });
       return unauthorized(res, 'Sai thông tin đăng nhập');
     }
     if (user.status !== 'active') return unauthorized(res, 'Tài khoản bị khóa');
     await req.prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } });
-    // Fire-and-forget: advance LOGIN mission progress
     missionSvc.incrementProgress(user.id, 'LOGIN', 1, req.prisma);
     const tokens = generateTokens({ id: user.id, username: user.username, email: user.email, role: user.role, project: 'game' });
+    await sessionService.create('game', user.id, { ip: req.ip, ua: req.get('user-agent'), role: user.role });
+    await sessionService.bindRefreshToken('game', user.id, tokens.refresh_token);
+    auditService.logSecurity({ project: 'game', userId: user.id, event: 'login_success', ip: req.ip, ua: req.get('user-agent'), meta: {} });
     return success(res, {
       user: { id: user.id, email: user.email, username: user.username, avatar: user.avatar, balance: user.balance, vipLevel: user.vipLevel, role: user.role },
       ...tokens,
@@ -77,9 +99,13 @@ exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) return error(res, 'Thiếu thông tin');
+    const pwError = await checkNewPassword(newPassword);
+    if (pwError) return error(res, pwError, 400);
     const user = await req.prisma.user.findUnique({ where: { id: req.user.id } });
     if (!(await comparePassword(oldPassword, user.password))) return error(res, 'Mật khẩu cũ không đúng');
     await req.prisma.user.update({ where: { id: user.id }, data: { password: await hashPassword(newPassword) } });
+    await sessionService.revokeRefreshToken('game', user.id).catch(() => {});
+    auditService.logSecurity({ project: 'game', userId: user.id, event: 'password_changed', ip: req.ip, ua: req.get('user-agent'), meta: {} });
     return success(res, null, 'Đổi mật khẩu thành công');
   } catch (e) { return error(res, e.message, 500); }
 };
@@ -91,16 +117,26 @@ exports.refresh = async (req, res) => {
     const { refresh_token } = req.body;
     if (!refresh_token) return unauthorized(res, 'Thiếu refresh token');
     const payload = verifyRefreshToken(refresh_token);
-    // Re-validate user status in DB — prevents banned/suspended users from refreshing
+    const tokenValid = await sessionService.verifyRefreshToken('game', payload.id, refresh_token);
+    if (!tokenValid) return unauthorized(res, 'Refresh token đã bị thu hồi');
     const user = await req.prisma.user.findUnique({
       where:  { id: payload.id },
       select: { id: true, username: true, email: true, role: true, status: true },
     });
     if (!user || user.status !== 'active') return unauthorized(res, 'Tài khoản không hợp lệ hoặc đã bị khóa');
     const tokens  = generateTokens({ id: user.id, username: user.username, email: user.email, role: user.role, project: 'game' });
+    await sessionService.revokeRefreshToken('game', user.id);
+    await sessionService.bindRefreshToken('game', user.id, tokens.refresh_token);
     return success(res, tokens);
   } catch (e) { return unauthorized(res, 'Refresh token không hợp lệ hoặc đã hết hạn'); }
 };
 
 // ── Logout ────────────────────────────────────────────────────────
-exports.logout = async (_req, res) => success(res, null, 'Đăng xuất thành công');
+exports.logout = async (req, res) => {
+  if (req.user?.id) {
+    await sessionService.revokeRefreshToken('game', req.user.id).catch(() => {});
+    await sessionService.destroy('game', req.user.id).catch(() => {});
+    auditService.logSecurity({ project: 'game', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+  }
+  return success(res, null, 'Đăng xuất thành công');
+};

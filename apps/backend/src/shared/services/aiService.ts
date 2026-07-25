@@ -1,8 +1,12 @@
 // @ts-nocheck
 'use strict';
 /**
- * AI Service — integrates Deepseek API, Google Translate, and
+ * AI Service — integrates Deepseek, Groq (Llama 3), Google Translate, and
  * in-house fraud detection heuristics.
+ *
+ * Provider priority:
+ *   chat/fraud  → Groq (fastest, free 30 req/min) → DeepSeek → OpenAI
+ *   translate   → Google Translate → DeepSeek → LibreTranslate (fallback)
  *
  * All external calls are wrapped with graceful fallbacks so the main
  * application never crashes due to AI unavailability.
@@ -16,6 +20,10 @@ const DEEPSEEK_URL     = 'https://api.deepseek.com/v1/chat/completions';
 const GOOGLE_TRANS_KEY = process.env.GOOGLE_TRANSLATE_KEY || '';
 const OPENAI_KEY       = process.env.OPENAI_API_KEY || '';
 const OPENAI_URL       = 'https://api.openai.com/v1/chat/completions';
+// ── Groq (free: 30 req/min, ~6000 tok/min on llama-3.3-70b) ──────────────
+const GROQ_KEY         = process.env.GROQ_API_KEY || '';
+const GROQ_URL         = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL       = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 // ── HTTP helper ───────────────────────────────────────────────────────────
 function postJson(url, headers, body) {
@@ -96,28 +104,32 @@ Nếu không biết câu trả lời, hãy hướng người dùng liên hệ h�
  * @returns {Promise<string>}
  */
 async function chat(messages) {
-  const apiKey = DEEPSEEK_KEY || OPENAI_KEY;
-  const apiUrl = DEEPSEEK_KEY ? DEEPSEEK_URL : OPENAI_URL;
-  const model  = DEEPSEEK_KEY ? 'deepseek-chat' : 'gpt-4o-mini';
+  // Priority: Groq (free, fastest) → DeepSeek → OpenAI
+  const providers = [];
+  if (GROQ_KEY)      providers.push({ url: GROQ_URL,     key: GROQ_KEY,     model: GROQ_MODEL });
+  if (DEEPSEEK_KEY)  providers.push({ url: DEEPSEEK_URL, key: DEEPSEEK_KEY, model: 'deepseek-chat' });
+  if (OPENAI_KEY)    providers.push({ url: OPENAI_URL,   key: OPENAI_KEY,   model: 'gpt-4o-mini' });
 
-  if (!apiKey) return 'Hệ thống AI tạm thời không khả dụng. Vui lòng liên hệ hỗ trợ.';
+  if (!providers.length) return 'Hệ thống AI tạm thời không khả dụng. Vui lòng liên hệ hỗ trợ.';
 
-  try {
-    const res = await postJson(apiUrl,
-      { Authorization: `Bearer ${apiKey}` },
-      {
-        model,
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages.slice(-10)],
-        max_tokens: 400,
-        temperature: 0.7,
-      }
-    );
-    return res?.choices?.[0]?.message?.content?.trim()
-      || 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau.';
-  } catch (err) {
-    logger.error('AI chat error', { err: err.message });
-    return 'Hệ thống AI tạm thời không khả dụng.';
+  for (const p of providers) {
+    try {
+      const res = await postJson(p.url,
+        { Authorization: `Bearer ${p.key}` },
+        {
+          model: p.model,
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages.slice(-10)],
+          max_tokens: 400,
+          temperature: 0.7,
+        }
+      );
+      const reply = res?.choices?.[0]?.message?.content?.trim();
+      if (reply) return reply;
+    } catch (err) {
+      logger.warn(`AI chat [${p.url}] failed, trying next: ${err.message}`);
+    }
   }
+  return 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau.';
 }
 
 // ── Fraud / Risk Detection ────────────────────────────────────────────────

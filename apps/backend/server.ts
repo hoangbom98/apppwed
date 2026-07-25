@@ -97,11 +97,51 @@ app.use(cors({
 // ── Compression (gzip API responses > 1KB) ───────────────────────────────
 app.use(compression({ threshold: 1024 }));
 
-// ── Security headers ──────────────────────────────────────────────────────
+// ── Security headers (OWASP A05 + NIST SC-8) ────────────────────────────
+app.disable('x-powered-by'); // Remove technology fingerprint (OWASP A05)
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false,
+  // Content-Security-Policy: restrict sources to self + trusted CDN only
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'"],
+      styleSrc:       ["'self'", "'unsafe-inline'"],
+      imgSrc:         ["'self'", 'data:', 'https:'],
+      connectSrc:     ["'self'"],
+      fontSrc:        ["'self'"],
+      objectSrc:      ["'none'"],
+      frameAncestors: ["'none'"],          // Prevents clickjacking (X-Frame-Options: DENY)
+      upgradeInsecureRequests:  [],        // Forces HTTPS on mixed-content
+      blockAllMixedContent:     [],
+    },
+  },
+  // HSTS: 2 years, includeSubDomains, preload (NIST SC-8, PCI DSS 4.0)
+  strictTransportSecurity: {
+    maxAge:            63_072_000,
+    includeSubDomains: true,
+    preload:           true,
+  },
+  // Prevent MIME-type sniffing (OWASP A05)
+  noSniff:                  true,
+  // Prevent clickjacking
+  frameguard:               { action: 'deny' },
+  // XSS filter (legacy browsers)
+  xssFilter:                true,
+  // Referrer policy: only send origin for same-origin requests
+  referrerPolicy:           { policy: 'strict-origin-when-cross-origin' },
+  // Disable browser features not needed for an API server
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 }));
+// Permissions-Policy: disable unused browser capabilities
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()',
+  );
+  next();
+});
 
 // ── Body parsing ──────────────────────────────────────────────────────────
 app.use(express.json({ limit: '5mb' }));
@@ -152,6 +192,29 @@ app.use('/api/dating', require('./src/modules/dating/routes/index'));
 app.use('/api/sports', require('./src/modules/sports/routes/index'));
 app.use('/api/admin',  require('./src/modules/admin/routes/index'));
 app.use('/api/lkvip',  require('./src/modules/lkvip/routes/index'));
+
+// ── Core event listeners ───────────────────────────────────────────────────
+// Wire CampaignService event-driven triggers (welcome email, first-deposit push,
+// level-up congratulation) for each project.  Admin Prisma is shared; the
+// project Prisma is not needed for these fire-and-forget notifications.
+(function wireCorEventListeners() {
+  try {
+    const { getPrismaClient: _getPC } = require('./src/config/databases');
+    const { CampaignService }         = require('./src/core/marketing/campaign.service');
+    const PROJECTS = ['hub', 'game', 'trade', 'dating', 'sports'] as const;
+    const adminPrisma = _getPC('admin');
+
+    for (const project of PROJECTS) {
+      const projectPrisma = _getPC(project);
+      const svc = new CampaignService(adminPrisma, projectPrisma, project);
+      svc.setupEventListeners();
+    }
+
+    logger.info('[Core] Campaign event listeners registered for all 5 projects');
+  } catch (err: any) {
+    logger.warn(`[Core] Campaign event listener setup failed: ${err.message}`);
+  }
+})();
 
 // ── /api/v1/game alias (GAME_LAUNCH_API.md spec URLs) ─────────────────────
 const _gameRouter = require('./src/modules/game/routes/index');

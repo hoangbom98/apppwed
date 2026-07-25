@@ -25,6 +25,14 @@
 const axios  = require('axios');
 const logger = require('../../../shared/services/logger');
 
+// CoinGecko symbol map: Binance symbol → CoinGecko id
+const COINGECKO_ID_MAP = {
+  BTCUSDT: 'bitcoin', ETHUSDT: 'ethereum', BNBUSDT: 'binancecoin',
+  SOLUSDT: 'solana',  XRPUSDT: 'ripple',   ADAUSDT: 'cardano',
+  DOGEUSDT:'dogecoin',TRXUSDT: 'tron',     DOTUSDT: 'polkadot',
+  MATICUSDT:'matic-network', LTCUSDT:'litecoin', USDTUSDT:'tether',
+};
+
 class MarketPriceFeed {
   constructor(prisma, io = null) {
     this.prisma = prisma;
@@ -57,6 +65,49 @@ class MarketPriceFeed {
     }
   }
 
+  // ── CoinGecko fallback ────────────────────────────────────────────────────
+  // Free: 10,000 req/month, no API key required.
+  // Called automatically when Binance returns null.
+
+  async fetchCoinGeckoPrices(symbols) {
+    try {
+      const ids = [...new Set(symbols.map(s => COINGECKO_ID_MAP[s]).filter(Boolean))];
+      if (!ids.length) return null;
+
+      const res = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+        timeout: 7000,
+        params: {
+          vs_currency: 'usd',
+          ids: ids.join(','),
+          order: 'market_cap_desc',
+          price_change_percentage: '24h',
+        },
+      });
+
+      // Build map keyed by original Binance symbol
+      const idToData = {};
+      for (const coin of res.data) idToData[coin.id] = coin;
+
+      const map = {};
+      for (const [binanceSym, geckoId] of Object.entries(COINGECKO_ID_MAP)) {
+        const c = idToData[geckoId];
+        if (!c) continue;
+        map[binanceSym] = {
+          price:     c.current_price,
+          change24h: c.price_change_percentage_24h,
+          high24h:   c.high_24h,
+          low24h:    c.low_24h,
+          volume24h: c.total_volume,
+        };
+      }
+      logger.info(`[PriceFeed] CoinGecko fallback: ${Object.keys(map).length} symbols`);
+      return map;
+    } catch (err) {
+      logger.warn(`[PriceFeed] CoinGecko fallback failed: ${err.message}`);
+      return null;
+    }
+  }
+
   // ── Update PriceHistory in DB ─────────────────────────────────────────────
 
   async updatePrices() {
@@ -69,7 +120,12 @@ class MarketPriceFeed {
 
       if (!symbols.length) return;
 
-      const binancePrices = await this.fetchBinancePrices();
+      // Binance first → CoinGecko fallback
+      let binancePrices = await this.fetchBinancePrices();
+      if (!binancePrices) {
+        const symbolCodes = symbols.map(s => s.code);
+        binancePrices = await this.fetchCoinGeckoPrices(symbolCodes);
+      }
 
       const updates = [];
       const snapshot = [];   // for Socket.IO broadcast

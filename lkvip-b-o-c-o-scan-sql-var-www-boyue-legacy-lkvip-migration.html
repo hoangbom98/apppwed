@@ -1,0 +1,486 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>LKVIP SQL Scan Report</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2328; background: #fff; padding: 32px 16px; }
+.wrap { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.sub { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+h2 { font-size: 15px; font-weight: 700; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; }
+h3 { font-size: 13px; font-weight: 600; color: #3b82d4; margin: 14px 0 6px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 13px; }
+thead th { background: #f7f8fa; border: 1px solid #e5e7eb; padding: 7px 10px; text-align: left; font-weight: 600; font-size: 12px; color: #57606a; }
+tbody td { border: 1px solid #e5e7eb; padding: 6px 10px; vertical-align: top; }
+tbody tr:nth-child(even) td { background: #fafafa; }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
+.b-green  { background: #dcfce7; color: #15803d; }
+.b-blue   { background: #dbeafe; color: #1d4ed8; }
+.b-amber  { background: #fef9c3; color: #854d0e; }
+.b-red    { background: #fee2e2; color: #b91c1c; }
+.b-purple { background: #ede9fe; color: #6d28d9; }
+.b-gray   { background: #f3f4f6; color: #374151; }
+.alert { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin: 10px 0; }
+.alert-blue { background: #eff6ff; border-color: #93c5fd; }
+.alert-red  { background: #fef2f2; border-color: #fca5a5; }
+.alert-green{ background: #f0fdf4; border-color: #86efac; }
+code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+ul.tree { list-style: none; padding: 0; }
+ul.tree li { padding: 2px 0 2px 16px; border-left: 2px solid #e5e7eb; margin-left: 8px; font-size: 13px; }
+ul.tree li::before { content: "–  "; color: #9ca3af; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+.card-num { font-size: 24px; font-weight: 700; color: #3b82d4; }
+.card-lbl { font-size: 12px; color: #57606a; margin-top: 2px; }
+hr { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>📂 LKVIP — Báo Cáo Scan SQL <code>/var/www</code></h1>
+<p class="sub">BoYue Legacy → LKVIP Migration Analysis  ·  25,283 dòng SQL được phân tích  ·  Tháng 7/2025</p>
+
+
+<div class="cards">
+  <div class="card"><div class="card-num">21</div><div class="card-lbl">Files SQL được scan</div></div>
+  <div class="card"><div class="card-num">25,283</div><div class="card-lbl">Tổng dòng SQL</div></div>
+  <div class="card"><div class="card-num">80+</div><div class="card-lbl">Tables (legacy)</div></div>
+  <div class="card"><div class="card-num">5</div><div class="card-lbl">Migrations (boyue)</div></div>
+  <div class="card"><div class="card-num">10</div><div class="card-lbl">VIP levels (by.sql)</div></div>
+  <div class="card"><div class="card-num">12</div><div class="card-lbl">Game providers TCG</div></div>
+  <div class="card"><div class="card-num">12</div><div class="card-lbl">Lottery types (by_supplement)</div></div>
+  <div class="card"><div class="card-num">10</div><div class="card-lbl">Banks VN</div></div>
+</div>
+
+
+<h2>1. Danh Sách Files SQL Đã Scan</h2>
+<table>
+  <thead><tr><th>File</th><th>Dòng</th><th>Mục đích</th><th>DB target</th></tr></thead>
+  <tbody>
+    <tr><td><code>boyue.sql</code></td><td>7,252</td><td>Full dump schema BoYue PHP legacy</td><td><code>boyue</code></td></tr>
+    <tr><td><code>by.sql</code></td><td>6,550</td><td>Production dump VN market (caipiao_*)</td><td><code>by</code></td></tr>
+    <tr><td><code>boy.sql</code></td><td>4,904</td><td>Extended schema với 80+ tables mới</td><td><code>by</code></td></tr>
+    <tr><td><code>database.sql</code></td><td>1,690</td><td>6-DB schema (hub/game/trade/dating/sports/admin)</td><td>Multi-DB</td></tr>
+    <tr><td><code>blockchain/blockchain.sql</code></td><td>1,690</td><td>Blockchain trading DB schema</td><td><code>blockchain</code></td></tr>
+    <tr><td><code>blockchain/blockchain_trading.sql</code></td><td>1,690</td><td>Trading platform với leverage/positions</td><td><code>blockchain_trading</code></td></tr>
+    <tr><td><code>by_supplement.sql</code></td><td>1,138</td><td>Bổ sung tables cho code đang dùng nhưng chưa tồn tại</td><td><code>by</code></td></tr>
+    <tr><td><code>backup_weekly_20260628.sql</code></td><td>1,740</td><td>Weekly backup production</td><td><code>by</code></td></tr>
+    <tr><td><code>backup_weekly_20260705.sql</code></td><td>1,740</td><td>Weekly backup production (+1 tuần)</td><td><code>by</code></td></tr>
+    <tr><td><code>by-vi.sql</code></td><td>369</td><td>Vietnamese localization patch (fanshui, fields, fuddetail…)</td><td><code>by</code></td></tr>
+    <tr><td><code>migrations/001_tcg_platform_setup.sql</code></td><td>~60</td><td>TCG platform table + index caipiao_game_bet</td><td><code>by</code></td></tr>
+    <tr><td><code>migrations/002_tcg_image_cdn_map.sql</code></td><td>~30</td><td>Map ng-demo icons → TCG CDN</td><td><code>by</code></td></tr>
+    <tr><td><code>migrations/003_localization.sql</code></td><td>~80</td><td>Việt hóa category/platform/settings</td><td><code>by</code></td></tr>
+    <tr><td><code>migrations/004_settings_vn.sql</code></td><td>~30</td><td>Cấu hình VN market (tên, limits, domain)</td><td><code>by</code></td></tr>
+    <tr><td><code>migrations/005_fix_platform_banners.sql</code></td><td>~50</td><td>Fix banner paths /app/admin/ → TCG CDN</td><td><code>by</code></td></tr>
+    <tr><td><code>install-apps/patch-tcg-images.sql</code></td><td>~40</td><td>Update icon động theo provider TCG CDN</td><td><code>by</code></td></tr>
+    <tr><td><code>install-apps/patch-localization.sql</code></td><td>~80</td><td>Tổng hợp brand+provider+CDN+settings VN</td><td><code>by</code></td></tr>
+    <tr><td><code>scripts/update_platform_images.sql</code></td><td>~150</td><td>Map platform banner từ /app/admin/ → /game_pictures/ CDN</td><td><code>by</code></td></tr>
+    <tr><td><code>blockchain/web/scripts/migrate_password_schema.sql</code></td><td>3</td><td>Mở rộng VARCHAR(255) cho bcrypt</td><td><code>blockchain</code></td></tr>
+    <tr><td><code>phpmyadmin/sql/*.sql</code></td><td>~200</td><td>phpMyAdmin internal tables (bỏ qua)</td><td>n/a</td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+
+<h2>2. Mapping: BoYue Tables → LKVIP Prisma Schema</h2>
+<div class="alert alert-blue">Đây là bảng tra cứu đầy đủ từ tên bảng legacy <code>caipiao_*</code> / <code>yzz_*</code> / <code>im_*</code> / <code>tcg_*</code> sang model Prisma tương ứng trong LKVIP.</div>
+
+<h3>game_db — Core Tables</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>caipiao_member</code></td><td><code>User</code> (game_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_fuddetail</code> / <code>caipiao_moneylog</code></td><td><code>Transaction</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_recharge</code></td><td><code>DepositOrder</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_withdraw</code></td><td><code>WithdrawOrder</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_touzhu</code></td><td><code>LotteryBet</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_kj</code> / <code>caipiao_kaijiang</code></td><td><code>LotteryDraw</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_type</code> / <code>caipiao_caipiao</code></td><td><code>LotteryType</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_group</code> / <code>caipiao_membergroup</code></td><td><code>VipLevel</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_fanshui</code></td><td><code>Rebate</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_agent_relation</code></td><td><code>Agent</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_agent_commission_log</code></td><td><code>Commission</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_activity</code> / <code>caipiao_huodong</code></td><td><code>Promotion</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_qiandao</code></td><td><code>UserCheckin</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_game</code></td><td><code>Game</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_game_platform</code></td><td><code>GameAggregator</code> / <code>GameProduct</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_game_bet</code></td><td><code>GameSession</code> / <code>GameTransaction</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_game_balance</code></td><td><code>Wallet</code> (seamless)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_game_transfer</code></td><td><code>GameTransaction</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_message</code></td><td><code>SupportMessage</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_notice</code></td><td><code>Notification</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_bank_list</code></td><td><code>PaymentGateway</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_setting</code></td><td><code>SystemConfig</code> / <code>ProjectConfig</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_banklist</code></td><td><code>PaymentGateway</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_member_bank</code></td><td><code>WithdrawOrder.bankInfo</code> (JSON)</td><td><span class="badge b-amber">Một phần</span></td></tr>
+    <tr><td><code>caipiao_withdraw_account</code></td><td><code>WithdrawOrder.bankInfo</code> (JSON)</td><td><span class="badge b-amber">Một phần</span></td></tr>
+    <tr><td><code>caipiao_user_device</code></td><td><code>user_devices</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_verify_code</code></td><td><code>sessionService</code> Redis OTP</td><td><span class="badge b-amber">Redis only</span></td></tr>
+    <tr><td><code>caipiao_jinjijilu</code></td><td>⚠️ Chưa có — Log khẩn cấp/phong tỏa tài khoản</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_play</code></td><td>⚠️ Chưa có — Play type config (wanfa detail)</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_wanfa</code></td><td>⚠️ Partial — Chi tiết kiểu chơi xổ số</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_payset</code></td><td>⚠️ Chưa có — Payment channel config</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_rebate_category_config</code></td><td>⚠️ Chưa có — Rebate rate per game type</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_rebate_tier_config</code></td><td>⚠️ Chưa có — Rebate rate per agent tier</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_bet_stats</code></td><td><code>BetStats</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>caipiao_member_stats</code></td><td>Tích hợp vào <code>User</code> fields</td><td><span class="badge b-amber">Một phần</span></td></tr>
+    <tr><td><code>caipiao_issue_config</code></td><td>⚠️ Chưa có — Lottery draw schedule config</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_lottery_chat</code></td><td>⚠️ Chưa có — Lottery room live chat</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_lottery_play_types</code></td><td>⚠️ Chưa có — Play type registry per lottery</td><td><span class="badge b-red">Thiếu</span></td></tr>
+  </tbody>
+</table>
+
+<h3>game_db — New Tables từ boy.sql (yzz_* prefix)</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>yzz_level_config</code></td><td><code>VipConfig</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_level_reward_record</code></td><td><code>VipHistory</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_user_level</code></td><td><code>User.vipLevel</code> + <code>UserVip</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_level_change_log</code></td><td>⚠️ Chưa có — VIP level change audit trail</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>yzz_banner</code></td><td><code>CrossBanner</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_yuebao_product</code></td><td><code>SavingsVaultProduct</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_yuebao_holding</code></td><td><code>SavingsVaultHolding</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_yuebao_record</code></td><td><code>Transaction</code> (type=savings)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>yzz_yuebao_stats</code></td><td>⚠️ Chưa có — Aggregated savings stats per user</td><td><span class="badge b-amber">Có thể dùng cacheService</span></td></tr>
+  </tbody>
+</table>
+
+<h3>game_db — IM/Chat Tables (im_* prefix)</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>im_messages</code></td><td><code>SupportMessage</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>im_conversations</code></td><td><code>SupportRoom</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>im_groups</code></td><td><code>SupportRoom</code> (type=group)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>im_group_members</code></td><td><code>SupportParticipants</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>im_friends</code></td><td>⚠️ Chưa có — Friend list (user-to-user)</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>im_friend_requests</code></td><td>⚠️ Chưa có — Friend request workflow</td><td><span class="badge b-red">Thiếu</span></td></tr>
+  </tbody>
+</table>
+
+<h3>game_db — TCG Wallet Tables</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>tcg_wallet_reserve</code></td><td><code>Wallet</code> (seamless wallet)</td><td><span class="badge b-amber">Tích hợp vào Wallet</span></td></tr>
+    <tr><td><code>tcg_wallet_transaction</code></td><td><code>GameTransaction</code></td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>tcg_platform</code></td><td><code>GameAggregator</code></td><td><span class="badge b-green">Có</span></td></tr>
+  </tbody>
+</table>
+
+<h3>game_db — Activity Tables (boy.sql)</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>caipiao_activity_category</code></td><td>⚠️ Chưa có — Activity category (slot/live/fish/chess/lottery)</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_activity_type</code></td><td>⚠️ Chưa có — Activity type (lucky_order/weekly_salary/loss_rescue)</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_activity_reward</code></td><td>⚠️ Partial — Reward tiers per activity (tiered amounts)</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_activity_participation</code></td><td>⚠️ Chưa có — User participation history</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>caipiao_activity_user_stats</code></td><td>⚠️ Chưa có — User activity accumulation stats</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>account_transactions</code></td><td><code>Transaction</code> (ledger)</td><td><span class="badge b-green">Có</span></td></tr>
+    <tr><td><code>accounts</code> (optimistic lock)</td><td><code>Wallet.version</code> field</td><td><span class="badge b-amber">Thiếu <code>version</code> field</span></td></tr>
+  </tbody>
+</table>
+
+<h3>trade_db — Trading Tables (blockchain_trading.sql)</h3>
+<table>
+  <thead><tr><th>Legacy Table</th><th>LKVIP Prisma Model</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><code>symbols</code> (pip_size, margin_rate, leverage_max)</td><td>⚠️ Chưa có symbol với đầy đủ trading params</td><td><span class="badge b-red">Thiếu margin/leverage fields</span></td></tr>
+    <tr><td><code>positions</code> (long/short, pnl, stop_loss, take_profit)</td><td>⚠️ Chưa có — Open positions tracking</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>candlesticks</code> (OHLCV per interval)</td><td>Partial — <code>marketPriceFeed.ts</code> service</td><td><span class="badge b-amber">Chưa có Prisma model</span></td></tr>
+    <tr><td><code>price_alerts</code> (above/below trigger)</td><td>⚠️ Chưa có</td><td><span class="badge b-red">Thiếu</span></td></tr>
+    <tr><td><code>refresh_tokens</code></td><td>Redis session (sessionService)</td><td><span class="badge b-green">Có (Redis)</span></td></tr>
+    <tr><td><code>orders</code> (market/limit/stop_loss/take_profit)</td><td><code>tradeWalletService</code> partial</td><td><span class="badge b-amber">Thiếu order types</span></td></tr>
+    <tr><td><code>kyc_documents</code></td><td><code>kyc_documents</code> (admin_db)</td><td><span class="badge b-green">Có</span></td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+
+<h2>3. Dữ Liệu Quan Trọng Học Được Từ SQL</h2>
+
+<h3>VIP Levels — by_supplement.sql (10 cấp, tỷ lệ hoàn trả per game type)</h3>
+<div class="alert alert-blue">LKVIP hiện có VipLevel generic. Legacy có rebate rate riêng biệt cho từng loại game.</div>
+<table>
+  <thead><tr><th>VIP</th><th>Điểm cần</th><th>Thưởng lên cấp</th><th>Live Casino</th><th>Slot</th><th>Fishing</th><th>Lottery</th><th>Sports</th><th>Rút tối đa/lần</th></tr></thead>
+  <tbody>
+    <tr><td>VIP1</td><td>0</td><td>1K VND</td><td>0.40%</td><td>0.40%</td><td>0.40%</td><td>0.40%</td><td>0.30%</td><td>10M</td></tr>
+    <tr><td>VIP2</td><td>5,000</td><td>5K</td><td>0.50%</td><td>0.50%</td><td>0.50%</td><td>0.50%</td><td>0.40%</td><td>30M</td></tr>
+    <tr><td>VIP3</td><td>10,000</td><td>10K</td><td>0.60%</td><td>0.60%</td><td>0.60%</td><td>0.60%</td><td>0.50%</td><td>50M</td></tr>
+    <tr><td>VIP5</td><td>100,000</td><td>100K</td><td>0.80%</td><td>0.80%</td><td>0.80%</td><td>0.80%</td><td>0.70%</td><td>200M</td></tr>
+    <tr><td>VIP7</td><td>1,000,000</td><td>500K</td><td>1.00%</td><td>1.00%</td><td>1.00%</td><td>1.00%</td><td>0.90%</td><td>500M</td></tr>
+    <tr><td>VIP9</td><td>10,000,000</td><td>1M</td><td>1.20%</td><td>1.20%</td><td>1.20%</td><td>1.20%</td><td>1.10%</td><td>2B</td></tr>
+    <tr><td>VIP10</td><td>100,000,000</td><td>100M</td><td>1.50%</td><td>1.50%</td><td>1.50%</td><td>1.50%</td><td>1.30%</td><td>5B</td></tr>
+  </tbody>
+</table>
+
+<h3>Lottery Types — by_supplement.sql (12 loại)</h3>
+<table>
+  <thead><tr><th>Code</th><th>Tên Việt</th><th>Loại</th></tr></thead>
+  <tbody>
+    <tr><td><code>tx1m</code></td><td>Tài Xỉu 1 phút</td><td>lottery</td></tr>
+    <tr><td><code>tx3m/tx5m</code></td><td>Tài Xỉu 3/5 phút</td><td>lottery</td></tr>
+    <tr><td><code>xoc1m/xoc3m</code></td><td>Xóc Đĩa 1/3 phút</td><td>lottery</td></tr>
+    <tr><td><code>k31m/k33m</code></td><td>K3 Xúc Xắc 1/3 phút</td><td>lottery</td></tr>
+    <tr><td><code>pk101m</code></td><td>PK10 1 phút</td><td>lottery</td></tr>
+    <tr><td><code>vn1m/vn5m</code></td><td>VN Lottery 1/5 phút</td><td>lottery</td></tr>
+    <tr><td><code>xy28</code></td><td>XY28 Bắc Kinh</td><td>lottery</td></tr>
+    <tr><td><code>animal</code></td><td>Thú Vật Lộc Phát</td><td>lottery</td></tr>
+  </tbody>
+</table>
+
+<h3>Savings Vault Products — by_supplement.sql</h3>
+<table>
+  <thead><tr><th>Gói</th><th>Lãi/ngày</th><th>Min gửi</th><th>Khóa</th></tr></thead>
+  <tbody>
+    <tr><td>Gói Linh Hoạt</td><td>0.12%</td><td>100K VND</td><td>0 ngày</td></tr>
+    <tr><td>Gói 7 Ngày</td><td>0.15%</td><td>500K VND</td><td>7 ngày</td></tr>
+    <tr><td>Gói 30 Ngày</td><td>0.20%</td><td>1M VND</td><td>30 ngày</td></tr>
+  </tbody>
+</table>
+
+<h3>Activity Reward Tiers — boy.sql (dữ liệu thực)</h3>
+<table>
+  <thead><tr><th>Loại Activity</th><th>Điều kiện</th><th>Thưởng</th><th>Kỳ hạn</th></tr></thead>
+  <tbody>
+    <tr><td>Vé cược may mắn (đuôi 888)</td><td>trano kết thúc bằng "888"</td><td>888 VND</td><td>daily, 3 lần</td></tr>
+    <tr><td>Vé cược may mắn (đuôi 8888)</td><td>trano kết thúc bằng "8888"</td><td>1,888 VND</td><td>daily, 2 lần</td></tr>
+    <tr><td>Vé cược may mắn (đuôi 88888)</td><td>trano kết thúc bằng "88888"</td><td>2,888 VND</td><td>daily, 3 lần</td></tr>
+    <tr><td>Cứu trợ thua lỗ ≥1,000</td><td>Thua ≥ 1K/ngày</td><td>18 VND</td><td>daily, 1 lần</td></tr>
+    <tr><td>Cứu trợ thua lỗ ≥10,000</td><td>Thua ≥ 10K/ngày</td><td>188 VND</td><td>daily, 1 lần</td></tr>
+    <tr><td>Cứu trợ thua lỗ ≥100,000</td><td>Thua ≥ 100K/ngày</td><td>1,888 VND</td><td>daily, 1 lần</td></tr>
+    <tr><td>Lương tuần ≥5,000</td><td>Cược ≥ 5K/tuần</td><td>8 VND</td><td>weekly, 1 lần</td></tr>
+    <tr><td>Lương tuần ≥10,000,000</td><td>Cược ≥ 10M/tuần</td><td>2,888 VND</td><td>weekly, 1 lần</td></tr>
+    <tr><td>Check-in ngày 1</td><td>1 ngày liên tiếp</td><td>1 VND</td><td>daily</td></tr>
+    <tr><td>Check-in ngày 7</td><td>7 ngày liên tiếp</td><td>28 VND</td><td>daily</td></tr>
+    <tr><td>PG Vua cược ≥10,000</td><td>Cược PG ≥ 10K/ngày</td><td>8 VND</td><td>daily</td></tr>
+    <tr><td>PG Vua cược ≥1,000,000</td><td>Cược PG ≥ 1M/ngày</td><td>888 VND</td><td>daily</td></tr>
+  </tbody>
+</table>
+
+<h3>Banks VN — by-vi.sql (10 ngân hàng)</h3>
+<table>
+  <thead><tr><th>Code</th><th>Tên đầy đủ</th></tr></thead>
+  <tbody>
+    <tr><td>Vietcombank</td><td>Ngân hàng TMCP Ngoại thương Việt Nam</td></tr>
+    <tr><td>Techcombank</td><td>Ngân hàng TMCP Kỹ thương Việt Nam</td></tr>
+    <tr><td>BIDV</td><td>Ngân hàng TMCP Đầu tư và Phát triển Việt Nam</td></tr>
+    <tr><td>Agribank</td><td>Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam</td></tr>
+    <tr><td>MB Bank</td><td>Ngân hàng TMCP Quân đội</td></tr>
+    <tr><td>ACB</td><td>Ngân hàng TMCP Á Châu</td></tr>
+    <tr><td>Sacombank</td><td>Ngân hàng TMCP Sài Gòn Thương Tín</td></tr>
+    <tr><td>TPBank</td><td>Ngân hàng TMCP Tiên Phong</td></tr>
+    <tr><td>VPBank</td><td>Ngân hàng TMCP Việt Nam Thịnh Vượng</td></tr>
+    <tr><td>VietinBank</td><td>Ngân hàng TMCP Công Thương Việt Nam</td></tr>
+  </tbody>
+</table>
+
+<h3>TCG Providers — migrations/001 + 003</h3>
+<table>
+  <thead><tr><th>Code</th><th>Tên</th><th>Game Type</th><th>CDN Icon</th></tr></thead>
+  <tbody>
+    <tr><td>PG</td><td>PG Soft</td><td>SLOTS</td><td><code>TCG_PROD_IMAGES/.../RNG_PG.png</code></td></tr>
+    <tr><td>JDB</td><td>JDB Gaming</td><td>SLOTS</td><td><code>RNG_JDB.png</code></td></tr>
+    <tr><td>JILI</td><td>JILI</td><td>SLOTS</td><td><code>RNG_JL.png</code></td></tr>
+    <tr><td>FC</td><td>FC Electronic</td><td>SLOTS</td><td><code>RNG_FC.png</code></td></tr>
+    <tr><td>CQ9</td><td>CQ9</td><td>SLOTS</td><td><code>RNG_CQ9.png</code></td></tr>
+    <tr><td>AG</td><td>AG Casino</td><td>LIVE</td><td><code>LIVE_AG.png</code></td></tr>
+    <tr><td>DG</td><td>DG Casino</td><td>LIVE</td><td><code>LIVE_DG.png</code></td></tr>
+    <tr><td>WM</td><td>WM Casino</td><td>LIVE</td><td><code>LIVE_WM.png</code></td></tr>
+    <tr><td>SEXY</td><td>SEXY Baccarat</td><td>LIVE</td><td><code>LIVE_SEX.png</code></td></tr>
+    <tr><td>SABA</td><td>SABA Thể Thao</td><td>SPORTS</td><td><code>SPORT_SABA.png</code></td></tr>
+    <tr><td>CMD</td><td>CMD368</td><td>SPORTS</td><td><code>SPORT_CMD.png</code></td></tr>
+  </tbody>
+</table>
+<p style="font-size:12px;color:#57606a;margin-top:4px">CDN base: <code>https://images.b728484.com:42666/TCG_PROD_IMAGES/VENDOR/WEB/BASE/NAV/</code> &amp; <code>TCG_GAME_ICONS/{PLATFORM}/VI/{game_id}.png</code></p>
+
+<hr />
+
+
+<h2>4. Gaps Cần Bổ Sung Vào Prisma Schema LKVIP</h2>
+<div class="alert alert-red">Các gap dưới đây được phát hiện từ so sánh legacy SQL vs Prisma schema hiện tại. Ưu tiên theo mức độ ảnh hưởng.</div>
+
+<h3>🔴 Phải làm — game_db</h3>
+<table>
+  <thead><tr><th>Gap</th><th>Legacy Source</th><th>Đề xuất xử lý</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>VipLevel thiếu rebate rate per game type</td>
+      <td><code>caipiao_membergroup</code> có 7 loại: fs_realperson, fs_fish, fs_electron, fs_lottery, fs_sport, fs_chess, fs_esport</td>
+      <td>Thêm fields vào <code>VipLevel</code> model trong <code>prisma/game/schema.prisma</code></td>
+    </tr>
+    <tr>
+      <td>Thiếu <code>LotteryPlayType</code> / <code>OddsSetting</code> chi tiết</td>
+      <td><code>caipiao_wanfa</code>, <code>caipiao_play</code>, <code>caipiao_lottery_play_types</code></td>
+      <td>Tạo model <code>LotteryPlayType</code> với fields: code, name, odds, minBet, maxBet, lotteryTypeId</td>
+    </tr>
+    <tr>
+      <td>Thiếu Activity system đầy đủ</td>
+      <td><code>caipiao_activity_category</code>, <code>caipiao_activity_type</code>, <code>caipiao_activity_reward</code>, <code>caipiao_activity_participation</code></td>
+      <td>Tạo 4 models mới: <code>ActivityCategory</code>, <code>ActivityType</code>, <code>ActivityReward</code>, <code>ActivityParticipation</code></td>
+    </tr>
+    <tr>
+      <td>Thiếu Rebate rate config per game category</td>
+      <td><code>caipiao_rebate_category_config</code>, <code>caipiao_rebate_tier_config</code></td>
+      <td>Extend <code>RebateRule</code> hoặc tạo <code>RebateCategoryConfig</code></td>
+    </tr>
+    <tr>
+      <td>Thiếu <code>LotteryIssueConfig</code> — schedule mỗi loại xổ số</td>
+      <td><code>caipiao_issue_config</code> (opentime, closetime, interval_sec)</td>
+      <td>Thêm model vào game schema</td>
+    </tr>
+    <tr>
+      <td>TCG CDN image mapping chưa có trong seed</td>
+      <td><code>patch-tcg-images.sql</code>, <code>migrations/002</code></td>
+      <td>Cập nhật <code>prisma/seeds/game.seed.ts</code> với icon CDN đúng format</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>🔴 Phải làm — trade_db</h3>
+<table>
+  <thead><tr><th>Gap</th><th>Legacy Source</th><th>Đề xuất</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Thiếu <code>TradingPosition</code> model (open positions)</td>
+      <td><code>positions</code> table: side, lot, pnl, stop_loss, take_profit, leverage, margin</td>
+      <td>Tạo model <code>TradingPosition</code> trong <code>prisma/trade/schema.prisma</code></td>
+    </tr>
+    <tr>
+      <td>Thiếu OHLCV <code>Candlestick</code> model</td>
+      <td><code>candlesticks</code>: symbol_id, interval (1m/5m/1h/1d…), open_time, open/high/low/close, volume</td>
+      <td>Tạo model <code>Candlestick</code> với interval enum. <code>marketPriceFeed.ts</code> service đang xử lý nhưng chưa persist</td>
+    </tr>
+    <tr>
+      <td>Thiếu <code>PriceAlert</code> model</td>
+      <td><code>price_alerts</code>: user_id, symbol_id, price, condition (above/below), fired_at</td>
+      <td>Tạo model trong trade schema</td>
+    </tr>
+    <tr>
+      <td>Symbol thiếu trading params</td>
+      <td><code>symbols</code> có: pip_size, min_lot, max_lot, margin_rate, leverage_max, maker_fee, taker_fee</td>
+      <td>Extend <code>GameProduct</code> hoặc tạo <code>TradingSymbol</code> model</td>
+    </tr>
+    <tr>
+      <td>Order types không đầy đủ</td>
+      <td>Legacy có: market, limit, stop_loss, take_profit; LKVIP hiện chỉ có pending/approved/rejected</td>
+      <td>Thêm <code>orderType</code> enum vào trade orders</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>🟡 Nên làm — admin_db / game_db</h3>
+<table>
+  <thead><tr><th>Gap</th><th>Source</th><th>Ưu tiên</th></tr></thead>
+  <tbody>
+    <tr><td>Wallet thiếu <code>version</code> field (Optimistic Lock)</td><td><code>accounts.version</code> — tránh race condition credit/debit</td><td>Medium</td></tr>
+    <tr><td>Thiếu <code>VipLevelChangeLog</code></td><td><code>yzz_level_change_log</code> — audit trail VIP changes</td><td>Low</td></tr>
+    <tr><td>Thiếu <code>im_friends</code> / <code>im_friend_requests</code></td><td>Friend list system (có thể cần cho dating/game)</td><td>Low</td></tr>
+    <tr><td>Lottery chat room thiếu</td><td><code>caipiao_lottery_chat</code></td><td>Low</td></tr>
+    <tr><td>caipiao_jinjijilu chưa có</td><td>Bảng log phong tỏa khẩn cấp tài khoản</td><td>Medium — dùng cho risk engine</td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+
+<h2>5. Seeds Cần Cập Nhật Từ Dữ Liệu Legacy</h2>
+<table>
+  <thead><tr><th>Seed File</th><th>Cần cập nhật gì</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>seeds/game.seed.ts</code></td>
+      <td>Thêm 12 lottery types VN (tx1m/tx3m/xoc1m/k3/pk10/vn/xy28/animal), 10 VIP levels với rebate rates per game type, 3 savings vault products</td>
+      <td><code>by_supplement.sql</code></td>
+    </tr>
+    <tr>
+      <td><code>seeds/admin.seed.ts</code></td>
+      <td>Thêm 10 banks VN (Vietcombank, Techcombank, BIDV…), system settings VN (min_recharge=100K, tikuanMin=200K), withdrawal hours 00:10–23:55</td>
+      <td><code>by-vi.sql</code>, <code>004_settings_vn.sql</code></td>
+    </tr>
+    <tr>
+      <td><code>seeds/gameAggregators.seed.ts</code></td>
+      <td>Thêm TCG platforms (PG/JDB/JILI/FC/CQ9/AG/DG/WM/SEXY/SABA/CMD) với CDN icons đúng</td>
+      <td><code>001_tcg_platform_setup.sql</code>, <code>003_localization.sql</code></td>
+    </tr>
+    <tr>
+      <td><code>seeds/gameProducts.seed.ts</code></td>
+      <td>Update game icons theo format CDN TCG: <code>https://images.b728484.com:42666/TCG_GAME_ICONS/{PLATFORM}/VI/{game_id}.png</code></td>
+      <td><code>patch-tcg-images.sql</code>, <code>002_tcg_image_cdn_map.sql</code></td>
+    </tr>
+    <tr>
+      <td><code>seeds/admin.seed.ts</code></td>
+      <td>9 default risk rules (transaction_anomaly, multi_account, bot_detected, high_frequency, withdraw_after_deposit…)</td>
+      <td><code>database.sql</code> (admin_db risk_rules INSERT)</td>
+    </tr>
+    <tr>
+      <td><code>seeds/admin.seed.ts</code></td>
+      <td>4 withdrawal rules per project (game/trade/dating/sports) với auto_approve thresholds</td>
+      <td><code>database.sql</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+
+<h2>6. Insights Kỹ Thuật Học Được</h2>
+
+<h3>Pattern: Optimistic Lock cho Wallet Balance</h3>
+<div class="alert">Legacy <code>accounts</code> table dùng <code>version</code> INT để tránh race condition khi nhiều worker credit/debit cùng lúc. LKVIP dùng Prisma <code>$transaction</code> nhưng chưa có version field. Nên thêm <code>version Int @default(0)</code> vào <code>Wallet</code> model + implement optimistic lock check.</div>
+
+<h3>Pattern: trano (Transaction Reference Number)</h3>
+<div class="alert">Legacy tạo <code>trano</code> theo format: <code>{RANDOM_CHAR}{YYMMDD}{SEQ}{UID}</code> — ví dụ <code>M25112506085594577</code>. LKVIP cần đảm bảo <code>referenceId</code> có format tương tự để match webhook từ payment gateway.</div>
+
+<h3>Pattern: Rebate Tier Config</h3>
+<div class="alert">Legacy có rebate rate riêng biệt theo game type (live/fish/slot/lottery/sport/chess/esport) PER VIP level. LKVIP hiện dùng <code>RebateRule</code> generic. Cần extend để hỗ trợ per-game-type rates nếu muốn feature parity.</div>
+
+<h3>CDN Image URL Pattern (TCG)</h3>
+<div class="alert alert-blue">
+  Game icon: <code>https://images.b728484.com:42666/TCG_GAME_ICONS/{PLATFORM}/VI/{game_id}.png</code><br />
+  Platform banner: <code>https://images.b728484.com:42666/TCG_PROD_IMAGES/VENDOR/WEB/BASE/NAV/{TYPE}_{PLATFORM}.png</code><br />
+  Local path backup: <code>/game_pictures/p/280/L1/{product_type}/{game_type}/custom_VND.avif</code>
+</div>
+
+<h3>Blockchain Password Migration</h3>
+<div class="alert">File <code>migrate_password_schema.sql</code> cho thấy blockchain platform dùng <code>lc_user</code> và <code>system_user</code> với password VARCHAR(60) cũ (MD5). Migration mở rộng lên VARCHAR(255) để hỗ trợ bcrypt. LKVIP đã dùng bcrypt ngay từ đầu — không cần migration này.</div>
+
+<h3>Domain &amp; Config Production</h3>
+<div class="alert">Domain production từ <code>004_settings_vn.sql</code>: <code>boyue.okwink6.com</code> (legacy). LKVIP đã cập nhật sang <code>tc-gaming.live</code>. Settings VN: min_recharge=100K, max_recharge=500M, tikuanMin=200K, tikuanMax=50M, giờ rút 00:10–23:55, số lần rút 10 lần/ngày.</div>
+
+<h3>Activity System Logic</h3>
+<div class="alert">Legacy có 3 loại activity chính: (1) <strong>lucky_order</strong> — thưởng khi đuôi mã cược khớp (888/8888/88888), (2) <strong>loss_rescue</strong> — cứu trợ theo tổng thua lỗ hàng ngày theo bậc, (3) <strong>weekly_salary</strong> — lương theo tổng cược tuần theo bậc. Đây là promotions động, cần ActivityReward table với tiered config.</div>
+
+<hr />
+
+<h2>7. Tổng Kết Ưu Tiên Action Items</h2>
+<table>
+  <thead><tr><th>#</th><th>Task</th><th>File cần sửa</th><th>Ưu tiên</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Thêm rebate rates per game type vào VipLevel schema</td><td><code>prisma/game/schema.prisma</code></td><td><span class="badge b-red">🔴 Cao</span></td></tr>
+    <tr><td>2</td><td>Thêm TradingPosition + Candlestick + PriceAlert models</td><td><code>prisma/trade/schema.prisma</code></td><td><span class="badge b-red">🔴 Cao</span></td></tr>
+    <tr><td>3</td><td>Thêm Activity system (4 models)</td><td><code>prisma/game/schema.prisma</code></td><td><span class="badge b-red">🔴 Cao</span></td></tr>
+    <tr><td>4</td><td>Thêm LotteryPlayType + LotteryIssueConfig models</td><td><code>prisma/game/schema.prisma</code></td><td><span class="badge b-amber">🟡 Trung bình</span></td></tr>
+    <tr><td>5</td><td>Update seeds: 12 lottery types, VIP levels với game-type rebate, banks VN</td><td><code>seeds/game.seed.ts</code>, <code>seeds/admin.seed.ts</code></td><td><span class="badge b-red">🔴 Cao</span></td></tr>
+    <tr><td>6</td><td>Update GameAggregator seeds với TCG providers + CDN icons</td><td><code>seeds/gameAggregators.seed.ts</code>, <code>seeds/gameProducts.seed.ts</code></td><td><span class="badge b-amber">🟡 Trung bình</span></td></tr>
+    <tr><td>7</td><td>Thêm Wallet.version field (optimistic lock)</td><td><code>prisma/admin/schema.prisma</code></td><td><span class="badge b-amber">🟡 Trung bình</span></td></tr>
+    <tr><td>8</td><td>Thêm RebateCategoryConfig model</td><td><code>prisma/admin/schema.prisma</code></td><td><span class="badge b-amber">🟡 Trung bình</span></td></tr>
+    <tr><td>9</td><td>Thêm VipLevelChangeLog model</td><td><code>prisma/game/schema.prisma</code></td><td><span class="badge b-gray">🔵 Thấp</span></td></tr>
+    <tr><td>10</td><td>Mở rộng constants/banks.ts với 10 banks VN đầy đủ</td><td><code>packages/constants/src/banks.ts</code></td><td><span class="badge b-amber">🟡 Trung bình</span></td></tr>
+    <tr><td>11</td><td>Cập nhật reference/database.md với game type rebate logic</td><td><code>.bob/skills/lkvip-group/reference/database.md</code></td><td><span class="badge b-gray">🔵 Low</span></td></tr>
+  </tbody>
+</table>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

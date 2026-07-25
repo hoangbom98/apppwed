@@ -1,216 +1,136 @@
-# Non-Functional Requirements (NFR) — KJC Platform v2.0
+# Non-Functional Requirements — LKVIP
 
----
+## 1. Performance
 
-## 1. Hiệu năng (Performance)
+| Scope | Target |
+|-------|--------|
+| Auth/login | p95 < 200ms khi cache/DB khỏe |
+| Authenticated API | p95 < 500ms |
+| Health/config cached endpoints | p95 < 200ms |
+| Chat/realtime | Socket.IO latency theo vùng triển khai |
+| Build frontends | Theo dõi qua CI/local build |
 
-### 1.1 Throughput Targets (TPS)
+Baseline kỹ thuật:
 
-| Module | Target TPS | Ghi chú |
-|--------|-----------|---------|
-| **Login / Auth** | 50 req/s | Rate limited: 20 req/min/IP |
-| **Dashboard stats** | 200 req/s | Cached Redis 60s |
-| **Payment (deposit/withdraw)** | 100 tx/s | ACID transactions, retry queue |
-| **Game session** | 500 req/s | Per game module |
-| **Chat / Realtime** | 1000 msg/s | Qua Socket.IO |
-| **Public API (health, docs)** | Không giới hạn | Nginx cache |
+- Redis cache cho dashboard/config khi phù hợp.
+- Prisma clients theo từng schema.
+- PM2 process `lkvip-api`.
+- Nginx gzip/proxy/static serving.
+- Public config cache header ngắn cho `/api/shared/config`.
 
-### 1.2 Latency Targets (API Response Time)
+## 2. Scalability
 
-| Percentile | Target | Scope |
-|-----------|--------|-------|
-| p50 (median) | < 100ms | Tất cả authenticated APIs |
-| **p95** | **< 500ms** | Tất cả authenticated APIs |
-| p99 | < 1000ms | Tất cả authenticated APIs |
-| p95 | < 200ms | Login, health check, cached endpoints |
+Giai đoạn hiện tại: single VPS native.
 
-> **Cách đo:** Thêm `prom-client` middleware ghi histogram latency per-route.
-
-### 1.3 Baseline Hiện tại
-
-Các biện pháp đã triển khai để đạt targets trên:
-- Redis cache cho dashboard stats (TTL 60s) và config (TTL 300s)
-- Prisma connection pooling (mặc định pool size theo DB)
-- PM2 cluster mode — tận dụng tất cả CPU cores
-- Nginx gzip compression cho response lớn
-- HTTP Cache-Control headers qua `httpCache.js` middleware
-
----
-
-## 2. Khả năng mở rộng (Scalability)
-
-### 2.1 Chiến lược Scale hiện tại (Single VPS)
-
-```
-Phase 1 (hiện tại): Single VPS + PM2 Cluster
-    → Scale UP: tăng RAM/CPU VPS
-    → Scale OUT: PM2 instances = số CPU cores
-
-Phase 2 (khi cần > 10k concurrent): Multi-VPS
-    → Nginx load balancing across multiple app servers
-    → MySQL replication (1 master + 1 replica read-only)
-    → Redis Sentinel hoặc Redis Cluster
-    → Shared session storage (Redis)
+```text
+Nginx → PM2 lkvip-api → MySQL 6 schemas + Redis
 ```
 
-### 2.2 Database Sharding
+Scale ưu tiên:
 
-**Chiến lược:** Domain-based sharding (đã triển khai)
-- **Shard key:** Project/domain (hub, game, trade, dating, sports, admin)
-- 6 databases độc lập → không có cross-database foreign keys
-- Mỗi database có thể di chuyển sang server riêng độc lập
+1. Tối ưu query/cache/index.
+2. Giảm duplicate/bundle bằng shared packages và lazy loading.
+3. Scale up VPS nếu CPU/RAM thiếu.
+4. Scale out nhiều app server/DB replica khi có nhu cầu thật.
 
-**Khi nào cần sharding sâu hơn:**
-- Table > 50M rows → partitioning theo `created_at` (range partitioning)
-- Single DB > 50GB → xem xét tách thêm
+Không dùng Docker làm hướng scale/deploy chuẩn.
 
-### 2.3 Auto-scaling Trigger (Phase 2)
+## 3. Reliability
 
-| Metric | Ngưỡng trigger scale out |
-|--------|--------------------------|
-| CPU sustained > 70% | Thêm app server |
-| Memory > 80% | Thêm app server hoặc tăng RAM |
-| MySQL connections > 70% max | Tăng `max_connections` hoặc thêm replica |
-| Redis memory > 70% | Tăng maxmemory |
+| Metric | Target |
+|--------|--------|
+| Production uptime | 99.9% |
+| RTO | < 4 giờ |
+| RPO | < 24 giờ |
+| Deploy health | `/health` JSON `status == healthy` |
 
----
+Health endpoint phải kiểm tra DB/Redis đủ để phản ánh degraded/healthy. Deploy không chỉ dựa vào HTTP 200.
 
-## 3. Độ tin cậy (Reliability)
+## 4. Security
 
-### 3.1 SLA Uptime
+| Hạng mục | Yêu cầu |
+|----------|---------|
+| Secrets | Không commit, không in ra docs/log/chat |
+| Env | `apps/backend/.env`, chmod `600` production |
+| JWT/Encryption | Secret tối thiểu 32 ký tự |
+| CORS | Production bắt buộc cấu hình `CORS_ORIGINS` |
+| DB/Redis/API port | Không expose trực tiếp public |
+| Public config | Chỉ trả non-secret ProjectConfig |
+| SQL injection | Dùng Prisma parameterized queries |
+| XSS | Không render HTML tùy ý; không dùng `dangerouslySetInnerHTML` nếu không bắt buộc |
 
-| Environment | Uptime Target | Max Downtime/năm |
-|-------------|--------------|------------------|
-| Production | **99.9%** | 8.7 giờ |
-| Staging | 95% | 18 ngày |
+## 5. Maintainability
 
-### 3.2 Recovery Objectives
+- Shared UI/hooks: `packages/ui`.
+- Shared types: `packages/types`.
+- Shared helpers: `packages/utils`.
+- Shared constants: `packages/constants`.
+- Không thêm dependency nếu dependency hiện có xử lý được.
+- Scan trùng lặp theo `docs/CODEBASE_SCAN.md` trước refactor lớn.
+- Refactor không đổi behavior nếu mục tiêu chỉ là giảm trùng lặp.
 
-| Metric | Target | Cơ chế |
-|--------|--------|--------|
-| **RTO** (Recovery Time Objective) | **< 4 giờ** | PM2 auto-restart + runbook |
-| **RPO** (Recovery Point Objective) | **< 24 giờ** | Daily backup lúc 2 AM |
-| MTTR (Mean Time to Repair) | < 2 giờ | Runbook + on-call |
+## 6. Testing requirements
 
-### 3.3 Fault Tolerance
-
-- **PM2:** `max_restarts: 10`, `restart_delay: 3000ms` — tự restart khi crash
-- **Database:** Retry logic qua Prisma connection pool
-- **Redis:** Fallback graceful — codebase không crash nếu Redis down (cache miss)
-- **Cron jobs:** Mỗi job độc lập, lỗi một job không ảnh hưởng các job khác
-- **Health check:** `/health/live` endpoint — PM2 và deploy script dùng để verify
-
----
-
-## 4. Bảo mật (Security)
-
-### 4.1 Mã hóa
-
-| Loại dữ liệu | Phương pháp | Ghi chú |
-|-------------|------------|---------|
-| Password | bcryptjs, salt rounds = 10 | Không thể giải mã ngược |
-| PII (số điện thoại, CCCD) | AES-256-CBC | Key trong env `ENCRYPTION_KEY` |
-| JWT tokens | HS256 (HMAC-SHA256) | Khóa 64+ ký tự |
-| Data in transit | TLS 1.2+ (HTTPS) | Nginx SSL termination |
-| Data at rest | MySQL encrypted InnoDB (optional) | Cấu hình MySQL level |
-
-### 4.2 Authentication & Authorization
-
-| Cơ chế | Chi tiết |
-|--------|---------|
-| JWT Access Token | Expiry: 2h |
-| JWT Refresh Token | Expiry: 30 ngày |
-| 2FA (TOTP) | Google Authenticator, optional per user |
-| RBAC | super_admin > admin > viewer |
-| Password Policy | Tối thiểu 8 ký tự, có số + chữ hoa |
-
-### 4.3 API Protection
-
-| Attack | Biện pháp |
-|--------|----------|
-| Brute force | `authLimiter`: 20 req/min/IP |
-| DDoS | Nginx `limit_req`, `publicLimiter`: 100 req/min |
-| SQL Injection | Prisma parameterized queries (100% prepared statements) |
-| XSS | Helmet `xssFilter` + `contentSecurityPolicy` |
-| CSRF | JWT Bearer token (không dùng cookies) |
-| Bot | Bot detector trong `src/risk/botDetector.js` |
-
-### 4.4 Key Management
-
-| Secret | Lưu trữ | Rotation |
-|--------|---------|---------|
-| JWT secrets | `.env` file (chmod 600) | Mỗi 6 tháng |
-| DB passwords | `.env` file (chmod 600) | Mỗi 3 tháng |
-| ENCRYPTION_KEY | `.env` file (chmod 600) | Không xoay (key derivation) |
-| SSH keys | `~/.ssh/` (chmod 600) | Hàng năm |
-
-> **Roadmap bảo mật cao hơn:** HashiCorp Vault hoặc AWS Secrets Manager khi scale lên multi-server.
-
----
-
-## 5. Tuân thủ pháp lý (Compliance)
-
-### 5.1 Phạm vi áp dụng
-
-| Quy định | Áp dụng? | Trạng thái |
-|----------|----------|-----------|
-| **PDPA** (Việt Nam) | Có — nếu xử lý dữ liệu cá nhân người Việt | Cần đánh giá |
-| **GDPR** (EU) | Có — nếu có user EU | Cần đánh giá nếu mở rộng |
-| **KYC/AML** | Có — với module giao dịch tài chính | KYC module đã có (`kycController.js`, `amlService.js`) |
-
-### 5.2 Data Retention Policy
-
-| Loại dữ liệu | Thời gian lưu trữ | Cơ chế xóa |
-|-------------|-------------------|------------|
-| Audit logs | 90 ngày | Cron auto-delete |
-| Security logs (low/medium severity) | 30 ngày | Cron auto-delete |
-| Transaction records | 7 năm | Manual archive |
-| Personal data | Theo yêu cầu của user (right to erasure) | Admin action |
-| Chat logs | 1 năm | Cron archive |
-
-### 5.3 KYC Levels
-
-| Level | Yêu cầu | Giới hạn giao dịch |
-|-------|---------|-------------------|
-| `unverified` | Email xác nhận | Nạp < 1 triệu/ngày |
-| `basic` | Phone + Email | Nạp < 5 triệu/ngày |
-| `verified` | CCCD/CMND | Nạp < 50 triệu/ngày |
-| `enhanced` | CCCD + selfie + bank link | Không giới hạn |
-
----
-
-## 6. Kiểm thử (Testing Requirements)
-
-### 6.1 Coverage Targets
-
-| Layer | Minimum Coverage | Target |
-|-------|-----------------|--------|
-| `shared/utils/` | **80%** | 95% |
-| `shared/services/` | **60%** | 80% |
-| `shared/base/` | **80%** | 95% |
-| `modules/admin/controllers/` | **60%** | 75% |
-| `modules/trade/`, `modules/game/` | **40%** | 60% |
-
-### 6.2 Performance Testing
-
-Công cụ: **k6** (JavaScript-based load testing)
+Checks thường dùng:
 
 ```bash
-# Install k6
-brew install k6  # macOS
-# hoặc: snap install k6  # Ubuntu
-
-# Chạy load test
-k6 run source/docs/tests/load-test.js
+pnpm lint:all
+pnpm typecheck:all
+pnpm test
+pnpm build:frontends
+pnpm --filter lkvip-backend run build
 ```
 
-Target kịch bản:
-- Login: 100 concurrent users × 60 giây
-- Dashboard: 200 concurrent users × 60 giây
-- Payment: 50 concurrent users × 120 giây
+Khi chỉ sửa docs, kiểm tra link/stale term là đủ.
 
-### 6.3 Security Testing
+Khi đổi frontend/shared packages:
 
-- `npm audit` trong CI pipeline (weekly)
-- Manual penetration test: mỗi 6 tháng (OWASP Top 10 checklist)
-- Dependency scanning: `npm audit --audit-level=high` fail CI nếu HIGH/CRITICAL
+- Build app bị ảnh hưởng.
+- Build toàn bộ frontends nếu thay shared package.
+- Kiểm tra UI bằng browser nếu là thay đổi giao diện.
+
+Khi đổi backend:
+
+- Build backend.
+- Test endpoint liên quan.
+- Kiểm tra `/health`.
+
+## 7. Observability
+
+- PM2 logs: `pm2 logs lkvip-api`.
+- Metrics endpoint: `/metrics`.
+- Health endpoint: `/health`.
+- Sentry optional nếu có `SENTRY_DSN`.
+- Prometheus/Grafana config trong `config/monitoring/` nếu được triển khai.
+
+## 8. Deployment requirements
+
+- Deploy root: `/var/LKVIP`.
+- Deploy user: `lkvip`.
+- Backend internal: `127.0.0.1:5000`.
+- Public domains hiện tại: root, hub, trade, sports, admin, api.
+- `game`/`dating` chưa public DNS/Nginx trong config hiện tại.
+- Canonical guide: `docs/DEPLOYMENT.md`.
+
+## 9. Performance testing
+
+Nếu cần load test, dùng script native trên host/dev machine, không Docker.
+
+Ví dụ k6 path chuẩn nếu thêm test:
+
+```bash
+k6 run tests/load/<scenario>.js
+```
+
+Không dùng path cũ `source/docs/tests/...`.
+
+## 10. Optimization targets
+
+Các target dưới đây là mục tiêu, không phải cam kết hiện trạng:
+
+| Chỉ số | Mục tiêu |
+|--------|----------|
+| Duplicate source | < 5% sau refactor lớn |
+| Bundle | Giảm theo từng app, đo từ `apps/*/dist` |
+| Dependency drift | Version shared đưa vào catalog khi hợp lý |
+| Build time | Theo dõi qua CI/local, tối ưu sau khi có baseline |

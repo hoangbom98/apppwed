@@ -95,6 +95,7 @@ Schema: `apps/backend/prisma/<project>/schema.prisma`.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Kiến trúc hệ thống |
 | [`docs/API_ENDPOINTS.md`](docs/API_ENDPOINTS.md) | API canonical |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Deploy canonical |
+| [`docs/CODEBASE_SCAN.md`](docs/CODEBASE_SCAN.md) | Scan trùng lặp/tối ưu codebase |
 | [`docs/MIGRATION_GUIDE.md`](docs/MIGRATION_GUIDE.md) | Prisma migrations |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runbook vận hành |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Quy trình đóng góp |

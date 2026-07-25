@@ -73,9 +73,9 @@ export default function MainLayout() {
     return () => document.removeEventListener('mousedown', close);
   }, [userMenuOpen]);
 
-  const siteName   = brand?.site_name    ?? 'OKVIP Hub';
+  const siteName   = brand?.site_name    ?? 'LKVIP Hub';
   const logoUrl    = brand?.logo_url     ?? '/assets/gif/header-logo.gif';
-  const copyright  = brand?.copyright_text ?? `© ${new Date().getFullYear()} OKVIP Hub`;
+  const copyright  = brand?.copyright_text ?? `© ${new Date().getFullYear()} LKVIP Hub`;
   const fbUrl      = social?.facebook_url   ?? '';
   const tgUrl      = social?.telegram_url   ?? '';
   const hotline    = social?.hotline         ?? '';

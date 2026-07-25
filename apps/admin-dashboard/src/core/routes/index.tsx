@@ -49,11 +49,14 @@ const AuditLogPage     = () => lazyPage(() => import('@admin/modules/shared/page
 const RealtimePage     = () => lazyPage(() => import('@admin/modules/realtime/RealtimeLayout'));
 
 // ── Settings extended pages ────────────────────────────────────────────────────
+const IntegrationSettingsPage   = () => lazyPage(() => import('@admin/modules/settings/pages/IntegrationSettings'));
 const GeneralSettingsPage       = () => lazyPage(() => import('@admin/modules/settings/pages/GeneralSettings'));
 const ConnectionsPage           = () => lazyPage(() => import('@admin/modules/settings/pages/ConnectionsPage'));
 const NotificationTemplatesPage = () => lazyPage(() => import('@admin/modules/settings/pages/NotificationTemplatesPage'));
 const CronJobsPage              = () => lazyPage(() => import('@admin/modules/settings/pages/CronJobsPage'));
 const WidgetsPage               = () => lazyPage(() => import('@admin/modules/settings/pages/WidgetsPage'));
+const TelegramBroadcastPage     = () => lazyPage(() => import('@admin/modules/settings/pages/TelegramBroadcastPage'));
+const TelegramAutoReplyPage     = () => lazyPage(() => import('@admin/modules/settings/pages/TelegramAutoReplyPage'));
 
 // ── Unified Project Users Component ────────────────────────────────────────────
 const UnifiedUsers = lazy(() => import('@admin/modules/shared/pages/ProjectUsersPage'));
@@ -183,11 +186,14 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'trade/config',      element: lazyPage(() => import('@admin/modules/trade/pages/TradeConfig')) },
 
   // Settings extended
-  { path: 'settings/general',          element: <GeneralSettingsPage /> },
-  { path: 'settings/connections',      element: <ConnectionsPage /> },
-  { path: 'settings/notification-tpl', element: <NotificationTemplatesPage /> },
-  { path: 'settings/cron-jobs',        element: <CronJobsPage /> },
-  { path: 'settings/widgets',          element: <WidgetsPage /> },
+  { path: 'settings/integrations',        element: <IntegrationSettingsPage /> },
+  { path: 'settings/general',             element: <GeneralSettingsPage /> },
+  { path: 'settings/connections',         element: <ConnectionsPage /> },
+  { path: 'settings/notification-tpl',    element: <NotificationTemplatesPage /> },
+  { path: 'settings/cron-jobs',           element: <CronJobsPage /> },
+  { path: 'settings/widgets',             element: <WidgetsPage /> },
+  { path: 'settings/telegram-broadcast',  element: <TelegramBroadcastPage /> },
+  { path: 'settings/telegram-bot',        element: <TelegramAutoReplyPage /> },
 
   // Ops
   { path: 'ops',               element: lazyPage(() => import('@admin/modules/ops/pages/OperationsDashboard')) },

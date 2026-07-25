@@ -6,13 +6,19 @@ const config: Config = {
   roots:            ['<rootDir>/src/__tests__'],
   testMatch:        ['**/*.test.ts'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', { tsconfig: { strict: false, allowJs: true } }],
+    '^.+\\.ts$': ['ts-jest', { tsconfig: { strict: false, allowJs: true, types: ['node', 'jest'] } }],
   },
   moduleNameMapper: {
+    // workspace packages — map to TypeScript source so ts-jest can compile them
+    '^@lkvip/constants$': '<rootDir>/../../packages/constants/src/index.ts',
+    '^@lkvip/utils$':     '<rootDir>/../../packages/utils/src/index.ts',
+    '^@lkvip/types$':     '<rootDir>/../../packages/types/src/index.ts',
     // databases mock
     '^../../config/databases$':      '<rootDir>/src/__tests__/__mocks__/databases',
     '^../config/databases$':         '<rootDir>/src/__tests__/__mocks__/databases',
-    '^../../../config/databases$':   '<rootDir>/src/__tests__/__mocks__/databases',
+    '^../../../config/databases$':       '<rootDir>/src/__tests__/__mocks__/databases',
+    '^../../../../config/databases$':    '<rootDir>/src/__tests__/__mocks__/databases',
+    '^../../../../../config/databases$': '<rootDir>/src/__tests__/__mocks__/databases',
     // logger mock
     '^../services/logger$':          '<rootDir>/src/__tests__/__mocks__/logger',
     '^../../services/logger$':       '<rootDir>/src/__tests__/__mocks__/logger',
@@ -32,9 +38,11 @@ const config: Config = {
     'src/shared/**/*.ts',
     '!src/shared/**/*.d.ts',
     '!src/shared/**/index.ts',
+    // payment-gateway adapters require live HTTP mocks — excluded from threshold
+    '!src/shared/services/paymentService.ts',
   ],
   coverageThreshold: {
-    global: { lines: 40 },
+    global: { lines: 50 },   // minimum 50% line coverage on testable shared services
   },
   passWithNoTests: true,
   testTimeout:     10000,

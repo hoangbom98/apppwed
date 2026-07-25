@@ -1,312 +1,206 @@
-# Deployment Guide — KJC Platform v2.0
+# Deployment Guide — LKVIP GROUP @ tc-gaming.live
 
----
+Canonical deploy guide cho LKVIP. Workflow chuẩn chạy native trên VPS, không dùng Docker.
 
-## 1. Yêu cầu VPS
+## 1. Hạ tầng production
 
-| Spec | Tối thiểu | Khuyến nghị |
-|------|-----------|-------------|
-| CPU | 2 vCPU | 4 vCPU |
-| RAM | 2 GB | 4 GB |
-| Disk | 20 GB SSD | 40 GB SSD |
-| OS | Ubuntu 20.04 LTS | Ubuntu 22.04 LTS |
-| Bandwidth | 100 Mbps | 1 Gbps |
+| Thành phần | Giá trị hiện tại |
+|------------|------------------|
+| Project root | `/var/LKVIP` |
+| System user | `lkvip` |
+| Backend process | PM2 `lkvip-api` |
+| Internal API | `127.0.0.1:5000` |
+| Public API | `https://api.tc-gaming.live` |
+| Logs | `/var/LKVIP/logs/` |
+| Backups | `/var/LKVIP/.backups/` |
+| Deploy script | `scripts/deploy.sh` |
+| CI deploy | `.github/workflows/deploy.yml` |
 
----
+Không dùng `/var/www` cho LKVIP deploy.
 
-## 2. Cài đặt lần đầu (First-time Setup)
+## 2. Public hosts hiện tại
 
-### 2.1 Chạy setup script
+| Host | Target |
+|------|--------|
+| `tc-gaming.live` | `apps/hub/dist` |
+| `hub.tc-gaming.live` | `apps/hub/dist` |
+| `trade.tc-gaming.live` | `apps/trading/dist` |
+| `sports.tc-gaming.live` | `apps/sports/dist` |
+| `admin.tc-gaming.live` | `apps/admin-dashboard/dist` |
+| `api.tc-gaming.live` | proxy `127.0.0.1:5000` |
+
+`game` và `dating` có build output nhưng chưa public DNS/Nginx trong cấu hình hiện tại. Không thêm public check cho hai app này nếu DNS/Nginx chưa được cấu hình.
+
+## 3. First-time VPS setup
+
+Chạy một lần bằng root:
 
 ```bash
-# SSH vào VPS
-ssh user@your-vps-ip
-
-# Clone repo
-cd /var/www
-git clone https://github.com/your-org/website-admin.git
-cd website-admin
-
-# Chạy setup script (cài Node.js, PM2, MySQL, Redis, Nginx)
-chmod +x config/scripts/setup.sh
-sudo ./config/scripts/setup.sh
+ssh root@<VPS_HOST>
+git clone <repo-url> /var/LKVIP
+sudo bash /var/LKVIP/scripts/vps-setup.sh
 ```
 
-Setup script cài đặt:
-- Node.js 20 LTS (qua NodeSource)
-- PM2 (global)
-- MySQL 8.0
-- Redis 7
-- Nginx
+Script setup chịu trách nhiệm:
 
-### 2.2 Cấu hình environment
+- Tạo user `lkvip`.
+- Cài Node.js 20, pnpm 9, PM2, MySQL 8, Redis 7, Nginx.
+- Tạo 6 MySQL schemas và user DB riêng.
+- Cấu hình firewall để chỉ public SSH/HTTP/HTTPS; backend port `5000` chỉ nội bộ.
+- Chuẩn bị Nginx/PM2 cho LKVIP.
+
+## 4. Environment production
 
 ```bash
-cp .env.example apps/backend/.env
+sudo -u lkvip bash
+cd /var/LKVIP
+cp config/env/.env.example apps/backend/.env
 nano apps/backend/.env
-```
-
-Điền đầy đủ các biến bắt buộc (xem [SETUP.md](SETUP.md#3-environment-variables)).
-
-**Lưu ý bảo mật:**
-```bash
-# Chmod .env — chỉ owner được đọc
 chmod 600 apps/backend/.env
 ```
 
-### 2.3 Tạo databases và chạy migrations
+Biến bắt buộc:
+
+```env
+NODE_ENV=production
+PORT=5000
+APP_URL=https://api.tc-gaming.live
+CORS_ORIGINS=https://tc-gaming.live,https://www.tc-gaming.live,https://hub.tc-gaming.live,https://trade.tc-gaming.live,https://sports.tc-gaming.live,https://admin.tc-gaming.live
+
+HUB_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/hub_db
+GAME_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/game_db
+TRADE_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/trade_db
+DATING_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/dating_db
+SPORTS_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/sports_db
+ADMIN_DATABASE_URL=mysql://lkvip:<password>@127.0.0.1:3306/admin_db
+
+REDIS_URL=redis://127.0.0.1:6379/2
+JWT_SECRET=<random-string-at-least-32-chars>
+ENCRYPTION_KEY=<random-string-at-least-32-chars>
+```
+
+Không ghi secret thật vào tài liệu, issue, log, chat.
+
+## 5. Deploy bằng script
 
 ```bash
-cd apps/backend
-
-# Install dependencies
-npm ci --omit=dev
-
-# Generate Prisma clients
-npm run prisma:generate
-
-# Deploy migrations (production — không tạo migration mới)
-npm run prisma:deploy:all
-
-# Seed dữ liệu ban đầu
-npm run seed:all
+sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh
 ```
 
-### 2.4 Tạo indexes
+Script làm các bước chính:
+
+1. Kiểm tra đúng root `/var/LKVIP`, toolchain, `.env`, port.
+2. Backup uploads.
+3. `git pull --ff-only origin main`.
+4. `pnpm install --frozen-lockfile --prod=false`.
+5. Prisma migrate deploy cho 6 schemas.
+6. Build backend.
+7. Build frontends.
+8. Reload/start PM2 `lkvip-api`.
+9. Reload Nginx nếu config hợp lệ.
+10. Health/public URL checks.
+
+Tuỳ chọn:
 
 ```bash
-mysql -u root -p < config/database/indexes.sql
+bash scripts/deploy.sh --backend-only
+bash scripts/deploy.sh --frontend-only
+bash scripts/deploy.sh --skip-build
+bash scripts/deploy.sh --skip-backup
 ```
 
-### 2.5 Cấu hình SSL
+## 6. Deploy bằng GitHub Actions
+
+Workflow: `.github/workflows/deploy.yml`.
+
+Trigger:
+
+- Push vào `main` khi file liên quan thay đổi.
+- Manual `workflow_dispatch` với confirm `deploy`.
+
+Secrets cần có:
+
+| Secret | Mô tả |
+|--------|------|
+| `VPS_HOST` | Host/IP VPS |
+| `VPS_USER` | User deploy, thường là `lkvip` |
+| `VPS_SSH_KEY` | Private SSH key cho user deploy |
+| `VPS_PORT` | SSH port, default 22 |
+
+CI phải pass trước deploy.
+
+## 7. Health checks
+
+Backend internal:
 
 ```bash
-chmod +x config/scripts/ssl-setup.sh
-sudo ./config/scripts/ssl-setup.sh your-domain.com
+curl -sf http://127.0.0.1:5000/health
 ```
 
-### 2.6 Khởi động PM2
+Deploy chỉ pass khi JSON có:
+
+```json
+{"status":"healthy"}
+```
+
+Public checks hiện tại:
 
 ```bash
-cd /var/LKVIP
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup    # Auto-start sau reboot
+curl -fsSIL https://tc-gaming.live/
+curl -fsSIL https://hub.tc-gaming.live/
+curl -fsSIL https://trade.tc-gaming.live/
+curl -fsSIL https://sports.tc-gaming.live/
+curl -fsSIL https://admin.tc-gaming.live/
+curl -fsS https://api.tc-gaming.live/health
+curl -fsS "https://api.tc-gaming.live/api/shared/config?project=hub&group=brand"
+curl -fsS "https://api.tc-gaming.live/api/shared/config?project=hub&group=colors"
 ```
 
----
-
-## 3. Deploy thông thường (Sau lần đầu)
-
-### 3.1 Thủ công
+## 8. PM2 operations
 
 ```bash
-cd /var/LKVIP
-
-# Pull code
-git fetch origin main
-git reset --hard origin/main
-
-# Update dependencies
-cd apps/backend
-npm ci --omit=dev
-
-# Regenerate Prisma clients
-npm run prisma:generate
-
-# Deploy schema changes (nếu có)
-npm run prisma:deploy:all
-
-# Reload PM2 (zero-downtime)
-cd /var/LKVIP
-pm2 reload ecosystem.config.js --update-env
-```
-
-### 3.2 Dùng deploy script
-
-```bash
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh
-```
-
-### 3.3 Tự động qua GitHub Actions
-
-Push vào branch `main` → CI pass → tự động deploy.
-
-**Điều kiện:** Đã cấu hình GitHub Secrets (xem §5).
-
----
-
-## 4. PM2 Configuration
-
-File: `ecosystem.config.js` (root)
-
-```javascript
-module.exports = {
-  apps: [{
-    name: 'kjc-api',
-    script: './apps/backend/dist/server.js',
-    instances: 'max',          // Tất cả CPU cores
-    exec_mode: 'cluster',      // Cluster mode cho zero-downtime reload
-    watch: false,
-    max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 5000,
-    },
-    log_file: './logs/combined.log',
-    error_file: './logs/error.log',
-    out_file: './logs/out.log',
-  }]
-};
-```
-
-### PM2 commands
-
-```bash
-pm2 status                          # Xem trạng thái
-pm2 reload kjc-api --update-env     # Zero-downtime reload
-pm2 restart kjc-api                 # Hard restart (có downtime)
-pm2 logs kjc-api                    # Xem logs realtime
-pm2 monit                           # CPU/RAM monitor
-pm2 save                            # Lưu process list
-```
-
----
-
-## 5. GitHub Actions Secrets
-
-Cấu hình trong GitHub repo → Settings → Secrets → Actions:
-
-| Secret | Mô tả | Ví dụ |
-|--------|-------|-------|
-| `VPS_HOST` | IP hoặc hostname VPS | `203.0.113.10` |
-| `VPS_USER` | SSH username | `ubuntu` |
-| `VPS_SSH_KEY` | Private SSH key (ED25519 hoặc RSA) | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
-| `VPS_PORT` | SSH port (optional, default 22) | `22` |
-
-### Tạo SSH key pair cho CI/CD
-
-```bash
-# Tạo key pair trên máy local
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/kjc_deploy
-
-# Copy public key lên VPS
-ssh-copy-id -i ~/.ssh/kjc_deploy.pub user@your-vps-ip
-
-# Copy private key vào GitHub Secret VPS_SSH_KEY
-cat ~/.ssh/kjc_deploy
-```
-
----
-
-## 6. Nginx Configuration
-
-File mẫu: `config/nginx/`
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name api.your-domain.com;
-
-    # SSL (Certbot auto-manage)
-    ssl_certificate     /etc/letsencrypt/live/api.your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.your-domain.com/privkey.pem;
-
-    # Security headers
-    add_header Strict-Transport-Security "max-age=63072000" always;
-
-    location / {
-        proxy_pass         http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade $http_upgrade;
-        proxy_set_header   Connection 'upgrade';
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_cache_bypass $http_upgrade;
-
-        # Rate limiting (Nginx level — trước Express)
-        limit_req zone=api_limit burst=20 nodelay;
-    }
-}
-
-# Redirect HTTP → HTTPS
-server {
-    listen 80;
-    server_name api.your-domain.com;
-    return 301 https://$server_name$request_uri;
-}
-```
-
----
-
-## 7. Backup & Restore
-
-### Backup thủ công
-
-```bash
-cd apps/backend
-npm run backup
-# → Tạo file backup trong ./backups/backup-YYYY-MM-DD.sql.gz
-```
-
-### Restore từ backup
-
-```bash
-cd apps/backend
-npm run restore -- --file=./backups/backup-2024-01-15.sql.gz
-```
-
-### Cron backup tự động
-
-```bash
-# Cấu hình via setup script
-chmod +x scripts/cron-setup.sh
-./scripts/cron-setup.sh
-```
-
-Lịch mặc định: backup hàng ngày lúc 2 AM, giữ 30 ngày gần nhất.
-
----
-
-## 8. Health Monitoring
-
-```bash
-# API health
-curl https://api.your-domain.com/health/live
-
-# PM2 status
 pm2 status
-
-# MySQL status
-systemctl status mysql
-
-# Redis status
-redis-cli ping
-
-# Disk usage
-df -h
-
-# Memory
-free -h
+pm2 logs lkvip-api --lines 100
+pm2 monit
+pm2 reload lkvip-api --update-env
+pm2 restart lkvip-api
+pm2 save
 ```
 
----
+`reload` là ưu tiên cho zero-downtime. Dùng `restart` khi reload không phù hợp.
 
-## 9. Rollback
+## 9. Nginx operations
 
-Nếu deploy bị lỗi:
+Config trong repo: `config/nginx/tc-gaming.conf`.
+
+Trên VPS, symlink/copy sang Nginx sites-enabled theo setup script.
+
+```bash
+nginx -t
+systemctl reload nginx
+```
+
+Không expose trực tiếp port `5000`, MySQL, Redis ra public.
+
+## 10. Rollback
+
+`scripts/deploy.sh` có rollback cơ bản về commit trước nếu lỗi xảy ra trong vùng deploy được script quản lý.
+
+Nếu cần xử lý thủ công:
 
 ```bash
 cd /var/LKVIP
-
-# Rollback về commit trước
-git log --oneline -5    # Tìm commit hash cần rollback
-git reset --hard <commit-hash>
-
-# Reinstall và restart
-cd apps/backend
-npm ci --omit=dev
-npm run prisma:generate
-pm2 reload ecosystem.config.js --update-env
+git log --oneline -5
+# Chỉ rollback khi đã xác nhận phạm vi ảnh hưởng.
+pm2 logs lkvip-api --lines 100
 ```
+
+Tránh `git reset --hard`, `git clean`, xóa file, hoặc force push nếu chưa xác nhận rõ.
+
+## 11. Sau deploy
+
+- Đổi mật khẩu seed/default trước production.
+- Kiểm tra admin `/config/general` nếu thay đổi theme config.
+- Kiểm tra public config API không trả secret.
+- Theo dõi PM2 logs, Nginx logs, MySQL/Redis health.
+- Nếu public game/dating cần bật, làm task riêng: DNS, SSL, Nginx server blocks, deploy checks.
