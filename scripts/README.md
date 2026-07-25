@@ -1,8 +1,71 @@
-﻿# backend/scripts
+# scripts
 
-Thư mục chứa các helper scripts nội bộ của backend (TypeScript, chạy bằng `tsx`).
+Thư mục chứa helper scripts cho backend (TypeScript / `tsx`) và DevOps VPS.
 
-## prisma-run.ts
+---
+
+## setup-permissions.sh *(root, chạy trên VPS)*
+
+Thiết lập đúng `ownership` và `chmod` cho toàn bộ `/var/LKVIP`.
+Chạy lần đầu sau `vps-setup.sh`, hoặc sau mỗi `git pull` nếu có file mới.
+
+```bash
+sudo bash /var/LKVIP/scripts/setup-permissions.sh
+```
+
+| Đường dẫn | Owner | Mode | Giải thích |
+|---|---|---|---|
+| `/var/LKVIP` (gốc) | `lkvip:www-data` | `755` | Base toàn dự án |
+| `apps/backend/.env*` | `root:lkvip` | `640` | Chỉ root ghi, lkvip đọc |
+| `config/.db-pass` | `root:root` | `600` | Tuyệt mật — chỉ root |
+| `data/uploads/` | `lkvip:www-data` | `775` | App + Nginx cần ghi |
+| `data/logs/` | `lkvip:lkvip` | `755` | Chỉ PM2/app ghi |
+| `logs/` | `lkvip:lkvip` | `755` | PM2 out/error logs |
+| `.backups/` | `lkvip:lkvip` | `750` | Private, không cần nginx |
+| `apps/*/dist/` | `lkvip:www-data` | `755` | Nginx serve static |
+| `.git/` | `lkvip:lkvip` | `700` | Private |
+| `*.sh` | — | `755` | Executable |
+
+---
+
+## vps-setup.sh *(root, chạy 1 lần duy nhất)*
+
+First-time VPS isolation setup: tạo user `lkvip`, databases MySQL, cấu hình Nginx / UFW / PM2.
+
+```bash
+sudo bash /var/LKVIP/scripts/vps-setup.sh
+```
+
+---
+
+## deploy.sh *(lkvip user)*
+
+Deploy toàn bộ dự án: `git pull` → `pnpm install` → build → migrations → PM2 reload.
+
+```bash
+sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh
+# Options: --skip-backup  --skip-build  --backend-only  --frontend-only
+```
+
+---
+
+## ssl-setup.sh *(root)*
+
+Cài SSL certificate bằng Certbot cho tất cả 7 subdomain cùng lúc.
+
+```bash
+sudo bash /var/LKVIP/scripts/ssl-setup.sh
+```
+
+---
+
+## backup.sh
+
+Backup databases và uploads.
+
+---
+
+## prisma-run.ts *(TypeScript, chạy bằng `tsx`)*
 
 Script tham số hóa thay thế 18 per-module Prisma scripts trùng lặp.
 
