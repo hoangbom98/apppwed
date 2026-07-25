@@ -1,0 +1,38 @@
+[
+  {
+    "ts": "2026-07-25T22:23:35.833Z",
+    "env": "local",
+    "results": [
+      {
+        "name": "TypeScript",
+        "status": "pass",
+        "summary": "Passed",
+        "durationMs": 8586
+      },
+      {
+        "name": "Unit Tests",
+        "status": "skip",
+        "summary": "Skipped (--no-tests)",
+        "durationMs": 0
+      },
+      {
+        "name": "API Routes",
+        "status": "warn",
+        "summary": "898 routes across 8 modules; 7 modules without tests",
+        "durationMs": 631
+      },
+      {
+        "name": "Frontend Routes",
+        "status": "pass",
+        "summary": "242 routes across 6 apps",
+        "durationMs": 578
+      },
+      {
+        "name": "Service Health",
+        "status": "warn",
+        "summary": "All services offline (dev server not running)",
+        "durationMs": 618
+      }
+    ]
+  }
+]
