@@ -52,7 +52,17 @@ export const LkvipForm: React.FC<React.ComponentProps<typeof Form>> = (props) =>
   <Form layout="vertical" {...props} />
 );
 
-export const LkvipInput: React.FC<InputProps> = (props) => <Input size="large" {...props} />;
+// LkvipInput with Password, TextArea, Search subcomponents — matches Ant Design Input API
+type LkvipInputComponent = React.FC<InputProps> & {
+  Password: typeof Input.Password;
+  TextArea: typeof Input.TextArea;
+  Search:   typeof Input.Search;
+};
+const _LkvipInputBase: React.FC<InputProps> = (props) => <Input size="large" {...props} />;
+export const LkvipInput = _LkvipInputBase as LkvipInputComponent;
+LkvipInput.Password = Input.Password;
+LkvipInput.TextArea = Input.TextArea;
+LkvipInput.Search   = Input.Search;
 export const LkvipSelect: React.FC<SelectProps> = (props) => <Select size="large" {...props} />;
 export const LkvipInputNumber: React.FC<any> = (props) => <InputNumber size="large" style={{ width: '100%' }} {...props} />;
 
