@@ -17,7 +17,8 @@
 
 import fs   from 'fs';
 import path from 'path';
-import http from 'http';
+import http  from 'http';
+import https from 'https';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -46,7 +47,17 @@ const args       = process.argv.slice(2);
 const filterApp  = args.find((_, i) => args[i - 1] === '--app');
 const jsonOutput = args.includes('--json');
 const noFetch    = args.includes('--no-fetch');
+const env        = args.find((_, i) => args[i - 1] === '--env') ?? 'local';
 const baseUrlArg = args.find((_, i) => args[i - 1] === '--base-url');   // e.g. https://hub.tc-gaming.live
+
+const PROD_ORIGINS: Record<string, string> = {
+  hub:             'https://hub.tc-gaming.live',
+  game:            'https://game.tc-gaming.live',
+  trading:         'https://trade.tc-gaming.live',
+  sports:          'https://sports.tc-gaming.live',
+  dating:          'https://dating.tc-gaming.live',
+  'admin-dashboard': 'https://admin.tc-gaming.live',
+};
 
 const selectedApps = filterApp ? APPS.filter(a => a.name === filterApp) : APPS;
 
@@ -101,9 +112,10 @@ interface ProbeResult {
 function probe(url: string, timeoutMs = 5000): Promise<ProbeResult> {
   const route = new URL(url).pathname;
   const start = Date.now();
+  const lib   = url.startsWith('https') ? https : http;
 
   return new Promise(resolve => {
-    const req = http.get(url, { headers: { 'Accept': 'text/html' } }, res => {
+    const req = lib.get(url, { headers: { 'Accept': 'text/html' } }, res => {
       res.resume();   // drain the body
       const ms     = Date.now() - start;
       const status = res.statusCode ?? 0;
@@ -141,7 +153,7 @@ interface AppReport {
 
 async function checkApp(cfg: AppConfig): Promise<AppReport> {
   const routes = extractRoutes(cfg.routeFile);
-  const origin = cfg.baseUrl ?? `http://localhost:${cfg.port}`;
+  const origin = cfg.baseUrl ?? (env === 'production' ? PROD_ORIGINS[cfg.name] : undefined) ?? (baseUrlArg && selectedApps.length === 1 ? baseUrlArg : undefined) ?? `http://localhost:${cfg.port}`;
 
   if (!jsonOutput) {
     console.log(`\n${'─'.repeat(60)}`);

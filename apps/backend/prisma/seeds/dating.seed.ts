@@ -7,8 +7,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { PrismaClient } = require('../../node_modules/.prisma/dating-client');
-const prisma = new PrismaClient();
+const { getPrismaClient, disconnectAll } = require('../../src/config/databases');
+const prisma = getPrismaClient('dating');
 
 async function seed() {
   // ── 1. VIP Plans ──────────────────────────────────────────────────
@@ -81,5 +81,5 @@ module.exports = { seed };
 if (require.main === module) {
   seed()
     .catch(e => { console.error('[seed:dating] ❌', e); process.exit(1); })
-    .finally(() => prisma.$disconnect());
+    .finally(() => disconnectAll());
 }

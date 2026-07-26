@@ -4,11 +4,12 @@
 // Cài đặt chung: hiển thị dịch vụ, đơn hàng, đăng ký tài khoản
 import React from 'react';
 import {
-  App, Card, Form, Switch, InputNumber, Select, Input, Button,
+  App, Card, Form, Switch, InputNumber, Button,
   Tabs, Divider, Row, Col, Spin, Typography,
 } from 'antd';
 import { SaveOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { LkvipForm, LkvipInput, LkvipSelect } from '@lkvip/ui';
 import api from '@admin/api/client';
 
 const { Text } = Typography;
@@ -51,10 +52,6 @@ function GeneralSettingsInner() {
   const { data: rows, isLoading, refetch } = useQuery({
     queryKey: ['settings', GROUP_KEY],
     queryFn:  () => api.get(`/admin/settings?group=${GROUP_KEY}`).then(r => r.data?.data ?? r.data),
-    onSuccess: (rows) => {
-      const map = buildSettingMap(rows ?? []);
-      form.setFieldsValue(map);
-    },
   });
 
   // Set form values when data loads
@@ -86,16 +83,14 @@ function GeneralSettingsInner() {
       label:    'Dịch vụ & Sản phẩm',
       children: (
         <div className="space-y-0">
-          <Form.Item name="require_login_view" valuePropName="checked" noStyle>
-            <SettingRow
-              label="Yêu cầu đăng nhập để xem dịch vụ"
-              info="Bật để yêu cầu khách hàng phải đăng nhập mới có thể xem danh sách dịch vụ"
-            >
-              <Form.Item name="require_login_view" valuePropName="checked" style={{ margin: 0 }}>
-                <Switch />
-              </Form.Item>
-            </SettingRow>
-          </Form.Item>
+          <SettingRow
+            label="Yêu cầu đăng nhập để xem dịch vụ"
+            info="Bật để yêu cầu khách hàng phải đăng nhập mới có thể xem danh sách dịch vụ"
+          >
+            <Form.Item name="require_login_view" valuePropName="checked" style={{ margin: 0 }}>
+              <Switch />
+            </Form.Item>
+          </SettingRow>
 
           <SettingRow
             label="Hiển thị số lượng đã bán"
@@ -144,7 +139,7 @@ function GeneralSettingsInner() {
             label={<Label info="Chat ID Telegram nhận thông báo đơn hàng thủ công (bỏ trống = dùng chat ID trong Kết nối)">Chat ID nhận thông báo đơn hàng</Label>}
             name="order_notify_chat_id"
           >
-            <Input placeholder="-100XXXXXXXXXX" style={{ maxWidth: 320 }} />
+            <LkvipInput placeholder="-100XXXXXXXXXX" />
           </Form.Item>
 
           <Row gutter={16}>
@@ -153,10 +148,10 @@ function GeneralSettingsInner() {
                 label={<Label info="Kiểu ký tự tạo mã đơn hàng">Loại random mã đơn hàng</Label>}
                 name="order_code_type"
               >
-                <Select style={{ width: 220 }}>
+                <LkvipSelect>
                   <Select.Option value="number">Chỉ số (123456…)</Select.Option>
                   <Select.Option value="alphanumeric">Chữ + số (A1B2C3…)</Select.Option>
-                </Select>
+                </LkvipSelect>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
@@ -164,7 +159,7 @@ function GeneralSettingsInner() {
                 label={<Label info="Tối thiểu 6, tối đa 20 ký tự">Số ký tự mã đơn hàng</Label>}
                 name="order_code_length"
               >
-                <InputNumber min={6} max={20} defaultValue={7} style={{ width: 120 }} />
+                <InputNumber min={6} max={20} defaultValue={7} style={{ width: '100%' }} size="large" />
               </Form.Item>
             </Col>
           </Row>
@@ -173,7 +168,7 @@ function GeneralSettingsInner() {
             label={<Label info="Prefix sẽ được thêm vào đầu mã đơn hàng — để trống = không dùng prefix">Prefix mã đơn hàng</Label>}
             name="order_code_prefix"
           >
-            <Input placeholder="VD: PO" style={{ maxWidth: 200 }} />
+            <LkvipInput placeholder="VD: PO" />
           </Form.Item>
 
           <Divider />
@@ -230,7 +225,8 @@ function GeneralSettingsInner() {
               step={1000}
               defaultValue={0}
               formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              style={{ width: 180 }}
+              style={{ width: '100%' }}
+              size="large"
             />
           </Form.Item>
         </div>
@@ -254,7 +250,7 @@ function GeneralSettingsInner() {
         <div className="flex justify-center py-16"><Spin size="large" /></div>
       ) : (
         <Card>
-          <Form form={form} layout="vertical" onFinish={v => save.mutate(v)}>
+          <LkvipForm form={form} onFinish={v => save.mutate(v)}>
             <Tabs items={tabs} />
             <Divider />
             <Button
@@ -266,7 +262,7 @@ function GeneralSettingsInner() {
             >
               Lưu cài đặt
             </Button>
-          </Form>
+          </LkvipForm>
         </Card>
       )}
     </div>

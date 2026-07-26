@@ -4,13 +4,14 @@
 // Cấu hình: SMTP, Telegram Bot, Google Login, ChatGPT / AI
 import React from 'react';
 import {
-  App, Card, Form, Input, Select, Switch, Button, Tabs,
+  App, Card, Form, Switch, Button, Tabs,
   Alert, Divider, Typography, Space, Row, Col, Spin,
 } from 'antd';
 import {
-  SaveOutlined, SendOutlined, CheckCircleOutlined, CopyOutlined,
+  SaveOutlined, SendOutlined, CopyOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { LkvipForm, LkvipInput, LkvipSelect } from '@lkvip/ui';
 import api from '@admin/api/client';
 
 const { Text } = Typography;
@@ -68,7 +69,7 @@ function TabSMTP({ settings }) {
   }, [settings, form]);
 
   return (
-    <Form form={form} layout="vertical" onFinish={v => save.mutate(v)} className="max-w-xl">
+    <LkvipForm form={form} onFinish={v => save.mutate(v)} className="max-w-xl">
       <Alert
         message="Gửi email thông báo qua SMTP"
         description="Cấu hình máy chủ SMTP để hệ thống gửi email tự động."
@@ -80,24 +81,24 @@ function TabSMTP({ settings }) {
       <Row gutter={12}>
         <Col span={16}>
           <Form.Item label="SMTP Host" name="host">
-            <Input placeholder="smtp.gmail.com" />
+            <LkvipInput placeholder="smtp.gmail.com" />
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item label="Cổng (Port)" name="port">
-            <Input placeholder="587" />
+            <LkvipInput placeholder="587" />
           </Form.Item>
         </Col>
       </Row>
       <Form.Item label="Mã hóa" name="encryption">
-        <Select>
-          <Select.Option value="tls">TLS (khuyến nghị)</Select.Option>
-          <Select.Option value="ssl">SSL</Select.Option>
-          <Select.Option value="none">Không mã hóa</Select.Option>
-        </Select>
+        <LkvipSelect>
+          <LkvipSelect.Option value="tls">TLS (khuyến nghị)</LkvipSelect.Option>
+          <LkvipSelect.Option value="ssl">SSL</LkvipSelect.Option>
+          <LkvipSelect.Option value="none">Không mã hóa</LkvipSelect.Option>
+        </LkvipSelect>
       </Form.Item>
       <Form.Item label="Email SMTP (tài khoản đăng nhập)" name="email">
-        <Input placeholder="yourmail@gmail.com" />
+        <LkvipInput placeholder="yourmail@gmail.com" />
       </Form.Item>
       <Form.Item
         label={
@@ -110,15 +111,15 @@ function TabSMTP({ settings }) {
         }
         name="from"
       >
-        <Input placeholder="noreply@yourdomain.com" />
+        <LkvipInput placeholder="noreply@yourdomain.com" />
       </Form.Item>
       <Form.Item label="Mật khẩu SMTP" name="password">
-        <Input.Password placeholder="App password hoặc mật khẩu SMTP" />
+        <LkvipInput.Password placeholder="App password hoặc mật khẩu SMTP" />
       </Form.Item>
       <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={save.isPending}>
         Lưu SMTP
       </Button>
-    </Form>
+    </LkvipForm>
   );
 }
 
@@ -135,7 +136,7 @@ function TabTelegram({ settings }) {
   React.useEffect(() => {
     if (settings) {
       form.setFieldsValue({
-        enabled:  settings['telegram.enabled'] === 'true',
+        enabled:    settings['telegram.enabled'] === 'true',
         bot_token: settings['telegram.bot_token'] ?? '',
         chat_id:  settings['telegram.chat_id']  ?? '',
         username: settings['telegram.username'] ?? '',
@@ -172,7 +173,7 @@ function TabTelegram({ settings }) {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={v => save.mutate(v)} className="max-w-xl">
+    <LkvipForm form={form} onFinish={v => save.mutate(v)} className="max-w-xl">
       <Alert
         message="Bot thông báo Telegram"
         description="Gửi thông báo đơn hàng, nạp tiền, cảnh báo qua Telegram Bot."
@@ -182,7 +183,7 @@ function TabTelegram({ settings }) {
         <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
       </Form.Item>
       <Form.Item label="Bot Token" name="bot_token">
-        <Input.Password placeholder="123456789:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
+        <LkvipInput.Password placeholder="123456789:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
       </Form.Item>
       <Form.Item
         label={
@@ -195,10 +196,10 @@ function TabTelegram({ settings }) {
         }
         name="chat_id"
       >
-        <Input placeholder="-100XXXXXXXXXX" />
+        <LkvipInput placeholder="-100XXXXXXXXXX" />
       </Form.Item>
       <Form.Item label="Bot Username" name="username">
-        <Input placeholder="@your_bot_name" addonBefore="@" />
+        <LkvipInput placeholder="@your_bot_name" addonBefore="@" />
       </Form.Item>
       <Form.Item
         label={
@@ -211,10 +212,10 @@ function TabTelegram({ settings }) {
         }
         name="api_server"
       >
-        <Select>
-          <Select.Option value="official">Official (api.telegram.org)</Select.Option>
-          <Select.Option value="proxy">Proxy / Mirror server</Select.Option>
-        </Select>
+        <LkvipSelect>
+          <LkvipSelect.Option value="official">Official (api.telegram.org)</LkvipSelect.Option>
+          <LkvipSelect.Option value="proxy">Proxy / Mirror server</LkvipSelect.Option>
+        </LkvipSelect>
       </Form.Item>
       <Space>
         <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={save.isPending}>
@@ -224,7 +225,7 @@ function TabTelegram({ settings }) {
           Gửi tin nhắn test
         </Button>
       </Space>
-    </Form>
+    </LkvipForm>
   );
 }
 
@@ -250,7 +251,7 @@ function TabGoogleLogin({ settings }) {
   }, [settings, form]);
 
   return (
-    <Form form={form} layout="vertical" onFinish={v => save.mutate(v)} className="max-w-xl">
+    <LkvipForm form={form} onFinish={v => save.mutate(v)} className="max-w-xl">
       <Alert
         message="Đăng nhập bằng Google"
         description="Cho phép người dùng đăng nhập / đăng ký bằng tài khoản Google."
@@ -260,13 +261,13 @@ function TabGoogleLogin({ settings }) {
         <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
       </Form.Item>
       <Form.Item label="Client ID" name="client_id">
-        <Input placeholder="XXXXXXXXXXX.apps.googleusercontent.com" />
+        <LkvipInput placeholder="XXXXXXXXXXX.apps.googleusercontent.com" />
       </Form.Item>
       <Form.Item label="Client Secret" name="client_secret">
-        <Input.Password placeholder="GOCSPX-XXXXXXXXXX" />
+        <LkvipInput.Password placeholder="GOCSPX-XXXXXXXXXX" />
       </Form.Item>
       <Form.Item label="Authorized Redirect URI">
-        <Input
+        <LkvipInput
           readOnly
           value={redirectUri}
           addonAfter={
@@ -284,7 +285,7 @@ function TabGoogleLogin({ settings }) {
       <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={save.isPending}>
         Lưu Google Login
       </Button>
-    </Form>
+    </LkvipForm>
   );
 }
 
@@ -308,18 +309,18 @@ function TabChatGPT({ settings }) {
   }, [settings, form]);
 
   return (
-    <Form form={form} layout="vertical" onFinish={v => save.mutate(v)} className="max-w-xl">
+    <LkvipForm form={form} onFinish={v => save.mutate(v)} className="max-w-xl">
       <Alert
         message="Tích hợp AI / ChatGPT"
         description="Dùng AI để dịch thuật tự động nội dung đa ngôn ngữ."
         type="info" showIcon style={{ marginBottom: 16 }}
       />
       <Form.Item label="Bộ máy dịch thuật" name="translate_engine">
-        <Select>
-          <Select.Option value="google">Google Translate (miễn phí — không cần API Key)</Select.Option>
-          <Select.Option value="chatgpt">OpenAI ChatGPT</Select.Option>
-          <Select.Option value="deepseek">DeepSeek AI (tiết kiệm chi phí)</Select.Option>
-        </Select>
+        <LkvipSelect>
+          <LkvipSelect.Option value="google">Google Translate (miễn phí — không cần API Key)</LkvipSelect.Option>
+          <LkvipSelect.Option value="chatgpt">OpenAI ChatGPT</LkvipSelect.Option>
+          <LkvipSelect.Option value="deepseek">DeepSeek AI (tiết kiệm chi phí)</LkvipSelect.Option>
+        </LkvipSelect>
       </Form.Item>
       <Form.Item
         label={
@@ -332,20 +333,20 @@ function TabChatGPT({ settings }) {
         }
         name="api_key"
       >
-        <Input.Password placeholder="sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
+        <LkvipInput.Password placeholder="sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
       </Form.Item>
       <Form.Item label="Model AI" name="model">
-        <Select>
-          <Select.Option value="gpt-4o-mini">GPT-4o Mini — $0.15/$0.60 per 1M tokens (tiết kiệm nhất)</Select.Option>
-          <Select.Option value="gpt-4o">GPT-4o — đa năng, chất lượng cao</Select.Option>
-          <Select.Option value="gpt-3.5-turbo">GPT-3.5 Turbo — nhanh, rẻ</Select.Option>
-          <Select.Option value="deepseek-chat">DeepSeek Chat — chi phí cực thấp</Select.Option>
-        </Select>
+        <LkvipSelect>
+          <LkvipSelect.Option value="gpt-4o-mini">GPT-4o Mini — $0.15/$0.60 per 1M tokens (tiết kiệm nhất)</LkvipSelect.Option>
+          <LkvipSelect.Option value="gpt-4o">GPT-4o — đa năng, chất lượng cao</LkvipSelect.Option>
+          <LkvipSelect.Option value="gpt-3.5-turbo">GPT-3.5 Turbo — nhanh, rẻ</LkvipSelect.Option>
+          <LkvipSelect.Option value="deepseek-chat">DeepSeek Chat — chi phí cực thấp</LkvipSelect.Option>
+        </LkvipSelect>
       </Form.Item>
       <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={save.isPending}>
         Lưu cấu hình AI
       </Button>
-    </Form>
+    </LkvipForm>
   );
 }
 

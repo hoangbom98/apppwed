@@ -417,8 +417,9 @@ async function seed() {
 module.exports = { seed };
 
 if (require.main === module) {
+  const { disconnectAll } = require('../../src/config/databases');
   seed()
     .then(() => { console.log('✅ sports.seed done'); process.exit(0); })
     .catch(e => { console.error('[seed:sports] ❌', e.message); process.exit(1); })
-    .finally(() => prisma.$disconnect && prisma.$disconnect());
+    .finally(() => disconnectAll());
 }

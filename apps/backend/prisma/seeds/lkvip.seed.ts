@@ -7,8 +7,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { PrismaClient } = require('../../node_modules/.prisma/game-client');
-const prisma = new PrismaClient();
+const { getPrismaClient, disconnectAll } = require('../../src/config/databases');
+const prisma = getPrismaClient('game');
 
 async function seed() {
   // ── Main internal bank account ────────────────────────────────────
@@ -51,5 +51,5 @@ module.exports = { seed };
 if (require.main === module) {
   seed()
     .catch(e => { console.error('[seed:lkvip] ❌', e); process.exit(1); })
-    .finally(() => prisma.$disconnect());
+    .finally(() => disconnectAll());
 }

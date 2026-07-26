@@ -26,13 +26,8 @@ require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const bcrypt = require('bcryptjs');
 
-// Direct client imports — mirrors the pattern in admin.seed.ts and game.seed.ts
-const { PrismaClient: AdminPrisma  } = require('../../node_modules/.prisma/admin-client');
-const { PrismaClient: HubPrisma    } = require('../../node_modules/.prisma/hub-client');
-const { PrismaClient: GamePrisma   } = require('../../node_modules/.prisma/game-client');
-const { PrismaClient: TradePrisma  } = require('../../node_modules/.prisma/trade-client');
-const { PrismaClient: DatingPrisma } = require('../../node_modules/.prisma/dating-client');
-const { PrismaClient: SportsPrisma } = require('../../node_modules/.prisma/sports-client');
+// Use the shared factory — singleton pattern, all 6 DBs
+const { getPrismaClient, disconnectAll } = require('../../src/config/databases');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -52,8 +47,8 @@ const USER_PASSWORD   = process.env.TEST_USER_PASSWORD   || 'Test@User123';
  *   • 1 User       (shared player row used by Risk/AML modules)
  */
 async function seedAdmin() {
-  const prisma = new AdminPrisma();
-  try {
+  const prisma = getPrismaClient('admin');
+  {
     const adminPwd = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
     const userPwd  = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
@@ -105,8 +100,6 @@ async function seedAdmin() {
       },
     });
     console.log(`    User (shared):           ${testUser.email}`);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -114,8 +107,8 @@ async function seedAdmin() {
  * Hub DB — creates 1 regular user and 1 agent user.
  */
 async function seedHub() {
-  const prisma = new HubPrisma();
-  try {
+  const prisma = getPrismaClient('hub');
+  {
     const pwd = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
     const user = await prisma.user.upsert({
@@ -131,8 +124,6 @@ async function seedHub() {
       },
     });
     console.log(`    User: ${user.email}  (id: ${user.id})`);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -142,8 +133,8 @@ async function seedHub() {
  *   • VIP user      (vipLevel 5, higher balance)
  */
 async function seedGame() {
-  const prisma = new GamePrisma();
-  try {
+  const prisma = getPrismaClient('game');
+  {
     const pwd = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
     const regularUser = await prisma.user.upsert({
@@ -178,8 +169,6 @@ async function seedGame() {
       },
     });
     console.log(`    User (vip5):  ${vipUser.email}  balance: 50,000,000 VND`);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -190,8 +179,8 @@ async function seedGame() {
  *   Also creates a USDT wallet for each.
  */
 async function seedTrade() {
-  const prisma = new TradePrisma();
-  try {
+  const prisma = getPrismaClient('trade');
+  {
     const pwd = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
     const regularUser = await prisma.user.upsert({
@@ -237,8 +226,6 @@ async function seedTrade() {
       update: {},
       create: { userId: verifiedUser.id, currency: 'USDT', balance: 1000 },
     }).catch(() => {});
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -246,8 +233,8 @@ async function seedTrade() {
  * Dating DB — creates 2 users (male + female) for testing match/like flow.
  */
 async function seedDating() {
-  const prisma = new DatingPrisma();
-  try {
+  const prisma = getPrismaClient('dating');
+  {
     const pwd = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
     const male = await prisma.user.upsert({
@@ -282,8 +269,6 @@ async function seedDating() {
       },
     });
     console.log(`    User (female): ${female.email}`);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -293,8 +278,8 @@ async function seedDating() {
  *   • Streamer user (isStreamer: true — for testing livestream flow)
  */
 async function seedSports() {
-  const prisma = new SportsPrisma();
-  try {
+  const prisma = getPrismaClient('sports');
+  {
     const pwd = await bcrypt.hash(USER_PASSWORD, SALT_ROUNDS);
 
     const user = await prisma.user.upsert({
@@ -327,8 +312,6 @@ async function seedSports() {
       },
     });
     console.log(`    Streamer: ${streamer.email}`);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -369,5 +352,6 @@ module.exports = { seed };
 
 if (require.main === module) {
   seed()
-    .catch(e => { console.error('[seed:test-users] ❌', e); process.exit(1); });
+    .catch(e => { console.error('[seed:test-users] ❌', e); process.exit(1); })
+    .finally(() => disconnectAll());
 }

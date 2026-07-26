@@ -12,12 +12,20 @@ export { DownloadModal }             from './components/DownloadModal';
 export { AppDistributionPage }       from './components/AppDistributionPage';
 export { SentryErrorBoundary }       from './components/SentryErrorBoundary';
 export { ChatRoom }                  from './components/ChatRoom';
+export { LkvipFooter }               from './components/LkvipFooter';
+export { LkvipThemeWrapper }         from './components/LkvipThemeWrapper';
+export { Logo, Banner, Icon }        from './components/AssetComponents';
+export { LkvipLayout, LkvipSplitter, Flex } from './components/LayoutComponents';
+export { LkvipGrid } from './components/GridComponents';
+export { LkvipStatusTag, LkvipStatCard, LkvipTable, LkvipForm, LkvipInput, LkvipSelect, LkvipSidebarItem, LkvipSidebarGroup } from './components/AdminComponents';
 export { TicketForm }                from './components/TicketForm';
 export { TicketList }                from './components/TicketList';
 export { ArticleDetail }             from './components/ArticleDetail';
 export { ArticleList }               from './components/ArticleList';
+export * from './components/Pro/AppProvider';
 export * from './components/Pro/ProForm';
 export * from './components/Pro/ProTable';
+export * from './theme/antdTheme';
 
 // ── Custom AutoComplete (extended wrapper that accepts our props + antd compat)
 export { AutoComplete } from './components/AutoComplete';

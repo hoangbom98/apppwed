@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
-import { H5Header } from '../Layout/H5Header';
-import { H5BottomNav } from '../Layout/H5BottomNav';
+import H5Header from '../Layout/H5Header';
+import H5BottomNav from '../Layout/H5BottomNav';
 
 /**
  * MainLayout — standard layout for user-facing SPAs (H5 mobile-first)

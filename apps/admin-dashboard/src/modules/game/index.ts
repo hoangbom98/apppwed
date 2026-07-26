@@ -3,7 +3,7 @@
 // Game module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';
 import {
-  Users, Coins, ArrowDownUp, Gamepad2, Wrench, SlidersHorizontal, BarChart2,
+  Users, Coins, ArrowDownUp, Gamepad2, Wrench, SlidersHorizontal, BarChart2, Trophy,
 } from 'lucide-react';
 
 registerModule({
@@ -22,7 +22,8 @@ registerModule({
         { to: '/game/providers',   icon: Wrench,            label: 'Providers' },
         { to: '/game/lottery',     icon: Coins,             label: 'Xổ số' },
         { to: '/game/statistics',  icon: BarChart2,         label: 'Thống kê' },
-        { to: '/game/config',      icon: SlidersHorizontal, label: 'Cấu hình' },
+        { to: '/game/vip-config',  icon: Trophy,            label: 'Cấu hình VIP' },
+        { to: '/game/config',      icon: SlidersHorizontal, label: 'Cấu hình khác' },
       ],
     },
   ],

@@ -7,8 +7,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { PrismaClient } = require('../../node_modules/.prisma/hub-client');
-const prisma = new PrismaClient();
+const { getPrismaClient } = require('../../src/config/databases');
+const prisma = getPrismaClient('hub');
 
 async function seed() {
   // ── 1. Categories ─────────────────────────────────────────────────
@@ -65,7 +65,8 @@ async function seed() {
 module.exports = { seed };
 
 if (require.main === module) {
+  const { disconnectAll } = require('../../src/config/databases');
   seed()
     .catch(e => { console.error('[seed:hub] ❌', e); process.exit(1); })
-    .finally(() => prisma.$disconnect());
+    .finally(() => disconnectAll());
 }

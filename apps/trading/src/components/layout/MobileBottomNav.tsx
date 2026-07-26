@@ -19,7 +19,7 @@ const ITEMS = [
 export default function MobileBottomNav() {
   return (
     <nav
-      className="flex justify-around items-center py-2"
+      className="flex justify-around items-center py-2 safe-area-bottom"
       style={{ background: 'var(--bn-bg-base)', borderTop: '1px solid var(--bn-border)' }}
     >
       {ITEMS.map(({ to, icon: Icon, label, end }) => (

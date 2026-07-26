@@ -8,6 +8,7 @@
 
 export * from './projects';
 export * from './roles';
+export * from './assets';
 export * from './errors';
 export * from './currencies';
 export * from './banks';

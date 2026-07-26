@@ -80,19 +80,28 @@ function extractRoutes(file: string): Route[] {
 
 // Module prefix map — derived from server.ts app.use() calls
 const MODULE_PREFIXES: Record<string, string> = {
-  'modules/hub/routes':     '/api/v1/hub',
-  'modules/game/routes':    '/api/v1/game',
-  'modules/trade/routes':   '/api/v1/trade',
-  'modules/dating/routes':  '/api/v1/dating',
-  'modules/sports/routes':  '/api/v1/sports',
-  'modules/lkvip/routes':   '/api/v1/lkvip',
-  'modules/admin/routes':   '/api/v1/admin',
-  'shared/routes':          '/api/v1/shared',
+  'modules/hub/routes':     '/api/hub',
+  'modules/game/routes':    '/api/game',
+  'modules/trade/routes':   '/api/trade',
+  'modules/dating/routes':  '/api/dating',
+  'modules/sports/routes':   '/api/sports',
+  'modules/lkvip/routes':   '/api/lkvip',
+  'modules/admin/routes':   '/api/admin',
+  'shared/routes':           '/api/shared',
+};
+
+// Route files mounted below a module prefix must retain that nested mount.
+const NESTED_PREFIXES: Record<string, string> = {
+  'shared/routes/payment-admin.routes': '/api/admin/payment/gateways',
 };
 
 function resolvePrefix(file: string): string {
+  const normalized = file.replace(/\\/g, '/');
+  for (const [seg, prefix] of Object.entries(NESTED_PREFIXES)) {
+    if (normalized.includes(seg)) return prefix;
+  }
   for (const [seg, prefix] of Object.entries(MODULE_PREFIXES)) {
-    if (file.replace(/\\/g, '/').includes(seg)) return prefix;
+    if (normalized.includes(seg)) return prefix;
   }
   return '/api/v1';
 }
@@ -167,7 +176,9 @@ async function main() {
   const allFiles  = walkTs(BACKEND_SRC);
   const routeFiles = allFiles.filter(f => {
     const rel = f.replace(/\\/g, '/');
-    return rel.includes('/routes/') && !rel.includes('__tests__');
+    return rel.includes('/routes/')
+      && !rel.includes('__tests__')
+      && !rel.endsWith('/modules/admin/routes/config.routes.ts');
   });
 
   if (!jsonOutput) {
@@ -184,7 +195,7 @@ async function main() {
   for (const f of routeFiles) {
     const rel    = path.relative(BACKEND_SRC, f);
     const prefix = resolvePrefix(rel);
-    const mod    = prefix.replace('/api/v1/', '');
+    const mod    = prefix.replace('/api/', '');
     const routes = extractRoutes(f);
     if (routes.length === 0) continue;
     byModule[mod] = byModule[mod] ?? [];
@@ -198,7 +209,7 @@ async function main() {
   const reports: ModuleReport[] = [];
 
   for (const [mod, routes] of Object.entries(byModule)) {
-    const prefix     = `/api/v1/${mod}`;
+    const prefix     = `/api/${mod}`;
     const hasCoverage = testedModules.has(mod) || testedModules.has(`${mod}service`) || testedModules.has(`${mod}Service`);
 
     if (!jsonOutput) {

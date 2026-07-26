@@ -16,7 +16,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { getPrismaClient } = require('../../src/shared/config/databases');
+const { getPrismaClient } = require('../../src/config/databases');
 
 // ── Delegate to service layer ─────────────────────────────────────────────────
 const tplSvc  = require('../../src/modules/admin/services/notificationTemplateService');

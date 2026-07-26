@@ -154,6 +154,7 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'game/config',       element: lazyPage(() => import('@admin/modules/game/pages/GameConfig')) },
   { path: 'game/lottery',      element: lazyPage(() => import('@admin/modules/game/pages/GameLotteryPage')) },
   { path: 'game/statistics',   element: lazyPage(() => import('@admin/modules/game/pages/GameStatisticsPage')) },
+  { path: 'game/vip-config',   element: lazyPage(() => import('@admin/modules/game/pages/VipConfigPage')) },
 
   // Dating
   { path: 'dating/users',      element: <ProjectUserPage project="dating" title="Dating — Người dùng" columns={DATING_COLUMNS} /> },

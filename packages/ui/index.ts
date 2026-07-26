@@ -8,7 +8,8 @@ export { useTradingViewSymbol } from './src/hooks/useTradingViewSymbol.ts';
 export * from './src/utils/tradingview.ts';
 
 // ── Pro Components ────────────────────────────────────────────────────────────
-export { AppProvider } from './src/components/Pro/AppProvider.tsx';
+export { AppProvider, LkvipAntdProvider } from './src/components/Pro/AppProvider.tsx';
+export * from './src/theme/antdTheme.ts';
 export { ProTable } from './src/components/Pro/ProTable.tsx';
 export { ProForm } from './src/components/Pro/ProForm.tsx';
 
@@ -18,6 +19,7 @@ export { DownloadButton }  from './components/DownloadButton';
 export { DownloadModal }   from './components/DownloadModal';
 
 // ── Base Components ───────────────────────────────────────────────────────────
+export { LkvipStatusTag, LkvipStatCard, LkvipTable, LkvipForm, LkvipInput, LkvipSelect, LkvipSidebarItem, LkvipSidebarGroup } from './src/components/AdminComponents';
 export { default as Button }        from './components/Button';
 export { default as Card }          from './components/Card';
 export { default as Modal }         from './components/Modal';

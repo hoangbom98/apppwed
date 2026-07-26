@@ -26,6 +26,8 @@
     "check:health": "tsx scripts/health-check.ts",
     "check:health:prod": "tsx scripts/health-check.ts --env production",
     "check:health:watch": "tsx scripts/health-check.ts --watch",
+    "check:health:prod:watch": "tsx scripts/health-check.ts --env production --watch",
+    "check:health:json": "tsx scripts/health-check.ts --env production --json",
     "check:all": "tsx scripts/daily-report.ts --no-tests",
     "check:all:full": "tsx scripts/daily-report.ts",
     "check:all:prod": "tsx scripts/daily-report.ts --env production",

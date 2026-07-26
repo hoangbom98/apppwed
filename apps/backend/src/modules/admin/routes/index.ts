@@ -36,6 +36,7 @@ const roleCtrl             = require('../controllers/roleController');
 const rebateCtrl           = require('../controllers/rebateController');
 const imCtrl               = require('../controllers/imController');
 const giftCodeCtrl         = require('../controllers/giftCodeController');
+const vipConfigCtrl        = require('../controllers/vipConfigController');
 // ── Group Finance (Gộp Vốn, Tách Lợi Nhuận) ──────────────────────────────────
 const groupFinanceCtrl     = require('../controllers/groupFinanceController');
 // ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
@@ -306,6 +307,12 @@ router.patch('/monitor/alerts/:id/resolve',  monitorCtrl.resolveAlert);
 router.get('/monitor/logs',                  monitorCtrl.listAdminLogs);
 router.get('/monitor/online',                monitorCtrl.getOnlineStats);
 
+// ── System Health API ─────────────────────────────────────────────────────────
+router.get('/health/all',                    monitorCtrl.healthAll);
+router.get('/health/services',               monitorCtrl.healthServices);
+router.get('/health/dns',                    monitorCtrl.healthDns);
+router.get('/health/pm2',                    monitorCtrl.healthPm2);
+
 // ── Push Notifications ────────────────────────────────────────────────────────
 router.get('/notifications/status',        notifCtrl.getNotificationStatus);
 router.post('/notifications/send',         notifCtrl.sendNotification);
@@ -359,6 +366,14 @@ router.delete('/rebates/rules/:id',          rebateCtrl.deleteRule);
 router.get('/rebates/claims',                rebateCtrl.listClaims);
 router.patch('/rebates/claims/:id/approve',  rebateCtrl.approveClaim);
 router.patch('/rebates/claims/:id/reject',   rebateCtrl.rejectClaim);
+
+// ── VIP Config Management ─────────────────────────────────────────────────────
+router.get('/vip/configs',          vipConfigCtrl.listConfigs);
+router.post('/vip/configs',         vipConfigCtrl.upsertConfig);
+router.patch('/vip/configs/:id',    vipConfigCtrl.updateConfig);
+router.delete('/vip/configs/:id',   vipConfigCtrl.deleteConfig);
+router.get('/vip/history',          vipConfigCtrl.listHistory);
+router.get('/vip/stats',            vipConfigCtrl.getStats);
 
 // ── IM / Chat Admin ───────────────────────────────────────────────────────────
 router.get('/im/rooms',                      imCtrl.listRooms);

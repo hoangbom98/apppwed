@@ -28,8 +28,7 @@ import { getVisibleMenuGroups, type MenuGroup, type MenuItem } from '@admin/modu
 import {
   LayoutDashboard, UserCircle,
   Users, CreditCard, ArrowDownUp, Bell, Shield, Tag, Radio, FileText, Activity,
-  Settings, Palette, SlidersHorizontal, ShieldCheck, Server, HandCoins,
-  Settings2, PlugZap, Clock4,
+  Palette, SlidersHorizontal, ShieldCheck, Server, HandCoins,
   LogOut, ChevronLeft, ChevronDown, X, AlignLeft,
 } from 'lucide-react';
 
@@ -63,102 +62,25 @@ const CORE_GROUPS: MenuGroup[] = [
   },
 ];
 
+// System group — only core platform routes not covered by module registries.
+// Settings sub-routes (general, connections, cron-jobs, etc.) are registered
+// in modules/settings/index.ts via registerModule().
+// Security / admins / roles are admin-only and kept here for quick access.
 const SYSTEM_GROUP: MenuGroup = {
   key:   'system',
   label: 'Hệ thống',
   items: [
-    { to: '/payment-gateways',         icon: CreditCard,        label: 'Cổng thanh toán' },
-    { to: '/config/general',           icon: Palette,           label: 'Giao diện & Live Preview' },
-    { to: '/config',                   icon: SlidersHorizontal, label: 'Cấu hình' },
-    { to: '/settings',                 icon: Settings,          label: 'Cài đặt' },
-    { to: '/settings/general',         icon: Settings2,         label: 'Cài đặt chung' },
-    { to: '/settings/connections',     icon: PlugZap,           label: 'Kết nối' },
-    { to: '/settings/notification-tpl',icon: Bell,              label: 'Template thông báo' },
-    { to: '/settings/cron-jobs',       icon: Clock4,            label: 'Cron Jobs' },
-    { to: '/settings/security',        icon: Shield,            label: 'Bảo mật' },
-    { to: '/settings/admins',          icon: ShieldCheck,       label: 'Tài khoản Admin' },
-    { to: '/settings/roles',           icon: ShieldCheck,       label: 'Roles & Quyền' },
-    { to: '/settings/system',          icon: Server,            label: 'Hệ thống' },
+    { to: '/payment-gateways',  icon: CreditCard,        label: 'Cổng thanh toán' },
+    { to: '/config/general',    icon: Palette,           label: 'Giao diện & Live Preview' },
+    { to: '/config',            icon: SlidersHorizontal, label: 'Cấu hình hệ thống' },
+    { to: '/settings/security', icon: Shield,            label: 'Bảo mật' },
+    { to: '/settings/admins',   icon: ShieldCheck,       label: 'Tài khoản Admin' },
+    { to: '/settings/roles',    icon: ShieldCheck,       label: 'Roles & Quyền' },
+    { to: '/settings/system',   icon: Server,            label: 'Thông tin hệ thống' },
   ],
 };
 
-// ── Sidebar nav group ──────────────────────────────────────────────────────────
-interface NavGroupProps {
-  group: MenuGroup;
-  collapsed: boolean;
-  defaultOpen?: boolean;
-}
-
-function NavGroup({ group, collapsed, defaultOpen = false }: NavGroupProps) {
-  const { pathname } = useLocation();
-  const hasActive = group.items.some((item: MenuItem) =>
-    item.end ? pathname === item.to : pathname.startsWith(item.to)
-  );
-  const [open, setOpen] = useState(defaultOpen || hasActive);
-
-  // No header → always render items
-  if (!group.label) {
-    return (
-      <div>
-        {group.items.map(item => (
-          <NavItem key={item.to} item={item} collapsed={collapsed} />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-1">
-      {/* Group header */}
-      {!collapsed && (
-        <button
-          onClick={() => setOpen(v => !v)}
-          className={`w-full flex items-center justify-between px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
-            hasActive ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          <span>{group.label}</span>
-          <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
-        </button>
-      )}
-      {collapsed && <div className="h-px bg-gray-800 mx-2 my-1" />}
-
-      {/* Items */}
-      {(open || collapsed) && (
-        <div>
-          {group.items.map(item => (
-            <NavItem key={item.to} item={item} collapsed={collapsed} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface NavItemProps {
-  item: MenuItem;
-  collapsed: boolean;
-}
-
-function NavItem({ item, collapsed }: NavItemProps) {
-  return (
-    <NavLink
-      to={item.to}
-      end={item.end}
-      title={collapsed ? item.label : undefined}
-      className={({ isActive }) =>
-        `flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-          isActive
-            ? 'bg-blue-600/20 text-blue-400 border-r-2 border-blue-500'
-            : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-        }`
-      }
-    >
-      <item.icon size={16} className="flex-shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
-    </NavLink>
-  );
-}
+import { LkvipSidebarGroup } from '@lkvip/ui';
 
 // ── Main layout ────────────────────────────────────────────────────────────────
 export default function AdminLayout() {
@@ -212,7 +134,7 @@ export default function AdminLayout() {
       {/* Navigation — driven by registry */}
       <nav className="flex-1 py-2 overflow-y-auto overflow-x-hidden">
         {allGroups.map((group, i) => (
-          <NavGroup
+          <LkvipSidebarGroup
             key={group.key}
             group={group}
             collapsed={!mobile && collapsed}

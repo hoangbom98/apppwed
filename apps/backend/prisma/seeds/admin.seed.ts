@@ -1,16 +1,17 @@
-﻿'use strict';
+'use strict';
 /**
- * prisma/seeds/admin.seed.js — Admin DB seed
- * Creates: AdminUser, User, Wallet, Projects, ProjectConfigs, PaymentGateways
+ * prisma/seeds/admin.seed.ts — Admin DB seed
+ * Creates: AdminUser, User, Wallet, Projects, ProjectConfigs, PaymentGateways,
+ *          VipConfig, RebateRule, NotificationTemplate, CronJob seeds
  */
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { PrismaClient } = require('../../node_modules/.prisma/admin-client');
+const { getPrismaClient, disconnectAll } = require('../../src/config/databases');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient('admin');
 
 async function seed() {
   // ── 1. AdminUser ──────────────────────────────────────────────────
@@ -134,6 +135,46 @@ async function seed() {
     });
   }
   console.log(`  VipConfigs: ${vipLevels.length} levels`);
+
+  // ── 8. RebateRule (default rules per project) ──────────────────────
+  const rebateRules = [
+    { name: 'Game — Rebate mặc định (Lottery)',   gameType: 'lottery', rebateRate: 0.005,  minBet: 10000, period: 'daily',   project: 'game',   status: 'active', sortOrder: 1 },
+    { name: 'Game — Rebate slot',                  gameType: 'slot',    rebateRate: 0.003,  minBet: 10000, period: 'daily',   project: 'game',   status: 'active', sortOrder: 2 },
+    { name: 'Game — Rebate live casino',           gameType: 'live',    rebateRate: 0.004,  minBet: 50000, period: 'daily',   project: 'game',   status: 'active', sortOrder: 3 },
+    { name: 'Game — Rebate tuần (tất cả loại)',    gameType: null,      rebateRate: 0.006,  minBet: 100000,period: 'weekly',  project: 'game',   status: 'active', sortOrder: 4 },
+    { name: 'Sports — Rebate cược thể thao',       gameType: 'sports',  rebateRate: 0.004,  minBet: 20000, period: 'daily',   project: 'sports', status: 'active', sortOrder: 5 },
+    { name: 'Trade — Rebate giao dịch',            gameType: 'trade',   rebateRate: 0.002,  minBet: 100000,period: 'monthly', project: 'trade',  status: 'active', sortOrder: 6 },
+  ];
+  let rebateCount = 0;
+  for (const rule of rebateRules) {
+    const existing = await prisma.rebateRule.findFirst({
+      where: { name: rule.name, project: rule.project },
+    });
+    if (!existing) {
+      await prisma.rebateRule.create({ data: rule });
+      rebateCount++;
+    }
+  }
+  console.log(`  RebateRules: ${rebateRules.length} (${rebateCount} created)`);
+
+  // ── 9. System Configs (key-value defaults) ─────────────────────────
+  const sysConfigs = [
+    { key: 'maintenance_mode',    value: 'false', group: 'system',  description: 'Chế độ bảo trì toàn hệ thống' },
+    { key: 'internal_loan_rate',  value: '0.0003',group: 'finance', description: 'Lãi suất vay nội bộ mặc định (mỗi ngày)' },
+    { key: 'vip_rebate_bonus',    value: '1.2',   group: 'game',    description: 'Hệ số nhân rebate cho VIP 5+' },
+    { key: 'max_withdraw_daily',  value: '100000000', group: 'payment', description: 'Hạn mức rút tối đa/ngày (VND)' },
+    { key: 'min_deposit',         value: '50000', group: 'payment', description: 'Nạp tối thiểu (VND)' },
+    { key: 'reg_require_referral',value: 'false', group: 'general', description: 'Bắt buộc mã giới thiệu khi đăng ký' },
+    { key: 'reg_bonus_amount',    value: '0',     group: 'general', description: 'Thưởng đăng ký mới (VND)' },
+  ];
+  for (const cfg of sysConfigs) {
+    await prisma.systemConfig.upsert({
+      where: { key: cfg.key },
+      update: {},
+      create: cfg,
+    }).catch(() => {});
+  }
+  console.log(`  SystemConfigs: ${sysConfigs.length}`);
 }
 
 module.exports = { seed };
@@ -141,5 +182,5 @@ module.exports = { seed };
 if (require.main === module) {
   seed()
     .catch(e => { console.error('[seed:admin] ❌', e); process.exit(1); })
-    .finally(() => prisma.$disconnect());
+    .finally(() => disconnectAll());
 }

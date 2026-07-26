@@ -4,7 +4,7 @@
 // Quản lý danh sách Cron Jobs và trạng thái thực thi
 import React from 'react';
 import {
-  App, Card, Table, Tag, Button, Space, Tooltip, Modal, Form, Input, Select,
+  App, Card, Table, Tag, Button, Space, Tooltip, Modal, Form,
   Typography, Alert, Descriptions, Spin,
 } from 'antd';
 import {
@@ -12,6 +12,7 @@ import {
   CopyOutlined, ReloadOutlined, EditOutlined, PlusOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { LkvipForm, LkvipInput, LkvipSelect } from '@lkvip/ui';
 import api from '@admin/api/client';
 
 const { Text, Paragraph } = Typography;
@@ -67,12 +68,12 @@ function EditModal({ job, open, onClose, onSaved }) {
       cancelText="Đóng"
       width={560}
     >
-      <Form form={form} layout="vertical" onFinish={v => save.mutate(v)}>
+      <LkvipForm form={form} onFinish={v => save.mutate(v)}>
         <Form.Item label="Tên" name="name" rules={[{ required: true }]}>
-          <Input />
+          <LkvipInput />
         </Form.Item>
         <Form.Item label="Mô tả" name="description">
-          <Input.TextArea rows={2} />
+          <LkvipInput />
         </Form.Item>
         <Form.Item
           label={
@@ -86,28 +87,29 @@ function EditModal({ job, open, onClose, onSaved }) {
           name="command"
           rules={[{ required: true }]}
         >
-          <Input placeholder="/cron/main" />
+          <LkvipInput placeholder="/cron/main" />
         </Form.Item>
         <Form.Item
           label={
             <span>
               Lịch chạy (Cron Expression)
               <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
-                VD: */5 * * * * = mỗi 5 phút
+                (vd: * * * * *)
               </Text>
             </span>
           }
           name="schedule"
           rules={[{ required: true }]}
         >
-          <Input placeholder="*/5 * * * *" />
+          <LkvipInput placeholder="* * * * *" />
         </Form.Item>
         <Form.Item label="Trạng thái" name="status">
-          <Select>
-            <Select.Option value="active">Kích hoạt</Select.Option>
+          <LkvipSelect>
+            <Select.Option value="active">Đang chạy</Select.Option>
             <Select.Option value="inactive">Tạm dừng</Select.Option>
-          </Select>
+          </LkvipSelect>
         </Form.Item>
+
       </Form>
     </Modal>
   );

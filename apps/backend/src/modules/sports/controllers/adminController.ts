@@ -27,9 +27,6 @@ exports.createLeague = async (req, res) => {
   } catch (e) { return error(res, e.message, 500); }
 };
 
-const { logAdminAction } = require('../../../shared/services/auditLogger.service');
-const { ok, created, error, paginate: paginateRes } = require('../../../shared/utils/response');
-
 exports.updateLeague = async (req, res) => {
   try {
     const { id } = req.params;

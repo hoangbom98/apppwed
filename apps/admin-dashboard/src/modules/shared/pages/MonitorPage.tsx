@@ -1,14 +1,17 @@
 // @ts-nocheck
 // frontend/admin-dashboard/src/modules/shared/pages/MonitorPage.jsx
-// Realtime Monitor — live alerts, admin activity logs, online stats.
-// Upgraded: realtime ticker, alert badge count, system health bars
+// Realtime Monitor — live alerts, admin activity logs, online stats, system health.
 // Route: /monitor
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Table, Tag, Button, Space, Input, Tabs, Card, App, Typography, Flex, Progress, Badge,
+  Statistic, Tooltip, Spin,
 } from 'antd';
-import { BellOutlined, AlertOutlined } from '@ant-design/icons';
+import {
+  BellOutlined, AlertOutlined, GlobalOutlined, CloudServerOutlined,
+  LockOutlined, SyncOutlined, CheckCircleFilled, CloseCircleFilled, WarningFilled,
+} from '@ant-design/icons';
 import api from '@admin/api/client';
 import { useAdminSocket } from '@admin/core/hooks/useAdminSocket';
 
@@ -264,6 +267,176 @@ function AdminLogsTab() {
   );
 }
 
+// ── System Health tab ─────────────────────────────────────────────────────────
+
+const STATUS_COLOR = {
+  online:   '#22c55e',
+  healthy:  '#22c55e',
+  offline:  '#ef4444',
+  down:     '#ef4444',
+  warning:  '#f59e0b',
+  degraded: '#f59e0b',
+};
+
+function StatusDot({ status }) {
+  const color = STATUS_COLOR[status] ?? '#9ca3af';
+  return <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: color, marginRight: 6 }} />;
+}
+
+function ServicePanel() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['health-services'],
+    queryFn:  () => api.get('/admin/health/services').then(r => r.data?.data ?? r.data),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+
+  const cols = [
+    { title: 'Dịch vụ',       dataIndex: 'name',         key: 'name',   render: v => <strong>{v}</strong> },
+    {
+      title: 'Trạng thái',    dataIndex: 'status',       key: 'status',
+      render: v => (
+        <Tag color={v === 'online' || v === 'healthy' ? 'success' : v === 'warning' || v === 'degraded' ? 'warning' : 'error'}>
+          <StatusDot status={v} />{v?.toUpperCase()}
+        </Tag>
+      ),
+    },
+    { title: 'Phản hồi (ms)', dataIndex: 'responseTime', key: 'rt',     render: v => v > 0 ? `${v} ms` : '—' },
+    {
+      title: 'URL',           dataIndex: 'url',          key: 'url',
+      render: v => <Text style={{ fontSize: 12, color: '#9ca3af' }} ellipsis={{ tooltip: v }}>{v}</Text>,
+    },
+    { title: 'Chi tiết',      dataIndex: 'details',      key: 'details', render: v => <Text style={{ fontSize: 12 }}>{v}</Text> },
+  ];
+
+  const rows    = Array.isArray(data) ? data : [];
+  const onCount = rows.filter(r => r.status === 'online' || r.status === 'healthy').length;
+
+  return (
+    <Card
+      size="small"
+      title={
+        <Flex align="center" gap={8}>
+          <CloudServerOutlined />
+          <span>Dịch vụ HTTP</span>
+          <Tag color={onCount === rows.length && rows.length > 0 ? 'success' : 'error'} style={{ marginLeft: 'auto' }}>
+            {onCount}/{rows.length} online
+          </Tag>
+        </Flex>
+      }
+      extra={<Button size="small" icon={<SyncOutlined spin={isFetching} />} onClick={() => refetch()} />}
+    >
+      <Table dataSource={rows} columns={cols} rowKey="name" pagination={false} size="small" loading={isLoading} />
+    </Card>
+  );
+}
+
+function DnsPanel() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['health-dns'],
+    queryFn:  () => api.get('/admin/health/dns').then(r => r.data?.data ?? r.data),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const cols = [
+    { title: 'Hostname',    dataIndex: 'hostname', key: 'hostname', render: v => <Text code style={{ fontSize: 12 }}>{v}</Text> },
+    {
+      title: 'DNS',         dataIndex: 'resolved', key: 'resolved',
+      render: v => v
+        ? <Tag icon={<CheckCircleFilled />} color="success">OK</Tag>
+        : <Tag icon={<CloseCircleFilled />} color="error">FAILED</Tag>,
+    },
+    { title: 'IP thực tế', dataIndex: 'ip',       key: 'ip',       render: v => <Text style={{ fontSize: 12 }}>{v}</Text> },
+    { title: 'IP mong đợi',dataIndex: 'expected', key: 'expected', render: v => <Text type="secondary" style={{ fontSize: 12 }}>{v}</Text> },
+    {
+      title: 'Lỗi',        dataIndex: 'error',    key: 'error',
+      render: v => v ? <Text style={{ fontSize: 12, color: '#ef4444' }}>{v}</Text> : '—',
+    },
+  ];
+
+  const rows   = Array.isArray(data) ? data : [];
+  const okCount = rows.filter(r => r.resolved).length;
+
+  return (
+    <Card
+      size="small"
+      title={
+        <Flex align="center" gap={8}>
+          <GlobalOutlined />
+          <span>DNS Records</span>
+          <Tag color={okCount === rows.length && rows.length > 0 ? 'success' : 'error'} style={{ marginLeft: 'auto' }}>
+            {okCount}/{rows.length} resolved
+          </Tag>
+        </Flex>
+      }
+      extra={<Button size="small" icon={<SyncOutlined spin={isFetching} />} onClick={() => refetch()} />}
+    >
+      <Table dataSource={rows} columns={cols} rowKey="hostname" pagination={false} size="small" loading={isLoading} />
+    </Card>
+  );
+}
+
+function Pm2Panel() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['health-pm2'],
+    queryFn:  () => api.get('/admin/health/pm2').then(r => r.data?.data ?? r.data),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+
+  const rows     = Array.isArray(data) ? data : [];
+  const onCount  = rows.filter(r => r.status === 'online').length;
+
+  return (
+    <Card
+      size="small"
+      title={
+        <Flex align="center" gap={8}>
+          <span>⚙️</span>
+          <span>PM2 Processes</span>
+          <Tag color={onCount === rows.length && rows.length > 0 ? 'success' : rows.length === 0 ? 'default' : 'error'} style={{ marginLeft: 'auto' }}>
+            {onCount}/{rows.length} online
+          </Tag>
+        </Flex>
+      }
+      extra={<Button size="small" icon={<SyncOutlined spin={isFetching} />} onClick={() => refetch()} />}
+    >
+      {isLoading ? (
+        <Spin size="small" />
+      ) : rows.length === 0 ? (
+        <Text type="secondary" style={{ fontSize: 12 }}>PM2 không khả dụng trên máy này.</Text>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {rows.map(p => (
+            <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <StatusDot status={p.status} />
+              <Text style={{ flex: 1, fontWeight: 500, fontSize: 13 }}>{p.name}</Text>
+              <Tag color={p.status === 'online' ? 'green' : 'red'} style={{ fontSize: 11 }}>{p.status}</Tag>
+              <Text type="secondary" style={{ fontSize: 11, width: 70, textAlign: 'right' }}>
+                CPU {p.cpu ?? 0}%
+              </Text>
+              <Text type="secondary" style={{ fontSize: 11, width: 70, textAlign: 'right' }}>
+                {p.memory ?? 0} MB
+              </Text>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function SystemHealthTab() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <ServicePanel />
+      <DnsPanel />
+      <Pm2Panel />
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function MonitorPage() {
   const [tab, setTab] = useState('alerts');
@@ -279,7 +452,8 @@ export default function MonitorPage() {
       ),
       children: <AlertsTab onBadgeUpdate={setAlertBadge} />,
     },
-    { key: 'logs', label: 'Lịch sử Admin', children: <AdminLogsTab /> },
+    { key: 'logs',   label: 'Lịch sử Admin',   children: <AdminLogsTab /> },
+    { key: 'health', label: '🖥️ System Health', children: <SystemHealthTab /> },
   ];
 
   return (

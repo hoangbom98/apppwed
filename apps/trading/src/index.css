@@ -9,15 +9,15 @@
 /* ── Color tokens ─────────────────────────────────────────────────── */
 :root {
   /* Binance Yellow — primary accent */
-  --bn-yellow:        #F0B90B;
-  --bn-yellow-hover:  #d4a409;
-  --bn-yellow-muted:  rgba(240,185,11,0.12);
-  --bn-yellow-border: rgba(240,185,11,0.30);
+  --bn-yellow:        #FCD535;
+  --bn-yellow-hover:  #F0B90B;
+  --bn-yellow-muted:  rgba(252,213,53,0.16);
+  --bn-yellow-border: rgba(252,213,53,0.30);
 
   /* Backgrounds — layered dark surfaces */
   --bn-bg-base:       #0b0e11;   /* deepest: page background       */
-  --bn-bg-surface:    #161a1e;   /* elevated: cards, panels        */
-  --bn-bg-elevated:   #1e2329;   /* highest: modals, dropdowns     */
+  --bn-bg-surface:    #1e2329;   /* elevated: cards, panels        */
+  --bn-bg-elevated:   #2b3139;   /* highest: modals, dropdowns     */
   --bn-bg-hover:      #2b3139;   /* hover state                    */
 
   /* Borders */
@@ -44,7 +44,7 @@
 html, body, #root {
   background-color: var(--bn-bg-base);
   color: var(--bn-text-primary);
-  font-family: "Binance Plex", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "BinanceNova", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -116,4 +116,11 @@ html, body, #root {
 .safe-area-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 
 /* ── Mono font for prices ─────────────────────────────────────────── */
-.tabular-price { font-family: "IBM Plex Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; }
+.tabular-price { font-family: "BinancePlex", "IBM Plex Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; }
+
+.bn-number { font-family: "BinancePlex", "IBM Plex Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; }
+
+.ant-btn-primary { color: #181a20; font-weight: 600; }
+.ant-input, .ant-input-affix-wrapper, .ant-select-selector { border-radius: 6px !important; }
+.ant-card { border-radius: 12px; }
+.ant-table-thead > tr > th { color: var(--bn-text-secondary) !important; font-size: 12px; }

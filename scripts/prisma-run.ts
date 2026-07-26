@@ -35,8 +35,8 @@ type Action = 'generate' | 'migrate' | 'deploy' | 'status' | 'studio';
 
 const VALID_ACTIONS: Action[] = ['generate', 'migrate', 'deploy', 'status', 'studio'];
 
-// tsx injects __dirname automatically even in CJS+ESM hybrid mode
-const SCHEMA_BASE = path.join(__dirname, '..', 'prisma');
+// Script lives at /scripts/prisma-run.ts; schemas are at apps/backend/prisma/
+const SCHEMA_BASE = path.join(__dirname, '..', 'apps', 'backend', 'prisma');
 
 function schemaPath(mod: Module): string {
   return path.join(SCHEMA_BASE, mod, 'schema.prisma');

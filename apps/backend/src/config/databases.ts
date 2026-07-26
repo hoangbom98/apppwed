@@ -39,9 +39,15 @@ const clients = {};
  */
 function getPrismaClient(project) {
   if (!clients[project]) {
-    const clientPath = path.join(
-      __dirname, '../../node_modules/.prisma', `${project}-client`
-    );
+    // __dirname resolves differently under src/ vs dist/src/ — use project root.
+    // Project root = apps/backend, which is always 2 levels above __dirname in
+    // both src/config/ (dev) and dist/src/config/ (prod dist).
+    // Prisma clients are generated into node_modules at the monorepo root:
+    //   /var/LKVIP/node_modules/.prisma/<project>-client
+    const projectRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', 'node_modules', '.prisma', `${project}-client`);
+    // Fallback: apps/backend/node_modules/.prisma (local install)
+    const localPath   = path.resolve(__dirname, '..', '..', 'node_modules', '.prisma', `${project}-client`);
+    const clientPath  = require('fs').existsSync(projectRoot) ? projectRoot : localPath;
     const { PrismaClient } = require(clientPath);
     const client = new PrismaClient();
     // Apply field-level encryption middleware for sensitive fields

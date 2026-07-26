@@ -14,7 +14,7 @@ export default function DesktopHeader() {
 
   return (
     <header
-      className="sticky top-0 z-40 px-6 py-3 flex items-center justify-between"
+      className="sticky top-0 z-40 h-16 px-4 md:px-6 flex items-center justify-between"
       style={{
         background:   'var(--bn-bg-surface)',
         borderBottom: '1px solid var(--bn-border)',
