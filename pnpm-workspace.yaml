@@ -69,14 +69,14 @@ catalog:
   # NOTE: workspace:* packages KHÔNG được khai báo trong catalog (pnpm restriction).
   # Mỗi app khai báo trực tiếp: "@lkvip/ui": "workspace:*" trong package.json
 
-allowBuilds:
-  '@firebase/util': true
-  '@prisma/client': true
-  '@prisma/engines': true
-  '@scarf/scarf': true
-  core-js: true
-  esbuild: true
-  msgpackr-extract: true
-  prisma: true
-  protobufjs: true
-  sharp: true
+onlyBuiltDependencies:
+  - '@firebase/util'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@scarf/scarf'
+  - core-js
+  - esbuild
+  - msgpackr-extract
+  - prisma
+  - protobufjs
+  - sharp
