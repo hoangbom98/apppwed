@@ -306,6 +306,7 @@ model Wallet {
   balance   Decimal  @default(0)  @db.Decimal(19,4)
   frozen    Decimal  @default(0)  @db.Decimal(19,4)
   version   Int      @default(0)                      // Optimistic lock — increment on every balance write
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   transactions Transaction[]
@@ -375,6 +376,7 @@ model ProjectBalance {
   totalBet    Decimal  @default(0) @db.Decimal(19,4)
   totalWin    Decimal  @default(0) @db.Decimal(19,4)
   totalFee    Decimal  @default(0) @db.Decimal(19,4)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("project_balances")
@@ -682,8 +684,10 @@ model LoyaltyPoint {
   totalEarned Int      @default(0)
   totalSpent  Int      @default(0)
   tier        String   @default("bronze") @db.VarChar(20)   // bronze|silver|gold|platinum|diamond
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([userId])
   @@map("loyalty_points")
 }
 
@@ -780,6 +784,7 @@ model NotificationSetting {
   sms       Boolean  @default(false)
   inApp     Boolean  @default(true)
   types     Json?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("notification_settings")
@@ -876,6 +881,7 @@ model SupportParticipant {
   lastReadAt DateTime    @default(now())
   joinedAt   DateTime    @default(now())
   leftAt     DateTime?
+  createdAt  DateTime    @default(now())
 
   @@unique([roomId, userId])
   @@index([userId])

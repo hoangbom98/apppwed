@@ -146,6 +146,7 @@ model PriceHistory {
   // 1m | 5m | 15m | 1h | 4h | 1d | 1w
   interval  String   @db.VarChar(10)
   timestamp DateTime
+  createdAt DateTime @default(now())
 
   @@index([symbolId, timestamp])
   @@index([symbolId, interval, timestamp])
@@ -231,8 +232,10 @@ model Wallet {
   frozen    Decimal  @default(0) @db.Decimal(19, 4)   // locked in open orders/positions
   version   Int      @default(0)                       // Optimistic lock — increment on every balance write
   currency  String   @default("USD") @db.VarChar(10)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
   @@map("wallets")
 }
 
@@ -420,6 +423,7 @@ model SupportParticipant {
   lastReadAt DateTime    @default(now())
   joinedAt   DateTime    @default(now())
   leftAt     DateTime?
+  createdAt  DateTime    @default(now())
 
   @@unique([roomId, userId])
   @@index([userId])
@@ -527,6 +531,7 @@ model NotificationSetting {
   sms       Boolean  @default(false)
   inApp     Boolean  @default(true)
   types     Json?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("notification_settings")
@@ -713,6 +718,7 @@ model SystemConfig {
   // finance | trading | payment | reward | general
   group       String   @default("general") @db.VarChar(50)
   description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([group])
@@ -731,6 +737,7 @@ model RiskConfig {
   qkbl           Decimal  @default(0) @db.Decimal(8, 4)   // risk rate type 4
   maxPositionAmt Decimal  @default(0) @db.Decimal(18, 2)  // 0 = unlimited
   marginCallRate Decimal  @default(0.1) @db.Decimal(8, 4) // 10% margin call threshold
+  createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@map("risk_configs")
@@ -946,6 +953,8 @@ model PrizeRecord {
   wonAt     DateTime    @default(now())
   claimed   Boolean     @default(false)
   claimedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@index([userId])
   @@index([wonAt])

@@ -172,3 +172,10 @@ Factory: `src/shared/payment/PaymentFactory.ts`.
 | Constants | SCREAMING_SNAKE_CASE |
 | Prisma models | PascalCase |
 | Database columns | camelCase (Prisma maps to snake_case in DB) |
+
+---
+
+## Image Standards
+
+All image types, dimensions, aspect ratios, shared components, file naming, and upload validation
+rules are documented in [`reference/image-standards.md`](image-standards.md).

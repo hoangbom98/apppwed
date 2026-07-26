@@ -4,6 +4,10 @@
 
 // ── Components ────────────────────────────────────────────────────────────────
 export { default as BackToTop }      from './components/BackToTop';
+export { default as ToastNotification } from './components/common/ToastNotification';
+export type { ToastType }            from './components/common/ToastNotification';
+export { default as DepositForm }    from './components/deposit/DepositForm';
+export type { DepositConfig }        from './components/deposit/DepositForm';
 export { default as Spinner }        from './components/Spinner';
 export { Pagination, default as PaginationComp } from './components/Pagination';
 export type { PaginationProps }      from './components/Pagination';
@@ -11,13 +15,26 @@ export { DownloadButton }            from './components/DownloadButton';
 export { DownloadModal }             from './components/DownloadModal';
 export { AppDistributionPage }       from './components/AppDistributionPage';
 export { SentryErrorBoundary }       from './components/SentryErrorBoundary';
+export { default as CskhPage }       from './components/CskhPage';
+export type { CskhConfig, CskhButton } from './components/CskhPage';
 export { ChatRoom }                  from './components/ChatRoom';
 export { LkvipFooter }               from './components/LkvipFooter';
 export { LkvipThemeWrapper }         from './components/LkvipThemeWrapper';
 export { Logo, Banner, Icon }        from './components/AssetComponents';
+export { default as ResponsiveImage } from './components/ResponsiveImage';
+export type { ResponsiveImageProps, ImageAspect } from './components/ResponsiveImage';
+
+// ── Icon Library ──────────────────────────────────────────────────────────────
+// Centralised Lucide icon re-exports — import from here, NOT from 'lucide-react' directly.
+export * from './components/IconLibrary';
 export { LkvipLayout, LkvipSplitter, Flex } from './components/LayoutComponents';
 export { LkvipGrid } from './components/GridComponents';
-export { LkvipStatusTag, LkvipStatCard, LkvipTable, LkvipForm, LkvipInput, LkvipSelect, LkvipSidebarItem, LkvipSidebarGroup } from './components/AdminComponents';
+export {
+  LkvipStatusTag, LkvipStatCard, LkvipTable, LkvipForm, LkvipInput, LkvipSelect,
+  LkvipInputNumber, LkvipSidebarItem, LkvipSidebarGroup,
+  LkvipPageHeader, LkvipFormModal,
+  STATUS_COLOR, STATUS_LABEL_VI, PRIORITY_COLOR,
+} from './components/AdminComponents';
 export { TicketForm }                from './components/TicketForm';
 export { TicketList }                from './components/TicketList';
 export { ArticleDetail }             from './components/ArticleDetail';

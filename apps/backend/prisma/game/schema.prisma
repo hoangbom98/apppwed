@@ -171,6 +171,7 @@ model UserVip {
   level        VipLevel @relation(fields: [levelId], references: [id])
   totalDeposit Decimal  @default(0) @db.Decimal(19, 4)
   totalBet     Decimal  @default(0) @db.Decimal(19, 4)
+  createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@map("user_vips")
@@ -726,6 +727,7 @@ model OddsSetting {
   rate      Decimal  @db.Decimal(18, 4)
   minBet    Decimal  @default(0) @db.Decimal(18, 2)
   maxBet    Decimal  @default(0) @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("odds_settings")
@@ -788,6 +790,7 @@ model PaymentSetting {
   key         String   @db.VarChar(100)
   value       Json
   description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@unique([projectCode, key])
@@ -825,6 +828,7 @@ model SupportParticipant {
   lastReadAt DateTime    @default(now())
   joinedAt   DateTime    @default(now())
   leftAt     DateTime?
+  createdAt  DateTime    @default(now())
 
   @@unique([roomId, userId])
   @@index([userId])
@@ -937,6 +941,7 @@ model NotificationSetting {
   sms       Boolean  @default(false)
   inApp     Boolean  @default(true)
   types     Json?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("notification_settings")
@@ -1085,9 +1090,11 @@ model WheelPrize {
   sortOrder   Int              @default(0)
   isActive    Boolean          @default(true)
   createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   spinHistory SpinHistory[]
 
+  @@index([wheelId, isActive])
   @@map("wheel_prizes")
 }
 
