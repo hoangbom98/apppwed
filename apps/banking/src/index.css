@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --bank-primary:    #0ea5e9;
+  --bank-primary-dk: #0284c7;
+  --bank-bg:         #f0f9ff;
+  --bank-surface:    #ffffff;
+  --bank-border:     #e0f2fe;
+  --bank-text:       #0c1a2e;
+  --bank-muted:      #64748b;
+  --bank-success:    #22c55e;
+  --bank-danger:     #ef4444;
+  --bank-warning:    #f59e0b;
+  --bank-card-bg:    linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  --bank-card-text:  #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: var(--bank-bg);
+  color: var(--bank-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input, textarea, select { user-select: text; }
+
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+.safe-top    { padding-top: env(safe-area-inset-top, 0px); }

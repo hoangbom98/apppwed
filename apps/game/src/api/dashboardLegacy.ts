@@ -49,4 +49,3 @@ export async function fetchRecentTransactions(limit = 8): Promise<RecentTransact
   if (!data) throw new Error('Failed to fetch recent transactions');
   return data?.data ?? data;
 }
-

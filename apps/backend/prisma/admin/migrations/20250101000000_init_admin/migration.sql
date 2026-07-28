@@ -1017,4 +1017,3 @@ ALTER TABLE `knowledge_translations` ADD CONSTRAINT `knowledge_translations_arti
 
 -- AddForeignKey
 ALTER TABLE `ops_tasks` ADD CONSTRAINT `ops_tasks_assignedTo_fkey` FOREIGN KEY (`assignedTo`) REFERENCES `admin_users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-

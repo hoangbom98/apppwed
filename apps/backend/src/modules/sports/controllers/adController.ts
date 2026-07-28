@@ -1,10 +1,11 @@
+import type { Request, Response } from 'express';
 const { success, error } = require('../../../shared/utils/network/response');
 
-exports.getByPosition = async (req, res) => {
+export const getByPosition = async (req: Request, res: Response): Promise<void> => {
   try {
     const { position } = req.query;
-    if (!position) return error(res, 'Position is required');
-    
+    if (!position) { error(res, 'Position is required'); return; }
+
     const now = new Date();
     const where = {
       position,
@@ -14,15 +15,15 @@ exports.getByPosition = async (req, res) => {
         { AND: [{ startDate: null }, { endDate: null }] },
       ],
     };
-    
-    const ads = await req.prisma.adBanner.findMany({
+
+    const ads = await (req as any).prisma.adBanner.findMany({
       where,
       orderBy: { sortOrder: 'asc' },
-      take: 10,
+      take:    10,
     });
-    
-    return success(res, { ads });
-  } catch (e) {
-    return error(res, e.message, 500);
+
+    success(res, { ads });
+  } catch (e: unknown) {
+    error(res, e instanceof Error ? e.message : 'Error', 500);
   }
 };

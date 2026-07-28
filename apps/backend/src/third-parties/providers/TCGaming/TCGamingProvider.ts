@@ -201,7 +201,7 @@ export class TCGamingProvider extends BaseProvider {
 
     const user = await prisma.user.findFirst({ where: { username } });
     if (!user || user.balance < amount) return { status: 3001, error_desc: 'Insufficient balance' };
-    
+
     await prisma.$transaction([
       prisma.user.update({ where: { id: user.id }, data: { balance: { decrement: amount } } }),
       prisma.reserve.create({ data: { reserve_ref: ref_no, uid: user.id, amount, status: 0 } })
@@ -217,7 +217,7 @@ export class TCGamingProvider extends BaseProvider {
     // Idempotency: If status is already 2 (cancelled), return success
     if (reserve && reserve.status === 2) return { status: 0 };
     if (!reserve || reserve.status !== 0) return { status: 7, error_desc: 'Reserve not found or invalid' };
-    
+
     await prisma.$transaction([
       prisma.user.update({ where: { id: reserve.uid }, data: { balance: { increment: reserve.amount } } }),
       prisma.reserve.update({ where: { id: reserve.id }, data: { status: 2 } })
@@ -233,7 +233,7 @@ export class TCGamingProvider extends BaseProvider {
     // Idempotency: If status is already 1 (confirmed), return success
     if (reserve && reserve.status === 1) return { status: 0 };
     if (!reserve || reserve.status !== 0) return { status: 7, error_desc: 'Reserve not found or invalid' };
-    
+
     await prisma.reserve.update({ where: { id: reserve.id }, data: { status: 1 } });
     return { status: 0 };
   }

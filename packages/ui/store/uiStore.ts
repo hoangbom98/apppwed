@@ -5,7 +5,7 @@ export const useUIStore = create((set) => ({
   // Theme & Sidebar
   darkMode: typeof window !== 'undefined' ? localStorage.getItem('theme') === 'dark' : false,
   sidebarOpen: false,
-  
+
   // Tabs & Modal Panels
   activeTab: 'home',
   isGiftPanelOpen: false,

@@ -2,9 +2,9 @@
 
 /**
  * PM2 Ecosystem Config — LKVIP GROUP @ tc-gaming.live
- * 
+ *
  * Centralized PM2 configuration for all LKVIP services.
- * 
+ *
  * Deploy path : /var/LKVIP
  * Public API  : https://api.tc-gaming.live  (Nginx → :5000)
  * Internal    : 127.0.0.1:5000 only — NOT exposed to public directly
@@ -28,7 +28,7 @@ module.exports = {
       restart_delay:      3000,
       max_restarts:       10,
       min_uptime:         '10s',
-      
+
       // Centralized logs
       out_file:           '/var/LKVIP/data/logs/lkvip-api-out.log',
       err_file:           '/var/LKVIP/data/logs/lkvip-api-err.log',

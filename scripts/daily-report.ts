@@ -30,6 +30,9 @@ import { execSync, spawnSync }  from 'child_process';
 import fs   from 'fs';
 import path from 'path';
 import https from 'https';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -145,7 +148,7 @@ async function runAllChecks(): Promise<CheckResult[]> {
     console.log('⏳ [2/5] Unit tests...');
     const testResult = runCheck(
       'Unit Tests',
-      'npm test -- --passWithNoTests 2>&1 | tail -15',
+      'pnpm test -- --passWithNoTests 2>&1 | tail -15',
       { cwd: path.join(ROOT, 'apps/backend'), timeout: 120_000 }
     );
     // Detect test count from output

@@ -53,7 +53,7 @@ export class Orchestrator {
     const results: ScanResult[] = [];
 
     // Filter analyzers if 'only' option is provided
-    const activeAnalyzers = options.only 
+    const activeAnalyzers = options.only
       ? this.analyzers.filter(a => options.only!.includes(a.constructor.name.replace('Analyzer', '').toLowerCase()))
       : this.analyzers;
 

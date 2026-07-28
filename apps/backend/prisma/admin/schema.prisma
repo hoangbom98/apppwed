@@ -89,7 +89,7 @@ model User {
   userDevices             UserDevice[]
   amlAlerts               AmlAlert[]
   securityLogs            SecurityLog[]
-  
+
   // 🔐 Security fields
   emailVerified           Boolean   @default(false)
   phoneVerified           Boolean   @default(false)
@@ -1520,7 +1520,6 @@ model RebateClaim {
   @@index([project, period])
   @@map("rebate_claims")
 }
-
 
 /// Per-project SMS delivery log
 /// Records every send attempt for audit, debugging, and rate-limit tracking.

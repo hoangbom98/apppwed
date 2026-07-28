@@ -33,4 +33,3 @@ global.IntersectionObserver = class {
   unobserve() {}
   disconnect() {}
 } as any;
-

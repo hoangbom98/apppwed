@@ -140,4 +140,3 @@ export const CONTACT_LINKS = {
   TELEGRAM: 'https://t.me/XXXXXXX',
   ZALO:     'https://zalo.me/XXXXXXX',
 } as const;
-

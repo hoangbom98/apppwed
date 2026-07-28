@@ -5,12 +5,11 @@
 import { logger } from '../core/logger';
 
 export class RiskEngine {
-  constructor(private prisma: any) {}
+  constructor(private prisma: unknown) {}
 
-  async checkBetRisk(userId: string, amount: number): Promise<boolean> {
+  async checkBetRisk(userId: string, _amount: number): Promise<boolean> {
     // 1. Kiểm tra giới hạn cược trong thời gian ngắn
-    // 2. Kiểm tra cược đối ứng (ví dụ: TAI và XIU cùng lúc)
-    
+    // 2. Kiểm tra cược đối ứng (ví dụ: TÀI và XỈU cùng lúc)
     logger.info(`[RiskEngine] Checking risk for user ${userId}`);
     return true; // true = an toàn
   }

@@ -17,7 +17,7 @@ orchestrator.run(apps, {
   only,
 }).then((results) => {
   const totalErrors = results.reduce((sum, r) => sum + r.summary.totalErrors, 0);
-  
+
   console.log(`\n📈 Scan complete: ${totalErrors} errors found.`);
   process.exit(totalErrors === 0 ? 0 : 1);
 }).catch((error) => {

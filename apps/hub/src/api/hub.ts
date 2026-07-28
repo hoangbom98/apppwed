@@ -43,6 +43,5 @@ export const removeFavorite     = (id: number)   => api.delete(`/hub/favorites/$
 export const getNotifications   = () => api.get('/hub/notifications');
 export const markNotifRead      = (id: number)   => api.put(`/hub/notifications/${id}/read`);
 
-
 /* ── App Catalog ──────────────────────────────── */
 export const getAppCatalog = () => api.get('/hub/app-catalog');

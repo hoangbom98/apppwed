@@ -4,11 +4,11 @@
 
 Hệ thống **Autonomous Risk Detection & Response** phát hiện và can thiệp tự động toàn bộ rủi ro:
 
-✅ **Tài chính**: giao dịch bất thường, rút tiền sau nạp, tần suất cao, vượt ngưỡng thống kê  
-✅ **Bảo mật**: brute-force, injection, DDoS, IP đen, thiết bị lạ  
-✅ **Gian lận**: multi-account, bot, fake device, rapid registration  
-✅ **Uy tín**: spam, khiêu dâm, lừa đảo, nội dung độc hại  
-✅ **Pháp lý**: KYC tự động, AML báo cáo, structuring detection  
+✅ **Tài chính**: giao dịch bất thường, rút tiền sau nạp, tần suất cao, vượt ngưỡng thống kê
+✅ **Bảo mật**: brute-force, injection, DDoS, IP đen, thiết bị lạ
+✅ **Gian lận**: multi-account, bot, fake device, rapid registration
+✅ **Uy tín**: spam, khiêu dâm, lừa đảo, nội dung độc hại
+✅ **Pháp lý**: KYC tự động, AML báo cáo, structuring detection
 ✅ **Quốc tế**: IP nước ngoài, quốc gia rủi ro cao, đổi location đột ngột
 
 ---
@@ -376,8 +376,8 @@ SELECT * FROM risk_scores WHERE user_id = 'user_123' ORDER BY created_at DESC LI
 ### Top users có risk score cao nhất
 
 ```sql
-SELECT user_id, score, level, reason 
-FROM risk_scores 
+SELECT user_id, score, level, reason
+FROM risk_scores
 WHERE level IN ('high', 'critical')
 ORDER BY score DESC, created_at DESC
 LIMIT 20;

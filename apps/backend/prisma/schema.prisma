@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("HUB_DATABASE_URL")
 }
 
@@ -30,7 +30,7 @@ model Project {
   configs     Config[]
   wallets     Wallet[]
   transactions Transaction[]
-  
+
   @@index([slug])
 }
 
@@ -40,7 +40,7 @@ model User {
   email           String   @unique @db.VarChar(255)
   password        String   @db.VarChar(255)
   createdAt       DateTime @default(now())
-  
+
   projects        UserProject[]
   wallets         Wallet[]
 }
@@ -49,7 +49,7 @@ model UserProject {
   userId      String
   projectId   String
   role        String   @default("USER")
-  
+
   user        User     @relation(fields: [userId], references: [id])
   project     Project  @relation(fields: [projectId], references: [id])
 
@@ -64,7 +64,7 @@ model Wallet {
   userId      String
   projectId   String
   main        Float    @default(0)
-  
+
   user        User     @relation(fields: [userId], references: [id])
   project     Project  @relation(fields: [projectId], references: [id])
 
@@ -95,7 +95,7 @@ model Config {
   key         String   @db.VarChar(100)
   value       Json
   projectId   String
-  
+
   project     Project  @relation(fields: [projectId], references: [id])
 
   @@unique([key, projectId])
@@ -116,7 +116,7 @@ model SystemSetting {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@index([group])
 }
 

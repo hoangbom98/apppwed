@@ -1,26 +1,28 @@
-// @ts-nocheck
-// backend/src/modules/admin/controllers/auditController.js
-const { getPrismaClient } = require('../../../shared/config/databases');
+import type { Request, Response } from 'express';
+import { getPrismaClient } from '../../../config/databases';
+const { ok, error } = require('../../../shared/utils/network/response');
 
-exports.getLogs = async (req, res) => {
+export const getLogs = async (req: Request, res: Response): Promise<void> => {
   try {
     const prisma = getPrismaClient('admin');
-    const { page = 1, limit = 20, module, action } = req.query;
-    const where = {};
-    if (module) where.module = module;
-    if (action) where.action = action;
-    
+    const page   = Number(req.query.page)  || 1;
+    const limit  = Number(req.query.limit) || 20;
+    const where: Record<string, unknown> = {};
+    if (req.query.module) where.module = req.query.module;
+    if (req.query.action) where.action = req.query.action;
+
     const [logs, total] = await Promise.all([
       prisma.auditLog.findMany({
-        where, 
+        where,
         orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * parseInt(limit), 
-        take: parseInt(limit),
+        skip:    (page - 1) * limit,
+        take:    limit,
       }),
-      prisma.auditLog.count({ where })
+      prisma.auditLog.count({ where }),
     ]);
-    res.json({ data: logs, total, page, limit });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+
+    ok(res, { logs, total, page, limit });
+  } catch (err: unknown) {
+    error(res, err instanceof Error ? err.message : 'Internal error', 500);
   }
 };

@@ -1,9 +1,9 @@
 # VPS Deployment & CI/CD — LKVIP Group
 
-Target: Ubuntu 22.04 VPS.  
-Deploy path: `/var/LKVIP`  
-Production domain: `tc-gaming.live`  
-Subdomains: `api`, `hub`, `game`, `trade`, `dating`, `sports`, `admin` — all under `tc-gaming.live`.  
+Target: Ubuntu 22.04 VPS.
+Deploy path: `/var/LKVIP`
+Production domain: `tc-gaming.live`
+Subdomains: `api`, `hub`, `game`, `trade`, `dating`, `sports`, `admin` — all under `tc-gaming.live`.
 PM2 process name: **`lkvip-api`** (not `lkvip-backend`).
 
 ---
@@ -80,7 +80,7 @@ pnpm --filter lkvip-backend run seed:all
 
 ## 3 — PM2 Ecosystem Config
 
-File: `apps/backend/ecosystem.config.js` (already committed to repo)  
+File: `apps/backend/ecosystem.config.js` (already committed to repo)
 Also available at: `config/pm2/ecosystem.config.js`
 
 ```javascript
@@ -284,9 +284,9 @@ pm2 monit
 pm2 status
 ```
 
-Log files: `/var/LKVIP/logs/lkvip-api-out.log` and `/var/LKVIP/logs/lkvip-api-err.log`.  
-Prometheus metrics: `GET /metrics` (protected by `METRICS_API_KEY` env var).  
+Log files: `/var/LKVIP/logs/lkvip-api-out.log` and `/var/LKVIP/logs/lkvip-api-err.log`.
+Prometheus metrics: `GET /metrics` (protected by `METRICS_API_KEY` env var).
 Health check: `GET /health` — returns DB + Redis + queue status.
 
-Prometheus config: `config/monitoring/prometheus.yml`  
+Prometheus config: `config/monitoring/prometheus.yml`
 Grafana dashboards: `config/monitoring/grafana/`

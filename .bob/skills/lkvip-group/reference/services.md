@@ -30,7 +30,7 @@ class WalletService {
 }
 ```
 
-All credit/debit calls write to `Ledger` (immutable) and update `Wallet` balance atomically inside a Prisma `$transaction`.  
+All credit/debit calls write to `Ledger` (immutable) and update `Wallet` balance atomically inside a Prisma `$transaction`.
 Use `decimal.js` (from `@lkvip/utils`) for all monetary arithmetic — never `Number` or `BigInt` for money.
 
 ## PaymentService
@@ -80,7 +80,7 @@ class NotificationService {
 }
 ```
 
-Uses Socket.IO `emit` for realtime delivery; falls back to DB insert for offline users.  
+Uses Socket.IO `emit` for realtime delivery; falls back to DB insert for offline users.
 Push notifications via Firebase Admin SDK (`firebase-admin`).
 
 ## PaymentAdapter Interface
@@ -101,7 +101,7 @@ type GatewayType = 'MoMo' | 'USDT' | 'OKPay' | 'Pay818' | 'GoPay' | 'LKvipIntern
 
 ## Background Jobs (BullMQ)
 
-All scheduled or heavy async work goes into a named queue — never inline with `setTimeout`.  
+All scheduled or heavy async work goes into a named queue — never inline with `setTimeout`.
 Workers live in `src/modules/workers/`. Each file is a self-contained BullMQ worker.
 
 | Worker file | Queue / Trigger | Responsibility |

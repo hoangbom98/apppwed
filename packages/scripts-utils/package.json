@@ -1,0 +1,11 @@
+{
+  "name": "@lkvip/scripts-utils",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "chalk": "^5.3.0"
+  }
+}

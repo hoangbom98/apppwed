@@ -10,39 +10,35 @@ const execAsync = promisify(exec);
 // Worker kiểm tra sức khỏe hệ thống định kỳ
 export const healthMonitorWorker = new Worker(
   'health-monitor',
-  async (job) => {
+  async (_job) => {
     const services = [
       { name: 'Backend', url: 'http://localhost:5000/health' },
-      // Bạn có thể thêm URL kiểm tra DB/Redis tại đây nếu có endpoint
     ];
 
     for (const service of services) {
       try {
         await axios.get(service.url, { timeout: 5000 });
         logger.info(`Health check passed: ${service.name}`);
-      } catch (error: any) {
-        logger.error(`Health check failed: ${service.name}. Error: ${error.message}`);
-        
-        // Tự động phục hồi nếu Backend down
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        logger.error(`Health check failed: ${service.name}. Error: ${msg}`);
+
         if (service.name === 'Backend') {
           await recoverBackend();
         }
       }
     }
   },
-  { connection: redis, concurrency: 1 }
+  { connection: redis, concurrency: 1 },
 );
 
-async function recoverBackend() {
+async function recoverBackend(): Promise<void> {
   logger.warn('Attempting to restart backend service...');
   try {
-    // Lưu ý: Đảm bảo user chạy backend có quyền thực thi pm2
-    await execAsync('pm2 restart lkvip-backend');
+    await execAsync('pm2 restart lkvip-api');
     logger.info('Backend service restarted successfully');
-    // TODO: Gửi cảnh báo critical cho admin qua Telegram/email
-    // Implement: await tg.alertWithLevel('CRITICAL', 'Backend restarted by health monitor', { time: new Date() })
-    // Requires: import tg from '../../shared/services/communication/telegramAlertService'
-  } catch (err: any) {
-    logger.error(`Failed to restart backend: ${err.message}`);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(`Failed to restart backend: ${msg}`);
   }
 }

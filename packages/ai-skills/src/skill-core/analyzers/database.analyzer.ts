@@ -13,7 +13,7 @@ export class DatabaseAnalyzer {
     // 1. Check Prisma schema files and migrations
     for (const module of modules) {
       const schemaPath = path.join(process.cwd(), 'prisma', module, 'schema.prisma');
-      
+
       // We only run this check if the app being scanned interacts with databases
       // For simplicity, we check if the prisma schema exists.
       if (!fs.existsSync(schemaPath)) {

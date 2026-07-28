@@ -240,14 +240,14 @@ async function launchGame(category, platform, gameCode = null) {
     platform,
     platform_type: 'WEB'
   });
-  
+
   if (gameCode) {
     params.append('game_code', gameCode);
   }
-  
+
   const response = await fetch(`/api/v1/game/launch?${params}`);
   const result = await response.json();
-  
+
   if (result.code === 200) {
     // Open game in iframe or new window
     window.open(result.data.game_url, '_blank');
@@ -266,10 +266,10 @@ launchGame('{category}', 'PG', 'fortune-tiger'); // Launch specific game
 ### HTML Iframe Example
 ```html
 <div id="game-container">
-  <iframe 
-    id="game-iframe" 
-    width="100%" 
-    height="600px" 
+  <iframe
+    id="game-iframe"
+    width="100%"
+    height="600px"
     frameborder="0"
     allow="autoplay; fullscreen"
   ></iframe>
@@ -279,7 +279,7 @@ launchGame('{category}', 'PG', 'fortune-tiger'); // Launch specific game
 async function loadGame() {
   const response = await fetch('/api/v1/game/launch?category={category}&platform=JDB');
   const result = await response.json();
-  
+
   if (result.code === 200) {
     document.getElementById('game-iframe').src = result.data.game_url;
   }

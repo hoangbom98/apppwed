@@ -1,30 +1,35 @@
-// @ts-nocheck
-/* eslint-disable */
+/**
+ * transferService.ts
+ * Handles withdrawal lifecycle: create → approve / reject with atomic balance management.
+ */
 
-import { PrismaClient } from '@prisma/client';
-// decimal.js installed lazily — fallback to native if missing
-let Decimal: any;
-try { Decimal = require('decimal.js'); } catch { Decimal = Number; }
+// decimal.js installed lazily — fallback to Number if missing
+let Decimal: new (v: number | string) => { lt: (n: unknown) => boolean; add: (n: unknown) => { toNumber: () => number }; negated: () => unknown; toNumber: () => number };
+try { Decimal = require('decimal.js'); } catch { Decimal = Number as any; }
 
 interface BankInfo {
   accountNumber: string;
-  bankName: string;
-  bankBin?: string;
+  bankName:      string;
+  bankBin?:      string;
   accountHolder: string;
 }
 
 class TransferService {
-  private prisma: PrismaClient;
+  private prisma: any;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: any) {
     this.prisma = prisma;
   }
 
-  // Create withdrawal request (freeze user balance)
-  async createWithdrawal(userId: string, amount: Decimal, bankInfo: BankInfo, _description: string = 'Rút tiền') {
-    // Check user balance
+  /** Create withdrawal request and freeze user balance atomically. */
+  async createWithdrawal(
+    userId:       string,
+    amount:       number,
+    bankInfo:     BankInfo,
+    _description: string = 'Rút tiền',
+  ): Promise<unknown> {
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where:  { id: userId },
       select: { balance: true },
     });
 
@@ -32,8 +37,7 @@ class TransferService {
       throw new Error('Insufficient balance or user not found');
     }
 
-    // Atomic: create withdrawal AND freeze balance in a single transaction
-    const withdrawal = await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       const created = await tx.withdrawalRequest.create({
         data: {
           userId,
@@ -47,21 +51,16 @@ class TransferService {
       });
       await tx.user.update({
         where: { id: userId },
-        data:  { 
-            balance: { decrement: amount }, 
-            frozen: { increment: amount } 
-        },
+        data:  { balance: { decrement: amount }, frozen: { increment: amount } },
       });
       return created;
     });
-
-    return withdrawal;
   }
 
-  // Admin approves withdrawal
-  async approveWithdrawal(withdrawalId: string, _adminId: string) {
+  /** Admin approves withdrawal — unfreeze and record transaction. */
+  async approveWithdrawal(withdrawalId: string, _adminId: string): Promise<unknown> {
     const withdrawal = await this.prisma.withdrawalRequest.findUnique({
-      where: { id: withdrawalId, status: 'pending' },
+      where:   { id: withdrawalId, status: 'pending' },
       include: { user: true },
     });
 
@@ -69,49 +68,41 @@ class TransferService {
       throw new Error('Withdrawal request not found or already processed');
     }
 
-    // Process in transaction
-    const result = await this.prisma.$transaction(async (prisma) => {
-      // 1. Update withdrawal
-      const updated = await prisma.withdrawalRequest.update({
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.withdrawalRequest.update({
         where: { id: withdrawalId },
-        data: {
-          status: 'completed',
+        data:  {
+          status:      'completed',
           processedAt: new Date(),
-          transferId: `TRF_${Date.now()}`,
+          transferId:  `TRF_${Date.now()}`,
         },
       });
 
-      // 2. Unfreeze balance (it was already deducted in createWithdrawal)
-      const user = await prisma.user.update({
+      const user = await tx.user.update({
         where: { id: withdrawal.userId },
-        data: {
-          frozen: { decrement: withdrawal.amount },
-        },
+        data:  { frozen: { decrement: withdrawal.amount } },
       });
 
-      // 3. Create transaction
-      const transaction = await prisma.lkvipTransaction.create({
+      const transaction = await tx.lkvipTransaction.create({
         data: {
-          userId: withdrawal.userId,
-          type: 'withdraw',
-          amount: withdrawal.amount.negated(),
+          userId:        withdrawal.userId,
+          type:          'withdraw',
+          amount:        new Decimal(withdrawal.amount).negated(),
           balanceBefore: new Decimal(user.balance).add(withdrawal.amount),
-          balanceAfter: new Decimal(user.balance),
+          balanceAfter:  new Decimal(user.balance),
           referenceType: 'withdrawal',
-          referenceId: withdrawal.id,
-          description: `Rút tiền về ${withdrawal.bankName} ${withdrawal.bankAccountNumber}`,
-          status: 'completed',
+          referenceId:   withdrawal.id,
+          description:   `Rút tiền về ${withdrawal.bankName} ${withdrawal.bankAccountNumber}`,
+          status:        'completed',
         },
       });
 
       return { withdrawal: updated, transaction, user };
     });
-
-    return result;
   }
 
-  // Reject withdrawal
-  async rejectWithdrawal(withdrawalId: string, reason: string) {
+  /** Admin rejects withdrawal — refund balance from frozen. */
+  async rejectWithdrawal(withdrawalId: string, reason: string): Promise<unknown> {
     const withdrawal = await this.prisma.withdrawalRequest.findUnique({
       where: { id: withdrawalId, status: 'pending' },
     });
@@ -120,30 +111,23 @@ class TransferService {
       throw new Error('Withdrawal request not found or already processed');
     }
 
-    // Process in transaction: refund balance
-    const result = await this.prisma.$transaction(async (prisma) => {
-      const updated = await prisma.withdrawalRequest.update({
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.withdrawalRequest.update({
         where: { id: withdrawalId },
-        data: {
-          status: 'rejected',
+        data:  {
+          status:          'rejected',
           rejectionReason: reason,
-          processedAt: new Date(),
+          processedAt:     new Date(),
         },
       });
 
-      // Refund: increase balance, decrease frozen
-      await prisma.user.update({
+      await tx.user.update({
         where: { id: withdrawal.userId },
-        data: {
-          balance: { increment: withdrawal.amount },
-          frozen: { decrement: withdrawal.amount },
-        },
+        data:  { balance: { increment: withdrawal.amount }, frozen: { decrement: withdrawal.amount } },
       });
 
       return updated;
     });
-
-    return result;
   }
 }
 

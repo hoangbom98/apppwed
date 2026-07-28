@@ -40,7 +40,7 @@ export class SecurityAnalyzer {
   private getAllFiles(dir: string): string[] {
     let files: string[] = [];
     if (!fs.existsSync(dir)) return files;
-    
+
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);

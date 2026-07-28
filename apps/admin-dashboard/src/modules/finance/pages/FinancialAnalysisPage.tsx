@@ -36,13 +36,13 @@ export default function FinancialAnalysisPage() {
           <Button type="primary" onClick={() => refetch()}>Truy vấn</Button>
         </div>
       </div>
-      
+
       <LkvipGrid>
         {stats.map((s, i) => (
           <LkvipStatCard key={i} {...s} />
         ))}
       </LkvipGrid>
-      
+
       <Card title="Xu hướng chênh lệch nạp/rút">
         {/* Biểu đồ tài chính ở đây */}
       </Card>

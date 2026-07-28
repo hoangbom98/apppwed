@@ -122,4 +122,3 @@ export default function TransactionChart({ data }: Props) {
     </div>
   );
 }
-

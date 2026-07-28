@@ -1,6 +1,6 @@
 # Incident Response Plan — LKVIP Group
 
-> Runbook ứng phó sự cố cho hệ thống production `tc-gaming.live`.  
+> Runbook ứng phó sự cố cho hệ thống production `tc-gaming.live`.
 > Cập nhật cùng mọi thay đổi về hạ tầng hoặc quy trình vận hành.
 
 ---

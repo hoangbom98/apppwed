@@ -1,7 +1,7 @@
 ﻿# MIGRATION GUIDE — v2.1
 # Hướng dẫn chạy migration cho toàn bộ hệ thống database
 
-> **Thứ tự bắt buộc:** admin → hub → game → dating → trade → sports  
+> **Thứ tự bắt buộc:** admin → hub → game → dating → trade → sports
 > Admin DB chứa `project_configs` và `payment_gateways` mà các module khác phụ thuộc.
 
 ---
@@ -443,4 +443,3 @@ npm run seed:trade
 | F2 | Referrer's referrer | 2% of invested amount | When F2's downline buys a package |
 
 Commission is paid immediately on `POST /investment/buy` via async fire-and-forget. No separate cron needed.
-

@@ -104,3 +104,10 @@ node_modules/.vite-cache/
 
 .gemini/
 gha-creds-*.json
+
+# --- AI tool configs (contain tokens/API keys — never commit) ---
+.codex/
+.claude/
+.claude.json
+*_credentials_*.txt
+router-config-*.zip

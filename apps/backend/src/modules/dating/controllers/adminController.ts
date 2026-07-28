@@ -1,76 +1,69 @@
-// @ts-nocheck
-/**
- * Dating Admin Controller
- * Handles admin CRUD for: profiles, matches, gifts, moments (feed posts), reports, live sessions.
- * All routes require auth + adminGuard.
- */
-const { ok, created, success, error, notFound } = require('../../../shared/utils/network/response');
+import type { Request, Response } from 'express';
+const { ok, created, notFound, error } = require('../../../shared/utils/network/response');
 const { paginate } = require('../../../shared/utils/core/helpers');
 const { logAdminAction } = require('../../../shared/services/auditLogger.service');
 
 // ── Profiles ──────────────────────────────────────────────────────
 
-exports.listProfiles = async (req, res) => {
+export const listProfiles = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = {};
-    if (req.query.status)  where.status  = req.query.status;
-    if (req.query.search)  where.OR = [
+    const where: Record<string, unknown> = {};
+    if (req.query.status) where.status = req.query.status;
+    if (req.query.search) where.OR = [
       { username: { contains: req.query.search } },
       { email:    { contains: req.query.search } },
     ];
     const [data, total] = await Promise.all([
-      req.prisma.user.findMany({
+      (req as any).prisma.user.findMany({
         where, skip, take,
         orderBy: { createdAt: 'desc' },
         select: { id: true, username: true, email: true, gender: true, status: true, vipLevel: true, createdAt: true },
       }),
-      req.prisma.user.count({ where }),
+      (req as any).prisma.user.count({ where }),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.getProfile = async (req, res) => {
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.user.findUnique({ where: { id: req.params.id } });
-    if (!item) return notFound(res);
-    return ok(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    const item = await (req as any).prisma.user.findUnique({ where: { id: req.params.id } });
+    if (!item) { notFound(res); return; }
+    ok(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const oldUser = await req.prisma.user.findUnique({ where: { id } });
-    if (!oldUser) return notFound(res);
-    
-    const updatedUser = await req.prisma.user.update({ where: { id }, data: req.body });
-    
-    // Audit log
-    await logAdminAction(req.user.id, 'updateProfile', id, oldUser, updatedUser, req.ip, req.prisma);
-    
-    return success(res, updatedUser, 'Profile updated');
-  } catch (e) { return error(res, e.message, 500); }
+    const oldUser = await (req as any).prisma.user.findUnique({ where: { id } });
+    if (!oldUser) { notFound(res); return; }
+
+    const updatedUser = await (req as any).prisma.user.update({ where: { id }, data: req.body });
+    await logAdminAction((req as any).user.id, 'updateProfile', id, oldUser, updatedUser, (req as any).ip, (req as any).prisma);
+
+    ok(res, updatedUser, 'Profile updated');
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.deleteProfile = async (req, res) => {
+export const deleteProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    await req.prisma.user.update({ where: { id: req.params.id }, data: { status: 'banned' } });
-    return ok(res, { id: req.params.id }, 'Profile banned');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    await (req as any).prisma.user.update({ where: { id: req.params.id }, data: { status: 'banned' } });
+    ok(res, { id: req.params.id }, 'Profile banned');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
 // ── Matches ───────────────────────────────────────────────────────
 
-exports.listMatches = async (req, res) => {
+export const listMatches = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
     const [data, total] = await Promise.all([
-      req.prisma.match.findMany({
+      (req as any).prisma.match.findMany({
         skip, take,
         orderBy: { createdAt: 'desc' },
         include: {
@@ -78,140 +71,140 @@ exports.listMatches = async (req, res) => {
           user2: { select: { username: true } },
         },
       }),
-      req.prisma.match.count(),
+      (req as any).prisma.match.count(),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.getMatch = async (req, res) => {
+export const getMatch = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.match.findUnique({
+    const item = await (req as any).prisma.match.findUnique({
       where: { id: req.params.id },
       include: { user1: { select: { username: true } }, user2: { select: { username: true } } },
     });
-    if (!item) return notFound(res);
-    return ok(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    if (!item) { notFound(res); return; }
+    ok(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.deleteMatch = async (req, res) => {
+export const deleteMatch = async (req: Request, res: Response): Promise<void> => {
   try {
-    await req.prisma.match.delete({ where: { id: req.params.id } });
-    return ok(res, { id: req.params.id }, 'Match deleted');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    await (req as any).prisma.match.delete({ where: { id: req.params.id } });
+    ok(res, { id: req.params.id }, 'Match deleted');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
 // ── Gifts ─────────────────────────────────────────────────────────
 
-exports.listGifts = async (req, res) => {
+export const listGifts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
     const [data, total] = await Promise.all([
-      req.prisma.gift.findMany({ skip, take, orderBy: { sortOrder: 'asc' } }),
-      req.prisma.gift.count(),
+      (req as any).prisma.gift.findMany({ skip, take, orderBy: { sortOrder: 'asc' } }),
+      (req as any).prisma.gift.count(),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.getGift = async (req, res) => {
+export const getGift = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.gift.findUnique({ where: { id: req.params.id } });
-    if (!item) return notFound(res);
-    return ok(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    const item = await (req as any).prisma.gift.findUnique({ where: { id: req.params.id } });
+    if (!item) { notFound(res); return; }
+    ok(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.createGift = async (req, res) => {
+export const createGift = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.gift.create({ data: req.body });
-    return created(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    const item = await (req as any).prisma.gift.create({ data: req.body });
+    created(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.updateGift = async (req, res) => {
+export const updateGift = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.gift.update({ where: { id: req.params.id }, data: req.body });
-    return ok(res, item, 'Gift updated');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    const item = await (req as any).prisma.gift.update({ where: { id: req.params.id }, data: req.body });
+    ok(res, item, 'Gift updated');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
-exports.deleteGift = async (req, res) => {
+export const deleteGift = async (req: Request, res: Response): Promise<void> => {
   try {
-    await req.prisma.gift.delete({ where: { id: req.params.id } });
-    return ok(res, { id: req.params.id }, 'Gift deleted');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    await (req as any).prisma.gift.delete({ where: { id: req.params.id } });
+    ok(res, { id: req.params.id }, 'Gift deleted');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
 // ── Moments (feed posts) ──────────────────────────────────────────
 
-exports.listMoments = async (req, res) => {
+export const listMoments = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = {};
+    const where: Record<string, unknown> = {};
     if (req.query.status) where.status = req.query.status;
     const [data, total] = await Promise.all([
-      req.prisma.feedPost.findMany({
+      (req as any).prisma.feedPost.findMany({
         where, skip, take,
         orderBy: { createdAt: 'desc' },
         include: { author: { select: { username: true } } },
       }),
-      req.prisma.feedPost.count({ where }),
+      (req as any).prisma.feedPost.count({ where }),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.getMoment = async (req, res) => {
+export const getMoment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.feedPost.findUnique({
+    const item = await (req as any).prisma.feedPost.findUnique({
       where: { id: req.params.id },
       include: { author: { select: { username: true } } },
     });
-    if (!item) return notFound(res);
-    return ok(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    if (!item) { notFound(res); return; }
+    ok(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.updateMoment = async (req, res) => {
+export const updateMoment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.feedPost.update({ where: { id: req.params.id }, data: req.body });
-    return ok(res, item, 'Moment updated');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    const item = await (req as any).prisma.feedPost.update({ where: { id: req.params.id }, data: req.body });
+    ok(res, item, 'Moment updated');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
-exports.deleteMoment = async (req, res) => {
+export const deleteMoment = async (req: Request, res: Response): Promise<void> => {
   try {
-    await req.prisma.feedPost.delete({ where: { id: req.params.id } });
-    return ok(res, { id: req.params.id }, 'Moment deleted');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    await (req as any).prisma.feedPost.delete({ where: { id: req.params.id } });
+    ok(res, { id: req.params.id }, 'Moment deleted');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
 // ── Reports / Violations ──────────────────────────────────────────
 
-exports.listReports = async (req, res) => {
+export const listReports = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = {};
+    const where: Record<string, unknown> = {};
     if (req.query.status) where.status = req.query.status;
     const [data, total] = await Promise.all([
-      req.prisma.userReport.findMany({
+      (req as any).prisma.userReport.findMany({
         where, skip, take,
         orderBy: { createdAt: 'desc' },
         include: {
@@ -219,55 +212,55 @@ exports.listReports = async (req, res) => {
           reported: { select: { username: true } },
         },
       }),
-      req.prisma.userReport.count({ where }),
+      (req as any).prisma.userReport.count({ where }),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.getReport = async (req, res) => {
+export const getReport = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.userReport.findUnique({ where: { id: req.params.id } });
-    if (!item) return notFound(res);
-    return ok(res, item);
-  } catch (e) { return error(res, e.message, 500); }
+    const item = await (req as any).prisma.userReport.findUnique({ where: { id: req.params.id } });
+    if (!item) { notFound(res); return; }
+    ok(res, item);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.updateReport = async (req, res) => {
+export const updateReport = async (req: Request, res: Response): Promise<void> => {
   try {
-    const item = await req.prisma.userReport.update({ where: { id: req.params.id }, data: req.body });
-    return ok(res, item, 'Report updated');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    const item = await (req as any).prisma.userReport.update({ where: { id: req.params.id }, data: req.body });
+    ok(res, item, 'Report updated');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };
 
 // ── Live Sessions ─────────────────────────────────────────────────
 
-exports.listLive = async (req, res) => {
+export const listLive = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = {};
+    const where: Record<string, unknown> = {};
     if (req.query.status) where.status = req.query.status;
     const [data, total] = await Promise.all([
-      req.prisma.liveStream.findMany({
+      (req as any).prisma.liveStream.findMany({
         where, skip, take,
         orderBy: { createdAt: 'desc' },
         include: { host: { select: { username: true } } },
       }),
-      req.prisma.liveStream.count({ where }),
+      (req as any).prisma.liveStream.count({ where }),
     ]);
-    return ok(res, data, null, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { return error(res, e.message, 500); }
+    ok(res, data, undefined, { total, page, limit, pages: Math.ceil(total / take) } as any);
+  } catch (e: unknown) { error(res, e instanceof Error ? e.message : 'Error', 500); }
 };
 
-exports.deleteLive = async (req, res) => {
+export const deleteLive = async (req: Request, res: Response): Promise<void> => {
   try {
-    await req.prisma.liveStream.update({ where: { id: req.params.id }, data: { status: 'ended' } });
-    return ok(res, { id: req.params.id }, 'Live session ended');
-  } catch (e) {
-    if (e.code === 'P2025') return notFound(res);
-    return error(res, e.message, 500);
+    await (req as any).prisma.liveStream.update({ where: { id: req.params.id }, data: { status: 'ended' } });
+    ok(res, { id: req.params.id }, 'Live session ended');
+  } catch (e: any) {
+    if (e.code === 'P2025') { notFound(res); return; }
+    error(res, e.message, 500);
   }
 };

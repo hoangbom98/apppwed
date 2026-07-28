@@ -1,20 +1,20 @@
 // @ts-nocheck
 /**
  * adminEncryption.ts — AES-256-GCM encrypt/decrypt for Admin API
- * 
+ *
  * Learned from BoYue EncryptionMiddleware:
  * - Admin panel → Backend: request body encrypted, server decrypts
  * - Backend → Admin panel: response body encrypted before sending
- * 
+ *
  * Only activates when:
  *   1. Request has header "X-Encrypted: 1"
  *   2. ADMIN_ENCRYPTION_KEY env var is set (32+ chars)
- * 
+ *
  * Key must be the same on the admin frontend (stored in env/config).
- * 
+ *
  * Cipher: AES-256-GCM (authenticated encryption — prevents tampering)
  * Format: JSON { iv, tag, data } → Base64-encoded in request/response body
- * 
+ *
  * Usage in admin routes:
  *   import { decryptAdminRequest, encryptAdminResponse } from '../../shared/middlewares/adminEncryption';
  *   router.use(decryptAdminRequest);

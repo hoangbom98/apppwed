@@ -612,4 +612,3 @@ ALTER TABLE `support_ticket_replies` ADD CONSTRAINT `support_ticket_replies_tick
 
 -- AddForeignKey
 ALTER TABLE `knowledge_translations` ADD CONSTRAINT `knowledge_translations_articleId_fkey` FOREIGN KEY (`articleId`) REFERENCES `knowledge_articles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-

@@ -26,7 +26,7 @@ export const useAuthStore = create((set, get) => ({
       const data = res.data.data || res.data;
       const finalToken = data.access_token || data.token;
       const user = data.user || data;
-      
+
       localStorage.setItem(tokenKey, finalToken);
       if (data.refresh_token) {
         localStorage.setItem(refreshTokenKey, data.refresh_token);

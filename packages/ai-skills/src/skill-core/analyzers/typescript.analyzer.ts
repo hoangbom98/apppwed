@@ -70,7 +70,7 @@ export class TypeScriptAnalyzer {
 
   private getFixForTypeScriptError(code: string, message: string, file: string, app: string) {
     const filter = app === 'backend' ? 'lkvip-backend' : `@lkvip/${app}`;
-    
+
     if (code === '2307' && message.includes('Cannot find module')) {
       const pkg = message.match(/['"]([^'"]+)['"]/)?.[1];
       if (pkg && !pkg.startsWith('.') && !pkg.startsWith('@/')) {

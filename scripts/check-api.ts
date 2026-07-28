@@ -22,6 +22,9 @@ import fs   from 'fs';
 import path from 'path';
 import http from 'http';
 import https from 'https';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Config ────────────────────────────────────────────────────────────────────
 

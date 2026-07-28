@@ -1,70 +1,68 @@
-const { getPrismaClient } = require('../../../config/databases');
-const prisma = getPrismaClient('admin');
+import type { Request, Response } from 'express';
+import { getPrismaClient } from '../../../config/databases';
+const { ok, created, noContent, error, notFound } = require('../../../shared/utils/network/response');
 const { logAdminAction } = require('../utils/adminLogger');
 
-const featureController = {
-  async list(req, res) {
+const prisma = getPrismaClient('admin');
+
+export const featureController = {
+  async list(req: Request, res: Response): Promise<void> {
     const { moduleId } = req.params;
     const features = await prisma.feature.findMany({
-      where: { moduleId },
+      where:   { moduleId },
       orderBy: { order: 'asc' },
     });
-    return res.json(features);
+    ok(res, features);
   },
 
-  async create(req, res) {
+  async create(req: Request, res: Response): Promise<void> {
     const { moduleId } = req.params;
     const { key, name, description, valueType, defaultValue, value, order } = req.body;
     const feature = await prisma.feature.create({
       data: {
-        moduleId,
-        key,
-        name,
-        description,
-        valueType: valueType || 'boolean',
-        defaultValue,
-        value,
-        order: order || 0,
+        moduleId, key, name, description,
+        valueType:    valueType    || 'boolean',
+        defaultValue, value,
+        order:        order        || 0,
       },
     });
-    await logAdminAction(req.user.id, 'create', 'feature', feature.id, { key });
-    return res.status(201).json(feature);
+    await logAdminAction((req as any).user.id, 'create', 'feature', feature.id, { key });
+    created(res, feature);
   },
 
-  async update(req, res) {
+  async update(req: Request, res: Response): Promise<void> {
     const { featureId } = req.params;
     const feature = await prisma.feature.update({
       where: { id: featureId },
-      data: req.body,
+      data:  req.body,
     });
-    await logAdminAction(req.user.id, 'update', 'feature', featureId, { key: feature.key });
-    return res.json(feature);
+    await logAdminAction((req as any).user.id, 'update', 'feature', featureId, { key: feature.key });
+    ok(res, feature);
   },
 
-  async toggle(req, res) {
+  async toggle(req: Request, res: Response): Promise<void> {
     const { featureId } = req.params;
     const feature = await prisma.feature.findUnique({ where: { id: featureId } });
-    if (!feature) return res.status(404).json({ error: 'Feature not found' });
-    
+    if (!feature) { notFound(res); return; }
+
     if (feature.valueType === 'boolean') {
       const current = feature.value ?? feature.defaultValue ?? false;
       const updated = await prisma.feature.update({
         where: { id: featureId },
-        data: { value: !current },
+        data:  { value: !current },
       });
-      await logAdminAction(req.user.id, 'toggle', 'feature', featureId, { key: feature.key, newValue: !current });
-      return res.json(updated);
+      await logAdminAction((req as any).user.id, 'toggle', 'feature', featureId, { key: feature.key, newValue: !current });
+      ok(res, updated);
+      return;
     }
-    return res.status(400).json({ error: 'Feature not boolean' });
+    error(res, 'Feature is not boolean', 400);
   },
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response): Promise<void> {
     const { featureId } = req.params;
     const feature = await prisma.feature.findUnique({ where: { id: featureId } });
     await prisma.feature.delete({ where: { id: featureId } });
-    await logAdminAction(req.user.id, 'delete', 'feature', featureId, { key: feature?.key });
-    return res.status(204).send();
+    await logAdminAction((req as any).user.id, 'delete', 'feature', featureId, { key: feature?.key });
+    noContent(res);
   },
 };
-
-module.exports = featureController;

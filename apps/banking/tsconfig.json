@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.frontend.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*":          ["./src/*"],
+      "@ui":          ["../../packages/ui/src/index.ts"],
+      "@ui/*":        ["../../packages/ui/src/*"],
+      "@lkvip/types": ["../../packages/types/src/index.ts"],
+      "virtual:pwa-register/react": ["../../node_modules/vite-plugin-pwa/react.d.ts"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

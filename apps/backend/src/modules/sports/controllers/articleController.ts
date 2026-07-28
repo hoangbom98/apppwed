@@ -1,105 +1,93 @@
-// @ts-nocheck
-const { success, error } = require('../../../shared/utils/network/response');
+import type { Request, Response } from 'express';
+const { success, error, notFound } = require('../../../shared/utils/network/response');
 const { paginate } = require('../../../shared/utils/core/helpers');
 
-exports.list = async (req, res) => {
+export const list = async (req: Request, res: Response): Promise<void> => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, 20);
-    const where = { status: 'published' };
-    
+    const where: Record<string, unknown> = { status: 'published' };
     if (req.query.category) where.category = req.query.category;
-    
+
     const [articles, total] = await Promise.all([
-      req.prisma.news.findMany({
-        where,
-        skip,
-        take,
+      (req as any).prisma.news.findMany({
+        where, skip, take,
         orderBy: { publishedAt: 'desc' },
         select: {
-          id: true,
-          title: true,
-          slug: true,
-          summary: true,
-          image: true,
-          category: true,
-          views: true,
-          likes: true,
-          publishedAt: true,
-          createdAt: true,
+          id: true, title: true, slug: true, summary: true,
+          image: true, category: true, views: true, likes: true,
+          publishedAt: true, createdAt: true,
         },
       }),
-      req.prisma.news.count({ where }),
+      (req as any).prisma.news.count({ where }),
     ]);
-    
-    return res.json({ success: true, articles, meta: { total, page, limit } });
-  } catch (e) {
-    return error(res, e.message, 500);
+
+    success(res, { articles, meta: { total, page, limit } });
+  } catch (e: unknown) {
+    error(res, e instanceof Error ? e.message : 'Error', 500);
   }
 };
 
-exports.get = async (req, res) => {
+export const get = async (req: Request, res: Response): Promise<void> => {
   try {
-    const article = await req.prisma.news.findUnique({
-      where: { slug: req.params.slug },
+    const article = await (req as any).prisma.news.findUnique({
+      where:   { slug: req.params.slug },
       include: {
         author: { select: { id: true, fullName: true, avatar: true } },
         _count: { select: { comments: true } },
       },
     });
-    
-    if (!article) return error(res, 'Article not found', 404);
-    if (article.status !== 'published') return error(res, 'Article not published', 403);
-    
-    // Increment views
-    await req.prisma.news.update({
+
+    if (!article)                      { notFound(res, 'Article not found'); return; }
+    if (article.status !== 'published') { error(res, 'Article not published', 403); return; }
+
+    await (req as any).prisma.news.update({
       where: { id: article.id },
-      data: { views: { increment: 1 } },
+      data:  { views: { increment: 1 } },
     });
-    
-    return success(res, { ...article, views: article.views + 1 });
-  } catch (e) {
-    return error(res, e.message, 500);
+
+    success(res, { ...article, views: article.views + 1 });
+  } catch (e: unknown) {
+    error(res, e instanceof Error ? e.message : 'Error', 500);
   }
 };
 
-exports.getComments = async (req, res) => {
+export const getComments = async (req: Request, res: Response): Promise<void> => {
   try {
-    const newsId   = req.params.id;              // CUID string
-    const comments = await req.prisma.newsComment.findMany({
-      where: { newsId, parentId: null, status: 'active' },
+    const newsId   = req.params.id;
+    const comments = await (req as any).prisma.newsComment.findMany({
+      where:   { newsId, parentId: null, status: 'active' },
       orderBy: { createdAt: 'asc' },
       include: {
-        user: { select: { id: true, username: true, fullName: true, avatar: true } },
+        user:    { select: { id: true, username: true, fullName: true, avatar: true } },
         replies: {
-          where: { status: 'active' },
+          where:   { status: 'active' },
           include: { user: { select: { id: true, username: true, fullName: true, avatar: true } } },
         },
       },
     });
-    
-    return success(res, { comments });
-  } catch (e) {
-    return error(res, e.message, 500);
+    success(res, { comments });
+  } catch (e: unknown) {
+    error(res, e instanceof Error ? e.message : 'Error', 500);
   }
 };
 
-exports.addComment = async (req, res) => {
+export const addComment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { newsId, content, parentId } = req.body;
-    if (!content || !newsId) return error(res, 'newsId and content are required', 400);
+    if (!content || !newsId) { error(res, 'newsId and content are required', 400); return; }
 
-    const comment = await req.prisma.newsComment.create({
+    const comment = await (req as any).prisma.newsComment.create({
       data: {
-        userId:   req.user.id,
-        newsId,                              // CUID string
+        userId:   (req as any).user.id,
+        newsId,
         content,
-        parentId: parentId || null,          // CUID string or null
+        parentId: parentId || null,
       },
       include: { user: { select: { id: true, username: true, fullName: true, avatar: true } } },
     });
-    
-    return success(res, comment);
-  } catch (e) {
-    return error(res, e.message, 500);
+
+    success(res, comment);
+  } catch (e: unknown) {
+    error(res, e instanceof Error ? e.message : 'Error', 500);
   }
 };

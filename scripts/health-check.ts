@@ -21,6 +21,9 @@ import dns    from 'dns/promises';
 import path   from 'path';
 import fs     from 'fs';
 import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Load .env ─────────────────────────────────────────────────────────────────
 

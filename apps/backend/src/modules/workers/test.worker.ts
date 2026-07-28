@@ -11,10 +11,5 @@ export const testWorker = new Worker(
     console.log(`Test worker processed job: ${job.id}, data:`, job.data);
     return { success: true };
   },
-  { connection: redis }
+  { connection: redis },
 );
-
-// To test: 
-// import { testQueue } from './test.worker';
-// await testQueue.add('test', { foo: 'bar' });
-console.log('Test worker initialized');

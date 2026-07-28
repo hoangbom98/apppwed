@@ -1,54 +1,56 @@
-const { getPrismaClient } = require('../../../config/databases');
-const prisma = getPrismaClient('admin');
-const { logAdminAction } = require('../utils/adminLogger'); // Will create this later
+import type { Request, Response } from 'express';
+import { getPrismaClient } from '../../../../config/databases';
+const { ok, created, noContent, notFound } = require('../../../../shared/utils/network/response');
+const { logAdminAction } = require('../../utils/adminLogger');
 
-const projectController = {
-  async list(req, res) {
+const prisma = getPrismaClient('admin');
+
+export const projectController = {
+  async list(_req: Request, res: Response): Promise<void> {
     const projects = await prisma.project.findMany({
       include: { modules: { include: { features: true } } },
       orderBy: { order: 'asc' },
     });
-    return res.json(projects);
+    ok(res, projects);
   },
 
-  async create(req, res) {
-    const { key, name, description, icon, order, config } = req.body;
+  async create(req: Request, res: Response): Promise<void> {
+    const { key } = req.body;
     const project = await prisma.project.create({
-      data: { key, name, domain: key, slug: key, status: 'ACTIVE' },
+      data: { key, name: req.body.name, domain: key, slug: key, status: 'ACTIVE' },
     });
-    // Log action (will implement logAdminAction)
-    return res.status(201).json(project);
+    await logAdminAction((req as any).user.id, 'create', 'project', project.id, { key });
+    created(res, project);
   },
-  
-  async update(req, res) {
+
+  async update(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const project = await prisma.project.update({
       where: { id },
-      data: req.body,
+      data:  req.body,
     });
-    await logAdminAction(req.user.id, 'update', 'project', id, { slug: project.slug });
-    return res.json(project);
+    await logAdminAction((req as any).user.id, 'update', 'project', id, { slug: project.slug });
+    ok(res, project);
   },
 
-  async toggle(req, res) {
+  async toggle(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const project = await prisma.project.findUnique({ where: { id } });
-    if (!project) return res.status(404).json({ error: 'Project not found' });
+    if (!project) { notFound(res); return; }
+
     const updated = await prisma.project.update({
       where: { id },
-      data: { status: project.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' },
+      data:  { status: project.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' },
     });
-    await logAdminAction(req.user.id, 'toggle', 'project', id, { status: updated.status });
-    return res.json(updated);
+    await logAdminAction((req as any).user.id, 'toggle', 'project', id, { status: updated.status });
+    ok(res, updated);
   },
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const project = await prisma.project.findUnique({ where: { id } });
     await prisma.project.delete({ where: { id } });
-    await logAdminAction(req.user.id, 'delete', 'project', id, { slug: project?.slug });
-    return res.status(204).send();
+    await logAdminAction((req as any).user.id, 'delete', 'project', id, { slug: project?.slug });
+    noContent(res);
   },
 };
-
-module.exports = projectController;
