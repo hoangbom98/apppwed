@@ -5,11 +5,11 @@ const socket = io(import.meta.env.VITE_WS_URL || 'http://localhost:5000', {
   query: { project: import.meta.env.VITE_PROJECT || 'hub' }
 });
 
-export const useWebSocket = (eventName) => {
-  const [data, setData] = useState(null);
+export const useWebSocket = (eventName: string) => {
+  const [data, setData] = useState<unknown>(null);
 
   useEffect(() => {
-    socket.on(eventName, (payload) => {
+    socket.on(eventName, (payload: unknown) => {
       setData(payload);
     });
 

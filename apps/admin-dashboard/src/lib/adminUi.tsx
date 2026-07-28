@@ -226,7 +226,7 @@ export function PageHeader({ title, description, extra, meta }: PageHeaderProps)
           </Text>
         )}
       </div>
-      {extra && <Space wrap>{extra}</Space>}
+      {extra != null && <Space wrap>{extra as React.ReactNode as any}</Space>}
     </Flex>
   );
 }

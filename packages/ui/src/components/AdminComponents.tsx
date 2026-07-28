@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tag, Card, Statistic, Table, TableProps, Form, Input, InputProps, Select, SelectProps, InputNumber } from 'antd';
+import { Tag, Card, Statistic, Table, type TableProps, Form, Input, type InputProps, Select, type SelectProps, InputNumber } from 'antd';
 import { NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 
@@ -7,7 +7,7 @@ import { ChevronDown } from 'lucide-react';
 export const LkvipStatusTag: React.FC<{
   status: string;
   type?: 'status' | 'source';
-}> = ({ status, type = 'status' }) => {
+}> = ({ status, type: _type = 'status' }) => {
   const statusColors: Record<string, string> = {
     ACTIVE: 'error', PAID: 'success', // Status
     GAME: '#3b82f6', SPORTS: '#10b981', TRADE: '#f59e0b', DATING: '#ec4899', HUB: '#8b5cf6', // Source
@@ -106,7 +106,7 @@ export const LkvipSidebarGroup: React.FC<{ group: any; collapsed: boolean; defau
     <div className="mt-1">
       {!collapsed && (
         <button
-          onClick={() => setOpen(v => !v)}
+          onClick={() => setOpen((v: boolean) => !v)}
           className={`w-full flex items-center justify-between px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
             hasActive ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
           }`}

@@ -3,8 +3,8 @@
 // Menu is driven entirely by the Module Registry — no hard-coded NAV_GROUPS.
 // To add a new sub-project: create modules/newproject/index.ts and call registerModule().
 // This file must NEVER be imported by any user-facing sub-project.
-import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@admin/store/adminStore';
 import { useSiteConfig }  from '@admin/core/hooks/useSiteConfig';
 import { useAdminSocket } from '@admin/core/hooks/useAdminSocket';
@@ -23,13 +23,13 @@ import '@admin/modules/ops/index';
 import '@admin/modules/settings/index';
 import '@admin/modules/finance/index';
 
-import { getVisibleMenuGroups, type MenuGroup, type MenuItem } from '@admin/modules/registry';
+import { getVisibleMenuGroups, type MenuGroup } from '@admin/modules/registry';
 
 import {
   LayoutDashboard, UserCircle,
   Users, CreditCard, ArrowDownUp, Bell, Shield, Tag, Radio, FileText, Activity,
   Palette, SlidersHorizontal, ShieldCheck, Server, HandCoins,
-  LogOut, ChevronLeft, ChevronDown, X, AlignLeft,
+  LogOut, ChevronLeft, X, AlignLeft,
 } from 'lucide-react';
 
 // ── Static groups (always visible to all authenticated admins) ─────────────────

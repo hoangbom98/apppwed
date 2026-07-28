@@ -3,7 +3,7 @@
 //   1. Authentication — must have a valid token
 //   2. Role gate     — requiredRole must match (super_admin bypasses all)
 //   3. Module gate   — requiredModule must appear in JWT user.modules[]
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@admin/store/adminStore';
 

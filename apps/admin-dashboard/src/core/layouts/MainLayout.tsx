@@ -2,7 +2,6 @@
 // Legacy layout stub — superseded by AdminLayout.jsx.
 // Kept for backwards compatibility with any direct import; delegates to the
 // new registry-driven sidebar without using the removed `menu` property.
-import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { getVisibleMenuGroups } from '../../modules/registry';
 
