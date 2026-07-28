@@ -24,9 +24,11 @@ export const depositWorker = new Worker(
     });
     if (!deposit || deposit.status !== 'pending') return;
 
-    // TODO: Implement checkExternalTransaction logic based on payment gateway
+    // TODO: Implement checkExternalTransaction — kiểm tra giao dịch với payment gateway thực tế
+    // Khi implement: gọi PaymentAdapter.verify(deposit.txRef) theo interface PaymentAdapter
+    // Xem: src/shared/payment/adapters/ để chọn adapter phù hợp (USDT, ngân hàng...)
     // const matched = await checkExternalTransaction(deposit);
-    const matched = null; // Placeholder
+    const matched = null; // Placeholder — thay bằng kết quả từ payment gateway
 
     if (!matched) {
       if (deposit.createdAt < new Date(Date.now() - 30 * 60 * 1000)) {

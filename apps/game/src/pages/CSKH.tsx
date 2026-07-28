@@ -3,8 +3,7 @@
 // Trang Trung tâm CSKH — dùng component dùng chung, config từ backend (fallback về static config).
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CskhPage } from '@lkvip/ui';
-import { api } from '@lkvip/ui';
+import { CskhPage, api } from '@lkvip/ui';
 import { gameCskhConfig } from '../configs/cskh.config';
 import toast from 'react-hot-toast';
 

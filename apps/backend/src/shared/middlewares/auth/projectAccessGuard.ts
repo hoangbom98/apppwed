@@ -24,10 +24,10 @@
  *
  * Usage: router.use(auth, projectAccessGuard)
  */
-const { unauthorized, forbidden } = require('../utils/response');
-const { getPrismaClient }         = require('../../config/databases');
-const logger                      = require('../services/logger');
-const cache                       = require('../services/cacheService');
+const { unauthorized, forbidden } = require('../../utils/network/response');
+const { getPrismaClient }         = require('../../../config/databases');
+const logger                      = require('../../services/logger');
+const cache                       = require('../../services/cacheService');
 
 // Admin project bypasses DB-level user lookup (admin tokens validated by adminGuard)
 const ADMIN_PROJECTS = new Set(['admin']);

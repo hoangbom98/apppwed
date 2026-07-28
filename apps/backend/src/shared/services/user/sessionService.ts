@@ -34,8 +34,8 @@
  * NOTE: CommonJS exports — backend package.json "type": "commonjs".
  */
 
-const redis  = require('../../config/redis');
-const logger = require('./logger');
+const redis  = require('../../../config/redis');
+const logger = require('../logger');
 
 // ── TTLs (seconds) ────────────────────────────────────────────────────────────
 const SESSION_TTL  = 2 * 60 * 60;   // 2 hours  — matches JWT_EXPIRES_IN

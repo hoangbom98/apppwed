@@ -37,8 +37,8 @@
 
 'use strict';
 
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 // Supported wallet types
 const WALLET_FIELDS = ['main', 'invest', 'commission', 'reward', 'saving', 'locked', 'escrow'] as const;

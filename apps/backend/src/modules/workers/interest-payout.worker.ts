@@ -45,7 +45,9 @@ export const interestPayoutWorker = new Worker(
 
         // Xử lý Mall (BTC/Conversion)
         if (payout.pay1 > 0) {
-          // TODO: Gọi API giá BTC ở đây (nên tách riêng hoặc cache)
+          // TODO: Lấy tỷ giá BTC và convert pay1 (VND) → BTC trước khi credit
+          // Implement: const btcRate = await getBTCRate() — nên cache tỷ giá 5 phút trong Redis
+          // Xem: src/shared/services/finance/currencyService.ts để tích hợp
           await walletService.credit(tx, payout.uid, payout.pay1, 'interest_mall', `mall_payout_${payoutId}`);
         }
       }

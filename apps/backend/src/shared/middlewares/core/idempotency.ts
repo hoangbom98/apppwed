@@ -11,7 +11,7 @@ import { Request, Response, NextFunction } from 'express';
 // Dùng shared Redis singleton từ config/redis — KHÔNG tạo new Redis() riêng
 // để tránh làm tốn connection pool.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const redis = require('../../config/redis');
+const redis = require('../../../config/redis');
 
 export const idempotency = (ttl = 86400) => {
   return async (req: Request, res: Response, next: NextFunction) => {

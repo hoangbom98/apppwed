@@ -107,7 +107,7 @@ jobs:
 
   # ── Packages: build shared packages ─────────────────────────────────────────
   packages:
-    name: Packages (shared-types · constants · utils)
+    name: Packages (types · constants · utils)
     runs-on: ubuntu-latest
 
     steps:
@@ -124,6 +124,14 @@ jobs:
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
 
-      - name: Build shared-types
-        working-directory: packages/shared-types
+      - name: Build types
+        working-directory: packages/types
+        run: pnpm build 2>/dev/null || pnpm exec tsc --noEmit || true
+
+      - name: Build constants
+        working-directory: packages/constants
+        run: pnpm build 2>/dev/null || pnpm exec tsc --noEmit || true
+
+      - name: Build utils
+        working-directory: packages/utils
         run: pnpm build 2>/dev/null || pnpm exec tsc --noEmit || true

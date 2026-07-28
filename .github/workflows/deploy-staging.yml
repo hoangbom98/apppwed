@@ -27,7 +27,7 @@ concurrency:
 env:
   NODE_VERSION: '20'
   DEPLOY_DIR: '/var/LKVIP'
-  PM2_APP: 'lkvip-backend'
+  PM2_APP: 'lkvip-api'
 
 jobs:
   # Guard: manual trigger must type "staging"
@@ -75,7 +75,7 @@ jobs:
             pnpm run build:packages 2>/dev/null || true
 
             echo "=== [4/5] Build backend ==="
-            pnpm --filter @lkvip/backend run build
+            pnpm --filter lkvip-backend run build
 
             echo "=== [5/5] Reload PM2 ==="
             pm2 reload ${{ env.PM2_APP }} --update-env --env staging 2>/dev/null || \

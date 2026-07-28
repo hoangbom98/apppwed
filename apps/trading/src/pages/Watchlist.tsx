@@ -86,13 +86,14 @@ export default function WatchlistPage() {
 
   // ── Derived data ──────────────────────────────────────────────────────────────
   const activeWatchlist = selected;
-  const watchedSymbolIds = new Set(activeWatchlist?.items.map(i => i.symbolId) ?? []);
+  // symbolId is stored as string; TradePair.id is number — normalise to string for Set lookup
+  const watchedSymbolIds = new Set(activeWatchlist?.items.map(i => String(i.symbolId)) ?? []);
 
-  const availablePairs = allPairs.filter(p => !watchedSymbolIds.has(p.id));
+  const availablePairs = allPairs.filter(p => !watchedSymbolIds.has(String(p.id)));
 
   // Enrich watchlist items with live pair data
   const enrichedItems = (activeWatchlist?.items ?? []).map(item => {
-    const pair = allPairs.find(p => p.id === item.symbolId);
+    const pair = allPairs.find(p => String(p.id) === String(item.symbolId));
     return { item, pair };
   });
 
@@ -245,7 +246,7 @@ export default function WatchlistPage() {
                       {availablePairs.map(pair => (
                         <button
                           key={pair.id}
-                          onClick={() => addMut.mutate({ watchlistId: activeWatchlist.id, symbolId: pair.id })}
+                          onClick={() => addMut.mutate({ watchlistId: activeWatchlist.id, symbolId: String(pair.id) })}
                           disabled={addMut.isPending}
                           className="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors border hover:border-yellow-500/50"
                           style={{ ...elevated, borderColor: 'var(--bn-border)' }}

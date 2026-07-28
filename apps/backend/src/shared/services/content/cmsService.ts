@@ -31,8 +31,8 @@
 
 'use strict';
 
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 const TTL_ARTICLES = 300;   // 5 min
 const TTL_BANNERS  = 300;

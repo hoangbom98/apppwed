@@ -60,10 +60,10 @@ import { ServiceRegistry }          from './src/third-parties/core/ServiceRegist
 const { logger, cron, swagger: { mount: mountSwagger }, socket: socketStore } = require('./src/config');
 const cache              = require('./src/shared/services/cacheService');
 const { disconnectAll }  = require('./src/config/databases');
-const { publicLimiter, authLimiter } = require('./src/shared/middlewares/rateLimiter');
-const riskMiddleware     = require('./src/shared/middlewares/riskMiddleware');
-const configResolver     = require('./src/shared/middlewares/configResolver');
-const errorHandler       = require('./src/shared/middlewares/errorHandler');
+const { publicLimiter, authLimiter } = require('./src/shared/middlewares/core/rateLimiter');
+const riskMiddleware     = require('./src/shared/middlewares/core/riskMiddleware');
+const configResolver     = require('./src/shared/middlewares/core/configResolver');
+const errorHandler       = require('./src/shared/middlewares/core/errorHandler');
 const i18nMiddleware     = (() => {
   try {
     const i18next     = require('./src/config/i18n');
@@ -180,7 +180,7 @@ app.use(riskMiddleware.geoGuard());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
 // ── Project resolver (sets req.projectId) ──────────────────────
-app.use(require('./src/shared/middlewares/projectResolver'));
+app.use(require('./src/shared/middlewares/core/projectResolver'));
 
 // ── Config resolver (sets req.configService) ──────────────────────────────
 app.use(configResolver);
@@ -189,8 +189,8 @@ app.use(configResolver);
 mountSwagger(app);
 
 // ── Module routes ──────────────────────────────────────────────────────────
-app.use('/api/auth',   require('./src/shared/routes/auth.routes').default || require('./src/shared/routes/auth.routes'));
-app.use('/api/shared', require('./src/shared/routes/configPublicRoutes'));
+app.use('/api/auth',   require('./src/shared/routes/auth/auth.routes').default || require('./src/shared/routes/auth/auth.routes'));
+app.use('/api/shared', require('./src/shared/routes/content/configPublicRoutes'));
 app.use('/api/hub',    require('./src/modules/hub/routes/index'));
 app.use('/api/game',   require('./src/modules/game/routes/index'));
 app.use('/api/trade',  require('./src/modules/trade/routes/index'));

@@ -36,8 +36,8 @@
 
 'use strict';
 
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 // Default VIP tiers (overridden by ProjectConfig)
 const DEFAULT_TIERS = [

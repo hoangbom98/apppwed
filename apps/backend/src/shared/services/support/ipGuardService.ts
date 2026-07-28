@@ -21,8 +21,8 @@
  *   // → { country: 'VN', city: 'Ho Chi Minh City', timezone: 'Asia/Ho_Chi_Minh', ... }
  */
 const https  = require('https');
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 const ABUSEIPDB_KEY       = process.env.ABUSEIPDB_API_KEY || '';
 const ABUSEIPDB_THRESHOLD = parseInt(process.env.ABUSEIPDB_THRESHOLD || '50', 10); // block if score ≥ threshold

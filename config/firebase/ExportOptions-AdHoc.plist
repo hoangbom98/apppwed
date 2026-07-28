@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ExportOptions-AdHoc.plist
+  Dùng cho: xcodebuild -exportArchive khi phân phối qua Firebase App Distribution
+  Method: ad-hoc — IPA được cài trực tiếp trên thiết bị đã đăng ký UDID
+-->
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>ad-hoc</string>
+
+  <!-- Thay YOUR_TEAM_ID bằng Apple Team ID (10 ký tự, ví dụ: ABCDE12345) -->
+  <key>teamID</key>
+  <string>YOUR_TEAM_ID</string>
+
+  <!-- Tắt Bitcode (không cần thiết cho Capacitor WebView apps) -->
+  <key>uploadBitcode</key>
+  <false/>
+
+  <!-- Tắt symbols upload (chỉ cần khi dùng Crashlytics) -->
+  <key>uploadSymbols</key>
+  <false/>
+
+  <!-- Compile Bitcode -->
+  <key>compileBitcode</key>
+  <false/>
+
+  <!--
+    Mapping provisioning profile: bundle ID → profile name.
+    Thêm entry cho mỗi app. Profile name lấy từ:
+      Apple Developer → Certificates, Identifiers and Profiles → Profiles
+  -->
+  <key>provisioningProfiles</key>
+  <dict>
+    <!-- Hub -->
+    <key>com.lkvip.hub</key>
+    <string>LKVIP Hub AdHoc</string>
+
+    <!-- Game -->
+    <key>com.lkvip.game</key>
+    <string>LKVIP Game AdHoc</string>
+
+    <!-- Trading -->
+    <key>com.lkvip.trade</key>
+    <string>LKVIP Trade AdHoc</string>
+
+    <!-- Dating -->
+    <key>com.lkvip.dating</key>
+    <string>LKVIP Dating AdHoc</string>
+
+    <!-- Sports -->
+    <key>com.lkvip.sports</key>
+    <string>LKVIP Sports AdHoc</string>
+  </dict>
+</dict>
+</plist>

@@ -8,10 +8,11 @@
       "@ui":              ["../../packages/ui/src/index.ts"],
       "@ui/*":            ["../../packages/ui/src/*"],
       "@lkvip/types":     ["../../packages/types/src/index.ts"],
-      "@lkvip/constants": ["../../packages/constants/dist/index.d.ts"],
+      "@lkvip/constants": ["../../packages/constants/src/index.ts"],
       "virtual:pwa-register/react": ["../../node_modules/vite-plugin-pwa/react.d.ts"]
     }
   },
   "include": ["src"],
+  "exclude": ["src/test", "src/__tests__", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

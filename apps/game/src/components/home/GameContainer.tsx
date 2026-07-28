@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import SidebarNav from './SidebarNav';
-import GameGrid from './GameGrid';
-import type { GameItem } from './GameGrid';
+import GameGrid, { type GameItem } from './GameGrid';
 
 interface Category {
   key: string;

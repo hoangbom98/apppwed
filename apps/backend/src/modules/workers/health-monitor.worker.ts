@@ -39,7 +39,9 @@ async function recoverBackend() {
     // Lưu ý: Đảm bảo user chạy backend có quyền thực thi pm2
     await execAsync('pm2 restart lkvip-backend');
     logger.info('Backend service restarted successfully');
-    // TODO: Gửi cảnh báo critical cho admin
+    // TODO: Gửi cảnh báo critical cho admin qua Telegram/email
+    // Implement: await tg.alertWithLevel('CRITICAL', 'Backend restarted by health monitor', { time: new Date() })
+    // Requires: import tg from '../../shared/services/communication/telegramAlertService'
   } catch (err: any) {
     logger.error(`Failed to restart backend: ${err.message}`);
   }

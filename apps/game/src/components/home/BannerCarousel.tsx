@@ -1,7 +1,8 @@
 import React from 'react';
+// @ts-ignore — swiper not installed yet; add "swiper": "^11.0.0" to package.json when deploying
 import { Swiper, SwiperSlide } from 'swiper/react';
+// @ts-ignore
 import { Autoplay, Pagination } from 'swiper/modules';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — swiper CSS side-effect imports have no TS declarations
 import 'swiper/css';
 // @ts-ignore

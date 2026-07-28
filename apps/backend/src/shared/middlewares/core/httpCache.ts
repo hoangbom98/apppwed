@@ -14,7 +14,7 @@
  *   - Response status !== 200
  *   - TTL is 0
  */
-const cache = require('../services/cacheService');
+const cache = require('../../services/cacheService');
 
 /**
  * @param {number} ttlSec  Cache TTL in seconds (default: 300 = 5 min)

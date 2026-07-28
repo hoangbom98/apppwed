@@ -23,7 +23,7 @@
  *   await imSvc.sendPrivateMessage(fromUid, toUid, content);
  */
 
-const logger = require('./logger');
+const logger = require('../logger');
 
 const MSG_TEXT   = 1;
 const MSG_IMAGE  = 2;

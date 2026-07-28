@@ -7,12 +7,18 @@ const path = require('path');
 //   2. Adding the language code to SUPPORTED_LOCALES below
 const SUPPORTED_LOCALES = ['vi', 'en', 'zh', 'ja', 'ko', 'th', 'id'];
 
-i18next
+// Use createInstance() to avoid polluting the global singleton and to be
+// compatible with i18next-http-middleware v3.x regardless of the hoisted
+// i18next version in the monorepo root node_modules.
+const instance = i18next.createInstance();
+
+instance
   .use(Backend)
   .init({
     fallbackLng: 'vi',
     preload: SUPPORTED_LOCALES,
-    ns: ['common', 'user', 'game', 'dating', 'validation'],
+    // Only load namespaces that actually exist on disk
+    ns: ['common'],
     defaultNS: 'common',
     backend: {
       loadPath: path.join(__dirname, '../../locales/{{lng}}/{{ns}}.json'),
@@ -22,4 +28,4 @@ i18next
     },
   });
 
-module.exports = i18next;
+module.exports = instance;

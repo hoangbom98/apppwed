@@ -19,8 +19,8 @@
  * Schema required on the project's `loyaltyTransaction` model:
  *   id, userId, type, points, balanceAfter, description, createdAt
  */
-const logger        = require('./logger');
-const ConfigService = require('./configService');
+const logger        = require('../logger');
+const ConfigService = require('../configService');
 const auditService  = require('./auditService');
 
 // Default tiers: [{ level, name, minPoints, earnMultiplier, cashbackRate }]

@@ -12,8 +12,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore }   from '@ui';
-import { useWalletStore } from '@ui';
+import { useAuthStore, useWalletStore } from '@ui';
 import toast from 'react-hot-toast';
 
 let _socket: Socket | null = null;

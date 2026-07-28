@@ -9,7 +9,7 @@
  * Path→project map is sourced from @lkvip/constants (single source of truth).
  */
 const { ROUTE_PROJECT_MAP, PROJECT_IDS } = require('@lkvip/constants');
-const { getPrismaClient } = require('../../config/databases');
+const { getPrismaClient } = require('../../../config/databases');
 
 // Build a Set of valid project IDs for fast O(1) lookup
 const VALID_PROJECTS = new Set(PROJECT_IDS);

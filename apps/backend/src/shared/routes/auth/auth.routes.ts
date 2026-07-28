@@ -1,10 +1,10 @@
 import express, { Router, Request, Response } from 'express';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { login, refresh, me } = require('../../modules/admin/controllers/authController');
+const { login, refresh, me } = require('../../../modules/admin/controllers/authController');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const authenticate = require('../middlewares/auth/auth');
+const authenticate = require('../../middlewares/auth/auth');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { clearAuthCookies } = require('../../config/cookie.config');
+const { clearAuthCookies } = require('../../../config/cookie.config');
 
 const router: Router = express.Router();
 

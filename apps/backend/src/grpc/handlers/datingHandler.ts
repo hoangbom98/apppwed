@@ -79,7 +79,7 @@ function chat(call) {
       if (!member) {
         try {
           call.write({ room_id, type: 'error', content: 'Not a member of this room', created_at: Date.now() });
-        } catch {}
+        } catch { /* stream already closed — ignore */ }
         return;
       }
       joinedRooms.add(room_id);
@@ -96,7 +96,7 @@ function chat(call) {
       });
 
       // Update room last activity
-      await prisma.chatRoom.update({ where: { id: room_id }, data: { updatedAt: new Date() } }).catch(() => {});
+      await prisma.chatRoom.update({ where: { id: room_id }, data: { updatedAt: new Date() } }).catch(() => { /* ignore */ });
 
       // Fan-out to all room's gRPC streams
       broadcastToRoom(room_id, {

@@ -50,7 +50,7 @@ export const TransactionType = {
   SAVINGS_SETTLE: 'savings_settle', // SavingsVault maturity payout
 } as const;
 
-export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType];
+export type TransactionTypeKey = (typeof TransactionType)[keyof typeof TransactionType];
 
 export const TransactionStatus = {
   PENDING:    'pending',
@@ -60,7 +60,7 @@ export const TransactionStatus = {
   PROCESSING: 'processing',
 } as const;
 
-export type TransactionStatus = (typeof TransactionStatus)[keyof typeof TransactionStatus];
+export type TransactionStatusKey = (typeof TransactionStatus)[keyof typeof TransactionStatus];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DEPOSIT / WITHDRAW ORDERS
@@ -74,7 +74,7 @@ export const DepositStatus = {
   CANCELLED:  'cancelled',
 } as const;
 
-export type DepositStatus = (typeof DepositStatus)[keyof typeof DepositStatus];
+export type DepositStatusKey = (typeof DepositStatus)[keyof typeof DepositStatus];
 
 export const WithdrawStatus = {
   PENDING:    'pending',
@@ -85,7 +85,7 @@ export const WithdrawStatus = {
   REJECTED:   'rejected',
 } as const;
 
-export type WithdrawStatus = (typeof WithdrawStatus)[keyof typeof WithdrawStatus];
+export type WithdrawStatusKey = (typeof WithdrawStatus)[keyof typeof WithdrawStatus];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOTTERY  (replaces BoYue caipiao_kj / caipiao_touzhu)
@@ -99,7 +99,7 @@ export const DrawStatus = {
   CANCELLED: 'CANCELLED', // Draw void — all bets refunded
 } as const;
 
-export type DrawStatus = (typeof DrawStatus)[keyof typeof DrawStatus];
+export type DrawStatusKey = (typeof DrawStatus)[keyof typeof DrawStatus];
 
 /** Individual lottery bet outcome. BoYue: caipiao_touzhu.status */
 export const BetStatus = {
@@ -110,7 +110,7 @@ export const BetStatus = {
   REFUNDED:  'REFUNDED',
 } as const;
 
-export type BetStatus = (typeof BetStatus)[keyof typeof BetStatus];
+export type BetStatusKey = (typeof BetStatus)[keyof typeof BetStatus];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REBATE  (replaces BoYue caipiao_fanshui / xima)
@@ -124,7 +124,7 @@ export const RebateStatus = {
   EXPIRED:   'expired',   // Unclaimed after 7 days
 } as const;
 
-export type RebateStatus = (typeof RebateStatus)[keyof typeof RebateStatus];
+export type RebateStatusKey = (typeof RebateStatus)[keyof typeof RebateStatus];
 
 /** Game type key used in rebate calculations. */
 export const GameTypeKey = {
@@ -134,7 +134,7 @@ export const GameTypeKey = {
   SPORTS:  'sports',  // Sports / Esports (BTI, SBO)
 } as const;
 
-export type GameTypeKey = (typeof GameTypeKey)[keyof typeof GameTypeKey];
+export type GameTypeKeyKey = (typeof GameTypeKey)[keyof typeof GameTypeKey];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VIP  (replaces BoYue caipiao_group / yzz_level_config)
@@ -154,7 +154,7 @@ export const VipTier = {
   V10:      'v10',
 } as const;
 
-export type VipTier = (typeof VipTier)[keyof typeof VipTier];
+export type VipTierKey = (typeof VipTier)[keyof typeof VipTier];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AGENT  (replaces BoYue caipiao_agent_relation / caipiao_agent_apply)
@@ -167,7 +167,7 @@ export const AgentStatus = {
   REJECTED:  'rejected',
 } as const;
 
-export type AgentStatus = (typeof AgentStatus)[keyof typeof AgentStatus];
+export type AgentStatusKey = (typeof AgentStatus)[keyof typeof AgentStatus];
 
 export const CommissionStatus = {
   PENDING:   'pending',
@@ -175,7 +175,7 @@ export const CommissionStatus = {
   CANCELLED: 'cancelled',
 } as const;
 
-export type CommissionStatus = (typeof CommissionStatus)[keyof typeof CommissionStatus];
+export type CommissionStatusKey = (typeof CommissionStatus)[keyof typeof CommissionStatus];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SAVINGS VAULT / YUEBAO  (replaces BoYue caipiao_yeb_record / yzz_yuebao_holding)
@@ -187,7 +187,7 @@ export const SavingsStatus = {
   CANCELLED: 'cancelled',
 } as const;
 
-export type SavingsStatus = (typeof SavingsStatus)[keyof typeof SavingsStatus];
+export type SavingsStatusKey = (typeof SavingsStatus)[keyof typeof SavingsStatus];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GIFTCODE  (replaces BoYue caipiao_giftcode)
@@ -200,7 +200,7 @@ export const GiftCodeStatus = {
   EXPIRED:  'expired',
 } as const;
 
-export type GiftCodeStatus = (typeof GiftCodeStatus)[keyof typeof GiftCodeStatus];
+export type GiftCodeStatusKey = (typeof GiftCodeStatus)[keyof typeof GiftCodeStatus];
 
 export const GiftCodeRewardType = {
   BALANCE:   'balance',   // Direct cash credit
@@ -209,7 +209,7 @@ export const GiftCodeRewardType = {
   VIP_EXP:   'vip_exp',   // VIP experience points
 } as const;
 
-export type GiftCodeRewardType = (typeof GiftCodeRewardType)[keyof typeof GiftCodeRewardType];
+export type GiftCodeRewardTypeKey = (typeof GiftCodeRewardType)[keyof typeof GiftCodeRewardType];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROMOTION / CAMPAIGN  (replaces BoYue caipiao_activity / caipiao_huodong)
@@ -221,7 +221,7 @@ export const PromotionStatus = {
   EXPIRED:  'expired',
 } as const;
 
-export type PromotionStatus = (typeof PromotionStatus)[keyof typeof PromotionStatus];
+export type PromotionStatusKey = (typeof PromotionStatus)[keyof typeof PromotionStatus];
 
 export const PromotionType = {
   WELCOME:        'welcome',
@@ -233,7 +233,7 @@ export const PromotionType = {
   REBATE:         'rebate',
 } as const;
 
-export type PromotionType = (typeof PromotionType)[keyof typeof PromotionType];
+export type PromotionTypeKey = (typeof PromotionType)[keyof typeof PromotionType];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // APPROVAL / REVIEW  (replaces BoYue shenhe / jinjishenhe)
@@ -245,4 +245,4 @@ export const ApprovalStatus = {
   REJECTED: 'rejected',
 } as const;
 
-export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus];
+export type ApprovalStatusKey = (typeof ApprovalStatus)[keyof typeof ApprovalStatus];

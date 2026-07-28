@@ -14,7 +14,7 @@
 const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
-const logger = require('./logger');
+const logger = require('../logger');
 
 /**
  * Fetch local Vietnamese bank list.

@@ -20,7 +20,7 @@
  */
 'use strict';
 const jwt    = require('jsonwebtoken');
-const logger = require('../services/logger');
+const logger = require('../../services/logger');
 
 const { PROJECT_IDS } = require('@lkvip/constants');
 const VALID_PROJECTS  = new Set(PROJECT_IDS);

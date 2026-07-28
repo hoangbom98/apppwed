@@ -93,7 +93,7 @@ function startBackground(apps: string[], doInstall: boolean): void {
 
   const cleanup = () => {
     log('Stopping all dev servers…');
-    procs.forEach((p) => { try { p.kill(); } catch {} });
+    procs.forEach((p) => { try { p.kill(); } catch { /* already killed */ } });
     process.exit(0);
   };
 

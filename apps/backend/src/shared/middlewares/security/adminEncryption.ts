@@ -24,7 +24,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 
-const logger = require('../services/logger');
+const logger = require('../../services/logger');
 
 const ALGO      = 'aes-256-gcm';
 const KEY_ENV   = 'ADMIN_ENCRYPTION_KEY';

@@ -11,9 +11,9 @@
  *  - Optimistic lock on debit via WHERE balance >= amount to prevent race conditions
  *    under high concurrency (replaces application-level check)
  */
-const ConfigService = require('./configService');
-const logger        = require('./logger');
-const cache         = require('./cacheService');
+const ConfigService = require('../configService');
+const logger        = require('../logger');
+const cache         = require('../cacheService');
 
 const BALANCE_TTL = 300; // seconds — cache balance for 5 minutes
 

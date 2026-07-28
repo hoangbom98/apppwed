@@ -43,7 +43,7 @@ function processSchema(filePath: string): void {
 
   const newLines = lines.map((line) => {
     // Match Prisma model field lines (indented, camelCase identifier)
-    const match = line.match(/^(\s+)([a-z][a-zA-Z0-9]+)(\s+[a-zA-Z0-9\[\]?]+)(\s+@.*)?$/);
+    const match = line.match(/^(\s+)([a-z][a-zA-Z0-9]+)(\s+[a-zA-Z0-9[\]?]+)(\s+@.*)?$/);
     if (!match) return line;
 
     const [, indent, fieldName, typePart, attrsPart = ''] = match;

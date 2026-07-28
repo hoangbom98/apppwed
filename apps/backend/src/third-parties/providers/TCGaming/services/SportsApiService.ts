@@ -51,17 +51,20 @@ export class SportsApiService extends BaseService {
       case 'balance':
         return this.provider.getBalance(p.username, productType);
 
-      case 'deposit':
+      case 'deposit': {
         const dp = p as Extract<TCSportsPayload, { action: 'deposit' }>;
         return this.provider.fundTransfer(dp.username, productType, '1', dp.amount, dp.referenceNo);
+      }
 
-      case 'withdraw':
+      case 'withdraw': {
         const wp = p as Extract<TCSportsPayload, { action: 'withdraw' }>;
         return this.provider.fundTransfer(wp.username, productType, '2', wp.amount, wp.referenceNo);
+      }
 
-      case 'withdrawAll':
+      case 'withdrawAll': {
         const wa = p as Extract<TCSportsPayload, { action: 'withdrawAll' }>;
         return this.provider.transferOutAll(wa.username, productType, wa.referenceNo);
+      }
 
       case 'seamless':
         if (!prisma) throw new Error('TCGaming/sports/seamless: prisma client required');

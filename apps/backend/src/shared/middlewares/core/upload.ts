@@ -8,8 +8,8 @@
  *   router.post('/gallery', upload.array('images', 10), handler);
  *   router.post('/docs', upload.fields([{name:'front'},{name:'back'}]), handler);
  */
-const { upload: multerInstance } = require('../services/uploadService');
-const { error: sendError } = require('../utils/response');
+const { upload: multerInstance } = require('../../services/uploadService');
+const { error: sendError } = require('../../utils/network/response');
 
 /**
  * Wraps a multer handler and converts multer errors to JSON responses.

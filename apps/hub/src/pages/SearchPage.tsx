@@ -1,13 +1,12 @@
 // frontend/hub/src/pages/SearchPage.tsx
+import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { search as apiSearch } from '../api/hub';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-import { AutoComplete } from '@ui';
-import type { AutoCompleteItem } from '@ui';
-import Spinner from '../components/Spinner';
+import { AutoComplete, type AutoCompleteItem } from '@ui';
 import Card from '../components/Card';
+import Spinner from '../components/Spinner';
+import { search as apiSearch } from '../api/hub';
 
 export default function SearchPage() {
   const { t } = useTranslation();

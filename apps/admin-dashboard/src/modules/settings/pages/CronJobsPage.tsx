@@ -110,7 +110,7 @@ function EditModal({ job, open, onClose, onSaved }) {
           </LkvipSelect>
         </Form.Item>
 
-      </Form>
+      </LkvipForm>
     </Modal>
   );
 }

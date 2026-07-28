@@ -28,6 +28,9 @@ import type {
   ShopItem,
   ShopOrder,
   WatchlistItem,
+  SavingsVaultProduct,
+  SavingsVaultInvestment,
+  NewsItem,
 } from '@/types';
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -276,8 +279,16 @@ export const claimSigninReward = () =>
 export const getSigninRewardStatus = () =>
   api.get<ApiEnvelope<{ claimed: boolean; streak: number; points: number }>>('/trade/reward/signin/status').then((r) => r.data);
 
+// ── SavingsVault (Flexible Savings) ──────────────────────────────────────────
+export const getSavingsVaultProducts = () =>
+  api.get<ApiEnvelope<SavingsVaultProduct[]>>('/trade/savings/products').then((r) => r.data);
+
+export const getMySavingsVaultInvestments = (params?: Record<string, unknown>) =>
+  api.get<ApiEnvelope<SavingsVaultInvestment[]>>('/trade/savings/my', { params }).then((r) => r.data);
+
+export const investSavingsVault = (data: { productId: string; amount: number }) =>
+  api.post<ApiEnvelope<SavingsVaultInvestment>>('/trade/savings/invest', data).then((r) => r.data);
+
 // ── News (content) ────────────────────────────────────────────────────────────
 export const getNewsList = (params?: Record<string, unknown>) =>
-  api.get<ApiEnvelope<{ id: string; title: string; slug: string; excerpt?: string; createdAt: string }[]>>(
-    '/trade/news', { params }
-  ).then((r) => r.data);
+  api.get<ApiEnvelope<NewsItem[]>>('/trade/news', { params }).then((r) => r.data);

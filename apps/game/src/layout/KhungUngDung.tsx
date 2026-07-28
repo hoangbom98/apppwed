@@ -5,9 +5,8 @@
  */
 import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { H5BottomNav } from '@ui';
+import { H5BottomNav, useAppConfig, applyColorConfig } from '@ui';
 import Header from './DauTrang';
-import { useAppConfig, applyColorConfig } from '@ui';
 import {
   HomeOutlined, GiftOutlined, WalletOutlined, DownloadOutlined, UserOutlined
 } from '@ant-design/icons';

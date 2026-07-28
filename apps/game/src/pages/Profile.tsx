@@ -1,13 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  User, Settings, Shield, History, Gift,
-  Wallet, CreditCard, Award,
-} from 'lucide-react';
+import { User, Settings, Shield, History, Gift, Wallet, CreditCard, Award } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import VipCard from '../components/profile/VipCard';
-import MenuGrid from '../components/profile/MenuGrid';
-import type { MenuItemDef } from '../components/profile/MenuGrid';
+import MenuGrid, { type MenuItemDef } from '../components/profile/MenuGrid';
 
 const MENU_ITEMS: MenuItemDef[] = [
   { icon: User,        label: 'Thông tin',      key: 'info' },

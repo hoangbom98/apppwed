@@ -3,7 +3,7 @@
 // Trang cá nhân (Mine) — profile, balance, VIP, menu điều hướng
 import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   UserOutlined, ReloadOutlined, CopyOutlined, CheckOutlined,
   ArrowUpOutlined, ArrowDownOutlined, SwapOutlined,
@@ -15,7 +15,6 @@ import {
 import { Collapse, Form, Input, Select, Button } from 'antd';
 import * as mineApi from '../api/mineApi';
 import { useAuthStore } from '@admin/store/adminStore';
-import { useNavigate } from 'react-router-dom';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS

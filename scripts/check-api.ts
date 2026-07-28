@@ -15,7 +15,7 @@
  *   tsx scripts/check-api.ts --json            # JSON output
  *   tsx scripts/check-api.ts --base-url https://api.tc-gaming.live
  *
- * Default API base: http://localhost:4000   (matches dev:backend)
+ * Default API base: http://localhost:5000   (matches dev:backend PORT=5000)
  */
 
 import fs   from 'fs';
@@ -28,7 +28,7 @@ import https from 'https';
 const ROOT        = path.resolve(__dirname, '..');
 const BACKEND_SRC = path.join(ROOT, 'apps/backend/src');
 const TEST_DIR    = path.join(ROOT, 'apps/backend/src/__tests__');
-const DEFAULT_API = 'http://localhost:4000';
+const DEFAULT_API = 'http://localhost:5000';
 
 const args       = process.argv.slice(2);
 const jsonOutput = args.includes('--json');

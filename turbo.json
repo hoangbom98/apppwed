@@ -1,6 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "clean": {
+      "cache": false,
+      "dependsOn": []
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
@@ -23,6 +27,10 @@
   },
   "globalEnv": [
     "NODE_ENV",
+    "PORT",
+    "LOG_LEVEL",
+    "DATABASE_URL",
+    "REDIS_URL",
     "VITE_API_URL",
     "VITE_SENTRY_DSN"
   ]

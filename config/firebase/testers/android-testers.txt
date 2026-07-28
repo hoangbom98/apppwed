@@ -1,0 +1,9 @@
+# Danh sách tester Android — dùng chung cho tất cả nhóm android-testers
+# Thêm email mỗi dòng một. Comment bắt đầu bằng #.
+# File này được tham chiếu bởi --testers-file khi dùng Firebase CLI thủ công.
+# Khi dùng GitHub Actions, quản lý tester qua Firebase Console → App Distribution → Testers & Groups.
+#
+# Ví dụ:
+# qa-lead@lkvip.com
+# tester.android.1@lkvip.com
+# tester.android.2@lkvip.com

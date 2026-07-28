@@ -153,7 +153,7 @@ export {
   PackageOpen  as IconPackageOpen,
   PackageSearch as IconPackageSearch,
   BookOpen     as IconBook,
-  News         as IconNews,
+  Newspaper    as IconNews,
   Inbox        as IconInbox,
 
   // ── Gift / Reward ───────────────────────────────────────────────────────

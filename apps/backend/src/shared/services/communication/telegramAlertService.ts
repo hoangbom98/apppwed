@@ -27,7 +27,7 @@
  *   await tg.sendMessage('-100123456789', 'Hello', 'HTML');
  */
 const https  = require('https');
-const logger = require('./logger');
+const logger = require('../logger');
 
 // Đọc config từ env (có thể override bằng DB setting trong runtime)
 let _config = {

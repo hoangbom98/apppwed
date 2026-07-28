@@ -16,8 +16,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore }   from '@ui';
-import { useWalletStore } from '@ui';
+import { useAuthStore, useWalletStore } from '@ui';
 import toast from 'react-hot-toast';
 
 let _socket: Socket | null = null;
@@ -30,11 +29,16 @@ export function useSocket() {
   useEffect(() => {
     if (!token) return;
 
-    const wsUrl = import.meta.env.VITE_WS_URL || '/';
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    if (!wsUrl) {
+      console.error('VITE_WS_URL is not defined! WebSocket connection will fail.');
+      return;
+    }
+
     _socket = io(wsUrl, {
       auth:       { token },
       path:       '/socket.io',
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'], // Allow fallback
     });
     socketRef.current = _socket;
 
@@ -74,6 +78,9 @@ export function useSocket() {
     // ── Chat ────────────────────────────────────────────────────────
     _socket.on('message:new', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:message_new', { detail: data }));
+    });
+    _socket.on('message:seen', (data: unknown) => {
+      window.dispatchEvent(new CustomEvent('socket:message_seen', { detail: data }));
     });
     _socket.on('typing:start', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:typing_start', { detail: data }));

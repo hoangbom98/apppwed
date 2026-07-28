@@ -3,7 +3,7 @@
  * Handles submission, approval, rejection and admin listing.
  */
 const emailService = require('./communication/emailService');
-const logger       = require('./logger');
+const logger       = require('../logger');
 
 /**
  * Submit a KYC document set for a user.

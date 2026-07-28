@@ -28,8 +28,8 @@
 import Decimal from 'decimal.js';
 import { Request, Response } from 'express';
 
-const cache  = require('./cacheService');
-const logger = require('./logger');
+const cache  = require('../cacheService');
+const logger = require('../logger');
 
 // ── Static fallback rates (base = USD) ────────────────────────────────────────
 // Updated periodically — used when live API is unavailable

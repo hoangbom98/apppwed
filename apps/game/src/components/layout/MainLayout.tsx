@@ -13,7 +13,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ title }) => (
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>
-      <H5BottomNav />
+      <H5BottomNav items={[]} />
     </H5Layout>
   </LkvipThemeWrapper>
 );

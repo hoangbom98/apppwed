@@ -2,8 +2,7 @@
 // apps/dating/src/pages/CSKH.tsx
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CskhPage } from '@lkvip/ui';
-import { api } from '@lkvip/ui';
+import { CskhPage, api } from '@lkvip/ui';
 import { datingCskhConfig } from '../configs/cskh.config';
 import toast from 'react-hot-toast';
 

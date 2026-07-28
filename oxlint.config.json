@@ -5,9 +5,15 @@
     "eqeqeq": ["error", "always"],
     "no-console": "warn",
     "no-debugger": "error",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
-  "plugins": ["react", "react-hooks"],
+  "categories": {
+    "correctness": "warn",
+    "react": "warn",
+    "react-hooks": "error"
+  },
   "env": {
     "browser": true,
     "es2022": true

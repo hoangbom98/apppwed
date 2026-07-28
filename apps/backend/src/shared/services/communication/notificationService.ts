@@ -9,7 +9,7 @@
  *   await notifSvc.sendEmail(project, userId, to, subj, text); // queued email
  */
 const notificationQueue = require('../queue/notificationQueue');
-const logger            = require('./logger');
+const logger            = require('../logger');
 
 let _io = null;
 

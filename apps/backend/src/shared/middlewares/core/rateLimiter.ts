@@ -21,12 +21,12 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 
 const rateLimit = require('express-rate-limit');
-const logger    = require('../services/logger');
+const logger    = require('../../services/logger');
 
 // ── Use shared Redis singleton (single connection for the entire process) ─────
 // config/redis.ts is already connected and handles reconnect/fallback.
 // We get the raw ioredis client (or null if Redis is unavailable).
-const redisStore = require('../../config/redis');
+const redisStore = require('../../../config/redis');
 
 // ── Redis-backed limiter setup ────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

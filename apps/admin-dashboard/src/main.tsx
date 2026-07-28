@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { LkvipAntdProvider } from '@lkvip/ui';
+import { InstallPrompt } from '@lkvip/ui/pwa/install';
 import App from './App';
 import './index.css';
 
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <LkvipAntdProvider project="admin">
       <App />
+      <InstallPrompt appName="LKVIP Admin" appIcon="/icons/icon-192.png" />
     </LkvipAntdProvider>
   </React.StrictMode>
 );

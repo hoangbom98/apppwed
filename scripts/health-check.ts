@@ -52,12 +52,12 @@ interface ServiceConfig {
 }
 
 const SERVICES_LOCAL: ServiceConfig[] = [
-  { name: 'API',    healthUrl: 'http://localhost:4000/health', type: 'backend'  },
+  { name: 'API',    healthUrl: 'http://localhost:5000/health', type: 'backend'  },
   { name: 'Hub',    healthUrl: 'http://localhost:5173',        type: 'frontend' },
   { name: 'Game',   healthUrl: 'http://localhost:5174',        type: 'frontend' },
-  { name: 'Trade',  healthUrl: 'http://localhost:5175',        type: 'frontend' },
-  { name: 'Sports', healthUrl: 'http://localhost:5176',        type: 'frontend' },
-  { name: 'Dating', healthUrl: 'http://localhost:5177',        type: 'frontend' },
+  { name: 'Trade',  healthUrl: 'http://localhost:5177',        type: 'frontend' },
+  { name: 'Sports', healthUrl: 'http://localhost:5178',        type: 'frontend' },
+  { name: 'Dating', healthUrl: 'http://localhost:5176',        type: 'frontend' },
   { name: 'Admin',  healthUrl: 'http://localhost:5180',        type: 'frontend' },
 ];
 

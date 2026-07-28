@@ -1,5 +1,5 @@
 // @ts-nocheck
-const logger = require('../services/logger');
+const logger = require('../../services/logger');
 
 /**
  * Express error-handling middleware.

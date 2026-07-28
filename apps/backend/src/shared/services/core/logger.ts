@@ -85,7 +85,7 @@ process.on('uncaughtException', (err) => {
 
 // Named export for TypeScript `import { logger } from '...'` consumers.
 // IMPORTANT: keep `exports.logger` AFTER module.exports reassignment so that
-// TypeScript compiled `require('…/logger').logger` (logger_1.logger) works.
+// TypeScript compiled `require('./logger').logger` (logger_1.logger) works.
 module.exports = logger;
 module.exports.logger = logger;
 export { logger };

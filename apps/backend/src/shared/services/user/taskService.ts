@@ -35,8 +35,8 @@
 
 'use strict';
 
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 // Check-in streak rewards: day → bonus amount (VND)
 const DEFAULT_CHECKIN_REWARDS = [

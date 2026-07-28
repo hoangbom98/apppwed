@@ -12,7 +12,7 @@
  */
 'use strict';
 const { Server } = require('socket.io');
-const logger     = require('./logger');
+const logger     = require('../logger');
 
 let _io = null;
 

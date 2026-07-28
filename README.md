@@ -19,7 +19,9 @@ Nền tảng giải trí đa dịch vụ gồm Hub, Game, Trading, Dating, Sport
 │   ├── ui/                   # @lkvip/ui
 │   ├── types/                # @lkvip/types
 │   ├── utils/                # @lkvip/utils
-│   └── constants/            # @lkvip/constants
+│   ├── constants/            # @lkvip/constants
+│   ├── auth/                 # @lkvip/auth
+│   └── ai-skills/            # @lkvip/ai-skills
 ├── config/                   # Nginx, DB, monitoring, env templates
 ├── docs/                     # Tài liệu kỹ thuật
 ├── scripts/                  # DevOps/CLI scripts

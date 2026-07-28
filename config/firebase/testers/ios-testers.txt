@@ -1,0 +1,9 @@
+# Danh sách tester iOS — dùng chung cho tất cả nhóm ios-testers
+# Thêm email mỗi dòng một. Comment bắt đầu bằng #.
+# LƯU Ý iOS: Tester cần chấp nhận lời mời qua email TRƯỚC để Firebase thu thập UDID.
+# UDID sẽ tự động được thêm vào provisioning profile trong lần build tiếp theo.
+#
+# Ví dụ:
+# qa-lead@lkvip.com
+# tester.ios.1@lkvip.com
+# tester.ios.2@lkvip.com

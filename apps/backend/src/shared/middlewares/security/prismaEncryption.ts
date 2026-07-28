@@ -21,8 +21,8 @@
 
 'use strict';
 
-import { encryptToString, decryptFromString } from '../utils/encryption';
-const logger = require('../services/logger');
+import { encryptToString, decryptFromString } from '../../utils/crypto/encryption';
+const logger = require('../../services/logger');
 
 // ── Models and fields to encrypt ─────────────────────────────────────────
 

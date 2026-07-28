@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMatch, addMatchComment } from '../api/sports';
 import { formatScore, formatDate, formatMatchTime } from '../utils/formatters';
 import { MATCH_STATUS } from '../utils/constants';
 import { getSocket } from '../hooks/useSocket';
 import CommentItem from '../components/CommentItem';
 import { useAuthStore } from '../store/authStore';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
   const total = home + away || 1;

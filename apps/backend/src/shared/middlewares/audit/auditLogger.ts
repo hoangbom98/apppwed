@@ -1,4 +1,4 @@
-const { auditService } = require('../services/auditService');
+const { auditService } = require('../../services/auditService');
 
 module.exports = async (req, res, next) => {
   if (req.method === 'GET') return next();

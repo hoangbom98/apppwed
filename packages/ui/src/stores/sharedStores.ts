@@ -73,7 +73,7 @@ export interface AuthState {
 
   // OAuth social login callback — gọi sau khi backend redirect về frontend
   // với query params: ?oauth=success&project=hub
-  handleOAuthCallback: () => void;
+  handleOAuthCallback: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

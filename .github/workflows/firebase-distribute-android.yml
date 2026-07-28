@@ -1,0 +1,314 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Firebase App Distribution — Android (LKVIP Group)
+#
+# Phân phối APK debug đến nhóm tester tương ứng mỗi khi:
+#   • Push lên nhánh `develop` có thay đổi trong app tương ứng
+#   • Kích hoạt thủ công qua workflow_dispatch
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   FIREBASE_SERVICE_ACCOUNT       → Nội dung JSON service account (Firebase Console
+#                                    → Project Settings → Service Accounts → Generate key)
+#   FIREBASE_APP_ID_HUB_ANDROID    → App ID của Hub trên Firebase  (1:xxx:android:yyy)
+#   FIREBASE_APP_ID_GAME_ANDROID   → App ID của Game
+#   FIREBASE_APP_ID_TRADE_ANDROID  → App ID của Trading
+#   FIREBASE_APP_ID_DATING_ANDROID → App ID của Dating
+#   FIREBASE_APP_ID_SPORTS_ANDROID → App ID của Sports
+#
+# App IDs lấy tại: Firebase Console → App Distribution → chọn app → App Settings
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Firebase Distribute — Android
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/hub/**'
+      - 'apps/game/**'
+      - 'apps/trading/**'
+      - 'apps/dating/**'
+      - 'apps/sports/**'
+      - 'apps/mobile/**'
+      - 'packages/**'
+
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App cần phân phối (hub | game | trading | dating | sports | all)'
+        required: true
+        default: 'all'
+      release_notes:
+        description: 'Ghi chú phát hành'
+        required: false
+        default: 'Build thủ công từ GitHub Actions'
+
+concurrency:
+  group: firebase-android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  JAVA_VERSION: '17'
+
+# ── Helper: build web assets rồi wrap bằng Capacitor ─────────────────────────
+# Mỗi app Android là một Capacitor WebView build từ Vite SPA.
+# Quy trình: pnpm build (SPA) → cap sync android → ./gradlew assembleDebug
+
+jobs:
+  # ── Hub Android ─────────────────────────────────────────────────────────────
+  distribute-hub:
+    name: Hub — Android
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.app == 'hub' || github.event.inputs.app == 'all') ||
+      github.event_name == 'push' &&
+        contains(github.event.commits[0].modified, 'apps/hub/')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm run build:packages
+
+      - name: Build Hub SPA
+        run: pnpm run build:hub
+        env:
+          VITE_API_URL: https://api.tc-gaming.live
+          VITE_APP_ENV: staging
+
+      - name: Capacitor sync (Hub → Android)
+        working-directory: apps/hub
+        run: npx cap sync android
+
+      - name: Build APK (Hub Debug)
+        working-directory: apps/hub/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Hub APK → Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_HUB_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: hub-testers,android-testers
+          file: apps/hub/android/app/build/outputs/apk/debug/app-debug.apk
+          releaseNotes: |
+            ${{ github.event.inputs.release_notes || format('Auto build — branch: {0} — commit: {1}', github.ref_name, github.sha) }}
+
+  # ── Game Android ─────────────────────────────────────────────────────────────
+  distribute-game:
+    name: Game — Android
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.app == 'game' || github.event.inputs.app == 'all') ||
+      github.event_name == 'push' &&
+        contains(github.event.commits[0].modified, 'apps/game/')
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - name: Build Game SPA
+        run: pnpm run build:game
+        env:
+          VITE_API_URL: https://api.tc-gaming.live
+          VITE_APP_ENV: staging
+
+      - name: Capacitor sync (Game → Android)
+        working-directory: apps/game
+        run: npx cap sync android
+
+      - name: Build APK (Game Debug)
+        working-directory: apps/game/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_GAME_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: game-testers,android-testers
+          file: apps/game/android/app/build/outputs/apk/debug/app-debug.apk
+          releaseNotes: |
+            ${{ github.event.inputs.release_notes || format('Auto build — branch: {0} — commit: {1}', github.ref_name, github.sha) }}
+
+  # ── Trading Android ───────────────────────────────────────────────────────────
+  distribute-trading:
+    name: Trading — Android
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.app == 'trading' || github.event.inputs.app == 'all') ||
+      github.event_name == 'push' &&
+        contains(github.event.commits[0].modified, 'apps/trading/')
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - name: Build Trade SPA
+        run: pnpm run build:trade
+        env:
+          VITE_API_URL: https://api.tc-gaming.live
+          VITE_APP_ENV: staging
+
+      - name: Capacitor sync (Trading → Android)
+        working-directory: apps/trading
+        run: npx cap sync android
+
+      - name: Build APK (Trading Debug)
+        working-directory: apps/trading/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_TRADE_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: trade-testers,android-testers
+          file: apps/trading/android/app/build/outputs/apk/debug/app-debug.apk
+          releaseNotes: |
+            ${{ github.event.inputs.release_notes || format('Auto build — branch: {0} — commit: {1}', github.ref_name, github.sha) }}
+
+  # ── Dating Android ───────────────────────────────────────────────────────────
+  distribute-dating:
+    name: Dating — Android
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.app == 'dating' || github.event.inputs.app == 'all') ||
+      github.event_name == 'push' &&
+        contains(github.event.commits[0].modified, 'apps/dating/')
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - name: Build Dating SPA
+        run: pnpm run build:dating
+        env:
+          VITE_API_URL: https://api.tc-gaming.live
+          VITE_APP_ENV: staging
+
+      - name: Capacitor sync (Dating → Android)
+        working-directory: apps/dating
+        run: npx cap sync android
+
+      - name: Build APK (Dating Debug)
+        working-directory: apps/dating/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_DATING_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: dating-testers,android-testers
+          file: apps/dating/android/app/build/outputs/apk/debug/app-debug.apk
+          releaseNotes: |
+            ${{ github.event.inputs.release_notes || format('Auto build — branch: {0} — commit: {1}', github.ref_name, github.sha) }}
+
+  # ── Sports Android ────────────────────────────────────────────────────────────
+  distribute-sports:
+    name: Sports — Android
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.app == 'sports' || github.event.inputs.app == 'all') ||
+      github.event_name == 'push' &&
+        contains(github.event.commits[0].modified, 'apps/sports/')
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - name: Build Sports SPA
+        run: pnpm run build:sports
+        env:
+          VITE_API_URL: https://api.tc-gaming.live
+          VITE_APP_ENV: staging
+
+      - name: Capacitor sync (Sports → Android)
+        working-directory: apps/sports
+        run: npx cap sync android
+
+      - name: Build APK (Sports Debug)
+        working-directory: apps/sports/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_SPORTS_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: sports-testers,android-testers
+          file: apps/sports/android/app/build/outputs/apk/debug/app-debug.apk
+          releaseNotes: |
+            ${{ github.event.inputs.release_notes || format('Auto build — branch: {0} — commit: {1}', github.ref_name, github.sha) }}

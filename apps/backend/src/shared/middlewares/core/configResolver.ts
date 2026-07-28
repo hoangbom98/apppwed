@@ -6,8 +6,8 @@
  * Usage in controllers:
  *   const value = await req.configService.get('hub', 'payment', 'deposit', 'minAmount', 50);
  */
-const ConfigService       = require('../services/configService');
-const { getPrismaClient } = require('../../config/databases');
+const ConfigService       = require('../../services/configService');
+const { getPrismaClient } = require('../../../config/databases');
 
 module.exports = (req, _res, next) => {
   // ConfigService reads from admin_db (ProjectConfig table)

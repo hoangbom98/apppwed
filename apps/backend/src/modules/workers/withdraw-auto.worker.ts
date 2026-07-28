@@ -71,9 +71,12 @@ export const withdrawWorker = new Worker(
 );
 
 async function processAutomatedWithdrawal(withdraw: any) {
-  // Logic gọi API ngân hàng/đối tác chuyển tiền ở đây
+  // TODO: Tích hợp payment gateway để thực hiện chuyển tiền tự động
+  // Implement: chọn adapter theo withdraw.method (USDT, ngân hàng...)
+  // const adapter = PaymentAdapterFactory.getAdapter(withdraw.method)
+  // await adapter.withdraw(withdraw.amount, withdraw.bankAccount)
+  // Xem: src/shared/payment/adapters/ và PaymentAdapter interface trong src/shared/payment/
   logger.info(`Processing automated withdrawal for ${withdraw.id}`);
-  // TODO: integrate payment gateway
 }
 
 async function requestAdditionalVerification(withdraw: any) {

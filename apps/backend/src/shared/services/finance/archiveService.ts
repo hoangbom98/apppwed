@@ -26,7 +26,7 @@ import zlib from 'zlib';
 import { promisify } from 'util';
 
 const gzip   = promisify(zlib.gzip);
-const logger = require('./logger');
+const logger = require('../logger');
 
 // ── S3 client (lazy-init so server starts even without aws-sdk) ───────────
 let _s3: any = null;

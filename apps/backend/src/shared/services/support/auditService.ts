@@ -4,8 +4,8 @@
  * Audit Service — records important business actions into the admin DB.
  * All security-relevant events (login, transactions, admin ops) must call log().
  */
-const { getPrismaClient } = require('../../config/databases');
-const logger              = require('./logger');
+const { getPrismaClient } = require('../../../config/databases');
+const logger              = require('../logger');
 
 /**
  * @param {object} opts

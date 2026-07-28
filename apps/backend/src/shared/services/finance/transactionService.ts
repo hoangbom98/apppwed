@@ -41,7 +41,7 @@
  * NOTE: CommonJS exports — backend package.json "type": "commonjs".
  */
 
-const logger = require('./logger');
+const logger = require('../logger');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const MAX_RETRIES   = 3;
@@ -141,7 +141,7 @@ async function runTxWith<T>(
   fn: (tx: any) => Promise<T>,
   options: TxOptions = {},
 ): Promise<T> {
-  const { getPrismaClient } = require('../../config/databases');
+  const { getPrismaClient } = require('../../../config/databases');
   return runTx(getPrismaClient(project), fn, options);
 }
 

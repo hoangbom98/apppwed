@@ -1,9 +1,6 @@
 // tests/integration/multiTenant.test.ts
 import request from 'supertest';
-import { app } from '../../server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { app } from '../../apps/backend/server';
 
 describe('Multi-tenancy Isolation', () => {
   it('should prevent access to resources of another project', async () => {
@@ -13,7 +10,7 @@ describe('Multi-tenancy Isolation', () => {
       .get('/api/wallet/balance')
       .set('X-Project-ID', 'project-2')
       .set('Authorization', 'Bearer token_user_1');
-    
+
     expect(res.status).toBe(403); // Hoặc 404 tùy logic
   });
 });

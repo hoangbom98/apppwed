@@ -68,7 +68,7 @@ async function _sendTwilio(to, body) {
           resolve();
         } else {
           let msg = `Twilio error ${res.statusCode}`;
-          try { msg = JSON.parse(raw)?.message || msg; } catch {}
+          try { msg = JSON.parse(raw)?.message || msg; } catch { /* ignore parse errors */ }
           reject(new Error(msg));
         }
       });

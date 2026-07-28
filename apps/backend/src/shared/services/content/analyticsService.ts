@@ -21,8 +21,8 @@
 
 'use strict';
 
-const cache  = require('./cacheService');
-const logger = require('./logger');
+const cache  = require('../cacheService');
+const logger = require('../logger');
 
 let _getReadClient: any;
 function getReadClient(project: string) {

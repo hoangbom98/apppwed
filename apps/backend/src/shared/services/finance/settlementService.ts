@@ -25,7 +25,7 @@
 
 'use strict';
 
-const logger = require('./logger');
+const logger = require('../logger');
 
 // Transactions still PENDING after this many minutes are auto-failed
 const PENDING_TIMEOUT_MINUTES = 60;

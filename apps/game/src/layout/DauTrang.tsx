@@ -8,10 +8,9 @@
  * We pass everything via rightSlot to avoid prop mismatch.
  */
 import React from 'react';
-import { Link, useNavigate }  from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sun, Moon, ChevronRight, Bell } from 'lucide-react';
-import { H5Header }           from '@ui';
-import { useUnreadCount }     from '@ui';
+import { H5Header, useUnreadCount } from '@ui';
 import { useAuthStore }       from '@/store/authStore';
 import { useWalletStore }     from '@/store/walletStore';
 import { useUIStore }         from '@/store/uiStore';

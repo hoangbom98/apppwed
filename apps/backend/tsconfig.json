@@ -17,10 +17,10 @@
     "rootDir":                       ".",
     "allowJs":                       true,
     "checkJs":                       false,
-    "sourceMap":                     false,
+    "sourceMap":                     true,
     "forceConsistentCasingInFileNames": true,
     "moduleDetection":               "force",
-    "noEmitOnError":                 false,
+    "noEmitOnError":                 true,
     "types":                         ["node"],
     "paths": {
       "@lkvip/types":     ["../packages/types/src/index.ts"],

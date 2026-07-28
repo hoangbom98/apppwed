@@ -9,8 +9,7 @@
  */
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AutoComplete } from '@ui';
-import type { AutoCompleteItem } from '@ui';
+import { AutoComplete, type AutoCompleteItem } from '@ui';
 
 // Map source → route prefix
 const SOURCE_ROUTES: Record<string, string> = {

@@ -1,0 +1,43 @@
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Logs & runtime data
+logs/
+*.log
+data/
+reports/
+
+# Prisma generated
+apps/backend/node_modules/.prisma/
+apps/backend/prisma/migrations/
+
+# Generated HTML reports
+*.html
+
+# Bob / AI tooling
+.bob/
+.backups/
+.claude/
+.gemini/
+
+# Capacitor / Mobile native
+apps/mobile/android/
+apps/mobile/ios/
+
+# Cache & temp
+.turbo/
+.cache/
+*.tmp

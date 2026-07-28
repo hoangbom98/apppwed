@@ -16,9 +16,9 @@
  *   router.use(risk.injectionGuard());
  *   router.post('/login', risk.ipBlockGuard(), authCtrl.login);
  */
-const riskService = require('../services/riskService');
-const logger      = require('../services/logger');
-const redis       = require('../../config/redis');
+const riskService = require('../../services/riskService');
+const logger      = require('../../services/logger');
+const redis       = require('../../../config/redis');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getIp(req) {

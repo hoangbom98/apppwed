@@ -15,7 +15,7 @@
  * Use one or the other — or both with different transports.
  */
 
-const logger = require('../services/logger');
+const logger = require('../../services/logger');
 
 module.exports = (req, res, next) => {
   const startMs = Date.now();

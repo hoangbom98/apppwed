@@ -6,9 +6,9 @@
  * This service is the single entry-point that route handlers / payment flows
  * should call. It delegates to specialised detectors in src/risk/.
  */
-const aiService  = require('./aiService');
-const logger     = require('./logger');
-const alertHelper = require('../../risk/alertHelper');
+const aiService  = require('../aiService');
+const logger     = require('../logger');
+const alertHelper = require('../../../risk/alertHelper');
 
 const RISK_HIGH_SCORE   = 70;
 const RISK_MEDIUM_SCORE = 40;
@@ -20,21 +20,21 @@ let _txMonitor, _bruteForce, _deviceFp, _fraudDetector,
     _contentMod, _compliance, _scorer;
 
 function _getPrisma() {
-  const { getPrismaClient } = require('../../config/databases');
+  const { getPrismaClient } = require('../../../config/databases');
   return getPrismaClient('admin');
 }
 
-function txMonitor(prisma)    { return (_txMonitor   || (_txMonitor   = new (require('../../risk/transactionMonitor'))(prisma))); }
-function bruteForce()         { return (_bruteForce  || (_bruteForce  = new (require('../../risk/bruteForceDetector'))(_getPrisma()))); }
-function deviceFp(prisma)     { return (_deviceFp    || (_deviceFp    = new (require('../../risk/deviceFingerprint'))(prisma))); }
-function fraudDet(prisma)     { return (_fraudDetector || (_fraudDetector = new (require('../../risk/fraudDetector'))(prisma))); }
-function botDet()             { return (_botDetector || (_botDetector = new (require('../../risk/botDetector'))())); }
-function secMon()             { return (_secMonitor  || (_secMonitor  = new (require('../../risk/securityMonitor'))())); }
-function ddosDet()            { return (_ddos        || (_ddos        = new (require('../../risk/ddosDetector'))())); }
-function geoMon()             { return (_geoMonitor  || (_geoMonitor  = new (require('../../risk/geolocationMonitor'))(_getPrisma()))); }
-function contentMod()         { return (_contentMod  || (_contentMod  = new (require('../../risk/contentModerator'))())); }
-function compliance()         { return (_compliance  || (_compliance  = new (require('../../risk/complianceMonitor'))(_getPrisma()))); }
-function scorer()             { return (_scorer      || (_scorer      = new (require('../../risk/riskScorer'))(_getPrisma()))); }
+function txMonitor(prisma)    { return (_txMonitor   || (_txMonitor   = new (require('../../../risk/transactionMonitor'))(prisma))); }
+function bruteForce()         { return (_bruteForce  || (_bruteForce  = new (require('../../../risk/bruteForceDetector'))(_getPrisma()))); }
+function deviceFp(prisma)     { return (_deviceFp    || (_deviceFp    = new (require('../../../risk/deviceFingerprint'))(prisma))); }
+function fraudDet(prisma)     { return (_fraudDetector || (_fraudDetector = new (require('../../../risk/fraudDetector'))(prisma))); }
+function botDet()             { return (_botDetector || (_botDetector = new (require('../../../risk/botDetector'))())); }
+function secMon()             { return (_secMonitor  || (_secMonitor  = new (require('../../../risk/securityMonitor'))())); }
+function ddosDet()            { return (_ddos        || (_ddos        = new (require('../../../risk/ddosDetector'))())); }
+function geoMon()             { return (_geoMonitor  || (_geoMonitor  = new (require('../../../risk/geolocationMonitor'))(_getPrisma()))); }
+function contentMod()         { return (_contentMod  || (_contentMod  = new (require('../../../risk/contentModerator'))())); }
+function compliance()         { return (_compliance  || (_compliance  = new (require('../../../risk/complianceMonitor'))(_getPrisma()))); }
+function scorer()             { return (_scorer      || (_scorer      = new (require('../../../risk/riskScorer'))(_getPrisma()))); }
 
 // ── Public API ───────────────────────────────────────────────────────────────
 

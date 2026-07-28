@@ -21,8 +21,8 @@
  *   baseAmount, rate, status, createdAt
  */
 const crypto        = require('crypto');
-const logger        = require('./logger');
-const ConfigService = require('./configService');
+const logger        = require('../logger');
+const ConfigService = require('../configService');
 const auditService  = require('./auditService');
 
 // Default commission rates per level (fallback if not configured in ProjectConfig)

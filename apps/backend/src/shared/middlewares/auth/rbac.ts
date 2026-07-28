@@ -1,5 +1,5 @@
 const { ADMIN_ROLES } = require('@lkvip/constants');
-const { forbidden }   = require('../utils/response');
+const { forbidden }   = require('../../utils/network/response');
 
 const ADMIN_ROLE_SET = new Set(ADMIN_ROLES);
 

@@ -16,7 +16,7 @@
  *   if (!result.safe) return error(res, 'Nội dung không phù hợp');
  */
 const https  = require('https');
-const logger = require('./logger');
+const logger = require('../logger');
 
 const PERSPECTIVE_KEY = process.env.PERSPECTIVE_API_KEY || '';
 const PERSPECTIVE_URL = 'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze';

@@ -329,6 +329,43 @@ export interface ShopOrder {
   item?:     Pick<ShopItem, 'title' | 'pointsCost'>;
 }
 
+// ── SavingsVault ───────────────────────────────────────────────────────────────
+export interface SavingsVaultProduct {
+  id:           string;
+  title:        string;
+  description?: string;
+  interestRate: number | string;
+  days:         number;
+  minAmount:    number | string;
+  maxAmount?:   number | string;
+  stars?:       number;
+  status:       string;
+}
+
+export interface SavingsVaultInvestment {
+  id:          string;
+  productId:   string;
+  amount:      number | string;
+  status:      'active' | 'completed' | 'cancelled' | string;
+  createdAt:   string;
+  endDate:     string;
+  product?:    Pick<SavingsVaultProduct, 'title' | 'interestRate'>;
+}
+
+// ── News ───────────────────────────────────────────────────────────────────────
+export interface NewsItem {
+  id:        string;
+  title:     string;
+  slug:      string;
+  excerpt?:  string;
+  /** Full content of the article (may be HTML). Alias: `summary` for back-compat */
+  content?:  string;
+  summary?:  string;
+  image?:    string;
+  author?:   string;
+  createdAt: string;
+}
+
 // ── Watchlist ──────────────────────────────────────────────────────────────────
 export interface WatchlistItem {
   id:       string;

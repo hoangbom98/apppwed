@@ -24,7 +24,7 @@
  * for role permissions if request volume justifies it (add to TODO).
  */
 
-const { forbidden } = require('../utils/response');
+const { forbidden } = require('../../utils/network/response');
 
 /**
  * Check if a user-held permission satisfies the required permission.

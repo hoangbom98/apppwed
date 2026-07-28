@@ -13,7 +13,7 @@
  * NOTE: Uses the shared redis singleton (src/config/redis) instead of creating
  * a dedicated ioredis client, so the process only maintains one Redis connection.
  */
-const redis  = require('../../config/redis');
+const redis  = require('../../../config/redis');
 const logger = require('./logger');
 
 // ── Cache TTLs (seconds) ──────────────────────────────────────────────────────

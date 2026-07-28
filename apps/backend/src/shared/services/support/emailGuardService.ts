@@ -14,8 +14,8 @@
  *   if (check.blocked) return error(res, check.reason, 400);
  */
 const https  = require('https');
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days per domain
 

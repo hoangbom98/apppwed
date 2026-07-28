@@ -2,13 +2,21 @@
 // ESLint v9 flat config for shared-ui React components library
 
 import js from '@eslint/js';
+import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
+      parser: tsParser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
       parserOptions: {
+        project: './tsconfig.json',
         ecmaVersion: 2022,
         sourceType: 'module',
         ecmaFeatures: { jsx: true },

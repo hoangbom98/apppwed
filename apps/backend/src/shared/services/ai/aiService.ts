@@ -13,8 +13,8 @@
  */
 const https  = require('https');
 const crypto = require('crypto');
-const logger = require('./logger');
-const cache  = require('./cacheService');
+const logger = require('../logger');
+const cache  = require('../cacheService');
 
 // ── Config ────────────────────────────────────────────────────────────────
 const DEEPSEEK_KEY     = process.env.DEEPSEEK_API_KEY || '';

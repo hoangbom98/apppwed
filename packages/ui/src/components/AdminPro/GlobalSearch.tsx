@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Input } from 'antd';
 import { Search } from 'lucide-react';
-import { useHotkeys } from 'react-hotkeys-hook';
 
 export const GlobalSearch: React.FC<{ onSearch: (keyword: string) => void }> = ({ onSearch }) => {
   const [open, setOpen] = useState(false);
 
-  useHotkeys('ctrl+k, command+k', () => setOpen(true), { preventDefault: true });
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen(prev => !prev);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   return (
     <>
