@@ -1,0 +1,12 @@
+{
+  "name": "@lkvip/config",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    "./eslint": "./src/eslint.js",
+    "./vitest": "./src/vitest.js",
+    "./tsconfig": "./src/tsconfig.json"
+  }
+}

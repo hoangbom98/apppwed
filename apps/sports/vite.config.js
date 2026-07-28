@@ -58,7 +58,6 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
-            '@ui/index': path.resolve(__dirname, '../../packages/ui/src/index.ts'),
             '@ui': path.resolve(__dirname, '../../packages/ui/src'),
             '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
         },

@@ -83,3 +83,4 @@ onlyBuiltDependencies:
   - prisma
   - protobufjs
   - sharp
+  - 'packages/config'

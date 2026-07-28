@@ -60,7 +60,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
             '@ui': path.resolve(__dirname, '../../packages/ui/src'),
             '@lkvip/types': path.resolve(__dirname, '../../packages/types/src'),
-            '@lkvip/constants': path.resolve(__dirname, '../../packages/constants/src'),
+            '@lkvip/constants': path.resolve(__dirname, '../../packages/constants/dist'),
         },
         dedupe: ['react', 'react-dom', 'react-router-dom'],
     },

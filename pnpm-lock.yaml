@@ -538,6 +538,9 @@ importers:
       '@capacitor/status-bar':
         specifier: 'catalog:'
         version: 7.0.6(@capacitor/core@7.6.8)
+      '@lkvip/config':
+        specifier: workspace:^
+        version: link:../../packages/config
       '@lkvip/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -1242,6 +1245,8 @@ importers:
       typescript:
         specifier: ~6.0.2
         version: 6.0.3
+
+  packages/config: {}
 
   packages/constants:
     dependencies:
