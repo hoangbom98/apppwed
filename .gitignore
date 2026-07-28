@@ -78,9 +78,20 @@ trading-old/
 *-cleanup-plan.md
 *-guide-draft.md
 
-# --- Capacitor / Mobile ---
+# --- Capacitor / Mobile (apps/mobile — Capacitor wrapper) ---
 android/
 ios/
+
+# --- Android Native (apps/mobile-native — Kotlin) ---
+apps/mobile-native/.gradle/
+apps/mobile-native/local.properties
+apps/mobile-native/app/build/
+apps/mobile-native/captures/
+apps/mobile-native/.cxx/
+apps/mobile-native/.externalNativeBuild/
+apps/mobile-native/*.jks
+apps/mobile-native/*.keystore
+apps/mobile-native/keystore.properties
 
 # --- Large media files ---
 apps/hub/public/assets/videos/

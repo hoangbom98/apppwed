@@ -1,18 +1,15 @@
-// @ts-nocheck
-'use strict';
-/**
- * GoPayAdapter — GoPay e-wallet gateway (redirect + QR flow).
- *
- * API flow:
- *   POST {endpoint}/pay    → returns { trade_no, pay_url }
- *   Webhook: POST /api/payment/webhook/gopay
- *   Status:  GET  {endpoint}/query/:trade_no
- */
-const BasePaymentAdapter = require('../BasePaymentAdapter');
-const crypto = require('crypto');
+import { BasePaymentAdapter } from '../BasePaymentAdapter';
+import { DepositOrder, PaymentInstructions, VerifyResult, WithdrawResult, StatusResult } from '../types';
+import axios from 'axios';
+import crypto from 'crypto';
 
-class GoPayAdapter extends BasePaymentAdapter {
-  constructor(gateway, prisma) {
+export class GoPayAdapter extends BasePaymentAdapter {
+  private appId: string;
+  private secretKey: string;
+  private endpoint: string;
+  private merchantId: string;
+
+  constructor(gateway: any, prisma: any) {
     super(gateway, prisma);
     this.appId       = this.cfg.appId       ?? '';
     this.secretKey   = this.cfg.secretKey   ?? '';
@@ -20,13 +17,8 @@ class GoPayAdapter extends BasePaymentAdapter {
     this.merchantId  = this.cfg.merchantId  ?? '';
   }
 
-  get _axios() {
-    if (!this.__axios) this.__axios = require('axios');
-    return this.__axios;
-  }
-
   // ── HMAC-SHA256 signature ───────────────────────────────────────────────────
-  _sign(params) {
+  private _sign(params: Record<string, any>): string {
     const sorted = Object.keys(params).sort()
       .filter(k => k !== 'sign')
       .map(k => `${k}=${params[k]}`)
@@ -34,16 +26,16 @@ class GoPayAdapter extends BasePaymentAdapter {
     return crypto.createHmac('sha256', this.secretKey).update(sorted).digest('hex');
   }
 
-  _verify(params, sign) {
+  private _verify(params: Record<string, any>, sign: string): boolean {
     return this._sign(params) === sign;
   }
 
   // ── createDeposit ──────────────────────────────────────────────────────────
-  async createDeposit(order) {
+  async createDeposit(order: DepositOrder): Promise<PaymentInstructions> {
     this.validateAmount(Number(order.amount));
 
     const callbackUrl = `${process.env.API_BASE_URL ?? 'http://localhost:5000'}/api/payment/webhook/gopay`;
-    const payload = {
+    const payload: Record<string, any> = {
       app_id:       this.appId,
       merchant_id:  this.merchantId,
       out_trade_no: order.id,
@@ -55,7 +47,7 @@ class GoPayAdapter extends BasePaymentAdapter {
     };
     payload.sign = this._sign(payload);
 
-    const response = await this._axios.post(`${this.endpoint}/pay`, payload, {
+    const response = await axios.post(`${this.endpoint}/pay`, payload, {
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -71,12 +63,12 @@ class GoPayAdapter extends BasePaymentAdapter {
   }
 
   // ── verifyPayment (webhook) ────────────────────────────────────────────────
-  async verifyPayment(payload, _sig) {
+  async verifyPayment(payload: any, _sig?: string): Promise<VerifyResult> {
     const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
     const { sign, ...rest } = data;
 
     if (sign && !this._verify(rest, sign)) {
-      return { success: false, error: 'Invalid GoPay signature' };
+      return { success: false, amount: 0, txId: '', orderId: null };
     }
 
     const success = ['paid', 'success', 'completed', 'trade_success'].includes(
@@ -92,10 +84,10 @@ class GoPayAdapter extends BasePaymentAdapter {
   }
 
   // ── processWithdraw ────────────────────────────────────────────────────────
-  async processWithdraw(request) {
+  async processWithdraw(request: any): Promise<WithdrawResult> {
     this.validateAmount(Number(request.amount));
 
-    const payload = {
+    const payload: Record<string, any> = {
       app_id:      this.appId,
       merchant_id: this.merchantId,
       order_id:    request.id,
@@ -106,20 +98,20 @@ class GoPayAdapter extends BasePaymentAdapter {
     };
     payload.sign = this._sign(payload);
 
-    const response = await this._axios.post(`${this.endpoint}/payout`, payload, {
+    const response = await axios.post(`${this.endpoint}/payout`, payload, {
       headers: { 'Content-Type': 'application/json' },
     });
 
     return {
       success: response.data?.success ?? true,
-      txId:    response.data?.trade_no ?? null,
+      error: response.data?.success ? undefined : 'Payout failed'
     };
   }
 
   // ── checkStatus ────────────────────────────────────────────────────────────
-  async checkStatus(transactionId) {
+  async checkStatus(transactionId: string): Promise<StatusResult> {
     try {
-      const res = await this._axios.get(`${this.endpoint}/query/${transactionId}`, {
+      const res = await axios.get(`${this.endpoint}/query/${transactionId}`, {
         headers: { 'X-App-Id': this.appId },
       });
       return { status: res.data.trade_status ?? 'unknown', txId: transactionId };
@@ -128,5 +120,3 @@ class GoPayAdapter extends BasePaymentAdapter {
     }
   }
 }
-
-module.exports = GoPayAdapter;

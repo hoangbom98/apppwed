@@ -1,101 +1,139 @@
-# @lkvip/mobile — Capacitor Mobile App
+# LKVIP Mobile Strategy
 
-Wrapper Capacitor cho **LKVIP Admin Dashboard** — biến PWA thành app native iOS và Android.
+LKVIP có **2 track mobile song song**:
 
-## Cấu trúc
+| | `apps/mobile/` | `apps/mobile-native/` |
+|---|---|---|
+| **Loại** | Capacitor PWA wrapper | Android native (Kotlin) |
+| **Công nghệ** | TypeScript + Capacitor v7 | Kotlin + Jetpack Compose |
+| **Content** | Wrap `admin-dashboard` SPA | App độc lập với UI riêng |
+| **Build** | `pnpm build` → `cap sync` | `./gradlew assembleDebug` |
+| **Target** | Admin staff (iOS + Android) | End users (Android trước) |
+| **pnpm workspace** | ✅ `@lkvip/mobile` | ❌ (Gradle project) |
+| **CI** | `firebase-distribute-android.yml` | `android-native-ci.yml` |
 
-```
-packages/mobile/
-├── src/
-│   └── index.ts          # Capacitor bridge entry (back button, deep link, status bar)
-├── ios/                  # Tự sinh bởi `cap add ios` (không commit vào git)
-├── android/              # Tự sinh bởi `cap add android` (không commit vào git)
-├── capacitor.config.ts   # Cấu hình Capacitor
-├── package.json
-└── tsconfig.json
-```
+---
 
-## Cài đặt ban đầu
+## Track 1: Capacitor (`apps/mobile/`)
+
+Biến **Admin Dashboard** PWA thành app native cho iOS và Android.
+Dùng cho nhân viên vận hành, không phải end-user.
+
+→ Xem chi tiết: [`apps/mobile/README.md`](../../apps/mobile/) *(via `docs/mobile/README.md`)*
+
+### Quick start
 
 ```bash
-cd packages/mobile
+cd apps/mobile
 
-# Cài dependencies (Capacitor CLI + runtime)
+# Cài dependencies
 pnpm install
 
-# Thêm platform (chỉ làm 1 lần)
-pnpm run add:ios        # Cần macOS + Xcode
-pnpm run add:android    # Cần Android Studio
+# Dev với livereload (trỏ vào Vite dev server)
+# 1. Bỏ comment server.url trong capacitor.config.ts
+# 2. Chạy admin dev server:
+pnpm --filter @lkvip/admin run dev
+
+# Sync và mở Android Studio
+pnpm run sync:android
+pnpm run open:android
 ```
 
-## Quy trình phát triển hàng ngày
+### Build pipeline
 
-### Development (livereload từ Vite dev server)
+```
+pnpm build:admin (Vite)
+       │
+       ▼
+apps/admin-dashboard/dist/
+       │
+       ▼
+cap sync android  ←── capacitor.config.ts: webDir = '../admin-dashboard/dist'
+       │
+       ▼
+apps/mobile/android/  (Gradle project, git-ignored)
+       │
+       ▼
+./gradlew assembleDebug  ──→  app-debug.apk
+```
 
-1. Chỉnh `capacitor.config.ts` — bỏ comment `server.url` và trỏ đến IP máy bạn:
-   ```ts
-   server: {
-     url: 'http://192.168.1.x:5180',
-     cleartext: true,
-   }
-   ```
-2. Chạy dev server: `pnpm --filter @lkvip/admin run dev`
-3. Sync và mở simulator:
-   ```bash
-   pnpm run sync
-   pnpm run open:ios     # Xcode
-   pnpm run open:android # Android Studio
-   ```
+---
 
-### Production build
+## Track 2: Native (`apps/mobile-native/`)
+
+Ứng dụng Android native viết bằng Kotlin + Jetpack Compose dành cho **end users**.
+Giao tiếp trực tiếp với LKVIP backend qua Retrofit REST client.
+
+→ Xem chi tiết: [`apps/mobile-native/README.md`](../../apps/mobile-native/README.md)
+
+### Quick start
 
 ```bash
-# Từ root monorepo
-pnpm run build:mobile
-# Hoặc từ packages/mobile
-pnpm run build
+cd apps/mobile-native
+
+# Copy và điền local.properties
+cp local.properties.example local.properties
+# Điền sdk.dir=/path/to/Android/Sdk
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Chạy unit tests
+./gradlew test
 ```
 
-Quy trình `build`:
-1. Build admin-dashboard → `frontend/admin-dashboard/dist/`
-2. `cap sync` — copy dist vào ios/ và android/
-3. Mở Xcode / Android Studio để archive và upload
+### API connection
 
-## Plugin đã cài
+Android emulator → localhost: dùng `http://10.0.2.2:5000/api` (alias `127.0.0.1` của máy host).
 
-| Plugin | Mô tả |
-|--------|-------|
-| `@capacitor/core` | Capacitor core runtime |
-| `@capacitor/app` | App lifecycle, deep links |
-| `@capacitor/status-bar` | Điều chỉnh thanh trạng thái |
-| `@capacitor/splash-screen` | Splash screen |
-| `@capacitor/keyboard` | Bàn phím native |
+---
 
-## Plugin cần cài thêm (tuỳ nhu cầu)
+## Quan hệ giữa 2 track
 
-```bash
-# Push notifications
-pnpm add @capacitor/push-notifications
-
-# Bluetooth LE (IoT)
-pnpm add @capacitor-community/bluetooth-le
-
-# NFC
-pnpm add @capacitor-community/nfc
-
-# Barcode Scanner
-pnpm add @capacitor-community/barcode-scanner
-
-# Biometric Auth
-pnpm add @aparajita/capacitor-biometric-auth
+```
+LKVIP Backend (apps/backend)
+    ├── REST API (/api/*)
+    │       │
+    │       ├──── Capacitor app (apps/mobile/) ─── admin-dashboard PWA
+    │       │           Auth: JWT cookie → HTTP header
+    │       │
+    │       └──── Native app (apps/mobile-native/) ─── Kotlin Retrofit
+    │                   Auth: JWT → EncryptedSharedPreferences
+    │
+    └── WebSocket
+            └──── Native app (Socket.IO → OkHttp WS)
 ```
 
-## Deep Link scheme
+Cả 2 track dùng **cùng JWT secret** và **cùng API endpoints** — không có API riêng cho mobile.
 
-URL scheme: `lkvip.admin://`
+---
 
-Ví dụ: `lkvip.admin:///trade/kyc` → điều hướng đến trang KYC trong app.
+## CI/CD
 
-Cấu hình trong:
-- iOS: `ios/App/App/Info.plist` → `CFBundleURLSchemes`
-- Android: `android/app/src/main/AndroidManifest.xml` → `intent-filter`
+| Workflow | Trigger | Output |
+|---|---|---|
+| `firebase-distribute-android.yml` | Push `develop` → `apps/{hub,game,trading,dating,sports,mobile}/**` | APK debug → Firebase App Distribution |
+| `android-native-ci.yml` | Push `develop` → `apps/mobile-native/**` | Lint + Tests + APK → Firebase App Distribution |
+
+---
+
+## GitHub Secrets cần thiết
+
+```
+# Dùng chung cho cả 2 track
+FIREBASE_SERVICE_ACCOUNT         # JSON service account
+
+# Track 1 (Capacitor — mỗi SPA 1 App ID)
+FIREBASE_APP_ID_HUB_ANDROID
+FIREBASE_APP_ID_GAME_ANDROID
+FIREBASE_APP_ID_TRADE_ANDROID
+FIREBASE_APP_ID_DATING_ANDROID
+FIREBASE_APP_ID_SPORTS_ANDROID
+
+# Track 2 (Native)
+FIREBASE_APP_ID_NATIVE
+ANDROID_KEYSTORE_BASE64           # Release signing (base64 .jks)
+ANDROID_KEY_ALIAS
+ANDROID_KEY_PASSWORD
+ANDROID_STORE_PASSWORD
+```

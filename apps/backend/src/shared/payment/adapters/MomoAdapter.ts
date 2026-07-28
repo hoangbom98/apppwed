@@ -1,14 +1,13 @@
-'use strict';
-/**
- * MomoAdapter — MoMo e-wallet payment gateway (redirect / deep-link flow).
- *
- * Wraps the existing paymentService.createMomoPayment() so all MoMo-specific
- * signing/request logic stays in one place.
- */
-const BasePaymentAdapter = require('../BasePaymentAdapter');
+import { BasePaymentAdapter } from '../BasePaymentAdapter';
+import { DepositOrder, PaymentInstructions, VerifyResult, WithdrawResult, StatusResult } from '../types';
 
-class MomoAdapter extends BasePaymentAdapter {
-  constructor(gateway, prisma) {
+export class MomoAdapter extends BasePaymentAdapter {
+  private partnerCode: string;
+  private accessKey: string;
+  private secretKey: string;
+  private endpoint: string;
+
+  constructor(gateway: any, prisma: any) {
     super(gateway, prisma);
     this.partnerCode = this.cfg.partnerCode ?? process.env.MOMO_PARTNER_CODE ?? '';
     this.accessKey   = this.cfg.accessKey   ?? process.env.MOMO_ACCESS_KEY   ?? '';
@@ -16,11 +15,10 @@ class MomoAdapter extends BasePaymentAdapter {
     this.endpoint    = this.cfg.endpoint    ?? process.env.MOMO_ENDPOINT     ?? 'https://payment.momo.vn/v2/gateway/api/create';
   }
 
-  // ── createDeposit ─────────────────────────────────────────────────────────
-  async createDeposit(order) {
+  async createDeposit(order: DepositOrder): Promise<PaymentInstructions> {
     this.validateAmount(Number(order.amount));
 
-    // Delegate to paymentService (existing MoMo integration)
+    // Delegate to paymentService
     const paymentService = require('../../services/paymentService');
     const result = await paymentService.createMomoPayment(
       order.id,
@@ -38,9 +36,7 @@ class MomoAdapter extends BasePaymentAdapter {
     });
   }
 
-  // ── verifyPayment (webhook) ───────────────────────────────────────────────
-  async verifyPayment(payload, _sig) {
-    // MoMo sends: { orderId, amount, resultCode, transId, message }
+  async verifyPayment(payload: any, _sig?: string): Promise<VerifyResult> {
     const { orderId, amount, resultCode, transId } = payload;
     const success = resultCode === 0 || resultCode === '0';
 
@@ -52,19 +48,14 @@ class MomoAdapter extends BasePaymentAdapter {
     };
   }
 
-  // ── processWithdraw ───────────────────────────────────────────────────────
-  async processWithdraw(_request) {
-    // MoMo disburse API (requires separate merchant agreement)
+  async processWithdraw(_request: any): Promise<WithdrawResult> {
     return {
       success: false,
       error:   'Withdraw qua MoMo chưa được kích hoạt. Liên hệ admin.',
     };
   }
 
-  // ── checkStatus ───────────────────────────────────────────────────────────
-  async checkStatus(transactionId) {
+  async checkStatus(transactionId: string): Promise<StatusResult> {
     return { status: 'unknown', txId: transactionId, note: 'MoMo status check via IPN only' };
   }
 }
-
-module.exports = MomoAdapter;

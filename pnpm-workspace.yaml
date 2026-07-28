@@ -84,3 +84,4 @@ onlyBuiltDependencies:
   - protobufjs
   - sharp
   - 'packages/config'
+  - 'packages/api-client'

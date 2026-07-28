@@ -1,40 +1,40 @@
-// PM2 Ecosystem Config — root-level convenience wrapper
-// ─────────────────────────────────────────────────────────────────────────────
-// Domain  : tc-gaming.live
-// Deploy  : /var/LKVIP  (isolated — do NOT change cwd to a shared path)
-// Port    : 5000 (127.0.0.1 only — Nginx proxies public traffic)
-//
-// Start from repo root:
-//   pm2 start config/pm2/ecosystem.config.js --env production
-//   pm2 save && pm2 startup
-//
-// The canonical production PM2 config lives at:
-//   apps/backend/ecosystem.config.js
-//
-// Backend entry point after `pnpm run build`:
-//   apps/backend/dist/server.js
-//
-// Reload (zero-downtime):
-//   pm2 reload lkvip-api --update-env
-// ─────────────────────────────────────────────────────────────────────────────
-
 'use strict';
+
+/**
+ * PM2 Ecosystem Config — LKVIP GROUP @ tc-gaming.live
+ * 
+ * Centralized PM2 configuration for all LKVIP services.
+ * 
+ * Deploy path : /var/LKVIP
+ * Public API  : https://api.tc-gaming.live  (Nginx → :5000)
+ * Internal    : 127.0.0.1:5000 only — NOT exposed to public directly
+ *
+ * Usage from repo root:
+ *   pm2 start config/pm2/ecosystem.config.js --env production
+ *   pm2 reload lkvip-api --update-env   ← zero-downtime
+ */
 
 module.exports = {
   apps: [
     {
-      name:        'lkvip-api',
-      // Compiled output of server.ts  (run: pnpm --filter lkvip-backend run build)
-      script:      './apps/backend/dist/server.js',
-      cwd:         '/var/LKVIP',      // ← always absolute; isolated from other projects
-      instances:   process.env.NODE_ENV === 'production' ? 'max' : 1,
-      exec_mode:   process.env.NODE_ENV === 'production' ? 'cluster' : 'fork',
-      watch:       false,
-      max_memory_restart: '400M',     // per instance
+      name:               'lkvip-api',
+      script:             'apps/backend/dist/server.js',
+      cwd:                '/var/LKVIP',
+      instances:          'max',
+      exec_mode:          'cluster',
+      watch:              false,
+      max_memory_restart: '400M',
+      kill_timeout:       30000,
       restart_delay:      3000,
       max_restarts:       10,
       min_uptime:         '10s',
-      kill_timeout:       30000,      // graceful shutdown for Socket.IO
+      
+      // Centralized logs
+      out_file:           '/var/LKVIP/data/logs/lkvip-api-out.log',
+      err_file:           '/var/LKVIP/data/logs/lkvip-api-err.log',
+      log_date_format:    'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs:         true,
+      time:               true,
 
       env: {
         NODE_ENV: 'development',
@@ -42,17 +42,10 @@ module.exports = {
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT:     5000,               // ← internal only — Nginx → 127.0.0.1:5000
+        PORT:     5000,
         APP_URL:  'https://api.tc-gaming.live',
         CORS_ORIGINS: 'https://tc-gaming.live,https://www.tc-gaming.live,https://hub.tc-gaming.live,https://trade.tc-gaming.live,https://sports.tc-gaming.live,https://game.tc-gaming.live,https://admin.tc-gaming.live',
       },
-
-      // Logs stored inside this project's directory only
-      out_file:        '/var/LKVIP/logs/lkvip-api-out.log',
-      err_file:        '/var/LKVIP/logs/lkvip-api-err.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs:      true,
-      time:            true,
     },
   ],
 };

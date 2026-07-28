@@ -6,6 +6,13 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url      = env("HUB_DATABASE_URL")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
 }
 
 // ===== CORE TABLES =====
@@ -26,8 +33,6 @@ model Project {
   
   @@index([slug])
 }
-
-enum ProjectStatus { ACTIVE INACTIVE MAINTENANCE }
 
 model User {
   id              String   @id @default(cuid())

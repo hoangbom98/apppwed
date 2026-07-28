@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
+      "env": {
+        "CLOUDFLARE_ACCOUNT_ID": "REPLACE_WITH_YOUR_ACCOUNT_ID",
+        "CLOUDFLARE_API_TOKEN": "REPLACE_WITH_YOUR_API_TOKEN"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
+      "env": {
+        "SUPABASE_URL": "REPLACE_WITH_https://xxxx.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "REPLACE_WITH_service_role_key"
+      }
+    }
+  }
+}

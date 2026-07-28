@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
   appName: 'LKVIP Admin',
 
   // Trỏ đến thư mục dist của admin-dashboard (build output)
-  webDir: '../../frontend/admin-dashboard/dist',
+  webDir: '../admin-dashboard/dist',
 
   // Tắt bundled webruntime để dùng WebView gốc của thiết bị (nhỏ hơn)
   bundledWebRuntime: false,
