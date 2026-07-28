@@ -10,19 +10,16 @@ export interface AuthUser {
   email:           string;
   balance:         number;
   role:            string;
-  // common optional fields
   fullName?:       string;
-  full_name?:      string;    // snake_case alias
+  full_name?:      string;
   phone?:          string;
   avatar?:         string;
   referralCode?:   string;
-  referral_code?:  string;    // snake_case alias
-  // VIP / level system
+  referral_code?:  string;
   vipLevel?:       number;
-  vip_level?:      number;    // snake_case alias
+  vip_level?:      number;
   level?:          number;
   exp?:            number;
-  // Dating-specific fields
   has_onboarded?:  boolean;
   is_verified?:    boolean;
   bio?:            string;
@@ -30,79 +27,116 @@ export interface AuthUser {
   city?:           string;
   coins?:          number;
   diamonds?:       number;
-  // Sports / game extras
   frozen?:         number;
-  [key: string]:   any;       // allow app-specific extension without casts
+  [key: string]:   any;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Xóa token khỏi localStorage VÀ xóa cookie phía client (fallback) */
+function _clearTokenStorage() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  sessionStorage.removeItem('refresh_token');
+  // Xóa cookie access_token / refresh_token (chỉ hoạt động với cookie không httpOnly)
+  // httpOnly cookies được xóa bởi backend qua clearAuthCookies() khi gọi /auth/logout
+  document.cookie = 'access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+}
+
+/** Lưu tokens vào localStorage */
+function _saveTokens(accessToken: string, refreshToken?: string) {
+  localStorage.setItem('token', accessToken);
+  localStorage.setItem('access_token', accessToken);
+  if (refreshToken) {
+    localStorage.setItem('refresh_token', refreshToken);
+  }
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export interface AuthState {
-  user:      AuthUser | null;
-  token:     string | null;
-  isLoggedIn: boolean;
-  isLoading:  boolean;
+  user:         AuthUser | null;
+  token:        string | null;
+  refreshToken: string | null;
+  isLoggedIn:   boolean;
+  isLoading:    boolean;
 
-  // Two-arg login (user, token) — kept for hub compat
-  login:     (userOrData: AuthUser | Record<string, any>, token?: string) => Promise<void>;
-  logout:    () => void;
-  register:  (data: Record<string, any>) => Promise<void>;
+  login:        (userOrData: AuthUser | Record<string, any>, token?: string) => Promise<void>;
+  logout:       () => Promise<void>;
+  register:     (data: Record<string, any>) => Promise<void>;
   fetchProfile: () => Promise<void>;
-  setUser:   (user: Partial<AuthUser>) => void;
+  setUser:      (user: Partial<AuthUser>) => void;
 
-  // setAuth/clearAuth pattern (hub uses 3 args: user, accessToken, refreshToken)
-  setAuth:   (user: AuthUser, accessToken: string, refreshToken?: string) => void;
-  clearAuth: () => void;
+  // setAuth/clearAuth — hub & OAuth callbacks truyền đủ 3 tham số
+  setAuth:      (user: AuthUser, accessToken: string, refreshToken?: string) => void;
+  clearAuth:    () => void;
+
+  // OAuth social login callback — gọi sau khi backend redirect về frontend
+  // với query params: ?oauth=success&project=hub
+  handleOAuthCallback: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user:       null,
-  token:      localStorage.getItem('token'),
-  isLoggedIn: !!localStorage.getItem('token'),
-  isLoading:  false,
+  user:         null,
+  token:        localStorage.getItem('token') || localStorage.getItem('access_token'),
+  refreshToken: localStorage.getItem('refresh_token') || null,
+  isLoggedIn:   !!(localStorage.getItem('token') || localStorage.getItem('access_token')),
+  isLoading:    false,
 
+  // ── login ─────────────────────────────────────────────────────────────────
   login: async (userOrData, token) => {
-    // If called with (user, token) directly — hub/legacy usage
     if (token !== undefined) {
+      // Gọi trực tiếp với (user, token) — legacy/hub usage
       const u = userOrData as AuthUser;
-      localStorage.setItem('token', token);
+      _saveTokens(token);
       set({ user: u, token, isLoggedIn: true });
       return;
     }
-    // Called with form data — perform API login
     set({ isLoading: true });
     try {
       const res = await api.post('/game/auth/login', userOrData);
-      const { token: t, user: u } = res.data.data ?? res.data;
-      if (t) localStorage.setItem('token', t);
-      set({ user: u, token: t, isLoggedIn: true });
+      const d   = res.data?.data ?? res.data;
+      const t   = d?.access_token || d?.token || null;
+      const rt  = d?.refresh_token || null;
+      if (t) _saveTokens(t, rt ?? undefined);
+      set({ user: d?.user ?? d, token: t, refreshToken: rt, isLoggedIn: !!t });
     } finally {
       set({ isLoading: false });
     }
   },
 
-  logout: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null, isLoggedIn: false });
+  // ── logout — xóa token local + gọi backend để xóa httpOnly cookie ─────────
+  logout: async () => {
+    const rt = get().refreshToken;
+    try {
+      await api.post('/auth/logout', { refresh_token: rt ?? undefined });
+    } catch { /* ignore — always clear local state */ }
+    _clearTokenStorage();
+    set({ user: null, token: null, refreshToken: null, isLoggedIn: false });
   },
 
+  // ── register ──────────────────────────────────────────────────────────────
   register: async (data) => {
     set({ isLoading: true });
     try {
       const res = await api.post('/game/auth/register', data);
-      const { token: t, user: u } = res.data.data ?? res.data;
-      if (t) localStorage.setItem('token', t);
-      set({ user: u, token: t, isLoggedIn: !!t });
+      const d   = res.data?.data ?? res.data;
+      const t   = d?.access_token || d?.token || null;
+      const rt  = d?.refresh_token || null;
+      if (t) _saveTokens(t, rt ?? undefined);
+      set({ user: d?.user ?? d, token: t, refreshToken: rt, isLoggedIn: !!t });
     } finally {
       set({ isLoading: false });
     }
   },
 
+  // ── fetchProfile ──────────────────────────────────────────────────────────
   fetchProfile: async () => {
     try {
       const res = await api.get('/game/auth/me');
-      const u = res.data.data ?? res.data;
+      const u = res.data?.data ?? res.data;
       set({ user: u });
-    } catch { /* token expired — ignore, logout will handle */ }
+    } catch { /* token expired — logout will handle */ }
   },
 
   setUser: (partial) => {
@@ -110,13 +144,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (current) set({ user: { ...current, ...partial } });
   },
 
-  setAuth: (user, accessToken, _rt) => {
-    localStorage.setItem('token', accessToken);
-    set({ user, token: accessToken, isLoggedIn: true });
+  // ── setAuth — dùng sau khi login/register thành công (hub, OAuth) ─────────
+  setAuth: (user, accessToken, refreshToken) => {
+    _saveTokens(accessToken, refreshToken);
+    set({
+      user,
+      token:        accessToken,
+      refreshToken: refreshToken ?? get().refreshToken,
+      isLoggedIn:   true,
+    });
   },
+
   clearAuth: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null, isLoggedIn: false });
+    _clearTokenStorage();
+    set({ user: null, token: null, refreshToken: null, isLoggedIn: false });
+  },
+
+  // ── handleOAuthCallback ───────────────────────────────────────────────────
+  // Gọi khi frontend load lại sau OAuth redirect.
+  // Backend đã set cookies access_token + refresh_token (httpOnly).
+  // Frontend chỉ cần fetch /auth/me để lấy user info.
+  // Token được gửi qua cookie — withCredentials:true đảm bảo cookie kèm theo.
+  handleOAuthCallback: async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('oauth') !== 'success') return;
+
+    set({ isLoading: true });
+    try {
+      // Cookie đã được set bởi backend — gọi /me để lấy user
+      const res = await api.get('/auth/me');
+      const user = res.data?.data ?? res.data;
+      // Token trong cookie không accessible từ JS (httpOnly) → không lưu vào localStorage
+      // Auth sẽ hoạt động thuần qua cookie + withCredentials
+      set({ user, isLoggedIn: true });
+      // Xóa query params OAuth khỏi URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } catch {
+      set({ isLoggedIn: false });
+    } finally {
+      set({ isLoading: false });
+    }
   },
 }));
 
@@ -125,7 +192,6 @@ interface UIState {
   loading:        boolean;
   sideOpen:       boolean;
   theme:          'light' | 'dark';
-  // darkMode alias — used by game sub-project
   darkMode:       boolean;
   setLoading:     (v: boolean) => void;
   toggleSide:     () => void;
@@ -168,7 +234,7 @@ export const useWalletStore = create<WalletState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await api.get('/game/wallet/balance');
-      const { balance, frozen = 0 } = res.data.data ?? res.data;
+      const { balance, frozen = 0 } = res.data?.data ?? res.data;
       set({ balance: Number(balance) || 0, frozen: Number(frozen) || 0 });
     } catch { /* silently fail — keeps last known balance */ }
     finally { set({ isLoading: false }); }

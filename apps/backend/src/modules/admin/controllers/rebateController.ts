@@ -5,7 +5,7 @@
 'use strict';
 
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, paginate } = require('../../../shared/utils/response');
+const { success, error, paginate } = require('../../../shared/utils/network/response');
 
 const adminDb  = () => getPrismaClient('admin');
 const safe = async (fn) => { try { return await fn(); } catch { return null; } };

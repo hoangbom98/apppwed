@@ -15,8 +15,8 @@
  *   — NOT url/type/isPrivate
  * Like fields: senderId, receiverId — NOT toUserId/fromUserId
  */
-const { success, error } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── GET /dating/search ────────────────────────────────────────────────────────
 exports.search = async (req, res) => {

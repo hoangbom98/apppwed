@@ -1,4 +1,4 @@
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 exports.search = async (req, res) => {
   try {

@@ -8,7 +8,7 @@
  *   GET  /game/giftcode/history     — user: redemption history
  */
 
-const { success, error, badRequest } = require('../../../shared/utils/response');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
 const GiftCodeService = require('../services/giftCodeService');
 
 // ── POST /game/giftcode/redeem ────────────────────────────────────────────────

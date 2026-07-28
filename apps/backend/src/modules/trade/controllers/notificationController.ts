@@ -4,8 +4,8 @@
  * All IDs are CUIDs (strings) — never coerce with +id.
  * markRead includes userId guard to prevent IDOR.
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 exports.getNotifications = async (req, res) => {
   try {

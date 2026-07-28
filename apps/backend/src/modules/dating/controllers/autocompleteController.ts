@@ -10,7 +10,7 @@
  * Non-existent fields: isActive, displayName, nickname, age, city
  */
 
-const { ok, badRequest } = require('../../../shared/utils/response');
+const { ok, badRequest } = require('../../../shared/utils/network/response');
 
 async function searchUsers(prisma, q, limit) {
   const rows = await prisma.user.findMany({

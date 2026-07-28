@@ -8,7 +8,7 @@
 //   PATCH /api/admin/lottery/bets/:id/refund    — refund a bet
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, notFound, paginate } = require('../../../shared/utils/response');
+const { success, error, notFound, paginate } = require('../../../shared/utils/network/response');
 const emit = require('../../../shared/socket/projectEmitter');
 
 // ── Summary stats ────────────────────────────────────────────────────────────

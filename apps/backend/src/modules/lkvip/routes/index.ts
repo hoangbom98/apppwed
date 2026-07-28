@@ -1,5 +1,5 @@
 const router         = require('express').Router();
-const auth           = require('../../../shared/middlewares/auth');
+const auth           = require('../../../shared/middlewares/auth/auth');
 const depositCtrl    = require('../controllers/depositController');
 
 // ── Sub-routes ───────────────────────────────────────────────────

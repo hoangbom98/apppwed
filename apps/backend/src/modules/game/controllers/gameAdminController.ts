@@ -4,8 +4,8 @@
  * Handles admin endpoints for: game rounds (sessions), game providers.
  * All routes require auth + adminGuard.
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { ok, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── Game Rounds / Sessions ────────────────────────────────────────
 

@@ -6,7 +6,7 @@
  * DB model: Story (id = CUID string)
  * NOTE: Schema has no StoryView model — view count is tracked via Story.views column.
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
+const { ok, created, error, notFound } = require('../../../shared/utils/network/response');
 const StoryService = require('../services/storyService');
 
 exports.getStories = async (req, res) => {

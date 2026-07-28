@@ -1,0 +1,103 @@
+:root {
+  /* ── Spacing ── */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+
+  /* ── Admin UI Tokens ── */
+  /* Border radius used on all admin cards, modals, and containers */
+  --lkvip-radius-sm:  6px;
+  --lkvip-radius:     10px;
+  --lkvip-radius-lg:  14px;
+
+  /* Module card minimum height — prevents empty gaps in the grid */
+  --lkvip-card-min-h: 180px;
+
+  /* Minimum width before a module card breaks to a new row */
+  --lkvip-module-min-w: 280px;
+
+  /* Consistent inner padding for module cards */
+  --lkvip-card-padding: 20px;
+
+  /* Z-index ladder — used by modals, dropdowns, tooltips, toasts */
+  --z-dropdown: 1000;
+  --z-sticky:   1020;
+  --z-modal:    1050;
+  --z-tooltip:  1070;
+  --z-toast:    9999;
+
+  /* Typography scale */
+  --lkvip-font-base:  14px;
+  --lkvip-font-sm:    12px;
+  --lkvip-font-lg:    16px;
+  --lkvip-line-height: 1.6;
+
+  /* ── Game Colors (BMW M inspired) ── */
+  --color-game-canvas: #000000;
+  --color-game-surface-card: #1a1a1a;
+  --color-game-m-blue: #0066b1;
+  --color-game-m-red: #e22718;
+  --color-game-text-ink: #ffffff;
+
+  /* ── Hub Colors (Meta inspired) ── */
+  --color-hub-cobalt: #0064e0;
+  --color-hub-canvas: #ffffff;
+  --color-hub-text-ink: #1c1e21;
+
+  /* ── Trade Colors (Binance inspired) ── */
+  --color-trade-yellow: #fcd535;
+  --color-trade-up: #0ecb81;
+  --color-trade-down: #f6465d;
+
+  /* ── Sports Colors (full token set) ── */
+  --color-sports-primary:        #00A651;
+  --color-sports-primary-dark:   #007A3C;
+  --color-sports-primary-light:  rgba(0,166,81,0.12);
+  --color-sports-accent:         #FFD700;
+  --color-sports-live:           #ef4444;
+  --color-sports-bg:             #0b0f0c;
+  --color-sports-bg-card:        #141a16;
+  --color-sports-bg-secondary:   #1a2420;
+  --color-sports-bg-elevated:    #1e2a24;
+  --color-sports-text:           #f0f4f0;
+  --color-sports-text-secondary: #8fa898;
+  --color-sports-text-muted:     #5a7060;
+  --color-sports-border:         #243028;
+  --color-sports-border-strong:  #2e3d35;
+  /* Alias (backward-compat) */
+  --color-sports-green: var(--color-sports-primary);
+
+  /* ── Dating Colors ── */
+  --color-dating-rose: #FF4D8A;
+}
+
+/* ── Admin safe-truncation utilities (usable anywhere via className) ── */
+.lkvip-line-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lkvip-line-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lkvip-line-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Touch-target minimum (WCAG 2.5.5) ── */
+.lkvip-touch {
+  min-height: 44px;
+  min-width:  44px;
+}

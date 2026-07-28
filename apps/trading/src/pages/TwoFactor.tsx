@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
-import { WarningOutlined, CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
+import { AlertTriangle, CheckCircle, Check } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface SetupData {
@@ -84,23 +84,23 @@ export default function TwoFactor() {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#1a1d27] rounded-2xl p-7 space-y-6 shadow-xl">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bn-bg-base)' }}>
+      <div className="w-full max-w-md rounded-2xl p-7 space-y-6 bn-surface">
 
         {/* Header */}
         <div>
-          <h1 className="text-xl font-bold text-white">Xác thực 2 lớp (2FA)</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <h1 className="text-xl font-bold" style={{ color: 'var(--bn-text-primary)' }}>Xác thực 2 lớp (2FA)</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--bn-text-secondary)' }}>
             Bảo vệ tài khoản giao dịch bằng Google Authenticator.
           </p>
         </div>
 
         {/* Status pill */}
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${is2FAEnabled ? 'bg-green-400' : 'bg-gray-600'}`} />
-          <span className="text-sm text-gray-300">
+          <span className="w-2 h-2 rounded-full" style={{ background: is2FAEnabled ? 'var(--bn-green)' : 'var(--bn-text-muted)' }} />
+          <span className="text-sm" style={{ color: 'var(--bn-text-secondary)' }}>
             Trạng thái:{' '}
-            <strong className={is2FAEnabled ? 'text-green-400' : 'text-red-400'}>
+            <strong style={{ color: is2FAEnabled ? 'var(--bn-green)' : 'var(--bn-red)' }}>
               {is2FAEnabled ? 'Đã bật' : 'Chưa bật'}
             </strong>
           </span>
@@ -111,25 +111,27 @@ export default function TwoFactor() {
           <div className="space-y-3">
             {!is2FAEnabled ? (
               <>
-                <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-4 text-sm text-yellow-300">
-                  <WarningOutlined style={{ marginRight: 6 }} />Yêu cầu: Tài khoản Trading <strong>phải bật 2FA</strong> để kích hoạt đầy đủ chức năng nạp/rút.
+                <div className="flex items-start gap-2 rounded-xl p-4 text-sm" style={{ background: 'var(--bn-yellow-muted)', border: '1px solid var(--bn-yellow-border)', color: 'var(--bn-yellow)' }}>
+                  <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
+                  <span>Yêu cầu: Tài khoản Trading <strong>phải bật 2FA</strong> để kích hoạt đầy đủ chức năng nạp/rút.</span>
                 </div>
                 <button
                   onClick={() => setupMutation.mutate()}
                   disabled={isPending}
-                  className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="w-full py-3 rounded-xl font-semibold transition-colors disabled:opacity-50 bn-btn-primary"
                 >
                   {isPending ? 'Đang khởi tạo…' : 'Bật xác thực 2 lớp'}
                 </button>
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-400">Nhập mã OTP từ Google Authenticator để tắt 2FA.</p>
+                <p className="text-sm" style={{ color: 'var(--bn-text-secondary)' }}>Nhập mã OTP từ Google Authenticator để tắt 2FA.</p>
                 <OtpInput value={token} onChange={setToken} disabled={isPending} />
                 <button
                   onClick={handleDisable}
                   disabled={isPending}
-                  className="w-full py-3 rounded-xl bg-red-700 text-white font-semibold hover:bg-red-800 transition-colors disabled:opacity-50"
+                  className="w-full py-3 rounded-xl text-white font-semibold transition-colors disabled:opacity-50"
+                  style={{ background: 'var(--bn-red)' }}
                 >
                   {isPending ? 'Đang xử lý…' : 'Tắt 2FA'}
                 </button>
@@ -141,7 +143,7 @@ export default function TwoFactor() {
         {/* ── STEP: setup — show QR code ── */}
         {step === 'setup' && setupData && (
           <div className="space-y-5">
-            <p className="text-sm text-gray-300">
+            <p className="text-sm" style={{ color: 'var(--bn-text-secondary)' }}>
               1. Mở <strong>Google Authenticator</strong> và quét mã QR bên dưới.<br />
               2. Nhập mã 6 chữ số từ app để xác nhận.
             </p>
@@ -152,9 +154,9 @@ export default function TwoFactor() {
                 alt="2FA QR Code"
                 className="w-48 h-48 rounded-xl bg-white p-2"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs break-all" style={{ color: 'var(--bn-text-muted)' }}>
                 Không quét được QR? Nhập thủ công:{' '}
-                <code className="text-gray-300 break-all">{setupData.secret}</code>
+                <code style={{ color: 'var(--bn-text-secondary)' }}>{setupData.secret}</code>
               </p>
             </div>
 
@@ -163,7 +165,7 @@ export default function TwoFactor() {
             <button
               onClick={handleEnable}
               disabled={isPending || token.length < 6}
-              className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="w-full py-3 rounded-xl font-semibold transition-colors disabled:opacity-50 bn-btn-primary"
             >
               {isPending ? 'Đang xác thực…' : 'Xác nhận & Bật 2FA'}
             </button>
@@ -173,35 +175,36 @@ export default function TwoFactor() {
         {/* ── STEP: done — show backup codes ── */}
         {step === 'done' && (
           <div className="space-y-4">
-            <div className="bg-green-900/20 border border-green-700/30 rounded-xl p-4 text-sm text-green-300">
-              <CheckCircleOutlined style={{ marginRight: 6 }} />2FA đã được bật thành công!
+            <div className="flex items-center gap-2 rounded-xl p-4 text-sm" style={{ background: 'var(--bn-green-muted)', border: '1px solid rgba(14,203,129,0.25)', color: 'var(--bn-green)' }}>
+              <CheckCircle size={15} className="flex-shrink-0" />2FA đã được bật thành công!
             </div>
 
             <div>
-              <p className="text-sm text-gray-300 font-medium mb-2">
+              <p className="text-sm font-medium mb-2" style={{ color: 'var(--bn-text-secondary)' }}>
                 Mã dự phòng (Backup Codes)
               </p>
-              <p className="text-xs text-gray-500 mb-3">
+              <p className="text-xs mb-3" style={{ color: 'var(--bn-text-muted)' }}>
                 Lưu các mã này ở nơi an toàn. Mỗi mã chỉ dùng được 1 lần khi mất điện thoại.
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {codes.map((c, i) => (
-                  <code key={i} className="text-xs font-mono bg-gray-800 rounded-lg px-3 py-2 text-gray-200 text-center tracking-widest">
+                  <code key={i} className="text-xs font-mono rounded-lg px-3 py-2 text-center tracking-widest" style={{ background: 'var(--bn-bg-elevated)', color: 'var(--bn-text-primary)' }}>
                     {c}
                   </code>
                 ))}
               </div>
               <button
                 onClick={copyBackupCodes}
-                className="mt-3 w-full py-2.5 rounded-xl bg-gray-700 text-white text-sm font-semibold hover:bg-gray-600 transition-colors"
+                className="mt-3 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                style={{ background: 'var(--bn-bg-elevated)', color: 'var(--bn-text-primary)', border: '1px solid var(--bn-border)' }}
               >
-                {copied ? <><CheckOutlined /> Đã sao chép</> : 'Sao chép tất cả mã'}
+                {copied ? <><Check size={13} className="inline mr-1" />Đã sao chép</> : 'Sao chép tất cả mã'}
               </button>
             </div>
 
             <button
               onClick={() => setStep('idle')}
-              className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+              className="w-full py-3 rounded-xl font-semibold transition-colors bn-btn-primary"
             >
               Hoàn tất
             </button>
@@ -210,7 +213,7 @@ export default function TwoFactor() {
 
         {/* Error banner */}
         {error && (
-          <p className="text-sm text-red-400 bg-red-900/20 border border-red-700/30 rounded-xl px-4 py-2.5">
+          <p className="text-sm rounded-xl px-4 py-2.5" style={{ color: 'var(--bn-red)', background: 'var(--bn-red-muted)', border: '1px solid rgba(246,70,93,0.25)' }}>
             {error}
           </p>
         )}
@@ -227,7 +230,7 @@ function OtpInput({ value, onChange, disabled }: {
 }) {
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-1">Mã OTP (6 chữ số)</label>
+      <label className="block text-sm mb-1" style={{ color: 'var(--bn-text-secondary)' }}>Mã OTP (6 chữ số)</label>
       <input
         type="text"
         inputMode="numeric"
@@ -236,7 +239,10 @@ function OtpInput({ value, onChange, disabled }: {
         onChange={e => onChange(e.target.value.replace(/\D/g, '').slice(0, 6))}
         disabled={disabled}
         placeholder="000000"
-        className="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white text-center text-2xl tracking-[0.5em] font-mono focus:border-blue-500 focus:outline-none transition-colors disabled:opacity-50"
+        className="w-full rounded-xl px-4 py-3 text-center text-2xl tracking-[0.5em] font-mono focus:outline-none transition-colors disabled:opacity-50"
+        style={{ background: 'var(--bn-bg-elevated)', border: '1px solid var(--bn-border)', color: 'var(--bn-text-primary)' }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'var(--bn-yellow)')}
+        onBlur={e  => (e.currentTarget.style.borderColor = 'var(--bn-border)')}
       />
     </div>
   );

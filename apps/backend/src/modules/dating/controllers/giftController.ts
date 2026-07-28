@@ -1,5 +1,5 @@
 'use strict';
-const { ok, created, error } = require('../../../shared/utils/response');
+const { ok, created, error } = require('../../../shared/utils/network/response');
 const GiftService = require('../services/giftService');
 
 /**

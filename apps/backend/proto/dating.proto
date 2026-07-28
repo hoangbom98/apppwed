@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package lkvip.dating;
+
+// ── Chat ──────────────────────────────────────────────────────────────────────
+// Maps to chatSocket.ts events: chat:join, chat:send, chat:receive, chat:recall.
+// Fields align with Message model in prisma/dating/schema.prisma.
+
+message ChatMessage {
+  string id         = 1;  // message id (empty on outgoing)
+  string room_id    = 2;
+  string user_id    = 3;  // resolved from auth metadata
+  string content    = 4;
+  string type       = 5;  // "text" | "image" | "file" | "recall"
+  string file_url   = 6;
+  bool   is_deleted = 7;
+  int64  created_at = 8;  // Unix ms
+  SenderInfo sender = 9;
+}
+
+message SenderInfo {
+  string id       = 1;
+  string username = 2;
+  string avatar   = 3;
+}
+
+message JoinRoomRequest {
+  string room_id = 1;
+}
+
+message JoinRoomResponse {
+  bool   success  = 1;
+  string room_id  = 2;
+}
+
+message GetRoomsRequest {}
+
+message RoomInfo {
+  string room_id      = 1;
+  string last_message = 2;
+  int64  updated_at   = 3;
+  repeated SenderInfo members = 4;
+}
+
+message GetRoomsResponse {
+  repeated RoomInfo rooms = 1;
+}
+
+message GetMessagesRequest {
+  string room_id = 1;
+  int32  page    = 2;
+  int32  limit   = 3;
+}
+
+message GetMessagesResponse {
+  repeated ChatMessage messages = 1;
+  int32 total = 2;
+}
+
+message RecallMessageRequest {
+  string room_id    = 1;
+  string message_id = 2;
+}
+
+message RecallMessageResponse {
+  bool   success    = 1;
+  string message_id = 2;
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
+
+service DatingService {
+  // Bidirectional Streaming — replaces chatSocket.ts chat:send / chat:receive.
+  // Client streams ChatMessage, server streams back to all room members.
+  rpc Chat           (stream ChatMessage)       returns (stream ChatMessage);
+
+  // Unary helpers
+  rpc JoinRoom       (JoinRoomRequest)          returns (JoinRoomResponse);
+  rpc GetRooms       (GetRoomsRequest)          returns (GetRoomsResponse);
+  rpc GetMessages    (GetMessagesRequest)       returns (GetMessagesResponse);
+  rpc RecallMessage  (RecallMessageRequest)     returns (RecallMessageResponse);
+}

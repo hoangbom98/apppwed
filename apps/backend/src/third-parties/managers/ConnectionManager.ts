@@ -11,7 +11,7 @@
 
 import { ServiceRegistry } from '../core/ServiceRegistry';
 import { IProvider, ServiceType, ProjectScope } from '../core/interfaces';
-import { logger } from '../../shared/services/logger';
+import { logger } from '../../shared/services/core/logger';
 
 /** Health cache entry */
 interface HealthEntry {

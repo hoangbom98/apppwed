@@ -5,8 +5,8 @@
  * User management endpoints for the sports module admin.
  * Uses req.prisma (injected by projectResolver) — no class instantiation needed.
  */
-const { ok, error } = require('../../../shared/utils/response');
-const { paginate }  = require('../../../shared/utils/helpers');
+const { ok, error } = require('../../../shared/utils/network/response');
+const { paginate }  = require('../../../shared/utils/core/helpers');
 
 exports.list = async (req, res) => {
   try {

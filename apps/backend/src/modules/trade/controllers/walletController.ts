@@ -12,8 +12,8 @@
  * Withdrawal model handles the withdrawal lifecycle (pending→processing→completed/failed/cancelled).
  * All IDs are CUID strings.
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const notifSvc = require('../../../shared/services/notificationService');
 
 // ── GET /trade/wallet ─────────────────────────────────────────────────────────

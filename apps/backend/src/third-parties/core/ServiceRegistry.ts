@@ -27,7 +27,7 @@ import { BinanceProvider }       from '../providers/Binance/BinanceProvider';
 import { ApiFootballProvider }   from '../providers/ApiFootball/ApiFootballProvider';
 import { TheSportsDBProvider }   from '../providers/TheSportsDB/TheSportsDBProvider';
 import { GNewsProvider }         from '../providers/GNews/GNewsProvider';
-import { logger }                from '../../shared/services/logger';
+import { logger }                from '../../shared/services/core/logger';
 import { getPrismaClient }       from '../../config/databases';
 
 // ── Provider constructor type ─────────────────────────────────────────────────

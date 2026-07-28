@@ -6,8 +6,8 @@
  * DB model: DownloadItem (id = CUID string)
  * Fields: id, title, description, platform, downloadUrl, version, fileSize, changelog, downloads, status
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 exports.list = async (req, res) => {
   try {

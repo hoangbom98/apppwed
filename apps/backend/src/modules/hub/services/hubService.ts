@@ -17,7 +17,7 @@ class HubService extends BaseService {
   }
 
   async getGames(query) {
-    const { page, limit, skip, take } = require('../../../shared/utils/helpers').paginate(query.page, query.limit);
+    const { page, limit, skip, take } = require('../../../shared/utils/core/helpers').paginate(query.page, query.limit);
     const { category, search, status = 'active' } = query;
     const where = { status };
     if (category) where.categoryId = category; // CUID string — no coercion

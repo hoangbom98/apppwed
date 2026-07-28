@@ -11,8 +11,8 @@
  * GET    /api/admin/vip/stats                — thống kê user theo VIP
  */
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, paginate: paginateRes } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, paginate: paginateRes } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── List all VIP configs ──────────────────────────────────────────────────────
 exports.listConfigs = async (req, res) => {

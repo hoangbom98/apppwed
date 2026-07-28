@@ -18,6 +18,7 @@ import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const compression = require('compression') as (options?: Record<string, unknown>) => import('express').RequestHandler;
 import path from 'path';
@@ -142,6 +143,11 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   );
   next();
 });
+
+// ── Cookie parsing (required for auth middleware cookie fallback) ──────────
+// Must come BEFORE auth middleware so req.cookies.access_token is available.
+// Reads: access_token (user SPA), admin_access_token (admin dashboard), refresh_token.
+app.use(cookieParser());
 
 // ── Body parsing ──────────────────────────────────────────────────────────
 app.use(express.json({ limit: '5mb' }));

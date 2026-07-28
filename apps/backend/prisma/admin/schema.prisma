@@ -19,6 +19,7 @@ datasource db {
 
 model AdminUser {
   id          Int       @id @default(autoincrement())
+  tenant      String    @default("admin") @db.VarChar(20)
   username    String    @unique @db.VarChar(100)
   email       String    @unique @db.VarChar(191)
   password    String    @db.VarChar(255)
@@ -38,6 +39,7 @@ model AdminUser {
   adminRole   AdminRole?   @relation("AdminUserRole", fields: [roleId], references: [id])
   roleId      Int?
 
+  @@index([tenant], map: "idx_tenant_config")
   @@index([status])
   @@index([role])
   @@index([roleId])
@@ -50,6 +52,7 @@ model AdminUser {
 
 model User {
   id              String    @id @default(cuid())
+  tenant          String    @db.VarChar(20)
   email           String    @unique @db.VarChar(191)
   phone           String?   @unique @db.VarChar(20)
   password        String    @db.VarChar(255)
@@ -103,6 +106,7 @@ model User {
   sessions                UserSession[]
   deviceFingerprints      DeviceFingerprint[]
 
+  @@index([tenant], map: "idx_tenant_config")
   @@index([email])
   @@index([status])
   @@index([role])
@@ -212,6 +216,7 @@ model Project {
 
 model SystemConfig {
   id          Int      @id @default(autoincrement())
+  tenant      String   @default("admin") @db.VarChar(20)
   key         String   @unique @db.VarChar(150)
   value       String?  @db.Text
   group       String   @default("general")  @db.VarChar(60)
@@ -220,6 +225,7 @@ model SystemConfig {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([tenant], map: "idx_tenant_config")
   @@index([group])
   @@map("system_configs")
 }
@@ -227,6 +233,7 @@ model SystemConfig {
 /// Generic key-value system settings (single-level, flat)
 model SystemSetting {
   id          Int      @id @default(autoincrement())
+  tenant      String   @default("admin") @db.VarChar(20)
   key         String   @unique @db.VarChar(150)
   value       String?  @db.Text
   group       String   @default("general")  @db.VarChar(60)
@@ -234,6 +241,7 @@ model SystemSetting {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([tenant], map: "idx_tenant_config")
   @@index([group])
   @@map("system_settings")
 }
@@ -241,6 +249,7 @@ model SystemSetting {
 /// Per-project UI / feature config (grouped by module + group + key)
 model ProjectConfig {
   id          String   @id @default(cuid())
+  tenant      String   @default("admin") @db.VarChar(20)
   projectCode String   @db.VarChar(20)
   module      String   @db.VarChar(60)
   group       String   @db.VarChar(60)
@@ -257,7 +266,8 @@ model ProjectConfig {
   updatedAt   DateTime @updatedAt
 
   @@unique([projectCode, module, group, key])
-  @@index([projectCode])
+  @@index([projectCode], map: "idx_proj_code")
+  @@index([tenant], map: "idx_tenant_config")
   @@index([module])
   @@index([projectCode, group, status])
   @@map("project_configs")
@@ -265,6 +275,7 @@ model ProjectConfig {
 
 model SystemLog {
   id        Int        @id @default(autoincrement())
+  tenant    String     @default("admin") @db.VarChar(20)
   adminId   Int?
   admin     AdminUser? @relation(fields: [adminId], references: [id])
   action    String     @db.VarChar(100)
@@ -276,6 +287,7 @@ model SystemLog {
   createdAt DateTime   @default(now())
 
   @@index([adminId, createdAt])
+  @@index([tenant], map: "idx_tenant_config")
   @@index([action])
   @@map("system_logs")
 }
@@ -620,6 +632,7 @@ model AmlAlert {
 
 model SecurityLog {
   id        String   @id @default(cuid())
+  tenant    String   @default("admin") @db.VarChar(20)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id])
   event     String   @db.VarChar(60)    // login_failed|2fa_failed|ip_blocked|password_changed
@@ -629,6 +642,7 @@ model SecurityLog {
   details   Json?
   createdAt DateTime @default(now())
 
+  @@index([tenant], map: "idx_tenant_config")
   @@index([userId])
   @@index([event, createdAt])
   @@index([severity, createdAt])
@@ -1507,3 +1521,24 @@ model RebateClaim {
   @@map("rebate_claims")
 }
 
+
+/// Per-project SMS delivery log
+/// Records every send attempt for audit, debugging, and rate-limit tracking.
+model SmsLog {
+  id        Int      @id @default(autoincrement())
+  /// Project that triggered the send: 'game' | 'hub' | 'trade' | 'dating' | 'sports' | 'global'
+  project   String   @db.VarChar(20)
+  phone     String   @db.VarChar(20)
+  body      String   @db.Text
+  /// 'twilio' | 'console'
+  provider  String   @db.VarChar(30)
+  /// 'sent' | 'failed'
+  status    String   @default("sent") @db.VarChar(10)
+  error     String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([project, createdAt])
+  @@index([phone, createdAt])
+  @@index([status, createdAt])
+  @@map("sms_logs")
+}

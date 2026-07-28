@@ -9,7 +9,7 @@
  *   all   — runs all sources concurrently
  */
 
-const { ok, badRequest } = require('../../../shared/utils/response');
+const { ok, badRequest } = require('../../../shared/utils/network/response');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

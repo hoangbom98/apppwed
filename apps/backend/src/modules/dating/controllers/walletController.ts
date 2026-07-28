@@ -12,8 +12,8 @@
  *   - Gift        (@@map "gifts")         — { id (cuid), name, coinCost, category, status, sortOrder }
  *   - GiftSend    (@@map "gift_sends")    — { giftId, senderId, receiverId, liveStreamId?, quantity, coinValue }
  */
-const { success, created, error } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── GET /dating/wallet/balance ────────────────────────────────────────────────
 exports.getBalance = async (req, res) => {

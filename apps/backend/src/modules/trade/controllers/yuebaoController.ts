@@ -6,8 +6,8 @@
  * User routes:  GET /trade/yuebao/products, POST /trade/yuebao/invest, GET /trade/yuebao/my
  * Admin routes: CRUD /trade/admin/yuebao/products, PUT .../settle, PUT .../renew
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate }                  = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                  = require('../../../shared/utils/core/helpers');
 const notifSvc                      = require('../../../shared/services/notificationService');
 
 // ─────────────────────────────────────────────────────────────────────────────

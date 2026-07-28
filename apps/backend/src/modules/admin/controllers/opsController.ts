@@ -4,7 +4,7 @@
  *
  * All routes live under /api/admin/ops/ and require auth + adminGuard.
  */
-const { success, error, paginate } = require('../../../shared/utils/response');
+const { success, error, paginate } = require('../../../shared/utils/network/response');
 const { getPrismaClient }           = require('../../../shared/config/databases');
 
 // ── Lazy service factory (avoids circular deps at module load time) ─────────

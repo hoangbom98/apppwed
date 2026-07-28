@@ -4,8 +4,8 @@
  * Manages game session lifecycle — launch, track, end.
  * IDs are CUIDs (strings), not integers.
  */
-const { created, success, error, notFound, forbidden } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { created, success, error, notFound, forbidden } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── POST /api/game/sessions/launch ───────────────────────────────────────────
 exports.launch = async (req, res) => {

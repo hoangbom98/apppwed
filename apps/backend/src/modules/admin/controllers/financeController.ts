@@ -6,7 +6,7 @@
 // GET /api/admin/finance/summary
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error }  = require('../../../shared/utils/response');
+const { success, error }  = require('../../../shared/utils/network/response');
 
 const safe = async (fn) => { try { return await fn(); } catch { return null; } };
 

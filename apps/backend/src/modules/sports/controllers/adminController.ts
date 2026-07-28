@@ -3,8 +3,8 @@
  * Sports Admin Controller — CRUD for leagues, teams, matches, articles, bets, users.
  * Extracted from inline route handlers in routes/index.ts for maintainability.
  */
-const { ok, created, error, paginate: paginateRes } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { ok, created, error, paginate: paginateRes } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const { logAdminAction } = require('../../../shared/services/auditLogger.service');
 
 // ── Leagues ───────────────────────────────────────────────────────

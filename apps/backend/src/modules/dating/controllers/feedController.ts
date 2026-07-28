@@ -5,7 +5,7 @@
  * Social feed (posts + stories) REST endpoints.
  * DB models: Post, PostLike, PostComment, Story
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
+const { ok, created, error, notFound } = require('../../../shared/utils/network/response');
 const FeedService = require('../services/feedService');
 const StoryService = require('../services/storyService');
 

@@ -2,7 +2,8 @@
 // backend/src/modules/admin/controllers/userController.js
 // Admin quản lý users CROSS-PROJECT: mỗi project có DB riêng
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
+const { invalidateUserStatusCache } = require('../../../shared/middlewares/auth/projectAccessGuard');
 
 const PROJECT_DBS = ['hub', 'game', 'dating', 'trade', 'sports'];
 
@@ -104,6 +105,8 @@ exports.toggleUserStatus = async (req, res) => {
       where: { id: req.params.id },
       data:  { status: newStatus, updatedAt: new Date() },
     });
+    // Invalidate cached status so the change is enforced immediately (no 60s stale window)
+    await invalidateUserStatusCache(project, req.params.id);
     return success(res, { newStatus, message: `User ${newStatus}` });
   } catch (e) { return error(res, e.message, 500); }
 };

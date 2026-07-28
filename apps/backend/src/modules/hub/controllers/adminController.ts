@@ -1,4 +1,4 @@
-const { success, created, error, notFound } = require('../../../shared/utils/response');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
 const AdminService = require('../services/adminService');
 
 const getAdminService = (req) => new AdminService(req.prisma);

@@ -13,7 +13,7 @@
  * Real-time: emits `admin:cron_status` via Socket.IO /admin namespace after every
  * run/toggle so the CronJobs page updates without polling.
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const cronSvc            = require('../services/cronService');
 const { getIo }          = require('../../../config/socket');
 

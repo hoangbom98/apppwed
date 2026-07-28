@@ -5,7 +5,7 @@
  * Uses Prisma models: Symbol (table: symbols), PriceHistory (table: price_history)
  * All model names match prisma/trade/schema.prisma exactly.
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
 
 // ── GET /api/trade/pairs — list all trading symbols ──────────────────────────
 exports.getPairs = async (req, res) => {

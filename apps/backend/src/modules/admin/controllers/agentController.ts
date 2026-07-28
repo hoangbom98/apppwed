@@ -8,7 +8,7 @@
 //   POST   /api/admin/agents/:id/commission/:commId/pay — mark commission as paid
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, notFound, paginate } = require('../../../shared/utils/response');
+const { success, error, notFound, paginate } = require('../../../shared/utils/network/response');
 
 // ── List agents ─────────────────────────────────────────────────────────────
 exports.list = async (req, res) => {

@@ -20,15 +20,25 @@ const config: Config = {
     '^../../../../config/databases$':    '<rootDir>/src/__tests__/__mocks__/databases',
     '^../../../../../config/databases$': '<rootDir>/src/__tests__/__mocks__/databases',
     // logger mock
-    '^../services/logger$':          '<rootDir>/src/__tests__/__mocks__/logger',
-    '^../../services/logger$':       '<rootDir>/src/__tests__/__mocks__/logger',
-    '^../../../services/logger$':    '<rootDir>/src/__tests__/__mocks__/logger',
-    '^./logger$':                    '<rootDir>/src/__tests__/__mocks__/logger',
-    '^../shared/services/logger$':   '<rootDir>/src/__tests__/__mocks__/logger',
-    // response utils — map relative path from __tests__ to actual location
-    '^../utils/response$':           '<rootDir>/src/shared/utils/response',
-    '^../../utils/response$':        '<rootDir>/src/shared/utils/response',
-    '^../shared/utils/response$':    '<rootDir>/src/shared/utils/response',
+    '^../services/logger$':                 '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../../services/logger$':              '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../../../services/logger$':           '<rootDir>/src/__tests__/__mocks__/logger',
+    '^./logger$':                           '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../shared/services/logger$':          '<rootDir>/src/__tests__/__mocks__/logger',
+    // core/logger — used by services under shared/services/communication/
+    '^../core/logger$':                     '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../../core/logger$':                  '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../../../core/logger$':               '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../../../../core/logger$':            '<rootDir>/src/__tests__/__mocks__/logger',
+    '^../shared/services/core/logger$':     '<rootDir>/src/__tests__/__mocks__/logger',
+    // response utils — map relative path from __tests__ to actual location (moved to network/)
+    '^../utils/response$':                      '<rootDir>/src/shared/utils/network/response',
+    '^../../utils/response$':                   '<rootDir>/src/shared/utils/network/response',
+    '^../shared/utils/response$':               '<rootDir>/src/shared/utils/network/response',
+    '^../shared/utils/network/response$':       '<rootDir>/src/shared/utils/network/response',
+    // authService flat re-export → auth subdirectory
+    '^../shared/services/authService$':         '<rootDir>/src/shared/services/auth/authService',
+    '^../../shared/services/authService$':      '<rootDir>/src/shared/services/auth/authService',
   },
   testPathIgnorePatterns: [
     // response.test.ts has pre-existing TS type errors unrelated to our changes

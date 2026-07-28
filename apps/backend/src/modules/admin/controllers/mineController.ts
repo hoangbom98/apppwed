@@ -7,7 +7,7 @@
 'use strict';
 
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { ok, notFound, badRequest, serverError, paginate } = require('../../../shared/utils/response');
+const { ok, notFound, badRequest, serverError, paginate } = require('../../../shared/utils/network/response');
 
 // All mine endpoints use the shared admin DB for the logged-in admin user's data.
 // For cross-project balance / VIP we read from game DB as the canonical source.

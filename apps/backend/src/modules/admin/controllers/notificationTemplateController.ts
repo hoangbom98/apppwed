@@ -10,7 +10,7 @@
  *   POST   /admin/notification/templates/seed     — seed defaults (super_admin only)
  *   GET    /admin/notification/logs               — delivery log (paginated)
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const tplSvc             = require('../services/notificationTemplateService');
 
 // GET /admin/notification/templates

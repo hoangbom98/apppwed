@@ -9,8 +9,8 @@
  *   Referral      (@@map "referrals")
  *   CommissionLog (@@map "commission_logs")
  */
-const { success, error } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const crypto = require('crypto');
 
 // ── GET /trade/referral/code — get current user's referral code ───────────────

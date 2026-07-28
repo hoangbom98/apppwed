@@ -7,7 +7,7 @@
  * POST /trade/reward/news/:id    — reward for reading a news article
  * GET  /trade/reward/signin/status — has user signed in today?
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD

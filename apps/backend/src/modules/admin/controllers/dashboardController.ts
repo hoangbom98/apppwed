@@ -7,7 +7,7 @@
  * GET /api/admin/dashboard/chart/revenue → 7/30 day revenue chart
  */
 'use strict';
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const { getPrismaClient } = require('../../../shared/config/databases');
 
 // ── Helper: safe count ─────────────────────────────────────────────

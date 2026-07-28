@@ -4,7 +4,7 @@ import {
   LineChart, ShieldCheck, Settings, LogIn, Zap,
   ArrowUpRight, TrendingDown, Users, Landmark, Cpu, Gift,
 } from 'lucide-react';
-import { CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAppConfig } from '@ui/hooks/useAppConfig';
 
@@ -97,8 +97,8 @@ export default function DesktopSidebar() {
                 </p>
                 <p className="text-[10px]" style={{ color: (user as any).kycStatus === 'verified' ? 'var(--bn-green)' : 'var(--bn-text-muted)' }}>
                   {(user as any).kycStatus === 'verified'
-                    ? <><CheckCircleOutlined /> KYC</>
-                    : <><WarningOutlined /> Chưa KYC</>}
+                    ? <><CheckCircle size={11} className="inline mr-1" />KYC</>
+                    : <><AlertTriangle size={11} className="inline mr-1" />Chưa KYC</>}
                 </p>
               </div>
             </div>

@@ -6,7 +6,7 @@
  *   GET  /missions                  — protected: today's mission list with progress
  *   POST /missions/:templateId/claim — protected: claim completed mission reward
  */
-const { success, error, badRequest } = require('../../../shared/utils/response');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
 const missionSvc = require('../services/missionService');
 
 // ── GET /game/missions — protected ───────────────────────────────────────────

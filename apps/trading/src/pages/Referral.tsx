@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { Users, Gift, Copy, CheckCircle, TrendingUp, Link as LinkIcon } from 'lucide-react';
-import { TeamOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { getReferralCode, getReferralTree, getReferralSummary, getReferralCommissions } from '@/api/trade';
 import { useAuthStore } from '@/store/authStore';
 import { fmt, fmtTime } from '@/utils/formatters';
@@ -123,7 +122,7 @@ export default function ReferralPage() {
             className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
               tab === t ? 'bg-pink-700 text-white' : 'text-gray-400 hover:text-white'
             }`}>
-            {t === 'tree' ? <><TeamOutlined /> Mạng lưới</> : <><CheckCircleOutlined /> Hoa hồng</>}
+            {t === 'tree' ? <><Users size={13} className="inline mr-1" />Mạng lưới</> : <><CheckCircle size={13} className="inline mr-1" />Hoa hồng</>}
           </button>
         ))}
       </div>
@@ -151,7 +150,7 @@ export default function ReferralPage() {
                     <div className="text-right">
                       <p className="text-[10px] text-gray-500">{fmtTime(r.createdAt)}</p>
                       <span className={`text-[10px] ${r.user?.kycStatus === 'verified' ? 'text-green-400' : 'text-yellow-400'}`}>
-                        {r.user?.kycStatus === 'verified' ? <><CheckCircleOutlined /> KYC</> : 'Chờ KYC'}
+                        {r.user?.kycStatus === 'verified' ? <><CheckCircle size={11} className="inline mr-0.5" />KYC</> : 'Chờ KYC'}
                       </span>
                     </div>
                   </div>

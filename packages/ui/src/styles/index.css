@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "./design-tokens.css";
+
+@theme {
+  --color-game-canvas: var(--color-game-canvas);
+  --color-game-surface-card: var(--color-game-surface-card);
+  --color-game-m-blue: var(--color-game-m-blue);
+  --color-game-m-red: var(--color-game-m-red);
+  --color-game-text-ink: var(--color-game-text-ink);
+
+  --color-hub-cobalt: var(--color-hub-cobalt);
+  --color-hub-canvas: var(--color-hub-canvas);
+  --color-hub-text-ink: var(--color-hub-text-ink);
+
+  --color-trade-yellow: var(--color-trade-yellow);
+  --color-trade-up: var(--color-trade-up);
+  --color-trade-down: var(--color-trade-down);
+
+  --color-sports-primary:        var(--color-sports-primary);
+  --color-sports-primary-dark:   var(--color-sports-primary-dark);
+  --color-sports-primary-light:  var(--color-sports-primary-light);
+  --color-sports-accent:         var(--color-sports-accent);
+  --color-sports-live:           var(--color-sports-live);
+  --color-sports-bg:             var(--color-sports-bg);
+  --color-sports-bg-card:        var(--color-sports-bg-card);
+  --color-sports-bg-secondary:   var(--color-sports-bg-secondary);
+  --color-sports-bg-elevated:    var(--color-sports-bg-elevated);
+  --color-sports-text:           var(--color-sports-text);
+  --color-sports-text-secondary: var(--color-sports-text-secondary);
+  --color-sports-text-muted:     var(--color-sports-text-muted);
+  --color-sports-border:         var(--color-sports-border);
+  --color-sports-border-strong:  var(--color-sports-border-strong);
+  --color-sports-green:          var(--color-sports-green);
+
+  --color-dating-rose: var(--color-dating-rose);
+
+  --spacing-1: var(--spacing-1);
+  --spacing-2: var(--spacing-2);
+  --spacing-3: var(--spacing-3);
+  --spacing-4: var(--spacing-4);
+  --spacing-6: var(--spacing-6);
+  --spacing-8: var(--spacing-8);
+  --spacing-10: var(--spacing-10);
+  --spacing-12: var(--spacing-12);
+}

@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "no-var": "error",
+    "prefer-const": "error",
+    "eqeqeq": ["error", "always"],
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-unused-vars": "warn"
+  },
+  "plugins": ["react", "react-hooks"],
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
+}

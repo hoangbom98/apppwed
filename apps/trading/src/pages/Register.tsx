@@ -1,13 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { register as apiRegister } from '@/api/trade';
 import { useAuthStore } from '@/store/authStore';
-import { Eye, EyeOff, Loader2, Check } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, TrendingUp } from 'lucide-react';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [form, setForm] = useState({ fullName:'', email:'', phone:'', password:'', confirm:'' });
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState<{
+    fullName: string; email: string; phone: string;
+    password: string; confirm: string; referralCode: string;
+  }>({
+    fullName: '', email: '', phone: '',
+    password: '', confirm: '',
+    referralCode: searchParams.get('ref') ?? '',
+  });
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
@@ -22,7 +30,13 @@ export default function RegisterPage() {
     if (!agreed) { setError('Vui lòng đồng ý với điều khoản sử dụng'); return; }
     setLoading(true); setError('');
     try {
-      await apiRegister({ fullName: form.fullName, email: form.email, password: form.password });
+      await apiRegister({
+        fullName:     form.fullName,
+        email:        form.email,
+        password:     form.password,
+        phone:        form.phone || undefined,
+        referralCode: form.referralCode || undefined,
+      });
       await login({ email: form.email, password: form.password });
       navigate('/');
     } catch (err: any) {
@@ -42,58 +56,87 @@ export default function RegisterPage() {
   };
   const strength = passwordStrength();
   const strengthLabel = ['', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'][strength];
-  const strengthColor = ['', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'][strength];
+  const strengthBg    = ['', 'var(--bn-red)', 'var(--bn-yellow)', 'var(--bn-blue)', 'var(--bn-green)'][strength];
+
+  const inputStyle = {
+    background: 'var(--bn-bg-elevated)',
+    border:     '1px solid var(--bn-border)',
+    color:      'var(--bn-text-primary)',
+  };
+  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = 'var(--bn-yellow)');
+  const onBlur  = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = 'var(--bn-border)');
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bn-bg-base)' }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black text-white">T</div>
-          <span className="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">TradePro</span>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black"
+            style={{ background: 'var(--bn-yellow)', color: '#0b0e11' }}>
+            <TrendingUp size={18} />
+          </div>
+          <span className="text-2xl font-black" style={{ color: 'var(--bn-yellow)' }}>TradePro</span>
         </div>
 
-        <h2 className="text-2xl font-black text-white mb-1">Tạo tài khoản</h2>
-        <p className="text-gray-400 text-sm mb-6">Đã có tài khoản? <Link to="/login" className="text-blue-400 hover:text-blue-300 font-semibold">Đăng nhập</Link></p>
+        <h2 className="text-2xl font-black mb-1" style={{ color: 'var(--bn-text-primary)' }}>Tạo tài khoản</h2>
+        <p className="text-sm mb-6" style={{ color: 'var(--bn-text-secondary)' }}>
+          Đã có tài khoản?{' '}
+          <Link to="/login" className="font-semibold" style={{ color: 'var(--bn-yellow)' }}>Đăng nhập</Link>
+        </p>
 
         {error && (
-          <div className="mb-4 p-3.5 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm">{error}</div>
+          <div className="mb-4 p-3.5 rounded-xl text-sm"
+            style={{ background: 'var(--bn-red-muted)', border: '1px solid rgba(246,70,93,0.25)', color: 'var(--bn-red)' }}>
+            {error}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full name */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Họ và tên</label>
-            <input type="text" value={form.fullName} onChange={update('fullName')} required placeholder="Nguyễn Văn A"
-              className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>Họ và tên</label>
+            <input type="text" value={form.fullName} onChange={update('fullName')} required
+              placeholder="Nguyễn Văn A"
+              className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email</label>
-            <input type="email" value={form.email} onChange={update('email')} required placeholder="email@example.com"
-              className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>Email</label>
+            <input type="email" value={form.email} onChange={update('email')} required
+              placeholder="email@example.com"
+              className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Số điện thoại</label>
-            <input type="tel" value={form.phone} onChange={update('phone')} placeholder="0909xxxxxx"
-              className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>Số điện thoại</label>
+            <input type="tel" value={form.phone} onChange={update('phone')}
+              placeholder="0909xxxxxx"
+              className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Mật khẩu</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>Mật khẩu</label>
             <div className="relative">
               <input type={showPwd ? 'text' : 'password'} value={form.password} onChange={update('password')} required
                 placeholder="Tối thiểu 8 ký tự"
-                className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none transition-colors"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur}
               />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+              <button type="button" onClick={() => setShowPwd(!showPwd)}
+                className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: 'var(--bn-text-muted)' }}>
                 {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
@@ -101,10 +144,11 @@ export default function RegisterPage() {
               <div className="mt-2">
                 <div className="flex gap-1 mb-1">
                   {[1,2,3,4].map(i => (
-                    <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= strength ? strengthColor : 'bg-gray-800'}`} />
+                    <div key={i} className="h-1 flex-1 rounded-full transition-all"
+                      style={{ background: i <= strength ? strengthBg : 'var(--bn-border)' }} />
                   ))}
                 </div>
-                <p className={`text-[10px] ${strength >= 3 ? 'text-green-400' : strength === 2 ? 'text-yellow-400' : 'text-red-400'}`}>
+                <p className="text-[10px]" style={{ color: strength >= 3 ? 'var(--bn-green)' : strength === 2 ? 'var(--bn-yellow)' : 'var(--bn-red)' }}>
                   Độ mạnh: {strengthLabel}
                 </p>
               </div>
@@ -113,36 +157,63 @@ export default function RegisterPage() {
 
           {/* Confirm */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Xác nhận mật khẩu</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>Xác nhận mật khẩu</label>
             <div className="relative">
               <input type={showPwd ? 'text' : 'password'} value={form.confirm} onChange={update('confirm')} required
                 placeholder="Nhập lại mật khẩu"
-                className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none transition-colors"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur}
               />
               {form.confirm && (
-                <div className={`absolute right-4 top-1/2 -translate-y-1/2 ${form.confirm === form.password ? 'text-green-400' : 'text-red-400'}`}>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2"
+                  style={{ color: form.confirm === form.password ? 'var(--bn-green)' : 'var(--bn-red)' }}>
                   <Check size={16} />
                 </div>
               )}
             </div>
           </div>
 
+          {/* Referral code */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--bn-text-secondary)' }}>
+              Mã giới thiệu <span style={{ color: 'var(--bn-text-muted)', fontWeight: 400, textTransform: 'none' }}>(tuỳ chọn)</span>
+            </label>
+            <input type="text" value={form.referralCode} onChange={update('referralCode')}
+              placeholder="Nhập mã giới thiệu nếu có"
+              className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors uppercase"
+              style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+            />
+          </div>
+
           {/* Terms */}
           <label className="flex items-start gap-3 cursor-pointer">
-            <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${agreed ? 'bg-blue-600 border-blue-600' : 'bg-transparent border-gray-600'}`}
-              onClick={() => setAgreed(!agreed)}>
-              {agreed && <Check size={10} className="text-white" />}
+            <div
+              className="mt-0.5 w-4 h-4 rounded flex items-center justify-center flex-shrink-0 transition-colors"
+              style={{
+                background: agreed ? 'var(--bn-yellow)' : 'transparent',
+                border: `1px solid ${agreed ? 'var(--bn-yellow)' : 'var(--bn-border)'}`,
+              }}
+              onClick={() => setAgreed(!agreed)}
+            >
+              {agreed && <Check size={10} color="#0b0e11" />}
             </div>
-            <span className="text-xs text-gray-400">
-              Tôi đồng ý với <span className="text-blue-400">Điều khoản sử dụng</span> và <span className="text-blue-400">Chính sách bảo mật</span> của TradePro
+            <span className="text-xs" style={{ color: 'var(--bn-text-secondary)' }}>
+              Tôi đồng ý với{' '}
+              <span style={{ color: 'var(--bn-yellow)' }}>Điều khoản sử dụng</span> và{' '}
+              <span style={{ color: 'var(--bn-yellow)' }}>Chính sách bảo mật</span> của TradePro
             </span>
           </label>
 
           <button
             type="submit" disabled={loading}
-            className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 bn-btn-yellow transition-colors"
           >
-            {loading ? <><Loader2 size={16} className="animate-spin" /> Đang tạo tài khoản...</> : 'Tạo tài khoản miễn phí'}
+            {loading
+              ? <><Loader2 size={16} className="animate-spin" /> Đang tạo tài khoản...</>
+              : 'Tạo tài khoản miễn phí'
+            }
           </button>
         </form>
       </div>

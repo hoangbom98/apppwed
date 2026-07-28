@@ -6,8 +6,8 @@
  * User:  GET /trade/mining/machines, POST /trade/mining/invest, GET /trade/mining/my
  * Admin: CRUD /trade/admin/mining/machines, GET /trade/admin/mining/investments
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate }                  = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                  = require('../../../shared/utils/core/helpers');
 const notifSvc                      = require('../../../shared/services/notificationService');
 
 // ─────────────────────────────────────────────────────────────────────────────

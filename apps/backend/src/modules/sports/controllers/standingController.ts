@@ -1,5 +1,5 @@
 'use strict';
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 exports.getByLeague = async (req, res) => {
   try {

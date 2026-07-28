@@ -25,22 +25,22 @@ export default function SettingsPage() {
     {
       title: 'Thông báo',
       items: [
-        { type: 'toggle', key: 'notifications', label: 'Thông báo đẩy',    icon: Bell,   description: 'Nhận thông báo về trận đấu và kết quả' },
-        { type: 'toggle', key: 'liveAlerts',    label: 'Cảnh báo trực tiếp', icon: Bell, description: 'Bàn thắng & sự kiện quan trọng' },
+        { type: 'toggle', key: 'notifications', label: 'Thông báo đẩy',      icon: Bell,  description: 'Nhận thông báo về trận đấu và kết quả' },
+        { type: 'toggle', key: 'liveAlerts',    label: 'Cảnh báo trực tiếp', icon: Bell,  description: 'Bàn thắng & sự kiện quan trọng' },
       ],
     },
     {
       title: 'Giao diện',
       items: [
-        { type: 'toggle', key: 'darkMode',    label: 'Chế độ tối',   icon: Moon },
-        { type: 'toggle', key: 'viLanguage',  label: 'Ngôn ngữ: Tiếng Việt', icon: Globe },
+        { type: 'toggle', key: 'darkMode',   label: 'Chế độ tối',          icon: Moon  },
+        { type: 'toggle', key: 'viLanguage', label: 'Ngôn ngữ: Tiếng Việt', icon: Globe },
       ],
     },
     {
       title: 'Tài khoản',
       items: [
-        { type: 'link', to: '/profile', label: 'Chỉnh sửa hồ sơ', icon: Shield },
-        { type: 'link', to: '/support', label: 'Hỗ trợ khách hàng', icon: Shield, badge: '' },
+        { type: 'link', to: '/profile', label: 'Chỉnh sửa hồ sơ',    icon: Shield },
+        { type: 'link', to: '/support', label: 'Hỗ trợ khách hàng',  icon: Shield, badge: '' },
         { type: 'link', to: '/knowledge', label: 'Câu hỏi thường gặp', icon: Shield },
       ],
     },
@@ -55,57 +55,78 @@ export default function SettingsPage() {
   return (
     <div className="pb-4 max-w-lg mx-auto">
       {/* Back header */}
-      <div className="sticky top-0 z-30 bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center gap-3">
-        <Link to="/profile" className="p-1.5 text-gray-400 hover:text-white rounded-lg">
+      <div className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3"
+        style={{ background: 'var(--sports-bg-card)', borderBottom: '1px solid var(--sports-border)' }}>
+        <Link to="/profile"
+          className="p-1.5 rounded-lg transition-colors"
+          style={{ color: 'var(--sports-text-secondary)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--sports-text)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--sports-text-secondary)')}>
           <ChevronLeft size={20} />
         </Link>
-        <h1 className="font-bold text-white text-base">Cài đặt</h1>
+        <h1 className="font-bold text-base" style={{ color: 'var(--sports-text)' }}>Cài đặt</h1>
       </div>
 
       <div className="p-4 space-y-6">
         {sections.map(section => (
           <div key={section.title}>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider mb-2 px-1"
+              style={{ color: 'var(--sports-text-muted)' }}>
               {section.title}
             </h2>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden divide-y divide-gray-800/60">
+            <div className="rounded-2xl overflow-hidden divide-y"
+              style={{ background: 'var(--sports-bg-card)', border: '1px solid var(--sports-border)', borderColor: 'var(--sports-border)' }}>
               {section.items.map((item, i) => {
                 if (item.type === 'toggle') {
                   const isOn = prefs[item.key as keyof typeof prefs];
                   return (
                     <div key={i} className="flex items-center justify-between px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                          <item.icon size={15} className="text-gray-400" />
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                          style={{ background: 'var(--sports-bg-elevated)' }}>
+                          <item.icon size={15} style={{ color: 'var(--sports-text-secondary)' }} />
                         </div>
                         <div>
-                          <p className="text-sm text-white font-medium">{item.label}</p>
-                          {item.description && <p className="text-[10px] text-gray-500">{item.description}</p>}
+                          <p className="text-sm font-medium" style={{ color: 'var(--sports-text)' }}>{item.label}</p>
+                          {item.description && (
+                            <p className="text-[10px]" style={{ color: 'var(--sports-text-muted)' }}>{item.description}</p>
+                          )}
                         </div>
                       </div>
                       <button
                         onClick={() => toggle(item.key as keyof typeof prefs)}
-                        className={`relative w-11 h-6 rounded-full transition-colors ${isOn ? 'bg-green-600' : 'bg-gray-700'}`}
+                        className="relative w-11 h-6 rounded-full transition-colors"
+                        style={{ background: isOn ? 'var(--sports-primary)' : 'var(--sports-border-strong)' }}
                       >
-                        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isOn ? 'translate-x-6' : 'translate-x-1'}`} />
+                        <span
+                          className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ transform: isOn ? 'translateX(1.5rem)' : 'translateX(0.25rem)' }}
+                        />
                       </button>
                     </div>
                   );
                 }
                 if (item.type === 'link') {
                   return (
-                    <Link key={i} to={item.to} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-800/40 transition-colors">
+                    <Link key={i} to={item.to}
+                      className="flex items-center justify-between px-4 py-3.5 transition-colors"
+                      style={{ color: 'inherit' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sports-bg-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                          <item.icon size={15} className="text-gray-400" />
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                          style={{ background: 'var(--sports-bg-elevated)' }}>
+                          <item.icon size={15} style={{ color: 'var(--sports-text-secondary)' }} />
                         </div>
-                        <p className="text-sm text-white">{item.label}</p>
+                        <p className="text-sm" style={{ color: 'var(--sports-text)' }}>{item.label}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {item.badge !== undefined && item.badge !== '' && (
-                          <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">{item.badge}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full text-white"
+                            style={{ background: 'var(--sports-primary)' }}>{item.badge}</span>
                         )}
-                        <ChevronRight size={15} className="text-gray-500" />
+                        <ChevronRight size={15} style={{ color: 'var(--sports-text-muted)' }} />
                       </div>
                     </Link>
                   );
@@ -113,9 +134,13 @@ export default function SettingsPage() {
                 if (item.type === 'action') {
                   return (
                     <button key={i} onClick={item.action}
-                      className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-800/40 transition-colors ${item.danger ? 'text-red-400' : 'text-white'}`}>
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.danger ? 'bg-red-950/40' : 'bg-gray-800'}`}>
-                        <item.icon size={15} className={item.danger ? 'text-red-400' : 'text-gray-400'} />
+                      className="w-full flex items-center gap-3 px-4 py-3.5 transition-colors"
+                      style={{ color: item.danger ? 'var(--sports-live)' : 'var(--sports-text)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sports-bg-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                        style={{ background: item.danger ? 'rgba(239,68,68,0.12)' : 'var(--sports-bg-elevated)' }}>
+                        <item.icon size={15} style={{ color: item.danger ? 'var(--sports-live)' : 'var(--sports-text-secondary)' }} />
                       </div>
                       <p className="text-sm font-medium">{item.label}</p>
                     </button>
@@ -127,7 +152,9 @@ export default function SettingsPage() {
           </div>
         ))}
 
-        <p className="text-center text-[10px] text-gray-600 mt-4">Sports Live v1.0.0</p>
+        <p className="text-center text-[10px] mt-4" style={{ color: 'var(--sports-text-muted)' }}>
+          Sports Live v1.0.0
+        </p>
       </div>
     </div>
   );

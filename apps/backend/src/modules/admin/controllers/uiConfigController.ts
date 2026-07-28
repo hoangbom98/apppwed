@@ -9,7 +9,7 @@
  *   POST /admin/ui-config/create  { project, module, group, key, value, type, description }
  *   DELETE /admin/ui-config/:id
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 /**
  * GET /admin/ui-config

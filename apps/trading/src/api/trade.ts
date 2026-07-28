@@ -32,22 +32,37 @@ import type {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const login = (data: { email: string; password: string }) =>
-  api.post<ApiEnvelope<{ accessToken: string; user: TradeUserProfile }>>(
+  api.post<ApiEnvelope<{ access_token: string; refresh_token: string; user: TradeUserProfile }>>(
     '/trade/auth/login', data
   ).then((r) => r.data);
 
 export const register = (data: {
-  email:    string;
-  password: string;
-  fullName?: string;
+  email:        string;
+  password:     string;
+  fullName?:    string;
+  phone?:       string;
   referralCode?: string;
 }) =>
-  api.post<ApiEnvelope<TradeUserProfile>>(
+  api.post<ApiEnvelope<{ access_token: string; refresh_token: string; user: TradeUserProfile }>>(
     '/trade/auth/register', data
   ).then((r) => r.data);
 
 export const getMe = () =>
   api.get<ApiEnvelope<TradeUserProfile>>('/trade/auth/me').then((r) => r.data);
+
+export const refreshToken = (refresh_token: string) =>
+  api.post<ApiEnvelope<{ access_token: string; refresh_token: string }>>(
+    '/trade/auth/refresh', { refresh_token }
+  ).then((r) => r.data);
+
+export const forgotPassword = (email: string) =>
+  api.post<ApiEnvelope<null>>('/trade/auth/forgot-password', { email }).then((r) => r.data);
+
+export const resetPassword = (data: { token: string; password: string }) =>
+  api.post<ApiEnvelope<null>>('/trade/auth/reset-password', data).then((r) => r.data);
+
+export const changePassword = (data: { currentPassword: string; newPassword: string }) =>
+  api.put<ApiEnvelope<null>>('/trade/auth/password', data).then((r) => r.data);
 
 // ── Market / Pairs ────────────────────────────────────────────────────────────
 export const getPairs = (params?: Record<string, unknown>) =>
@@ -148,6 +163,17 @@ export const getPortfolio = () =>
 /** Alias for getMe — kept for backward compat */
 export const getUserProfile = () =>
   api.get<ApiEnvelope<TradeUserProfile>>('/trade/auth/me').then((r) => r.data);
+
+export const updateProfile = (data: { fullName?: string; phone?: string }) =>
+  api.patch<ApiEnvelope<TradeUserProfile>>('/trade/profile', data).then((r) => r.data);
+
+export const uploadAvatar = (file: File) => {
+  const form = new FormData();
+  form.append('avatar', file);
+  return api.patch<ApiEnvelope<TradeUserProfile>>('/trade/profile/avatar', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then((r) => r.data);
+};
 
 // ── Bank Accounts ─────────────────────────────────────────────────────────────
 export interface BankAccountPayload {

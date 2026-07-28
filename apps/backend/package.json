@@ -58,6 +58,7 @@
     "bull": "^4.16.5",
     "bullmq": "^5.80.10",
     "compression": "^1.7.4",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
@@ -87,6 +88,7 @@
   "devDependencies": {
     "@prisma/client": "^5.15.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",

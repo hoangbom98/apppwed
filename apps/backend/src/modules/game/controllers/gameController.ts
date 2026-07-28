@@ -4,8 +4,8 @@
  * game/controllers/gameController.js
  * Games, categories, and promotions.
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const GameService = require('../services/gameService/GameService');
 
 exports.getCategories = async (req, res) => {

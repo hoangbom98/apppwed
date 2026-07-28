@@ -8,8 +8,8 @@
  * This controller is repurposed to serve "upcoming events" (matches with open bet markets)
  * which is what the frontend needs.
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 /**
  * GET /sports/events

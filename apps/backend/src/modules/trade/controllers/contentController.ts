@@ -6,8 +6,8 @@
  * Public: GET /trade/banners, GET /trade/news, GET /trade/news/:slug
  * Admin:  CRUD /trade/admin/banners, CRUD /trade/admin/news
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate }                  = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                  = require('../../../shared/utils/core/helpers');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BANNERS

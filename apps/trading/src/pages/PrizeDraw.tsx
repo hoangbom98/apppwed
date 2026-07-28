@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Gift, Trophy, History, Sparkles, Loader2 } from 'lucide-react';
-import { TrophyOutlined, FileTextOutlined, GiftOutlined } from '@ant-design/icons';
+import { FileText } from 'lucide-react';
 import {
   getPrizeConfigs,
   getRecentWinners,
@@ -86,7 +86,7 @@ export default function PrizeDrawPage() {
             className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
               tab === t ? 'bg-pink-700 text-white' : 'text-gray-400 hover:text-white'
             }`}>
-            {t === 'draw' ? <><GiftOutlined /> Quay thưởng</> : t === 'my' ? <><TrophyOutlined /> Của tôi</> : <><FileTextOutlined /> Gần đây</>}
+            {t === 'draw' ? <><Gift size={13} className="inline mr-1" />Quay thưởng</> : t === 'my' ? <><Trophy size={13} className="inline mr-1" />Của tôi</> : <><FileText size={13} className="inline mr-1" />Gần đây</>}
           </button>
         ))}
       </div>
@@ -97,7 +97,7 @@ export default function PrizeDrawPage() {
           {/* Win overlay */}
           {winner && (
             <div className="relative bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/40 rounded-2xl p-6 text-center">
-              <div className="text-5xl mb-3"><GiftOutlined style={{ fontSize: 48, color: '#eab308' }} /></div>
+              <div className="mb-3"><Gift size={48} style={{ color: '#eab308' }} className="mx-auto" /></div>
               <p className="text-white font-black text-xl">Chúc mừng!</p>
               <p className="text-yellow-400 font-bold text-lg mt-1">{winner.title}</p>
               {winner.amount > 0 && (

@@ -1,7 +1,7 @@
 // backend/src/modules/admin/routes/index.js
 const router = require('express').Router();
-const auth        = require('../../../shared/middlewares/auth');
-const adminGuard  = require('../../../shared/middlewares/adminGuard');
+const auth        = require('../../../shared/middlewares/auth/auth');
+const adminGuard  = require('../../../shared/middlewares/auth/adminGuard');
 
 // ── Controllers ───────────────────────────────────────────────────────────────
 const authCtrl        = require('../controllers/authController');
@@ -23,10 +23,10 @@ const riskCtrl        = require('../controllers/riskController');
 const opsCtrl          = require('../controllers/opsController');
 const securityCtrl     = require('../controllers/securityController');
 const appCatalogCtrl   = require('../controllers/appCatalogController');
-const monitorCtrl      = require('../controllers/monitorController');
+const monitorCtrl      = require('../controllers/ops/monitorController');
 const gameProviderCtrl   = require('../controllers/gameProviderController');
 const thirdPartyCtrl     = require('../controllers/thirdPartyController');
-const paymentAdminRoutes  = require('../../../shared/routes/payment-admin.routes');
+const paymentAdminRoutes  = require('../../../shared/routes/finance/payment-admin.routes');
 const mineRoutes           = require('./mine.routes');
 const notifCtrl            = require('../controllers/notificationController');
 const notifTplCtrl         = require('../controllers/notificationTemplateController');
@@ -42,7 +42,7 @@ const groupFinanceCtrl     = require('../controllers/groupFinanceController');
 // ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
 const telegramCtrl         = require('../controllers/telegramBroadcastController');
 
-const requirePermission = require('../../../shared/middlewares/requirePermission');
+const requirePermission = require('../../../shared/middlewares/auth/requirePermission');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 router.post('/auth/login',   authCtrl.login);

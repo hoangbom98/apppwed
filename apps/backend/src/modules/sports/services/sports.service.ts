@@ -1,7 +1,7 @@
 // src/modules/sports/services/sports.service.ts
 import { ServiceRegistry } from '../../../third-parties/core/ServiceRegistry';
 import { ServiceType } from '../../../third-parties/core/interfaces';
-import { logger } from '../../../shared/services/logger';
+import { logger } from '../../../shared/services/core/logger';
 
 const { getPrismaClient } = require('../../../config/databases');
 const prisma = getPrismaClient('sports');

@@ -7,7 +7,7 @@
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
 const Decimal             = require('decimal.js');
-const { success, error }  = require('../../../shared/utils/response');
+const { success, error }  = require('../../../shared/utils/network/response');
 const emit                = require('../../../shared/socket/projectEmitter');
 
 const toMoney = (value) => new Decimal(value).toDecimalPlaces(4, Decimal.ROUND_HALF_EVEN);

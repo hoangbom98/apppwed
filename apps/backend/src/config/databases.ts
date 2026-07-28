@@ -37,6 +37,9 @@ const clients = {};
  * @param {'hub'|'game'|'trade'|'dating'|'sports'|'admin'} project
  * @returns {import('@prisma/client').PrismaClient}
  */
+/** Slow query threshold in milliseconds — queries above this are logged as warnings. */
+const SLOW_QUERY_THRESHOLD_MS = 150;
+
 function getPrismaClient(project) {
   if (!clients[project]) {
     // __dirname resolves differently under src/ vs dist/src/ — use project root.
@@ -49,7 +52,35 @@ function getPrismaClient(project) {
     const localPath   = path.resolve(__dirname, '..', '..', 'node_modules', '.prisma', `${project}-client`);
     const clientPath  = require('fs').existsSync(projectRoot) ? projectRoot : localPath;
     const { PrismaClient } = require(clientPath);
-    const client = new PrismaClient();
+
+    // Enable slow-query logging in non-production environments.
+    // Production: only log errors to avoid log volume overhead.
+    const logConfig = process.env.NODE_ENV === 'production'
+      ? [{ level: 'error', emit: 'event' }]
+      : [{ level: 'query', emit: 'event' }, { level: 'error', emit: 'event' }];
+
+    const client = new PrismaClient({ log: logConfig });
+
+    // Slow query detection — log any query exceeding the threshold
+    if (process.env.NODE_ENV !== 'production') {
+      client.$on('query', (e) => {
+        if (e.duration >= SLOW_QUERY_THRESHOLD_MS) {
+          const logger = require('../shared/services/logger');
+          logger.warn(`[Prisma:${project}] Slow query ${e.duration}ms`, {
+            query:  e.query.slice(0, 200),   // truncate to avoid log flooding
+            params: e.params,
+            target: e.target,
+          });
+        }
+      });
+    }
+
+    // Always log Prisma-level errors regardless of environment
+    client.$on('error', (e) => {
+      const logger = require('../shared/services/logger');
+      logger.error(`[Prisma:${project}] Engine error`, { message: e.message, target: e.target });
+    });
+
     // Apply field-level encryption middleware for sensitive fields
     applyEncryptionMiddleware(client);
     clients[project] = client;

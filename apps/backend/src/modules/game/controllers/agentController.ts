@@ -8,8 +8,8 @@
  *   - Get agent downline tree (depth 3)
  *   - Get commissions (paginated)
  */
-const { ok, forbidden, badRequest, error } = require('../../../shared/utils/response');
-const { paginate }                          = require('../../../shared/utils/helpers');
+const { ok, forbidden, badRequest, error } = require('../../../shared/utils/network/response');
+const { paginate }                          = require('../../../shared/utils/core/helpers');
 
 // ── GET /agent/check ──────────────────────────────────────────────────────────
 exports.checkAgent = async (req, res) => {

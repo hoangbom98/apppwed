@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 const { generateTokens, hashPassword, comparePassword, checkNewPassword } = require('../../../shared/services/authService');
-const { success, created, error, unauthorized } = require('../../../shared/utils/response');
+const { success, created, error, unauthorized } = require('../../../shared/utils/network/response');
 const emailGuard    = require('../../../shared/services/emailGuardService');
 const ipGuard       = require('../../../shared/services/ipGuardService');
 const auditService  = require('../../../shared/services/auditService');

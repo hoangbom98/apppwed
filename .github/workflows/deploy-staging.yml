@@ -1,0 +1,106 @@
+name: CD — Deploy to Staging
+
+# Trigger: push to develop branch OR manual dispatch
+# Requires GitHub Environment: "staging" with secrets:
+#   STAGING_HOST, STAGING_USER, STAGING_SSH_KEY, STAGING_PORT (optional)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "staging" to confirm deploy'
+        required: true
+        default: ''
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  DEPLOY_DIR: '/var/LKVIP'
+  PM2_APP: 'lkvip-backend'
+
+jobs:
+  # Guard: manual trigger must type "staging"
+  guard:
+    name: Deployment guard
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.confirm == 'staging'
+    steps:
+      - run: echo "Staging deployment approved ✓"
+
+  # Run CI first
+  ci:
+    name: CI checks
+    needs: guard
+    uses: ./.github/workflows/ci.yml
+
+  # Deploy to staging VPS
+  deploy-staging:
+    name: Deploy to Staging VPS
+    needs: ci
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host:     ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key:      ${{ secrets.STAGING_SSH_KEY }}
+          port:     ${{ secrets.STAGING_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ env.DEPLOY_DIR }}
+
+            echo "=== [1/5] Git pull develop ==="
+            git pull --ff-only origin develop
+
+            echo "=== [2/5] Install dependencies ==="
+            pnpm install --frozen-lockfile --prod=false
+
+            echo "=== [3/5] Build packages ==="
+            pnpm run build:packages 2>/dev/null || true
+
+            echo "=== [4/5] Build backend ==="
+            pnpm --filter @lkvip/backend run build
+
+            echo "=== [5/5] Reload PM2 ==="
+            pm2 reload ${{ env.PM2_APP }} --update-env --env staging 2>/dev/null || \
+              pm2 start config/pm2/ecosystem.config.js --env staging
+            pm2 save
+
+            echo "=== Staging deploy complete @ $(date) ==="
+            pm2 status
+
+      - name: Staging health check
+        uses: appleboy/ssh-action@v1
+        with:
+          host:     ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key:      ${{ secrets.STAGING_SSH_KEY }}
+          port:     ${{ secrets.STAGING_PORT || 22 }}
+          script: |
+            sleep 5
+            STATUS=$(curl -sf http://127.0.0.1:5000/health \
+              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" \
+              2>/dev/null || echo "error")
+            if [ "$STATUS" = "healthy" ] || [ "$STATUS" = "degraded" ]; then
+              echo "Staging health check passed: $STATUS ✓"
+            else
+              echo "ERROR: Staging health check failed! Status: $STATUS"
+              pm2 logs ${{ env.PM2_APP }} --lines 50 --nostream
+              exit 1
+            fi

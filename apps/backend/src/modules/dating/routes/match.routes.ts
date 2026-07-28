@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const auth = require('../../../shared/middlewares/auth');
-const auditLogger = require('../../../shared/middlewares/auditLogger');
+const auth = require('../../../shared/middlewares/auth/auth');
+const auditLogger = require('../../../shared/middlewares/audit/auditLogger');
 const matchCtrl = require('../controllers/matchController');
 
 router.use(auth);

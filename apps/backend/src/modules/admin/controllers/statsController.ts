@@ -1,6 +1,6 @@
 // backend/src/modules/admin/controllers/statsController.js
 // Cross-project statistics — sử dụng đúng models từ từng project schema
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const { getPrismaClient } = require('../../../shared/config/databases');
 
 // Helper: safe count (trả về 0 nếu lỗi)

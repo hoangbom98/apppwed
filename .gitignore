@@ -90,3 +90,6 @@ apps/hub/public/assets/videos/
 
 # --- Vite shared transform cache (monorepo) ---
 node_modules/.vite-cache/
+
+.gemini/
+gha-creds-*.json

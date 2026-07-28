@@ -10,7 +10,7 @@
  *
  * All IDs are CUID strings — never coerce with +id.
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
+const { ok, created, error, notFound } = require('../../../shared/utils/network/response');
 const CallService = require('../services/callService');
 
 /**

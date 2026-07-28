@@ -4,9 +4,9 @@
  * AdminUserController — CRUD for admin accounts.
  * Uses req.prisma (admin DB, injected by projectResolver).
  */
-const { paginate }     = require('../../../shared/utils/helpers');
-const { hashPassword } = require('../../../shared/services/authService');
-const { ok, created, notFound, badRequest, serverError } = require('../../../shared/utils/response');
+const { paginate }     = require('../../../shared/utils/core/helpers');
+const { hashPassword } = require('../../../shared/services/auth/authService');
+const { ok, created, notFound, badRequest, serverError } = require('../../../shared/utils/network/response');
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function wrap(fn) {
@@ -74,7 +74,7 @@ exports.resetPassword = wrap(async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 8) return badRequest(res, 'Mật khẩu tối thiểu 8 ký tự');
   if (req.user.role !== 'super_admin' && req.params.id !== req.user.id) {
-    const { forbidden } = require('../../../shared/utils/response');
+    const { forbidden } = require('../../../shared/utils/network/response');
     return forbidden(res, 'Không có quyền đặt lại mật khẩu người khác');
   }
   try {

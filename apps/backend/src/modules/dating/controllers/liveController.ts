@@ -5,8 +5,8 @@
  * Manages LiveStream sessions in dating_db.
  * Models: LiveStream (@@map "live_streams"), GiftSend (@@map "gift_sends")
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const notifSvc = require('../../../shared/services/notificationService');
 
 // ── GET /dating/live/streams — list active/recent streams ────────────────────

@@ -6,8 +6,8 @@
  * Event fields: id, title, slug, description, image, startAt, endAt, location, maxAttendees, status
  * EventRegistration fields: id, eventId, userId, name, email, phone, status
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 exports.list = async (req, res) => {
   try {

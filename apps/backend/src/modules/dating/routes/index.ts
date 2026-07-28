@@ -1,7 +1,7 @@
 const router      = require('express').Router();
-const auth        = require('../../../shared/middlewares/auth');
-const adminGuard  = require('../../../shared/middlewares/adminGuard');
-const auditLogger = require('../../../shared/middlewares/auditLogger');
+const auth        = require('../../../shared/middlewares/auth/auth');
+const adminGuard  = require('../../../shared/middlewares/auth/adminGuard');
+const auditLogger = require('../../../shared/middlewares/audit/auditLogger');
 const { upload } = require('../../../shared/services/uploadService');
 const autocompleteCtrl = require('../controllers/autocompleteController');
 
@@ -126,7 +126,7 @@ router.put('/notifications/:id/read',     auth, auditLogger, notifCtrl.markRead)
 router.put('/notifications/read-all',     auth, auditLogger, notifCtrl.markAllRead);
 
 // ── Shared: Push Notifications ────────────────────────────────────
-router.use('/', require('../../../shared/routes/push.routes'));
+router.use('/', require('../../../shared/routes/user/push.routes'));
 
 // ── Admin: Profiles ───────────────────────────────────────────────
 router.get('/admin/profiles',         auth, adminGuard, adminCtrl.listProfiles);
@@ -162,18 +162,18 @@ router.get('/admin/live',             auth, adminGuard, adminCtrl.listLive);
 router.delete('/admin/live/:id',      auth, adminGuard, auditLogger, adminCtrl.deleteLive);
 
 // ── Core: Referral (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/referral.routes'));
+router.use('/', require('../../../shared/routes/user/referral.routes'));
 
 // ── Core: Loyalty (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/loyalty.routes'));
+router.use('/', require('../../../shared/routes/user/loyalty.routes'));
 
 // ── Core: Affiliate (shared) ─────────────────────────────────────
-router.use('/', require('../../../shared/routes/affiliate.routes'));
+router.use('/', require('../../../shared/routes/user/affiliate.routes'));
 
 // ── Core: Leaderboard (shared) ───────────────────────────────────
-router.use('/', require('../../../shared/routes/leaderboard.routes'));
+router.use('/', require('../../../shared/routes/user/leaderboard.routes'));
 
 // ── Core: Marketing Campaigns (admin, shared) ─────────────────────
-router.use('/', require('../../../shared/routes/campaign.routes'));
+router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 module.exports = router;

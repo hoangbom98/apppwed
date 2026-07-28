@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package lkvip.game;
+
+// ── Jackpot / Lottery Updates ─────────────────────────────────────────────────
+// Maps to game lottery draw events broadcast via Socket.IO.
+// Fields align with LotteryDraw / Jackpot models in prisma/game/schema.prisma.
+
+message JackpotUpdate {
+  string draw_id     = 1;
+  string game_id     = 2;
+  string game_name   = 3;
+  double jackpot     = 4;  // current jackpot pool (VND)
+  double total_bets  = 5;
+  int32  player_count = 6;
+  string status      = 7;  // "open" | "closed" | "drawn"
+  int64  timestamp_ms = 8;
+}
+
+message WatchJackpotRequest {
+  repeated string game_ids = 1; // empty = watch all active games
+}
+
+// ── Game Round Results ────────────────────────────────────────────────────────
+
+message RoundResult {
+  string round_id   = 1;
+  string game_id    = 2;
+  string game_name  = 3;
+  string result     = 4;  // JSON-encoded result (game-specific)
+  double payout     = 5;  // total payout
+  string status     = 6;  // "settled"
+  int64  timestamp_ms = 7;
+}
+
+message WatchRoundsRequest {
+  repeated string game_ids = 1;
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+
+message LeaderboardEntry {
+  string user_id   = 1;
+  string username  = 2;
+  string avatar    = 3;
+  double amount    = 4;
+  int32  rank      = 5;
+}
+
+message LeaderboardUpdate {
+  string game_id  = 1;
+  string period   = 2;  // "daily" | "weekly"
+  repeated LeaderboardEntry entries = 3;
+  int64  timestamp_ms = 4;
+}
+
+message WatchLeaderboardRequest {
+  string game_id = 1;
+  string period  = 2;  // "daily" | "weekly"
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
+
+service GameService {
+  // Server Streaming — pushes jackpot pool changes in real-time.
+  rpc WatchJackpot     (WatchJackpotRequest)     returns (stream JackpotUpdate);
+
+  // Server Streaming — pushes round results when a draw is settled.
+  rpc WatchRounds      (WatchRoundsRequest)      returns (stream RoundResult);
+
+  // Server Streaming — pushes leaderboard changes every bet cycle.
+  rpc WatchLeaderboard (WatchLeaderboardRequest) returns (stream LeaderboardUpdate);
+}

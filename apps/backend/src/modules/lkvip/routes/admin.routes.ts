@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const auth = require('../../../shared/middlewares/auth');
-const adminGuard = require('../../../shared/middlewares/adminGuard');
+const auth = require('../../../shared/middlewares/auth/auth');
+const adminGuard = require('../../../shared/middlewares/auth/adminGuard');
 const adminController = require('../controllers/adminController');
 
 // All admin routes require auth + admin role

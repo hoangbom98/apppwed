@@ -23,7 +23,7 @@
  *   news_reward_max  "5"         max news reading reward
  *   news_reward_limit "3"        max news reward per day per user
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
 
 // ── GET /trade/config (public — readable keys only) ───────────────────────────
 exports.getPublicConfig = async (req, res) => {

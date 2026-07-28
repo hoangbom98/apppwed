@@ -6,7 +6,7 @@
  * DB models: Match (matches), User (users)
  * Exports match what dating routes/index.js AND dating/routes/match.routes.js expect.
  */
-const { ok, created, error, notFound } = require('../../../shared/utils/response');
+const { ok, created, error, notFound } = require('../../../shared/utils/network/response');
 const MatchService = require('../services/matchService');
 
 function svc(req) { return new MatchService(req.prisma); }

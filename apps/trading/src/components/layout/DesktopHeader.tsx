@@ -2,10 +2,20 @@ import { useState } from 'react';
 import { Bell, Search, Sun, Moon, LogIn, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getUnreadCount } from '@/api/trade';
 
 export default function DesktopHeader() {
   const [darkMode, setDarkMode] = useState(true); // trade is always dark
   const { user, token, logout } = useAuthStore();
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notif-unread'],
+    queryFn:  getUnreadCount,
+    enabled:  !!token,
+    refetchInterval: 30_000,
+  });
+  const unreadCount: number = (unreadData as { data?: { count?: number } })?.data?.count ?? 0;
 
   const toggleDark = () => {
     document.documentElement.classList.toggle('dark');
@@ -58,7 +68,14 @@ export default function DesktopHeader() {
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--bn-text-secondary)')}
         >
           <Bell size={16} />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: 'var(--bn-red)' }} />
+          {unreadCount > 0 && (
+            <span
+              className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold px-0.5"
+              style={{ background: 'var(--bn-red)', color: '#fff' }}
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* Divider */}

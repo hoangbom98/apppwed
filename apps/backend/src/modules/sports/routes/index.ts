@@ -30,7 +30,7 @@
  */
 
 const { Router } = require('express');
-const authenticate = require('../../../shared/middlewares/auth');
+const authenticate = require('../../../shared/middlewares/auth/auth');
 
 // ── Role guard — admin only ───────────────────────────────────────────────────
 function adminOnly(req, res, next) {
@@ -305,18 +305,18 @@ router.get('/knowledge/:slug', async (req, res) => {
 router.get('/', (_req, res) => res.json({ success: true, module: 'sports', version: '2.1' }));
 
 // ── Core: Referral (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/referral.routes'));
+router.use('/', require('../../../shared/routes/user/referral.routes'));
 
 // ── Core: Loyalty (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/loyalty.routes'));
+router.use('/', require('../../../shared/routes/user/loyalty.routes'));
 
 // ── Core: Affiliate (shared) ─────────────────────────────────────
-router.use('/', require('../../../shared/routes/affiliate.routes'));
+router.use('/', require('../../../shared/routes/user/affiliate.routes'));
 
 // ── Core: Leaderboard (shared) ───────────────────────────────────
-router.use('/', require('../../../shared/routes/leaderboard.routes'));
+router.use('/', require('../../../shared/routes/user/leaderboard.routes'));
 
 // ── Core: Marketing Campaigns (admin, shared) ─────────────────────
-router.use('/', require('../../../shared/routes/campaign.routes'));
+router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 module.exports = router;

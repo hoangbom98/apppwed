@@ -6,8 +6,8 @@
  * User:  GET /trade/prize/configs, POST /trade/prize/draw, GET /trade/prize/records
  * Admin: CRUD /trade/admin/prize/configs
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate }                  = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                  = require('../../../shared/utils/core/helpers');
 const notifSvc                      = require('../../../shared/services/notificationService');
 
 // ── Odds-based draw algorithm ─────────────────────────────────────────────────

@@ -1,0 +1,6 @@
+@import '@lkvip/ui/src/styles/design-tokens.css';
+
+:root {
+  /* Override nếu cần, ví dụ: */
+  --card-background-color: #1a1a2e;
+}

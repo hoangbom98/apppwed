@@ -22,7 +22,7 @@ jest.mock('../services/logger', () => ({
 
 // Import response helpers (resolve after mocks)
 let forbidden: jest.Mock, unauthorized: jest.Mock;
-jest.mock('../shared/utils/response', () => {
+jest.mock('../shared/utils/network/response', () => {
   forbidden    = jest.fn();
   unauthorized = jest.fn();
   return { forbidden, unauthorized };
@@ -30,7 +30,7 @@ jest.mock('../shared/utils/response', () => {
 
 // Import SUT after mocks
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const projectAccessGuard = require('../shared/middlewares/projectAccessGuard');
+const projectAccessGuard = require('../shared/middlewares/auth/projectAccessGuard');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

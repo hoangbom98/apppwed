@@ -6,8 +6,8 @@
  * Routes: GET /users/home, GET /users/discovery, GET /users/:id,
  *         POST /users/:id/report, POST /users/:id/block
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const UserService  = require('../services/userService');
 
 // ── GET /dating/users/home — personalised home data ──────────────────────────

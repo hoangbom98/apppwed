@@ -3,7 +3,7 @@
 
 'use strict';
 const { comparePassword, hashPassword, generateTokens, generateOtp, generateCode, checkNewPassword } = require('../../../shared/services/authService');
-const { success, created, error, unauthorized } = require('../../../shared/utils/response');
+const { success, created, error, unauthorized } = require('../../../shared/utils/network/response');
 const cache        = require('../../../shared/services/cacheService');
 const logger       = require('../../../shared/services/logger');
 const emailGuard   = require('../../../shared/services/emailGuardService');

@@ -170,7 +170,7 @@ notificationQueue.process(async (job) => {
           text:    data.text,
         });
       } else {
-        const emailService = require('../services/emailService');
+        const emailService = require('../shared/services/communication/emailService');
         await emailService.send(data.to, data.subject, data.html || data.text, data.text);
       }
       emitNotifStatus('email', 'direct', 'sent');

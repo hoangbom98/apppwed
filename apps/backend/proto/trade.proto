@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package lkvip.trade;
+
+// ── Price Feed ────────────────────────────────────────────────────────────────
+// Maps to the snapshot object emitted by marketPriceFeed.ts.
+// Fields align with PriceHistory model in prisma/trade/schema.prisma.
+
+message PriceUpdate {
+  string symbol       = 1; // sym.code e.g. "BTCUSDT"
+  double last_price   = 2;
+  double change_24h   = 3;
+  double volume_24h   = 4;
+  double high_24h     = 5;
+  double low_24h      = 6;
+  int64  timestamp_ms = 7; // Unix milliseconds
+}
+
+message WatchPricesRequest {
+  repeated string symbols = 1; // empty = watch all active symbols
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+// Mirrors orderController.ts createOrder logic.
+
+message PlaceOrderRequest {
+  string symbol    = 1;  // e.g. "BTCUSDT"
+  string type      = 2;  // "market" | "limit"
+  string side      = 3;  // "buy" | "sell"
+  double price     = 4;  // 0 for market orders
+  double quantity  = 5;
+  int32  leverage  = 6;  // default 1
+  double stop_price = 7; // optional stop-loss
+  string project   = 8;  // resolved from auth metadata
+}
+
+message PlaceOrderResponse {
+  string order_id   = 1;
+  string status     = 2;  // "pending"
+  string symbol     = 3;
+  string side       = 4;
+  double price      = 5;
+  double quantity   = 6;
+  string created_at = 7;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message CancelOrderResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+// ── Market / Symbols ──────────────────────────────────────────────────────────
+
+message GetPairsRequest {
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+message Symbol {
+  string id          = 1;
+  string code        = 2;
+  string name        = 3;
+  string base_asset  = 4;
+  string quote_asset = 5;
+  string status      = 6;
+}
+
+message GetPairsResponse {
+  repeated Symbol symbols = 1;
+  int32 total = 2;
+}
+
+// ── Wallet ────────────────────────────────────────────────────────────────────
+
+message GetWalletRequest {}
+
+message WalletBalance {
+  string currency  = 1;
+  double balance   = 2;
+  double frozen    = 3;
+  double available = 4;
+}
+
+message GetWalletResponse {
+  repeated WalletBalance balances = 1;
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
+
+service TradeService {
+  // Server Streaming — replaces setInterval(30s) in marketPriceFeed.ts.
+  // Pushes a PriceUpdate as soon as the price broadcast fires.
+  rpc WatchPrices   (WatchPricesRequest)  returns (stream PriceUpdate);
+
+  // Unary — mirrors POST /orders with built-in deadline support.
+  rpc PlaceOrder    (PlaceOrderRequest)   returns (PlaceOrderResponse);
+  rpc CancelOrder   (CancelOrderRequest)  returns (CancelOrderResponse);
+
+  // Unary — mirrors GET /pairs and GET /wallet.
+  rpc GetPairs      (GetPairsRequest)     returns (GetPairsResponse);
+  rpc GetWallet     (GetWalletRequest)    returns (GetWalletResponse);
+}

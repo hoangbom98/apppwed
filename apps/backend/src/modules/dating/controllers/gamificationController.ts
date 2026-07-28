@@ -13,7 +13,7 @@
  * Check-in data is stored as a simple Transaction with type='checkin'
  * and a date-keyed note so we can detect duplicates.
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 // ── GET /dating/gamification/daily — daily check-in status ───────────────────
 exports.getDailyStatus = async (req, res) => {

@@ -20,7 +20,7 @@
  *   104 = CMD368 Sports
  */
 const SportsProviderService     = require('../services/sportsProviderService');
-const { success, error, badRequest } = require('../../../shared/utils/response');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
 
 // ── GET /api/sports/provider/launch ──────────────────────────────────────────
 

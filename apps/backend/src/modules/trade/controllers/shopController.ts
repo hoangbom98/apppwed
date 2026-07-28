@@ -7,8 +7,8 @@
  *        GET /trade/shop/orders
  * Admin: CRUD /trade/admin/shop/items
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate }                           = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                           = require('../../../shared/utils/core/helpers');
 const notifSvc                               = require('../../../shared/services/notificationService');
 
 // ── GET /trade/shop ───────────────────────────────────────────────────────────

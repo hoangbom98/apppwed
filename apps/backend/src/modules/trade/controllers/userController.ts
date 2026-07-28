@@ -2,12 +2,12 @@
 'use strict';
 /**
  * trade/controllers/userController.js
- * User management endpoints for the trade module admin.
+ * User management endpoints for the trade module.
  * Uses req.prisma (injected by projectResolver) — no class instantiation needed.
  * All IDs are CUIDs (strings) — never coerce with +id or Number(id).
  */
-const { ok, error } = require('../../../shared/utils/response');
-const { paginate }  = require('../../../shared/utils/helpers');
+const { ok, error, success } = require('../../../shared/utils/network/response');
+const { paginate }  = require('../../../shared/utils/core/helpers');
 
 // Field whitelist for admin user update — prevents mass-assignment of sensitive fields
 const ALLOWED_UPDATE_FIELDS = ['fullName', 'phone', 'role', 'status'];
@@ -84,4 +84,19 @@ exports.update = async (req, res) => {
   } catch (e) {
     return error(res, e.message, 500);
   }
+};
+
+// ── PATCH /profile/avatar — upload avatar image ───────────────────────────────
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) return error(res, 'Không có file được tải lên', 400);
+    const { saveAvatar } = require('../../../shared/services/content/uploadService');
+    const avatarUrl = await saveAvatar(req.file.buffer, req.user.id);
+    const user = await req.prisma.user.update({
+      where:  { id: req.user.id },
+      data:   { avatar: avatarUrl },
+      select: { id: true, email: true, fullName: true, phone: true, avatar: true },
+    });
+    return ok(res, user, 'Ảnh đại diện đã được cập nhật');
+  } catch (e) { return error(res, e.message, 500); }
 };

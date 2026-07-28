@@ -13,8 +13,8 @@
  */
 'use strict';
 
-const { success, error, badRequest, notFound } = require('../../../shared/utils/response');
-const { paginate }                             = require('../../../shared/utils/helpers');
+const { success, error, badRequest, notFound } = require('../../../shared/utils/network/response');
+const { paginate }                             = require('../../../shared/utils/core/helpers');
 
 // ── GET /game/savingsVault/products — public ───────────────────────────────────────
 exports.getProducts = async (req, res) => {

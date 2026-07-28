@@ -5,7 +5,7 @@
  * Used to confirm: withdrawals, order placement, investment purchases
  */
 const bcrypt  = require('bcryptjs');
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 // ── POST /trade/trading-password/set ─────────────────────────────────────────
 exports.set = async (req, res) => {

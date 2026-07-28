@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable */
 
-const { success, created, error } = require('../../../shared/utils/response');
+const { success, created, error } = require('../../../shared/utils/network/response');
 const VirtualAccountService  = require('../services/virtualAccountService');
 const ConfigService          = require('../../../shared/services/configService');
 const paymentService         = require('../../../shared/services/paymentService');

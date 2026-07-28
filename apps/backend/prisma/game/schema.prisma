@@ -20,6 +20,7 @@ datasource db {
 
 model User {
   id                 String    @id @default(cuid())
+  tenant             String    @default("game") @db.VarChar(20)
   email              String?   @unique @db.VarChar(191)
   phone              String?   @unique @db.VarChar(20)
   username           String?   @unique @db.VarChar(50)
@@ -69,6 +70,7 @@ model User {
   @@index([status])
   @@index([vipLevel])
   @@index([agentId])
+  @@index([tenant])
   @@index([createdAt])
   @@map("users")
 }
@@ -79,6 +81,7 @@ model User {
 
 model Referral {
   id         String   @id @default(cuid())
+  tenant     String   @default("game") @db.VarChar(20)
   referrerId String   @db.VarChar(30)
   referrer   User     @relation("Referrer", fields: [referrerId], references: [id])
   refereeId  String   @unique @db.VarChar(30)
@@ -87,6 +90,7 @@ model Referral {
   status     String   @default("active") @db.VarChar(20) // active | expired
   createdAt  DateTime @default(now())
 
+  @@index([tenant])
   @@index([referrerId])
   @@map("referrals")
 }
@@ -97,6 +101,7 @@ model Referral {
 
 model Agent {
   id              String   @id @default(cuid())
+  tenant          String   @default("game") @db.VarChar(20)
   userId          String   @unique @db.VarChar(30)
   user            User     @relation(fields: [userId], references: [id])
   // Referential parent agent — stored as plain string to avoid circular Prisma FK issues
@@ -113,12 +118,14 @@ model Agent {
   commissions Commission[]
 
   @@index([parentAgentId])
+  @@index([tenant])
   @@index([status])
   @@map("agents")
 }
 
 model Commission {
   id        String    @id @default(cuid())
+  tenant    String    @default("game") @db.VarChar(20)
   agentId   String    @db.VarChar(30)
   agent     Agent     @relation(fields: [agentId], references: [id])
   // e.g. "2025-06" monthly or "2025-01-15" daily
@@ -134,6 +141,7 @@ model Commission {
   updatedAt DateTime  @updatedAt
 
   @@unique([agentId, period])
+  @@index([tenant])
   @@index([agentId, status])
   @@map("commissions")
 }
@@ -144,6 +152,7 @@ model Commission {
 
 model VipLevel {
   id              String   @id @default(cuid())
+  tenant          String   @default("game") @db.VarChar(20)
   level           Int      @unique
   name            String   @db.VarChar(50) // Bronze | Silver | Gold | Platinum | Diamond
   icon            String?  @db.VarChar(500)
@@ -160,11 +169,13 @@ model VipLevel {
 
   userVips UserVip[]
 
+    @@index([tenant])
   @@map("vip_levels")
 }
 
 model UserVip {
   id           String   @id @default(cuid())
+  tenant       String   @default("game") @db.VarChar(20)
   userId       String   @unique @db.VarChar(30)
   user         User     @relation(fields: [userId], references: [id])
   levelId      String   @db.VarChar(30)
@@ -174,11 +185,13 @@ model UserVip {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+    @@index([tenant])
   @@map("user_vips")
 }
 
 model CashbackHistory {
   id        String   @id @default(cuid())
+  tenant    String   @default("game") @db.VarChar(20)
   userId    String   @db.VarChar(30)
   user      User     @relation(fields: [userId], references: [id])
   amount    Decimal  @db.Decimal(19, 4)
@@ -188,12 +201,14 @@ model CashbackHistory {
   paidAt    DateTime @default(now())
   createdAt DateTime @default(now())
 
+  @@index([tenant])
   @@index([userId, createdAt])
   @@map("cashback_history")
 }
 
 model InterestHistory {
   id        String   @id @default(cuid())
+  tenant    String   @default("game") @db.VarChar(20)
   userId    String   @db.VarChar(30)
   user      User     @relation(fields: [userId], references: [id])
   amount    Decimal  @db.Decimal(19, 4)
@@ -202,6 +217,7 @@ model InterestHistory {
   date      String   @db.VarChar(10) // "2025-01-15"
   createdAt DateTime @default(now())
 
+  @@index([tenant])
   @@index([userId, date])
   @@map("interest_history")
 }
@@ -212,6 +228,7 @@ model InterestHistory {
 
 model Promotion {
   id              String    @id @default(cuid())
+  tenant          String    @default("game") @db.VarChar(20)
   // welcome | deposit | cashback | free_spin | event | referral
   type            String    @db.VarChar(30)
   title           String    @db.VarChar(255)
@@ -237,12 +254,14 @@ model Promotion {
 
   claims PromotionClaim[]
 
+  @@index([tenant])
   @@index([status, startDate, endDate])
   @@map("promotions")
 }
 
 model PromotionClaim {
   id          String    @id @default(cuid())
+  tenant      String    @default("game") @db.VarChar(20)
   userId      String    @db.VarChar(30)
   user        User      @relation(fields: [userId], references: [id])
   promotionId String    @db.VarChar(30)
@@ -256,6 +275,7 @@ model PromotionClaim {
   completedAt DateTime?
 
   @@unique([userId, promotionId])
+  @@index([tenant])
   @@index([userId, status])
   @@map("promotion_claims")
 }
@@ -266,6 +286,7 @@ model PromotionClaim {
 
 model DepositOrder {
   id          String    @id @default(cuid())
+  tenant      String    @default("game") @db.VarChar(20)
   userId      String    @db.VarChar(30)
   user        User      @relation(fields: [userId], references: [id])
   // bank | usdt | momo | zalopay | vnpay | vietqr
@@ -285,6 +306,7 @@ model DepositOrder {
   updatedAt   DateTime  @updatedAt
 
   @@index([userId, status])
+  @@index([tenant])
   @@index([status, createdAt])
   @@map("deposit_orders")
 }
@@ -295,6 +317,7 @@ model DepositOrder {
 
 model WithdrawOrder {
   id          String    @id @default(cuid())
+  tenant      String    @default("game") @db.VarChar(20)
   userId      String    @db.VarChar(30)
   user        User      @relation(fields: [userId], references: [id])
   amount      Decimal   @db.Decimal(19, 4)
@@ -325,6 +348,7 @@ model WithdrawOrder {
 
 model Transaction {
   id            String   @id @default(cuid())
+  tenant        String   @default("game") @db.VarChar(20)
   userId        String   @db.VarChar(30)
   user          User     @relation(fields: [userId], references: [id])
   // deposit | withdraw | bet | win | refund | bonus | cashback | interest | commission | adjustment
@@ -339,6 +363,7 @@ model Transaction {
 
   @@index([userId, type])
   @@index([userId, createdAt])
+  @@index([tenant])
   @@index([referenceType, referenceId])
   @@map("transactions")
 }
@@ -543,6 +568,7 @@ model Game {
 
 model GameSession {
   id                String    @id @default(cuid())
+  tenant            String    @default("game") @db.VarChar(20)
   userId            String    @db.VarChar(30)
   user              User      @relation(fields: [userId], references: [id])
   gameId            String    @db.VarChar(30)
@@ -563,6 +589,7 @@ model GameSession {
 
   @@index([userId, status])
   @@index([userId, createdAt])
+  @@index([tenant])
   @@index([gameId])
   @@map("game_sessions")
 }
@@ -574,6 +601,7 @@ model GameSession {
 
 model GameTransaction {
   id             String       @id @default(cuid())
+  tenant         String       @default("game") @db.VarChar(20)
   userId         String       @db.VarChar(30)
   // sessionId is optional — seamless callbacks don't always have a session
   sessionId      String?      @db.VarChar(30)
@@ -603,6 +631,7 @@ model GameTransaction {
   @@index([userId, type])
   @@index([userId, createdAt])
   @@index([sessionId])
+  @@index([tenant])
   @@index([externalId])
   @@index([wagerCode])
   @@map("game_transactions")
@@ -615,6 +644,7 @@ model GameTransaction {
 
 model GameWager {
   id             String    @id @default(cuid())
+  tenant         String    @default("game") @db.VarChar(20)
   memberAccount  String    @db.VarChar(100) // GSC member_account
   wagerCode      String    @unique @db.VarChar(100)
   wagerStatus    String    @db.VarChar(30) // PENDING | WIN | LOSE | VOID | CANCELLED
@@ -638,6 +668,7 @@ model GameWager {
   @@index([memberAccount])
   @@index([wagerStatus])
   @@index([productCode])
+  @@index([tenant])
   @@index([placedAt])
   @@map("game_wagers")
 }

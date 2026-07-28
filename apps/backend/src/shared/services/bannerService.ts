@@ -1,1 +1,1 @@
-module.exports = { getAll: async (prisma) => { return await prisma.crossBanner.findMany(); } };
+module.exports = require('./content/bannerService'.replace('.ts', ''));

@@ -27,7 +27,6 @@ export const binanceThemeConfig: ThemeConfig = {
     },
     Table: {
       headerColor: '#707a8a',
-      headerFontSize: 12,
     }
   }
 };

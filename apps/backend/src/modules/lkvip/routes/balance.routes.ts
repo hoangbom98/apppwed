@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const auth = require('../../../shared/middlewares/auth');
+const auth = require('../../../shared/middlewares/auth/auth');
 const balanceController = require('../controllers/balanceController');
 
 router.get('/balance', auth, balanceController.getBalance);

@@ -19,7 +19,7 @@
  */
 
 const { getPrismaClient }   = require('../../../shared/config/databases');
-const { success, error }    = require('../../../shared/utils/response');
+const { success, error }    = require('../../../shared/utils/network/response');
 const GroupFinanceService   = require('../services/groupFinanceService');
 const FeeConfigService      = require('../services/feeConfigService');
 const InterestWorker        = require('../ops/financial/interestWorker');

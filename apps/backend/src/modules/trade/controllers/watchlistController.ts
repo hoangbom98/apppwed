@@ -6,7 +6,7 @@
  * User: GET /trade/watchlists, POST /trade/watchlists, DELETE /trade/watchlists/:id
  *       POST /trade/watchlists/:id/items, DELETE /trade/watchlists/:watchlistId/items/:symbolId
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
 
 // ── GET /trade/watchlists ─────────────────────────────────────────────────────
 exports.list = async (req, res) => {

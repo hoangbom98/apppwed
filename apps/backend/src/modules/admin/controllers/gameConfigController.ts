@@ -4,7 +4,7 @@
  * The authoritative ProjectConfig CRUD now lives in uiConfigController.js.
  * These handlers delegate to req.configService (bound to admin_db).
  */
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const { getPrismaClient } = require('../../../shared/config/databases');
 
 /**

@@ -20,7 +20,7 @@ export default function TradeSettingsPage() {
   const toggle = (k: keyof typeof prefs) => setPrefs(p => ({ ...p, [k]: !p[k] }));
 
   const changePwdMut = useMutation({
-    mutationFn: () => api.put('/trade/auth/password', { currentPassword: pwdForm.current, newPassword: pwdForm.next }),
+    mutationFn: () => api.put('/trade/auth/password', { currentPassword: pwdForm.current, newPassword: pwdForm.next }).then(r => r.data),
     onSuccess: () => {
       setMsg('OK Đổi mật khẩu thành công!');
       setPwdForm({ current: '', next: '', confirm: '' });
@@ -39,41 +39,51 @@ export default function TradeSettingsPage() {
 
   const kycStatus = (user as any)?.kycStatus ?? 'none';
   const kycBadge = kycStatus === 'verified'
-    ? <span className="flex items-center gap-1 text-green-400 text-xs"><CheckCircle size={12} />Đã xác minh</span>
+    ? <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--bn-green)' }}><CheckCircle size={12} />Đã xác minh</span>
     : kycStatus === 'pending_review'
-    ? <span className="flex items-center gap-1 text-yellow-400 text-xs"><AlertTriangle size={12} />Đang xét duyệt</span>
-    : <span className="flex items-center gap-1 text-gray-400 text-xs">Chưa xác minh</span>;
+    ? <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--bn-yellow)' }}><AlertTriangle size={12} />Đang xét duyệt</span>
+    : <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--bn-text-muted)' }}>Chưa xác minh</span>;
+
+  const inputStyle = {
+    background: 'var(--bn-bg-elevated)',
+    border:     '1px solid var(--bn-border)',
+    color:      'var(--bn-text-primary)',
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link to="/profile" className="p-1.5 text-gray-400 hover:text-white rounded-lg">
+        <Link to="/profile"
+          className="p-1.5 rounded-lg transition-colors"
+          style={{ color: 'var(--bn-text-secondary)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--bn-text-primary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--bn-text-secondary)')}>
           <ChevronLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-white">Cài đặt & Bảo mật</h1>
-          <p className="text-xs text-gray-400">Quản lý tài khoản và bảo mật</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--bn-text-primary)' }}>Cài đặt &amp; Bảo mật</h1>
+          <p className="text-xs" style={{ color: 'var(--bn-text-secondary)' }}>Quản lý tài khoản và bảo mật</p>
         </div>
       </div>
 
       {/* Security status */}
-      <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20 rounded-2xl p-5">
+      <div className="rounded-2xl p-5" style={{ background: 'var(--bn-bg-surface)', border: '1px solid var(--bn-yellow-border)' }}>
         <div className="flex items-center gap-3 mb-3">
-          <Shield size={18} className="text-blue-400" />
-          <span className="font-semibold text-white">Trạng thái bảo mật</span>
+          <Shield size={18} style={{ color: 'var(--bn-yellow)' }} />
+          <span className="font-semibold" style={{ color: 'var(--bn-text-primary)' }}>Trạng thái bảo mật</span>
         </div>
         <div className="space-y-2">
           {[
-            { label: 'Xác minh email', ok: !!(user as any)?.email },
-            { label: 'Xác minh KYC',  ok: kycStatus === 'verified' },
+            { label: 'Xác minh email',        ok: !!(user as any)?.email },
+            { label: 'Xác minh KYC',          ok: kycStatus === 'verified' },
             { label: 'Xác thực 2 bước (2FA)', ok: false },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">{item.label}</span>
+              <span style={{ color: 'var(--bn-text-secondary)' }}>{item.label}</span>
               {item.ok
-                ? <span className="flex items-center gap-1 text-green-400 text-xs"><CheckCircle size={12} />Đã bật</span>
-                : <span className="flex items-center gap-1 text-gray-500 text-xs"><AlertTriangle size={12} />Chưa bật</span>
+                ? <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--bn-green)' }}><CheckCircle size={12} />Đã bật</span>
+                : <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--bn-text-muted)' }}><AlertTriangle size={12} />Chưa bật</span>
               }
             </div>
           ))}
@@ -82,72 +92,98 @@ export default function TradeSettingsPage() {
 
       {/* Account */}
       <div>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Tài khoản</h2>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl divide-y divide-gray-800/60">
-          <Link to="/kyc" className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-800/40 transition-colors">
+        <h2 className="text-xs font-semibold uppercase tracking-wider mb-2 px-1"
+          style={{ color: 'var(--bn-text-muted)' }}>Tài khoản</h2>
+        <div className="rounded-2xl divide-y" style={{ background: 'var(--bn-bg-surface)', border: '1px solid var(--bn-border)', borderColor: 'var(--bn-border)' }}>
+          <Link to="/kyc"
+            className="flex items-center justify-between px-4 py-3.5 transition-colors"
+            style={{ color: 'inherit' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bn-bg-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                <Shield size={15} className="text-blue-400" />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: 'var(--bn-bg-elevated)' }}>
+                <Shield size={15} style={{ color: 'var(--bn-yellow)' }} />
               </div>
               <div>
-                <p className="text-sm text-white">Xác minh KYC</p>
+                <p className="text-sm" style={{ color: 'var(--bn-text-primary)' }}>Xác minh KYC</p>
                 <div className="mt-0.5">{kycBadge}</div>
               </div>
             </div>
-            <ChevronRight size={15} className="text-gray-500" />
+            <ChevronRight size={15} style={{ color: 'var(--bn-text-muted)' }} />
           </Link>
 
-          <Link to="/2fa" className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-800/40 transition-colors">
+          <Link to="/2fa"
+            className="flex items-center justify-between px-4 py-3.5 transition-colors"
+            style={{ color: 'inherit' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bn-bg-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                <Smartphone size={15} className="text-purple-400" />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: 'var(--bn-bg-elevated)' }}>
+                <Smartphone size={15} style={{ color: 'var(--bn-blue)' }} />
               </div>
               <div>
-                <p className="text-sm text-white">Xác thực 2 bước (2FA)</p>
-                <p className="text-[10px] text-gray-500">Google Authenticator</p>
+                <p className="text-sm" style={{ color: 'var(--bn-text-primary)' }}>Xác thực 2 bước (2FA)</p>
+                <p className="text-[10px]" style={{ color: 'var(--bn-text-muted)' }}>Google Authenticator</p>
               </div>
             </div>
-            <ChevronRight size={15} className="text-gray-500" />
+            <ChevronRight size={15} style={{ color: 'var(--bn-text-muted)' }} />
           </Link>
 
           <button
             onClick={() => setShowChangePwd(!showChangePwd)}
-            className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-gray-800/40 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3.5 transition-colors"
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bn-bg-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                <Key size={15} className="text-yellow-400" />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: 'var(--bn-bg-elevated)' }}>
+                <Key size={15} style={{ color: 'var(--bn-yellow)' }} />
               </div>
-              <p className="text-sm text-white">Đổi mật khẩu</p>
+              <p className="text-sm" style={{ color: 'var(--bn-text-primary)' }}>Đổi mật khẩu</p>
             </div>
-            <ChevronRight size={`15`} className={`text-gray-500 transition-transform ${showChangePwd ? 'rotate-90' : ''}`} />
+            <ChevronRight size={15} style={{ color: 'var(--bn-text-muted)', transform: showChangePwd ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
           </button>
 
           {showChangePwd && (
-            <form onSubmit={handleChangePwd} className="px-4 pb-4 space-y-3 border-t border-gray-800/60 pt-4">
+            <form onSubmit={handleChangePwd} className="px-4 pb-4 space-y-3 pt-4"
+              style={{ borderTop: '1px solid var(--bn-border)' }}>
               {(['current', 'next', 'confirm'] as const).map(k => (
                 <div key={k} className="relative">
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-xs mb-1" style={{ color: 'var(--bn-text-muted)' }}>
                     {k === 'current' ? 'Mật khẩu hiện tại' : k === 'next' ? 'Mật khẩu mới' : 'Xác nhận mật khẩu mới'}
                   </label>
                   <input
                     type={showPwd ? 'text' : 'password'}
                     value={pwdForm[k]}
                     onChange={e => setPwdForm(p => ({ ...p, [k]: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 pr-10"
+                    className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none pr-10 transition-colors"
+                    style={inputStyle}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--bn-yellow)')}
+                    onBlur={e  => (e.currentTarget.style.borderColor = 'var(--bn-border)')}
                     required
                   />
                   <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3 bottom-2.5 text-gray-500 hover:text-gray-300">
+                    className="absolute right-3 bottom-2.5" style={{ color: 'var(--bn-text-muted)' }}>
                     {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
               ))}
               {msg && (
-                <p className={`text-xs p-2.5 rounded-xl ${msg.startsWith('OK') ? 'bg-green-950 text-green-400' : 'bg-red-950 text-red-400'}`}>{msg.replace(/^(OK|ERR) /, '')}</p>
+                <p className="text-xs p-2.5 rounded-xl"
+                  style={{
+                    background: msg.startsWith('OK') ? 'var(--bn-green-muted)' : 'var(--bn-red-muted)',
+                    color: msg.startsWith('OK') ? 'var(--bn-green)' : 'var(--bn-red)',
+                  }}>
+                  {msg.replace(/^(OK|ERR) /, '')}
+                </p>
               )}
               <button type="submit" disabled={changePwdMut.isPending}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm disabled:opacity-50 transition-colors">
+                className="w-full py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 transition-colors bn-btn-yellow">
                 {changePwdMut.isPending ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
               </button>
             </form>
@@ -157,25 +193,33 @@ export default function TradeSettingsPage() {
 
       {/* Notifications */}
       <div>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Thông báo</h2>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl divide-y divide-gray-800/60">
+        <h2 className="text-xs font-semibold uppercase tracking-wider mb-2 px-1"
+          style={{ color: 'var(--bn-text-muted)' }}>Thông báo</h2>
+        <div className="rounded-2xl divide-y" style={{ background: 'var(--bn-bg-surface)', border: '1px solid var(--bn-border)' }}>
           {[
-            { key: 'notifications',  label: 'Thông báo giao dịch', icon: Bell },
-            { key: 'emailAlerts',    label: 'Cảnh báo qua email',  icon: Bell },
+            { key: 'notifications',  label: 'Thông báo giao dịch',    icon: Bell },
+            { key: 'emailAlerts',    label: 'Cảnh báo qua email',     icon: Bell },
             { key: 'tradingAlerts',  label: 'Cảnh báo biến động giá', icon: Bell },
           ].map(({ key, label, icon: Icon }) => {
             const isOn = prefs[key as keyof typeof prefs];
             return (
               <div key={key} className="flex items-center justify-between px-4 py-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center">
-                    <Icon size={15} className="text-gray-400" />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                    style={{ background: 'var(--bn-bg-elevated)' }}>
+                    <Icon size={15} style={{ color: 'var(--bn-text-secondary)' }} />
                   </div>
-                  <p className="text-sm text-white">{label}</p>
+                  <p className="text-sm" style={{ color: 'var(--bn-text-primary)' }}>{label}</p>
                 </div>
-                <button onClick={() => toggle(key as keyof typeof prefs)}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${isOn ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isOn ? 'translate-x-6' : 'translate-x-1'}`} />
+                <button
+                  onClick={() => toggle(key as keyof typeof prefs)}
+                  className="relative w-11 h-6 rounded-full transition-colors"
+                  style={{ background: isOn ? 'var(--bn-yellow)' : 'var(--bn-border)' }}
+                >
+                  <span
+                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                    style={{ transform: isOn ? 'translateX(1.5rem)' : 'translateX(0.25rem)' }}
+                  />
                 </button>
               </div>
             );
@@ -186,12 +230,17 @@ export default function TradeSettingsPage() {
       {/* Logout */}
       <button
         onClick={() => { logout(); navigate('/login'); }}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-red-900/20 border border-red-900/30 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-2xl text-sm font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-medium transition-colors"
+        style={{ background: 'var(--bn-red-muted)', border: '1px solid rgba(246,70,93,0.25)', color: 'var(--bn-red)' }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(246,70,93,0.18)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bn-red-muted)')}
       >
         <LogOut size={15} /> Đăng xuất khỏi tài khoản
       </button>
 
-      <p className="text-center text-[10px] text-gray-600">TradePro v1.0.0 · Giao dịch có trách nhiệm</p>
+      <p className="text-center text-[10px]" style={{ color: 'var(--bn-text-muted)' }}>
+        TradePro v1.0.0 · Giao dịch có trách nhiệm
+      </p>
     </div>
   );
 }

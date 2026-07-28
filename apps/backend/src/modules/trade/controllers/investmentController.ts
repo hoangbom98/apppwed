@@ -13,8 +13,8 @@
  *   CommissionLog      (@@map "commission_logs")
  *   Referral           (@@map "referrals")
  */
-const { success, created, error, notFound, forbidden } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound, forbidden } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const notifSvc = require('../../../shared/services/notificationService');
 
 // ── Commission rates (overridable via DB config) ──────────────────────────────

@@ -4,7 +4,7 @@
  * bankAccountController — user bank / e-wallet accounts management
  * Routes: /trade/bank-accounts
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
 
 // ── GET /trade/bank-accounts ──────────────────────────────────────────────────
 exports.list = async (req, res) => {

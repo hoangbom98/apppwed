@@ -5,9 +5,9 @@
  * REST interface for chat — all real-time events go through chatSocket.js.
  * DB models: ChatRoom (chat_rooms), ChatRoomMember (chat_room_members), Message (messages)
  */
-const { ok, created, error, notFound, forbidden } = require('../../../shared/utils/response');
+const { ok, created, error, notFound, forbidden } = require('../../../shared/utils/network/response');
 const ChatService = require('../services/chatService');
-const { paginate } = require('../../../shared/utils/helpers');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 function svc(req) { return new ChatService(req.prisma); }
 

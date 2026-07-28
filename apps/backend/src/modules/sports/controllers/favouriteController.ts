@@ -1,5 +1,5 @@
 // @ts-nocheck
-const { success, created, error } = require('../../../shared/utils/response');
+const { success, created, error } = require('../../../shared/utils/network/response');
 
 exports.list = async (req, res) => {
   try {

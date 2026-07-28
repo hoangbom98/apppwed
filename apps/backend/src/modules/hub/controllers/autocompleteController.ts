@@ -4,7 +4,7 @@
  * GET /api/hub/autocomplete?q=<query>[&source=game|website|tool|news|all][&limit=10]
  */
 
-const { ok, badRequest } = require('../../../shared/utils/response');
+const { ok, badRequest } = require('../../../shared/utils/network/response');
 
 async function searchGames(prisma, q, limit) {
   const rows = await prisma.game.findMany({

@@ -13,8 +13,8 @@
  */
 'use strict';
 
-const { success, error, badRequest } = require('../../../shared/utils/response');
-const { paginate }                   = require('../../../shared/utils/helpers');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
+const { paginate }                   = require('../../../shared/utils/core/helpers');
 
 // Rebate rates per VIP level per game type (learned from caipiao_membergroup.fs_*)
 // Format: { [vipLevel]: { live, slot, lottery, sports } }

@@ -1,6 +1,6 @@
 // @ts-nocheck
 'use strict';
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const https = require('https');
 
 const MASKED_VALUE = '[REDACTED]';
@@ -42,9 +42,11 @@ exports.testIntegration = async (req, res) => {
     const strValue = String(value).trim();
 
     switch (key) {
-      case 'TELEGRAM_BOT_TOKEN': {
+      // ── Telegram — test bất kỳ bot token (getMe) ────────────────────────────
+      case 'TELEGRAM_BOT_TOKEN':
+      case 'TELEGRAM_SUPPORT_BOT_TOKEN':
+      case 'TELEGRAM_PROMO_BOT_TOKEN': {
         const result = await new Promise((resolve) => {
-          const body = JSON.stringify({ chat_id: req.body.chatId || '0', text: 'Test LKVIP Admin' });
           const opts = {
             hostname: 'api.telegram.org',
             path:     `/bot${strValue}/getMe`,
@@ -55,10 +57,7 @@ exports.testIntegration = async (req, res) => {
             let raw = '';
             resp.on('data', (c) => raw += c);
             resp.on('end', () => {
-              try {
-                const json = JSON.parse(raw);
-                resolve(json);
-              } catch { resolve({ ok: false }); }
+              try { resolve(JSON.parse(raw)); } catch { resolve({ ok: false }); }
             });
           });
           r.on('error', () => resolve({ ok: false }));
@@ -66,8 +65,42 @@ exports.testIntegration = async (req, res) => {
           r.end();
         });
         if (result && result.ok)
-          return success(res, { tested: key }, `Bot hợp lệ: @${result.result?.username || 'unknown'}`);
+          return success(res, { tested: key, username: result.result?.username }, `Bot hợp lệ: @${result.result?.username || 'unknown'}`);
         return error(res, 'Bot Token không hợp lệ hoặc đã bị thu hồi', 400);
+      }
+
+      // ── Cloudflare R2 — test S3-compatible HEAD bucket ───────────────────────
+      case 'S3_ACCESS_KEY':
+      case 'CLOUDFLARE_R2_ACCESS_KEY': {
+        // Verify R2 credentials by calling Cloudflare token verify endpoint
+        const accountId = req.body.accountId || process.env.S3_ENDPOINT?.match(/([a-f0-9]{32})/)?.[1] || '';
+        const apiToken  = req.body.apiToken  || process.env.CLOUDFLARE_API_TOKEN || '';
+        if (!apiToken && !accountId) {
+          return success(res, { tested: key, skipped: true }, 'Thiếu CLOUDFLARE_API_TOKEN để verify — Key đã lưu');
+        }
+        const cfResult = await new Promise((resolve) => {
+          const opts = {
+            hostname: 'api.cloudflare.com',
+            path:     `/client/v4/accounts/${accountId}/tokens/verify`,
+            method:   'GET',
+            headers:  { 'Authorization': `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
+            timeout:  6000,
+          };
+          const r = https.request(opts, (resp) => {
+            let raw = '';
+            resp.on('data', (c) => raw += c);
+            resp.on('end', () => {
+              try { resolve({ status: resp.statusCode, body: JSON.parse(raw) }); }
+              catch { resolve({ status: resp.statusCode }); }
+            });
+          });
+          r.on('error', () => resolve({ status: 0 }));
+          r.on('timeout', () => { r.destroy(); resolve({ status: 0 }); });
+          r.end();
+        });
+        if (cfResult?.status === 200 && cfResult?.body?.success)
+          return success(res, { tested: key }, 'Cloudflare R2 token hợp lệ');
+        return error(res, 'Cloudflare R2 token không hợp lệ hoặc đã hết hạn', 400);
       }
 
       case 'ABUSEIPDB_API_KEY': {

@@ -1,5 +1,5 @@
 // @ts-nocheck
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 
 exports.getBalance = async (req, res) => {
   try {

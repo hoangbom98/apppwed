@@ -14,7 +14,7 @@
  *   DELETE /api/admin/app-catalog/:id    — soft-delete (isPublished = false)
  */
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { ok, created, notFound, error } = require('../../../shared/utils/response');
+const { ok, created, notFound, error } = require('../../../shared/utils/network/response');
 
 // Helper — always read from admin_db regardless of req.project
 function adminPrisma() {

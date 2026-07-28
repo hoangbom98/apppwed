@@ -11,9 +11,9 @@
  */
 'use strict';
 
-const pushService = require('../../../shared/services/pushService').default
-                 || require('../../../shared/services/pushService');
-const logger      = require('../../../shared/services/logger');
+const pushService = require('../../../shared/services/communication/pushService').default
+                 || require('../../../shared/services/communication/pushService');
+const logger      = require('../../../shared/services/core/logger');
 const { getPrismaClient } = require('../../../shared/config/databases');
 
 // ── GET /admin/notifications/status ──────────────────────────────────────────

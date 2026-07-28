@@ -5,8 +5,8 @@
  * Lottery draw management.
  * DB models: LotteryType, LotteryDraw, LotteryBet (all CUID string IDs)
  */
-const { success, error, notFound, created } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound, created } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const missionSvc = require('../services/missionService');
 const { enqueueLotterySettlement } = require('../../workers/lottery-settlement.worker');
 

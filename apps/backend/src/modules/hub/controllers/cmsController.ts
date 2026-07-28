@@ -5,8 +5,8 @@
  * Full CMS controller for all public + user endpoints.
  * Models match prisma/hub/schema.prisma exactly.
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const HubService = require('../services/hubService');
 
 const svc = (req) => new HubService(req.prisma);

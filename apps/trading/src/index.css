@@ -38,6 +38,12 @@
 
   /* Sidebar width */
   --bn-sidebar-w:     220px;
+
+  /* Alias tokens used across pages */
+  --bn-surface-card:  var(--bn-bg-surface);
+  --bn-hairline:      var(--bn-border);
+  --bn-rounded-xl:    0.75rem;
+  --bn-rounded-md:    0.5rem;
 }
 
 /* ── Base ─────────────────────────────────────────────────────────── */
@@ -55,6 +61,17 @@ html, body, #root {
 /* ── Binance utility classes ──────────────────────────────────────── */
 .bn-surface   { background: var(--bn-bg-surface); border: 1px solid var(--bn-border); }
 .bn-elevated  { background: var(--bn-bg-elevated); border: 1px solid var(--bn-border); }
+
+/* Primary button — Binance yellow */
+.bn-btn-primary {
+  background: var(--bn-yellow);
+  color: #0b0e11;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.bn-btn-primary:hover { background: var(--bn-yellow-hover); }
 .bn-yellow    { color: var(--bn-yellow); }
 .bn-green     { color: var(--bn-green); }
 .bn-red       { color: var(--bn-red); }

@@ -10,7 +10,7 @@
  *   GET    /admin/giftcodes/:id/redemptions   — who redeemed this code
  */
 
-const { success, error, created, paginate, notFound } = require('../../../shared/utils/response');
+const { success, error, created, paginate, notFound } = require('../../../shared/utils/network/response');
 const GiftCodeService = require('../../game/services/giftCodeService');
 
 // ── GET /admin/giftcodes ──────────────────────────────────────────────────────

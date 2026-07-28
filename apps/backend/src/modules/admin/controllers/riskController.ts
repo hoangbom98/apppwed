@@ -4,9 +4,10 @@
 'use strict';
 
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, paginate } = require('../../../shared/utils/response');
-const riskService = require('../../../shared/services/riskService');
+const { success, error, paginate } = require('../../../shared/utils/network/response');
+const riskService = require('../../../shared/services/auth/riskService');
 const alertHelper = require('../../../risk/alertHelper');
+const { invalidateUserStatusCache } = require('../../../shared/middlewares/auth/projectAccessGuard');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const adminDb = () => getPrismaClient('admin');
@@ -280,6 +281,10 @@ exports.lockUser = async (req, res) => {
       where: { id: userId },
       data:  { status: 'banned' },
     });
+
+    // Invalidate status cache for all projects so the ban is enforced immediately
+    const ALL_PROJECTS = ['hub', 'game', 'trade', 'dating', 'sports'];
+    await Promise.all(ALL_PROJECTS.map(p => invalidateUserStatusCache(p, userId)));
 
     await alertHelper.sendAlert(
       `🔒 Manual lock: user \`${userId}\` by admin \`${req.user?.id}\` — reason: ${reason}`,

@@ -62,7 +62,7 @@ export type { AuthState, AuthUser } from './stores/sharedStores';
 // Note: AuthUser re-exported below is removed to avoid duplicate — keep only line above
 
 // ── API ───────────────────────────────────────────────────────────────────────
-export { api } from './api/apiClient';
+export { api, buildFormData } from './api/apiClient';
 
 // ── H5 components ─────────────────────────────────────────────────────────────
 export { H5Header, H5BottomNav, H5Layout, useUnreadCount } from './components/H5';

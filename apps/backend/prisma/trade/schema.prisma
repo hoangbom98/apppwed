@@ -37,10 +37,12 @@ model User {
   tradingFrozen   Boolean   @default(false)    // isjy — freeze trading only
   memberLevel     Int       @default(1)        // VIP membership level 1-10
   integral        Decimal   @default(0) @db.Decimal(19, 4)  // points balance
-  referralCode    String?   @unique @db.VarChar(20)         // user's own referral code
-  lastLogin       DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  referralCode          String?   @unique @db.VarChar(20)         // user's own referral code
+  passwordResetToken    String?   @db.VarChar(255)                // hashed reset token (SHA-256)
+  passwordResetExpires  DateTime?                                  // token expiry (15 min)
+  lastLogin             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   orders            Order[]
   positions         Position[]

@@ -124,6 +124,10 @@ export {
   Calendar     as IconCalendar,
   Clock        as IconClock,
   Clock4       as IconClock4,
+  Tv           as IconTv,
+  Newspaper    as IconNewspaper,
+  Download     as IconDownload2,
+  Search       as IconSearch2,
 
   // ── System / Settings ───────────────────────────────────────────────────
   Settings     as IconSettings,
@@ -163,6 +167,10 @@ export {
   History      as IconHistory,
   Building2    as IconBuilding,
   Ruler        as IconRuler,
+  FileText     as IconFileText,
+  ScrollText   as IconScrollText,
+  Trophy       as IconTrophy2,
+  Sparkles     as IconSparkles2,
 
 } from 'lucide-react';
 

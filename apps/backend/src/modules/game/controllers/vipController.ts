@@ -1,4 +1,4 @@
-const { success, error, badRequest } = require('../../../shared/utils/response');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
 
 // ── GET /game/vip/levels — public ────────────────────────────────────────────
 exports.getVipLevels = async (req, res) => {

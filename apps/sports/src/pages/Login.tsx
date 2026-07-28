@@ -21,12 +21,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: 'var(--sports-bg)' }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center font-black text-2xl text-white mx-auto mb-3">S</div>
-          <h1 className="text-2xl font-black text-white">Sports</h1>
-          <p className="text-sm text-gray-500 mt-1">Đăng nhập tài khoản của bạn</p>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl text-white mx-auto mb-3"
+            style={{ background: 'var(--sports-primary)' }}>S</div>
+          <h1 className="text-2xl font-black" style={{ color: 'var(--sports-text)' }}>Sports</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--sports-text-muted)' }}>
+            Đăng nhập tài khoản của bạn
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -34,7 +38,7 @@ export default function LoginPage() {
             value={username}
             onChange={e => setUsername(e.target.value)}
             placeholder="Email hoặc username"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"
+            className="sports-input"
             autoComplete="username"
             required
           />
@@ -43,25 +47,31 @@ export default function LoginPage() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="Mật khẩu"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"
+            className="sports-input"
             autoComplete="current-password"
             required
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl disabled:opacity-50 transition-colors"
+            className="w-full py-3 rounded-xl font-bold text-sm transition-colors sports-btn-primary"
           >
             {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm mt-6" style={{ color: 'var(--sports-text-muted)' }}>
           Chưa có tài khoản?{' '}
-          <Link to="/register" className="text-green-400 font-semibold hover:text-green-300">Đăng ký</Link>
+          <Link to="/register" className="font-semibold" style={{ color: 'var(--sports-primary)' }}>
+            Đăng ký
+          </Link>
         </p>
         <p className="text-center mt-3">
-          <Link to="/" className="text-xs text-gray-600 hover:text-gray-400">← Về trang chủ</Link>
+          <Link to="/" className="text-xs transition-colors" style={{ color: 'var(--sports-text-muted)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--sports-text-secondary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--sports-text-muted)')}>
+            ← Về trang chủ
+          </Link>
         </p>
       </div>
     </div>

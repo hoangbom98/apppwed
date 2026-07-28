@@ -6,8 +6,8 @@
  *   BetMarket (@@map "bet_markets"), BetOdds (@@map "bet_odds"),
  *   BetSlip  (@@map "bet_slips"),   BetSlipItem (@@map "bet_slip_items")
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const notifSvc = require('../../../shared/services/notificationService');
 
 // ── GET /api/sports/betting/events — markets grouped by match ────────────────

@@ -4,8 +4,8 @@
  * Handles admin CRUD for: profiles, matches, gifts, moments (feed posts), reports, live sessions.
  * All routes require auth + adminGuard.
  */
-const { ok, created, success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { ok, created, success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 const { logAdminAction } = require('../../../shared/services/auditLogger.service');
 
 // ── Profiles ──────────────────────────────────────────────────────

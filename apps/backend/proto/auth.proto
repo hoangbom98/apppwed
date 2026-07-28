@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package lkvip.auth;
+
+// ── Auth Service ──────────────────────────────────────────────────────────────
+// Mirrors shared/services/auth/authService.ts token generation logic.
+// project field enforces cross-project token isolation (same as HTTP middleware).
+
+message LoginRequest {
+  string username_or_email = 1;
+  string password          = 2;
+  string project           = 3; // "hub" | "game" | "trade" | "dating" | "sports"
+}
+
+message LoginResponse {
+  string access_token  = 1;
+  string refresh_token = 2;
+  UserInfo user        = 3;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+  string project       = 2;
+}
+
+message RefreshResponse {
+  string access_token  = 1;
+  string refresh_token = 2;
+}
+
+message LogoutRequest {
+  string access_token = 1;
+  string project      = 2;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message MeRequest {
+  // resolved from interceptor metadata
+}
+
+message UserInfo {
+  string id      = 1;
+  string email   = 2;
+  string role    = 3;
+  string project = 4;
+  string username = 5;
+  string avatar  = 6;
+}
+
+message RegisterRequest {
+  string username  = 1;
+  string email     = 2;
+  string password  = 3;
+  string project   = 4;
+  string referral_code = 5;
+}
+
+message RegisterResponse {
+  string access_token  = 1;
+  string refresh_token = 2;
+  UserInfo user        = 3;
+}
+
+service AuthService {
+  rpc Login    (LoginRequest)    returns (LoginResponse);
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Refresh  (RefreshRequest)  returns (RefreshResponse);
+  rpc Logout   (LogoutRequest)   returns (LogoutResponse);
+  rpc Me       (MeRequest)       returns (UserInfo);
+}

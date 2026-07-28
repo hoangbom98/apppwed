@@ -12,8 +12,9 @@
  * Cấu hình ENCRYPT_MAP:
  *   Thêm model/field vào ENCRYPT_MAP để mã hóa tự động.
  */
-import type { PrismaClient } from '@prisma/client';
-import { encryptToString, decryptFromString } from '../utils/encryption';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PrismaClient = any;
+import { encryptToString, decryptFromString } from '../utils/crypto/encryption';
 
 /** Danh sách model và field cần mã hóa */
 const ENCRYPT_MAP: Record<string, string[]> = {

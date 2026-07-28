@@ -8,7 +8,7 @@
  */
 'use strict';
 
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const securityService     = require('../services/securityService');
 
 /** GET /admin/settings/security */

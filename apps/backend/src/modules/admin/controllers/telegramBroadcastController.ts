@@ -23,9 +23,9 @@
  *   POST   /admin/telegram/config/reload           — reload bot config từ DB vào service
  */
 
-const { success, error, paginate } = require('../../../shared/utils/response');
-const tg                           = require('../../../shared/services/telegramAlertService');
-const logger                       = require('../../../shared/services/logger');
+const { success, error, paginate } = require('../../../shared/utils/network/response');
+const tg                           = require('../../../shared/services/communication/telegramAlertService');
+const logger                       = require('../../../shared/services/core/logger');
 
 // Lazy load worker to avoid circular dependency at startup
 let _botWorker = null;
@@ -46,18 +46,34 @@ function renderTemplate(tpl, vars) {
   return out;
 }
 
-// ── Resolve target chatId ─────────────────────────────────────────────────────
+// ── Resolve target chatId + bot token ────────────────────────────────────────
+// Returns { chatId, botToken } — botToken null means use default TELEGRAM_BOT_TOKEN
 async function resolveTarget(prisma, targetName) {
+  // key → { chatIdKey, tokenKey }
   const keyMap = {
-    channel: 'TELEGRAM_CHANNEL_ID',
-    group:   'TELEGRAM_GROUP_ID',
-    admin:   'TELEGRAM_ADMIN_CHAT_ID',
+    channel:  { chatIdKey: 'TELEGRAM_CHANNEL_ID',          tokenKey: null },
+    group:    { chatIdKey: 'TELEGRAM_GROUP_ID',             tokenKey: null },
+    admin:    { chatIdKey: 'TELEGRAM_ADMIN_CHAT_ID',        tokenKey: null },
+    support:  { chatIdKey: 'TELEGRAM_SUPPORT_CHAT_ID',      tokenKey: 'TELEGRAM_SUPPORT_BOT_TOKEN' },
+    promo:    { chatIdKey: 'TELEGRAM_PROMO_CHAT_ID',        tokenKey: 'TELEGRAM_PROMO_BOT_TOKEN' },
+    agent:    { chatIdKey: 'TELEGRAM_AGENT_BOT_CHAT_ID',    tokenKey: null },
+    cskh:     { chatIdKey: 'TELEGRAM_CSKH_USER_ID',         tokenKey: null },
   };
-  const settingKey = keyMap[targetName];
-  if (!settingKey) return targetName; // treat as raw chatId
 
-  const row = await prisma.systemSetting.findUnique({ where: { key: settingKey } }).catch(() => null);
-  return row?.value || process.env[settingKey] || null;
+  const entry = keyMap[targetName];
+  if (!entry) return { chatId: targetName, botToken: null }; // raw chatId
+
+  const keys = [entry.chatIdKey, entry.tokenKey].filter(Boolean);
+  const rows = keys.length
+    ? await prisma.systemSetting.findMany({ where: { key: { in: keys } } }).catch(() => [])
+    : [];
+  const map = rows.reduce((a, r) => { a[r.key] = r.value; return a; }, {});
+
+  const chatId   = map[entry.chatIdKey]   || process.env[entry.chatIdKey]   || null;
+  const botToken = entry.tokenKey
+    ? (map[entry.tokenKey] || process.env[entry.tokenKey] || null)
+    : null;
+  return { chatId, botToken };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -95,14 +111,14 @@ exports.listBroadcasts = async (req, res) => {
 };
 
 // POST /admin/telegram/broadcasts
-// Body: { target: 'channel'|'group'|'admin'|chatId, content, parseMode?, templateKey?, variables? }
+// Body: { target: 'channel'|'group'|'admin'|'support'|'promo'|'agent'|'cskh'|chatId, content, parseMode?, templateKey?, variables? }
 exports.sendBroadcast = async (req, res) => {
   try {
     const { target = 'channel', content, parseMode = 'HTML', templateKey, variables } = req.body;
     if (!content) return error(res, 'content là bắt buộc', 400);
 
     const rendered = renderTemplate(content, variables || {});
-    const chatId   = await resolveTarget(req.prisma, target);
+    const { chatId, botToken } = await resolveTarget(req.prisma, target);
 
     if (!chatId) {
       return error(res, `Chưa cấu hình chat ID cho target "${target}". Vào Cài đặt → Tích hợp để thêm.`, 422);
@@ -122,8 +138,8 @@ exports.sendBroadcast = async (req, res) => {
       },
     });
 
-    // Send immediately
-    const result = await tg.sendMessage(chatId, rendered, parseMode);
+    // Send immediately — use per-bot token when available
+    const result = await tg.sendMessage(chatId, rendered, parseMode, botToken || null);
 
     if (result && result.ok) {
       await req.prisma.telegramBroadcast.update({
@@ -274,40 +290,135 @@ exports.testAutoReply = async (req, res) => {
 // BOT CONFIG
 // ════════════════════════════════════════════════════════════════════════════
 
+// ── All known Telegram config keys ───────────────────────────────────────────
+const TG_CONFIG_KEYS = [
+  'TELEGRAM_BOT_TOKEN',
+  'TELEGRAM_ADMIN_CHAT_ID',
+  'TELEGRAM_CHANNEL_ID',
+  'TELEGRAM_COMMUNITY_CHANNEL_ID',
+  'TELEGRAM_GROUP_ID',
+  'TELEGRAM_SUPPORT_BOT_TOKEN',
+  'TELEGRAM_SUPPORT_CHAT_ID',
+  'TELEGRAM_PROMO_BOT_TOKEN',
+  'TELEGRAM_PROMO_CHAT_ID',
+  'TELEGRAM_CSKH_USER_ID',
+  'TELEGRAM_AGENT_BOT_CHAT_ID',
+];
+
 // GET /admin/telegram/config
-// Trả về 4 config keys từ DB (không trả về full token để bảo mật)
+// Trả về trạng thái cấu hình đầy đủ 7 kênh (mask token, expose chatId)
 exports.getConfig = async (req, res) => {
   try {
-    const keys = ['TELEGRAM_BOT_TOKEN','TELEGRAM_ADMIN_CHAT_ID','TELEGRAM_CHANNEL_ID','TELEGRAM_GROUP_ID'];
-    const rows = await req.prisma.systemSetting.findMany({ where: { key: { in: keys } } });
+    const rows = await req.prisma.systemSetting.findMany({ where: { key: { in: TG_CONFIG_KEYS } } });
     const map  = rows.reduce((acc, r) => { acc[r.key] = r.value; return acc; }, {});
 
+    // Fallback to env for any key not in DB
+    const get = (k) => map[k] || process.env[k] || '';
+    const hasToken = (k) => !!get(k);
+
     return success(res, {
-      botToken:    map.TELEGRAM_BOT_TOKEN    ? '***configured***' : '',
-      adminChatId: map.TELEGRAM_ADMIN_CHAT_ID || '',
-      channelId:   map.TELEGRAM_CHANNEL_ID   || '',
-      groupId:     map.TELEGRAM_GROUP_ID     || '',
-      configured:  !!map.TELEGRAM_BOT_TOKEN,
+      configured: hasToken('TELEGRAM_BOT_TOKEN'),
+      // Bot 1 — Super Bot
+      bot1: {
+        label:     'Super Bot (@Proxylll_bot)',
+        token:     hasToken('TELEGRAM_BOT_TOKEN') ? '***' : '',
+        chatId:    get('TELEGRAM_ADMIN_CHAT_ID'),
+        configured: hasToken('TELEGRAM_BOT_TOKEN'),
+      },
+      // Bot 2 — Hỗ Trợ Tài Khoản
+      bot2: {
+        label:     'Hỗ Trợ Tài Khoản (@Ho_Tro_Bao_Mat_bot)',
+        token:     hasToken('TELEGRAM_SUPPORT_BOT_TOKEN') ? '***' : '',
+        chatId:    get('TELEGRAM_SUPPORT_CHAT_ID'),
+        configured: hasToken('TELEGRAM_SUPPORT_BOT_TOKEN'),
+      },
+      // Bot 3 — Hỗ Trợ Khuyến Mại
+      bot3: {
+        label:     'Hỗ Trợ Khuyến Mại (@napthuongcasino_bot)',
+        token:     hasToken('TELEGRAM_PROMO_BOT_TOKEN') ? '***' : '',
+        chatId:    get('TELEGRAM_PROMO_CHAT_ID'),
+        configured: hasToken('TELEGRAM_PROMO_BOT_TOKEN'),
+      },
+      // Account 4 — CSKH
+      acc4: {
+        label:    'CSKH (@nhanviendacap)',
+        userId:   get('TELEGRAM_CSKH_USER_ID'),
+        configured: !!get('TELEGRAM_CSKH_USER_ID'),
+      },
+      // Bot 6 — Đại Lý
+      bot6: {
+        label:    'CSKH Đại Lý (@Daily789F)',
+        chatId:   get('TELEGRAM_AGENT_BOT_CHAT_ID'),
+        configured: !!get('TELEGRAM_AGENT_BOT_CHAT_ID'),
+      },
+      // Channel 7 — Kênh Cộng Đồng
+      ch7: {
+        label:    'Kênh Cộng Đồng (@santhuong500)',
+        channelId: get('TELEGRAM_CHANNEL_ID'),
+        configured: !!get('TELEGRAM_CHANNEL_ID'),
+      },
+      // Legacy flat fields (backward compat)
+      channelId: get('TELEGRAM_CHANNEL_ID'),
+      groupId:   get('TELEGRAM_GROUP_ID'),
     });
   } catch (e) { return error(res, e.message, 500); }
 };
 
 // POST /admin/telegram/config/reload
-// Đọc lại config từ DB → reload telegramAlertService _config
+// Đọc lại toàn bộ config từ DB → reload telegramAlertService _config
 exports.reloadConfig = async (req, res) => {
   try {
-    const keys = ['TELEGRAM_BOT_TOKEN','TELEGRAM_ADMIN_CHAT_ID','TELEGRAM_CHANNEL_ID','TELEGRAM_GROUP_ID'];
-    const rows = await req.prisma.systemSetting.findMany({ where: { key: { in: keys } } });
+    const rows = await req.prisma.systemSetting.findMany({ where: { key: { in: TG_CONFIG_KEYS } } });
     const map  = rows.reduce((acc, r) => { acc[r.key] = r.value; return acc; }, {});
+    const get  = (k) => map[k] || process.env[k] || '';
 
     tg.reloadConfig({
-      botToken:    map.TELEGRAM_BOT_TOKEN     || process.env.TELEGRAM_BOT_TOKEN     || '',
-      adminChatId: map.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID || '',
-      channelId:   map.TELEGRAM_CHANNEL_ID    || process.env.TELEGRAM_CHANNEL_ID    || '',
-      groupId:     map.TELEGRAM_GROUP_ID      || process.env.TELEGRAM_GROUP_ID      || '',
+      botToken:           get('TELEGRAM_BOT_TOKEN'),
+      adminChatId:        get('TELEGRAM_ADMIN_CHAT_ID'),
+      channelId:          get('TELEGRAM_CHANNEL_ID'),
+      communityChannelId: get('TELEGRAM_COMMUNITY_CHANNEL_ID'),
+      groupId:            get('TELEGRAM_GROUP_ID'),
+      supportBotToken:    get('TELEGRAM_SUPPORT_BOT_TOKEN'),
+      supportChatId:      get('TELEGRAM_SUPPORT_CHAT_ID'),
+      promoBotToken:      get('TELEGRAM_PROMO_BOT_TOKEN'),
+      promoChatId:        get('TELEGRAM_PROMO_CHAT_ID'),
+      cskhUserId:         get('TELEGRAM_CSKH_USER_ID'),
+      agentChatId:        get('TELEGRAM_AGENT_BOT_CHAT_ID'),
     });
 
-    logger.info('[TgBroadcast] Config reloaded from DB');
+    logger.info('[TgBroadcast] Full config reloaded from DB (11 keys)');
     return success(res, null, 'Config đã reload từ DB — thay đổi có hiệu lực ngay');
+  } catch (e) { return error(res, e.message, 500); }
+};
+
+// POST /admin/telegram/config/test-bot
+// Body: { tokenKey } — test bất kỳ bot token key đang lưu trong DB/env
+exports.testBotToken = async (req, res) => {
+  try {
+    const { tokenKey } = req.body;
+    const allowedKeys  = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_SUPPORT_BOT_TOKEN', 'TELEGRAM_PROMO_BOT_TOKEN'];
+    if (!allowedKeys.includes(tokenKey))
+      return error(res, `tokenKey không hợp lệ. Cho phép: ${allowedKeys.join(', ')}`, 400);
+
+    const row   = await req.prisma.systemSetting.findUnique({ where: { key: tokenKey } }).catch(() => null);
+    const token = row?.value || process.env[tokenKey] || '';
+    if (!token) return error(res, `${tokenKey} chưa được cấu hình`, 422);
+
+    const result = await new Promise((resolve) => {
+      const https = require('https');
+      const opts  = { hostname: 'api.telegram.org', path: `/bot${token}/getMe`, method: 'GET', timeout: 5000 };
+      const r = https.request(opts, (resp) => {
+        let raw = '';
+        resp.on('data', (c) => raw += c);
+        resp.on('end', () => { try { resolve(JSON.parse(raw)); } catch { resolve({ ok: false }); } });
+      });
+      r.on('error', () => resolve({ ok: false }));
+      r.on('timeout', () => { r.destroy(); resolve({ ok: false }); });
+      r.end();
+    });
+
+    if (result?.ok)
+      return success(res, { tokenKey, username: result.result?.username }, `✅ @${result.result?.username} — Bot hợp lệ`);
+    return error(res, `${tokenKey}: Token không hợp lệ hoặc bị thu hồi`, 400);
   } catch (e) { return error(res, e.message, 500); }
 };

@@ -11,8 +11,8 @@
  *   GET  /api/sports/promotions/:id          — promotion detail
  *   POST /api/sports/promotions/:id/claim    — claim promotion (auth)
  */
-const { success, created, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, created, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── GET /api/sports/promotions ────────────────────────────────────────────────
 exports.list = async (req, res) => {

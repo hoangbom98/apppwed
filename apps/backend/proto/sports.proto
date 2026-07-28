@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package lkvip.sports;
+
+// ── Live Scores ───────────────────────────────────────────────────────────────
+// Maps to the payload emitted by sportsDataSyncService.ts syncLiveScores().
+// Fields align with Match model in prisma/sports/schema.prisma.
+
+message ScoreUpdate {
+  int32  match_id    = 1;
+  string home_team   = 2;
+  string away_team   = 3;
+  int32  home_score  = 4;
+  int32  away_score  = 5;
+  string status      = 6;  // "1H" | "2H" | "HT" | "FT" | "NS"
+  int32  elapsed     = 7;  // minutes elapsed
+  int32  half_home   = 8;
+  int32  half_away   = 9;
+  int64  timestamp_ms = 10;
+}
+
+message WatchMatchesRequest {
+  repeated int32 match_ids = 1; // empty = watch all live matches
+}
+
+// ── Match Info ────────────────────────────────────────────────────────────────
+
+message GetLiveMatchesRequest {
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+message MatchInfo {
+  int32  id           = 1;
+  string home_team    = 2;
+  string away_team    = 3;
+  int32  home_score   = 4;
+  int32  away_score   = 5;
+  string status       = 6;
+  int32  elapsed      = 7;
+  string league_name  = 8;
+  string start_time   = 9;
+}
+
+message GetLiveMatchesResponse {
+  repeated MatchInfo matches = 1;
+  int32 total = 2;
+}
+
+// ── Live Stream ───────────────────────────────────────────────────────────────
+// Maps to streamService.ts — live video streaming sessions.
+
+message WatchStreamRequest {
+  int32 stream_id = 1;
+}
+
+message StreamViewerUpdate {
+  int32  stream_id    = 1;
+  int32  viewer_count = 2;
+  string status       = 3;  // "live" | "ended"
+  int64  timestamp_ms = 4;
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
+
+service SportsService {
+  // Server Streaming — replaces cron 60s in sportsDataSyncService.ts.
+  // Pushes score updates instantly when syncLiveScores() detects a change.
+  rpc WatchMatches      (WatchMatchesRequest)    returns (stream ScoreUpdate);
+
+  // Server Streaming — pushes viewer count changes for live video streams.
+  rpc WatchStream       (WatchStreamRequest)     returns (stream StreamViewerUpdate);
+
+  // Unary — mirrors GET /sports/matches/live
+  rpc GetLiveMatches    (GetLiveMatchesRequest)  returns (GetLiveMatchesResponse);
+}

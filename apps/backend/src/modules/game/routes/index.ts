@@ -1,10 +1,10 @@
 // @ts-nocheck
 const router          = require('express').Router();
-const auth            = require('../../../shared/middlewares/auth');
-const adminGuard      = require('../../../shared/middlewares/adminGuard');
-const auditLogger     = require('../../../shared/middlewares/auditLogger');
+const auth            = require('../../../shared/middlewares/auth/auth');
+const adminGuard      = require('../../../shared/middlewares/auth/adminGuard');
+const auditLogger     = require('../../../shared/middlewares/audit/auditLogger');
 const gameAdminCtrl   = require('../controllers/gameAdminController');
-const { httpCache } = require('../../../shared/middlewares/httpCache');
+const { httpCache } = require('../../../shared/middlewares/core/httpCache');
 const autocompleteCtrl = require('../controllers/autocompleteController');
 const authCtrl      = require('../controllers/authController');
 const walletCtrl    = require('../controllers/walletController');
@@ -22,11 +22,11 @@ const yuebaoCtrl    = require('../controllers/savingsVaultController');
 const miningCtrl    = require('../controllers/miningController');
 const statsCtrl     = require('../controllers/statisticsController');
 const giftCodeCtrl  = require('../controllers/giftCodeController');
-const { validate }  = require('../../../shared/middlewares/validate');
+const { validate }  = require('../../../shared/middlewares/validation/validate');
 const walletSchemas = require('../validators/walletValidator');
 
 // ── Bank Accounts (protected) ─────────────────────────────────────
-const bankAccCtrl = require('../../../shared/controllers/bankAccountController');
+const bankAccCtrl = require('../../../shared/controllers/user/bankAccountController');
 router.get('/bank-accounts',              auth, bankAccCtrl.list);
 router.post('/bank-accounts',             auth, bankAccCtrl.create);
 router.patch('/bank-accounts/:id',        auth, bankAccCtrl.update);
@@ -82,7 +82,7 @@ router.put('/notifications/read-all', auth, notifCtrl.markAllRead);
 
 // ── 2FA ───────────────────────────────────────────────────────────
 if (process.env.ENABLE_2FA === 'true') {
-  const twoFACtrl = require('../../../shared/controllers/twoFactorController');
+  const twoFACtrl = require('../../../shared/controllers/auth/twoFactorController');
   router.post('/auth/2fa/setup',    auth, twoFACtrl.setup);
   router.post('/auth/2fa/enable',   auth, twoFACtrl.enable);
   router.post('/auth/2fa/disable',  auth, twoFACtrl.disable);
@@ -113,8 +113,8 @@ router.delete('/admin/providers/:id',   auth, adminGuard, auditLogger, gameAdmin
 
 // ── Admin: Users / Deposits / Withdrawals ─────────────────────────
 router.get('/admin/users',              auth, adminGuard, async (req, res) => {
-  const { paginate } = require('../../../shared/utils/helpers');
-  const { paginate: paginateRes } = require('../../../shared/utils/response');
+  const { paginate } = require('../../../shared/utils/core/helpers');
+  const { paginate: paginateRes } = require('../../../shared/utils/network/response');
   const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
   const where = {};
   if (req.query.status) where.status = req.query.status;
@@ -129,17 +129,17 @@ router.get('/admin/users',              auth, adminGuard, async (req, res) => {
       req.prisma.user.count({ where }),
     ]);
     return paginateRes(res, data, { total, page, limit, pages: Math.ceil(total / take) });
-  } catch (e) { const { error } = require('../../../shared/utils/response'); return error(res, e.message, 500); }
+  } catch (e) { const { error } = require('../../../shared/utils/network/response'); return error(res, e.message, 500); }
 });
 router.put('/admin/users/:id',          auth, adminGuard, auditLogger, async (req, res) => {
-  const { success, error } = require('../../../shared/utils/response');
+  const { success, error } = require('../../../shared/utils/network/response');
   try {
     const u = await req.prisma.user.update({ where: { id: req.params.id }, data: req.body });
     return success(res, u);
   } catch (e) { return error(res, e.message, 500); }
 });
 router.get('/admin/deposits',           auth, adminGuard, async (req, res) => {
-  const { paginate } = require('../../../shared/utils/helpers');
+  const { paginate } = require('../../../shared/utils/core/helpers');
   const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
   const where = {};
   if (req.query.status) where.status = req.query.status;
@@ -149,7 +149,7 @@ router.get('/admin/deposits',           auth, adminGuard, async (req, res) => {
 router.put('/admin/deposits/:id/approve', auth, adminGuard, walletCtrl.approveDeposit);
 router.put('/admin/deposits/:id/reject',  auth, adminGuard, walletCtrl.rejectDeposit);
 router.get('/admin/withdraws',          auth, adminGuard, async (req, res) => {
-  const { paginate } = require('../../../shared/utils/helpers');
+  const { paginate } = require('../../../shared/utils/core/helpers');
   const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
   const where = {};
   if (req.query.status) where.status = req.query.status;
@@ -160,11 +160,11 @@ router.put('/admin/withdraws/:id/approve', auth, adminGuard, walletCtrl.approveW
 router.put('/admin/withdraws/:id/reject',  auth, adminGuard, walletCtrl.rejectWithdraw);
 
 // ── Shared: Support Chat / Tickets / Knowledge ────────────────────
-const supportRoutes = require('../../../shared/routes/support.routes.js');
+const supportRoutes = require('../../../shared/routes/support/support.routes');
 router.use('/', supportRoutes);
 
 // ── Shared: Push Notifications ────────────────────────────────────
-router.use('/', require('../../../shared/routes/push.routes'));
+router.use('/', require('../../../shared/routes/user/push.routes'));
 
 // ── Lottery ───────────────────────────────────────────────────────
 router.get('/lottery/types',                     lotteryCtrl.getTypes);
@@ -275,21 +275,21 @@ router.post('/callbacks/tc-gaming/seamless',   providerCallbackCtrl.tcGamingSeam
 // GET  /api/game/payment/gateways      — list active gateways (public)
 // GET  /api/game/payment/orders/deposit  — user deposit history
 // POST /api/game/payment/webhook/:code — inbound payment webhook
-router.use('/payment', require('../../../shared/routes/payment.routes'));
+router.use('/payment', require('../../../shared/routes/finance/payment.routes'));
 
 // ── Core: Referral (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/referral.routes'));
+router.use('/', require('../../../shared/routes/user/referral.routes'));
 
 // ── Core: Loyalty (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/loyalty.routes'));
+router.use('/', require('../../../shared/routes/user/loyalty.routes'));
 
 // ── Core: Affiliate (shared) ─────────────────────────────────────
-router.use('/', require('../../../shared/routes/affiliate.routes'));
+router.use('/', require('../../../shared/routes/user/affiliate.routes'));
 
 // ── Core: Leaderboard (shared) ───────────────────────────────────
-router.use('/', require('../../../shared/routes/leaderboard.routes'));
+router.use('/', require('../../../shared/routes/user/leaderboard.routes'));
 
 // ── Core: Marketing Campaigns (admin, shared) ─────────────────────
-router.use('/', require('../../../shared/routes/campaign.routes'));
+router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 module.exports = router;

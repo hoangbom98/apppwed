@@ -1,8 +1,8 @@
 const router   = require('express').Router();
-const auth     = require('../../../shared/middlewares/auth');
-const adminGuard = require('../../../shared/middlewares/adminGuard');
-const auditLogger = require('../../../shared/middlewares/auditLogger');
-const { httpCache } = require('../../../shared/middlewares/httpCache');
+const auth     = require('../../../shared/middlewares/auth/auth');
+const adminGuard = require('../../../shared/middlewares/auth/adminGuard');
+const auditLogger = require('../../../shared/middlewares/audit/auditLogger');
+const { httpCache } = require('../../../shared/middlewares/core/httpCache');
 const autocompleteCtrl = require('../controllers/autocompleteController');
 const authCtrl   = require('../controllers/authController');
 const cmsCtrl    = require('../controllers/cmsController');
@@ -81,26 +81,26 @@ router.put('/admin/seo/:id',         auth, adminGuard, auditLogger, seoCtrl.upda
 router.delete('/admin/seo/:id',      auth, adminGuard, auditLogger, seoCtrl.remove);
 
 // ── Shared: Support Chat / Tickets / Knowledge ────────────────────
-const supportRoutes = require('../../../shared/routes/support.routes.js');
+const supportRoutes = require('../../../shared/routes/support/support.routes');
 router.use('/', supportRoutes);
 
 // ── Shared: Push Notifications ────────────────────────────────────
-router.use('/', require('../../../shared/routes/push.routes'));
+router.use('/', require('../../../shared/routes/user/push.routes'));
 
 // ── Core: Referral (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/referral.routes'));
+router.use('/', require('../../../shared/routes/user/referral.routes'));
 
 // ── Core: Loyalty (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/loyalty.routes'));
+router.use('/', require('../../../shared/routes/user/loyalty.routes'));
 
 // ── Core: Affiliate (shared) ─────────────────────────────────────
-router.use('/', require('../../../shared/routes/affiliate.routes'));
+router.use('/', require('../../../shared/routes/user/affiliate.routes'));
 
 // ── Core: Leaderboard (shared) ───────────────────────────────────
-router.use('/', require('../../../shared/routes/leaderboard.routes'));
+router.use('/', require('../../../shared/routes/user/leaderboard.routes'));
 
 // ── Core: Marketing Campaigns (admin, shared) ─────────────────────
-router.use('/', require('../../../shared/routes/campaign.routes'));
+router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 // ── App Catalog (public — reads from admin_db, no auth required) ───
 router.get('/app-catalog',   httpCache(300), appCatalogCtrl.publicList);
@@ -128,7 +128,7 @@ router.delete('/news/comments/:id',        auth, newsCommentCtrl.delete);
 
 // ── 2FA ───────────────────────────────────────────────────────────
 if (process.env.ENABLE_2FA === 'true') {
-  const twoFACtrl = require('../../../shared/controllers/twoFactorController');
+  const twoFACtrl = require('../../../shared/controllers/auth/twoFactorController');
   router.post('/auth/2fa/setup',    auth, twoFACtrl.setup);
   router.post('/auth/2fa/enable',   auth, twoFACtrl.enable);
   router.post('/auth/2fa/disable',  auth, twoFACtrl.disable);

@@ -1,6 +1,6 @@
 // @ts-nocheck
-const { success, error } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 exports.list = async (req, res) => {
   try {

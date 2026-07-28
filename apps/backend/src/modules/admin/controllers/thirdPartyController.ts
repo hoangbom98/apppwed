@@ -17,7 +17,7 @@ const { ServiceRegistry }    = require('../../../third-parties/core/ServiceRegis
 const { ConnectionManager }  = require('../../../third-parties/managers/ConnectionManager');
 const { GoldgateProvider }   = require('../../../third-parties/providers/Goldgate/GoldgateProvider');
 const { getPrismaClient }    = require('../../../shared/config/databases');
-const { success, error, notFound, paginate } = require('../../../shared/utils/response');
+const { success, error, notFound, paginate } = require('../../../shared/utils/network/response');
 
 // ── List providers ────────────────────────────────────────────────────────────
 

@@ -9,10 +9,12 @@ import { UpdateBanner }  from '@ui/pwa/update';
 
 // ── Lazy pages ─────────────────────────────────────────────────────────────────
 // Auth & standalone
-const LoginPage           = lazy(() => import('@/pages/Login'));
-const RegisterPage        = lazy(() => import('@/pages/Register'));
-const DownloadPage        = lazy(() => import('@/pages/Download'));
-const TwoFactorPage       = lazy(() => import('@/pages/TwoFactor'));
+const LoginPage             = lazy(() => import('@/pages/Login'));
+const RegisterPage          = lazy(() => import('@/pages/Register'));
+const ForgotPasswordPage    = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPasswordPage     = lazy(() => import('@/pages/ResetPassword'));
+const DownloadPage          = lazy(() => import('@/pages/Download'));
+const TwoFactorPage         = lazy(() => import('@/pages/TwoFactor'));
 
 // Main app
 const MarketPage          = lazy(() => import('@/pages/Market'));
@@ -67,10 +69,12 @@ export default function App() {
       <UpdateBanner />
       <Routes>
         {/* Auth & standalone pages — no layout */}
-        <Route path="login"    element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="download" element={<DownloadPage />} />
-        <Route path="2fa"      element={<TwoFactorPage />} />
+        <Route path="login"            element={<LoginPage />} />
+        <Route path="register"         element={<RegisterPage />} />
+        <Route path="forgot-password"  element={<ForgotPasswordPage />} />
+        <Route path="reset-password"   element={<ResetPasswordPage />} />
+        <Route path="download"         element={<DownloadPage />} />
+        <Route path="2fa"              element={<TwoFactorPage />} />
 
         {/* Main app — with desktop layout */}
         <Route element={<DesktopLayout />}>

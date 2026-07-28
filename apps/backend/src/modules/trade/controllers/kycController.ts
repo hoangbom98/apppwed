@@ -6,8 +6,8 @@
  * User.kycStatus is the status field on User itself.
  * All IDs are CUIDs (strings) — never coerce with +id.
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── GET /kyc — user's own KYC status ────────────────────────────────────────
 exports.getStatus = async (req, res) => {

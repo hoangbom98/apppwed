@@ -1,9 +1,9 @@
 // @ts-nocheck
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const TransferService = require('../services/transferService');
 const AmlService = require('../services/amlService');
 const notifSvc = require('../../../shared/services/notificationService');
-const { paginate } = require('../../../shared/utils/helpers');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── Withdrawals ──────────────────────────────────────────────────
 

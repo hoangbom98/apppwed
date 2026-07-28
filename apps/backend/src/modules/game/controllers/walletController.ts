@@ -8,8 +8,8 @@
  *   - Validate min/max amount
  *   - Kiểm tra KYC nếu requireKYC = true (tra cứu admin_db qua shared configService)
  */
-const { success, created, error } = require('../../../shared/utils/response');
-const { paginate }                = require('../../../shared/utils/helpers');
+const { success, created, error } = require('../../../shared/utils/network/response');
+const { paginate }                = require('../../../shared/utils/core/helpers');
 const Decimal                     = require('decimal.js');
 const bcrypt                      = require('bcryptjs');
 const notifSvc    = require('../../../shared/services/notificationService');

@@ -9,7 +9,7 @@ import {
   ok, created, noContent, error, badRequest,
   unauthorized, forbidden, notFound, conflict,
   validationError, serverError, paginate,
-} from '../shared/utils/response';
+} from '../shared/utils/network/response';
 
 /** Build a lightweight Express res mock */
 function mockRes() {

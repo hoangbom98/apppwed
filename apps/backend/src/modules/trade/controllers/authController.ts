@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 const { hashPassword, comparePassword, generateTokens, checkNewPassword } = require('../../../shared/services/authService');
-const { success, created, error, unauthorized } = require('../../../shared/utils/response');
+const { success, created, error, unauthorized } = require('../../../shared/utils/network/response');
 const emailGuard     = require('../../../shared/services/emailGuardService');
 const ipGuard        = require('../../../shared/services/ipGuardService');
 const auditService   = require('../../../shared/services/auditService');
@@ -174,4 +174,115 @@ exports.logout = async (req, res) => {
     auditService.logSecurity({ project: 'trade', userId: req.user.id, event: 'logout', ip: req.ip, ua: req.get('user-agent'), meta: {} });
   }
   return success(res, null, 'Đăng xuất thành công');
+};
+
+// ── Forgot password — step 1: generate reset token + send email ──────────────
+exports.forgotPassword = async (req, res) => {
+  const { error: sendErr, success } = require('../../../shared/utils/network/response');
+  const sendMail = require('../../../shared/services/communication/emailService');
+  const crypto = require('crypto');
+  try {
+    const { email } = req.body;
+    if (!email) return sendErr(res, 'Email là bắt buộc', 400);
+
+    const user = await req.prisma.user.findUnique({ where: { email } });
+    // Always return success to prevent email enumeration (OWASP A07)
+    if (!user) return success(res, null, 'Nếu email tồn tại, hướng dẫn sẽ được gửi');
+
+    const resetToken  = crypto.randomBytes(32).toString('hex');
+    const resetHash   = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt   = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await req.prisma.user.update({
+      where: { email },
+      data:  { passwordResetToken: resetHash, passwordResetExpires: expiresAt },
+    });
+
+    const resetUrl = `${process.env.TRADE_FRONTEND_URL || process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    const emailBody = `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0f1117;color:#e2e8f0;border-radius:12px">
+        <h2 style="color:#3b82f6;margin-bottom:8px">Đặt lại mật khẩu</h2>
+        <p style="color:#94a3b8;margin-bottom:16px">Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản <strong>${email}</strong>.</p>
+        <p style="color:#94a3b8;margin-bottom:24px">Nhấn vào nút bên dưới để đặt lại mật khẩu. Liên kết có hiệu lực trong <strong>15 phút</strong>.</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 28px;background:#3b82f6;color:#fff;border-radius:8px;text-decoration:none;font-weight:700">Đặt lại mật khẩu</a>
+        <p style="color:#64748b;font-size:12px;margin-top:24px">Nếu bạn không yêu cầu đổi mật khẩu, hãy bỏ qua email này.</p>
+        <hr style="border-color:#1e293b;margin-top:24px"/>
+        <p style="color:#475569;font-size:11px">LKVIP Trade · Giao dịch an toàn</p>
+      </div>
+    `;
+
+    await sendMail.send(email, 'Đặt lại mật khẩu LKVIP Trade', emailBody).catch(() => {});
+    auditService.logSecurity({ project: 'trade', userId: user.id, event: 'forgot_password', ip: req.ip, ua: req.get('user-agent'), meta: { email } });
+    return success(res, null, 'Nếu email tồn tại, hướng dẫn sẽ được gửi');
+  } catch (e) { return sendErr(res, e.message, 500); }
+};
+
+// ── Reset password — step 2: verify token + set new password ─────────────────
+exports.resetPassword = async (req, res) => {
+  const { error: sendErr, success } = require('../../../shared/utils/network/response');
+  const crypto = require('crypto');
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return sendErr(res, 'Token và mật khẩu là bắt buộc', 400);
+
+    const pwError = await checkNewPassword(password);
+    if (pwError) return sendErr(res, pwError, 400);
+
+    const resetHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await req.prisma.user.findFirst({
+      where: {
+        passwordResetToken:   resetHash,
+        passwordResetExpires: { gt: new Date() },
+      },
+    });
+    if (!user) return sendErr(res, 'Token không hợp lệ hoặc đã hết hạn', 400);
+
+    await req.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password:             await hashPassword(password),
+        passwordResetToken:   null,
+        passwordResetExpires: null,
+      },
+    });
+
+    // Revoke all sessions after password reset
+    await sessionService.revokeRefreshToken('trade', user.id).catch(() => {});
+    await sessionService.destroy('trade', user.id).catch(() => {});
+    auditService.logSecurity({ project: 'trade', userId: user.id, event: 'reset_password', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+    return success(res, null, 'Mật khẩu đã được đặt lại thành công');
+  } catch (e) { return sendErr(res, e.message, 500); }
+};
+
+// ── Change password (authenticated) ──────────────────────────────────────────
+exports.changePassword = async (req, res) => {
+  const { error: sendErr, success } = require('../../../shared/utils/network/response');
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return sendErr(res, 'Thiếu mật khẩu hiện tại hoặc mới', 400);
+
+    const pwError = await checkNewPassword(newPassword);
+    if (pwError) return sendErr(res, pwError, 400);
+
+    const user = await req.prisma.user.findUnique({
+      where:  { id: req.user.id },
+      select: { id: true, password: true },
+    });
+    if (!user) return sendErr(res, 'Người dùng không tồn tại', 404);
+
+    const valid = await comparePassword(currentPassword, user.password);
+    if (!valid) return sendErr(res, 'Mật khẩu hiện tại không đúng', 400);
+
+    if (currentPassword === newPassword) return sendErr(res, 'Mật khẩu mới phải khác mật khẩu cũ', 400);
+
+    await req.prisma.user.update({
+      where: { id: user.id },
+      data:  { password: await hashPassword(newPassword) },
+    });
+
+    // Revoke refresh token — force re-login on other devices
+    await sessionService.revokeRefreshToken('trade', user.id).catch(() => {});
+    auditService.logSecurity({ project: 'trade', userId: user.id, event: 'change_password', ip: req.ip, ua: req.get('user-agent'), meta: {} });
+    return success(res, null, 'Mật khẩu đã được thay đổi thành công');
+  } catch (e) { return sendErr(res, e.message, 500); }
 };

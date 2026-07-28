@@ -1,5 +1,5 @@
-const { comparePassword, generateTokens } = require('../../../shared/services/authService');
-const { success, error, unauthorized } = require('../../../shared/utils/response');
+const { comparePassword, generateTokens } = require('../../../shared/services/auth/authService');
+const { success, error, unauthorized } = require('../../../shared/utils/network/response');
 
 exports.login = async (req, res) => {
   try {
@@ -35,7 +35,7 @@ exports.refresh = async (req, res) => {
   try {
     const { refresh_token } = req.body;
     if (!refresh_token) return error(res, 'refresh_token là bắt buộc');
-    const { verifyRefreshToken, generateTokens } = require('../../../shared/services/authService');
+    const { verifyRefreshToken, generateTokens } = require('../../../shared/services/auth/authService');
     let payload;
     try { payload = verifyRefreshToken(refresh_token); }
     catch { return error(res, 'Refresh token không hợp lệ hoặc đã hết hạn', 401); }

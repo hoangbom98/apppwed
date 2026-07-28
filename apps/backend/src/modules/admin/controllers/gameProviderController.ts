@@ -11,7 +11,7 @@
 //   GET    /api/admin/game/providers/:id/products — list products under aggregator
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, notFound, created, paginate } = require('../../../shared/utils/response');
+const { success, error, notFound, created, paginate } = require('../../../shared/utils/network/response');
 const emit = require('../../../shared/socket/projectEmitter');
 
 // ── List aggregators ─────────────────────────────────────────────────────────

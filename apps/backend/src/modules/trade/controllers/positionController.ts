@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use strict';
-const { success, error, notFound } = require('../../../shared/utils/response');
-const { paginate } = require('../../../shared/utils/helpers');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
 
 // ── GET /trade/positions  — open positions ─────────────────────────────────────
 exports.getPositions = async (req, res) => {

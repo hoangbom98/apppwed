@@ -7,7 +7,7 @@
  *   GET  /checkin/status  — protected: user's streak + today's claim status
  *   POST /checkin/claim   — protected: claim today's check-in
  */
-const { success, error, badRequest } = require('../../../shared/utils/response');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
 const checkinSvc = require('../services/checkinService');
 
 // ── GET /game/checkin/config — public ─────────────────────────────────────────

@@ -1,4 +1,4 @@
-const { success, error } = require('../../../shared/utils/response');
+const { success, error } = require('../../../shared/utils/network/response');
 const FeedService = require('../services/feedService');
 const StoryService = require('../services/storyService');
 

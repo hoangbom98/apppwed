@@ -18,7 +18,7 @@ import {
   ProjectScope,
   IAggregatorConfig,
 } from './interfaces';
-import { logger } from '../../shared/services/logger';
+import { logger } from '../../shared/services/core/logger';
 
 export abstract class BaseProvider implements IProvider {
   protected httpClient:  AxiosInstance;

@@ -1,8 +1,8 @@
 // @ts-nocheck
 'use strict';
 const router     = require('express').Router();
-const auth       = require('../../../shared/middlewares/auth');
-const adminGuard = require('../../../shared/middlewares/adminGuard');
+const auth       = require('../../../shared/middlewares/auth/auth');
+const adminGuard = require('../../../shared/middlewares/auth/adminGuard');
 
 const authCtrl          = require('../controllers/authController');
 const marketCtrl        = require('../controllers/marketController');
@@ -27,18 +27,23 @@ const rewardCtrl        = require('../controllers/rewardController');
 const shopCtrl          = require('../controllers/shopController');
 const watchlistCtrl     = require('../controllers/watchlistController');
 
-const { paginate } = require('../../../shared/utils/helpers');
-const { ok, error } = require('../../../shared/utils/response');
+const { paginate } = require('../../../shared/utils/core/helpers');
+const { ok, error } = require('../../../shared/utils/network/response');
 
 // ── Auth ──────────────────────────────────────────────────────────
-router.post('/auth/register',   authCtrl.register);
-router.post('/auth/login',      authCtrl.login);
-router.post('/auth/refresh',    authCtrl.refresh);
-router.get('/auth/me',          auth, authCtrl.me);
-router.post('/auth/logout',     auth, authCtrl.logout);
+router.post('/auth/register',         authCtrl.register);
+router.post('/auth/login',            authCtrl.login);
+router.post('/auth/refresh',          authCtrl.refresh);
+router.get('/auth/me',                auth, authCtrl.me);
+router.post('/auth/logout',           auth, authCtrl.logout);
+router.post('/auth/forgot-password',  authCtrl.forgotPassword);
+router.post('/auth/reset-password',   authCtrl.resetPassword);
+router.put('/auth/password',          auth, authCtrl.changePassword);
 
 // ── Profile ───────────────────────────────────────────────────────────────────
-router.patch('/profile',        auth, userCtrl.updateProfile);
+const uploadMw = require('../../../shared/middlewares/core/upload');
+router.patch('/profile',              auth, userCtrl.updateProfile);
+router.patch('/profile/avatar',       auth, uploadMw.single('avatar'), userCtrl.uploadAvatar);
 
 // ── Market / Symbols ──────────────────────────────────────────────
 router.get('/pairs',                     marketCtrl.getPairs);
@@ -211,7 +216,7 @@ router.get('/admin/positions',         auth, adminGuard, async (req, res) => {
 
 // ── 2FA ───────────────────────────────────────────────────────────
 if (process.env.ENABLE_2FA === 'true') {
-  const twoFACtrl = require('../../../shared/controllers/twoFactorController');
+  const twoFACtrl = require('../../../shared/controllers/auth/twoFactorController');
   router.post('/auth/2fa/setup',   auth, twoFACtrl.setup);
   router.post('/auth/2fa/enable',  auth, twoFACtrl.enable);
   router.post('/auth/2fa/disable', auth, twoFACtrl.disable);
@@ -331,22 +336,22 @@ router.delete('/admin/shop/:id',  auth, adminGuard, shopCtrl.adminDelete);
 router.get('/health', (_req, res) => res.json({ status: 'ok', module: 'trade' }));
 
 // ── Shared: Support Chat / Tickets / Knowledge ────────────────────
-const supportRoutes = require('../../../shared/routes/support.routes.js');
+const supportRoutes = require('../../../shared/routes/support/support.routes');
 router.use('/', supportRoutes);
 
 // ── Core: Referral (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/referral.routes'));
+router.use('/', require('../../../shared/routes/user/referral.routes'));
 
 // ── Core: Loyalty (shared) ───────────────────────────────────────
-router.use('/', require('../../../shared/routes/loyalty.routes'));
+router.use('/', require('../../../shared/routes/user/loyalty.routes'));
 
 // ── Core: Affiliate (shared) ─────────────────────────────────────
-router.use('/', require('../../../shared/routes/affiliate.routes'));
+router.use('/', require('../../../shared/routes/user/affiliate.routes'));
 
 // ── Core: Leaderboard (shared) ───────────────────────────────────
-router.use('/', require('../../../shared/routes/leaderboard.routes'));
+router.use('/', require('../../../shared/routes/user/leaderboard.routes'));
 
 // ── Core: Marketing Campaigns (admin, shared) ─────────────────────
-router.use('/', require('../../../shared/routes/campaign.routes'));
+router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 module.exports = router;

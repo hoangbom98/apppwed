@@ -6,7 +6,7 @@
  * Fields: id, userId, newsId, content, likes, status
  * Note: Comment model has NO parentId/replies — flat comment structure only.
  */
-const { success, created, error, notFound, forbidden } = require('../../../shared/utils/response');
+const { success, created, error, notFound, forbidden } = require('../../../shared/utils/network/response');
 
 exports.list = async (req, res) => {
   try {

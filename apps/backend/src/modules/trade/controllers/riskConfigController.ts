@@ -4,7 +4,7 @@
  * riskConfigController — per-symbol risk parameters (replaces lc_risk)
  * Admin-only routes: /trade/admin/risk
  */
-const { success, error, notFound } = require('../../../shared/utils/response');
+const { success, error, notFound } = require('../../../shared/utils/network/response');
 
 // GET /trade/admin/risk
 exports.listAll = async (req, res) => {

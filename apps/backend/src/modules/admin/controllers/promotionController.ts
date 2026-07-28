@@ -11,7 +11,7 @@
 //   PATCH  /api/admin/promotions/participants/:pid/cancel — cancel participant
 'use strict';
 const { getPrismaClient } = require('../../../shared/config/databases');
-const { success, error, notFound, created, paginate } = require('../../../shared/utils/response');
+const { success, error, notFound, created, paginate } = require('../../../shared/utils/network/response');
 
 // ── List promotions ──────────────────────────────────────────────────────────
 exports.list = async (req, res) => {

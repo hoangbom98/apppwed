@@ -1,5 +1,5 @@
 // SEO metadata for pages/games/tools
-const { success, created, notFound, error } = require('../../../shared/utils/response');
+const { success, created, notFound, error } = require('../../../shared/utils/network/response');
 
 exports.getMeta = async (req, res) => {
   try {

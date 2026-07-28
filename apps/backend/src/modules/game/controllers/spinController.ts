@@ -8,8 +8,8 @@
  *   POST /wheel/spin        — protected: execute a spin
  *   GET  /wheel/history     — protected: user's spin history (paginated)
  */
-const { success, error, badRequest } = require('../../../shared/utils/response');
-const { paginate }                   = require('../../../shared/utils/helpers');
+const { success, error, badRequest } = require('../../../shared/utils/network/response');
+const { paginate }                   = require('../../../shared/utils/core/helpers');
 const spinSvc                        = require('../services/spinService');
 
 // ── GET /game/wheel — public ──────────────────────────────────────────────────
