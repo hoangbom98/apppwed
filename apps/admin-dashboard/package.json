@@ -59,6 +59,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.1.1",
     "oxlint": "^1.71.0",
+    "vitest": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
     "postcss": "^8.5.20",
     "stylelint": "^14.16.1",
     "typescript": "~6.0.2",

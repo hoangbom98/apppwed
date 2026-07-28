@@ -14,6 +14,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // IMPORTANT: This assumes the setup file is located at ./src/test/setup.ts
+    // relative to the root of the project consuming this base config.
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', 'src/test/setup.ts'],

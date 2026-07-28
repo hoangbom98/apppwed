@@ -44,7 +44,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT:     5000,               // ← internal only — Nginx → 127.0.0.1:5000
         APP_URL:  'https://api.tc-gaming.live',
-        CORS_ORIGINS: 'https://tc-gaming.live,https://www.tc-gaming.live,https://hub.tc-gaming.live,https://trade.tc-gaming.live,https://sports.tc-gaming.live,https://admin.tc-gaming.live',
+        CORS_ORIGINS: 'https://tc-gaming.live,https://www.tc-gaming.live,https://hub.tc-gaming.live,https://trade.tc-gaming.live,https://sports.tc-gaming.live,https://game.tc-gaming.live,https://admin.tc-gaming.live',
       },
 
       // Logs stored inside this project's directory only

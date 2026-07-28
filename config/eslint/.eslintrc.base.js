@@ -38,10 +38,10 @@ module.exports = {
 
   rules: {
     // ── TypeScript ──────────────────────────────────────────────────────────
-    '@typescript-eslint/no-explicit-any':       'warn',
+    '@typescript-eslint/no-explicit-any':       'error',
     '@typescript-eslint/no-unused-vars':        ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    '@typescript-eslint/ban-ts-comment':        'warn',
+    '@typescript-eslint/ban-ts-comment':        'error',
 
     // ── React Hooks ─────────────────────────────────────────────────────────
     'react-hooks/rules-of-hooks':  'error',

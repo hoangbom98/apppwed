@@ -45,10 +45,10 @@ systemctl start  prometheus prometheus-node-exporter grafana-server
 
 ```bash
 # Copy LKVIP config (overwrites default)
-cp source/monitoring/prometheus.yml /etc/prometheus/prometheus.yml
+cp config/monitoring/prometheus.yml /etc/prometheus/prometheus.yml
 
 # Copy alert rules
-cp source/monitoring/prometheus/alerts.yml /etc/prometheus/alerts.yml
+cp config/monitoring/prometheus/alerts.yml /etc/prometheus/alerts.yml
 
 # Validate config
 promtool check config /etc/prometheus/prometheus.yml
@@ -71,11 +71,11 @@ http://localhost:9090/targets
 
 ```bash
 # Datasource (auto-creates Prometheus connection)
-cp source/monitoring/grafana/provisioning/datasources/prometheus.yml \
+cp config/monitoring/grafana/provisioning/datasources/prometheus.yml \
    /etc/grafana/provisioning/datasources/lkvip-prometheus.yml
 
 # Dashboard provisioning (auto-loads JSON dashboards)
-cp source/monitoring/grafana/provisioning/dashboards/dashboard.yml \
+cp config/monitoring/grafana/provisioning/dashboards/dashboard.yml \
    /etc/grafana/provisioning/dashboards/lkvip.yml
 
 # Create dashboards directory
@@ -139,12 +139,12 @@ The LKVIP backend exposes these Prometheus metrics at `GET /metrics`:
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `kjc_requests_total` | Counter | Total HTTP requests handled |
-| `kjc_errors_total` | Counter | Total 5xx errors returned |
-| `kjc_process_uptime_seconds` | Gauge | Seconds since process started |
-| `kjc_memory_rss_bytes` | Gauge | RSS memory in bytes |
-| `kjc_memory_heap_used_bytes` | Gauge | V8 heap used in bytes |
-| `kjc_memory_heap_total_bytes` | Gauge | V8 heap total allocated in bytes |
+| `lkvip_requests_total` | Counter | Total HTTP requests handled |
+| `lkvip_errors_total` | Counter | Total 5xx errors returned |
+| `lkvip_process_uptime_seconds` | Gauge | Seconds since process started |
+| `lkvip_memory_rss_bytes` | Gauge | RSS memory in bytes |
+| `lkvip_memory_heap_used_bytes` | Gauge | V8 heap used in bytes |
+| `lkvip_memory_heap_total_bytes` | Gauge | V8 heap total allocated in bytes |
 
 Node Exporter additionally provides hundreds of OS-level metrics (prefixed `node_`).
 
@@ -205,7 +205,7 @@ journalctl -u prometheus -f
 ## File Structure
 
 ```
-source/monitoring/
+config/monitoring/
 ├── prometheus.yml                          # Main Prometheus config (copy to /etc/prometheus/)
 ├── prometheus/
 │   └── alerts.yml                          # Alert rules (copy to /etc/prometheus/)

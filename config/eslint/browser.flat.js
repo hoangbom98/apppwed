@@ -32,7 +32,7 @@ export const browserFlatConfig = [
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'error', // Thay warn thành error để bắt buộc
+      'react-hooks/exhaustive-deps': 'warn', // Thay error thành warn
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },

@@ -1,29 +1,13 @@
 {
+  "$schema": "https://oxc.rs/docs/schema/oxlint.schema.json",
   "rules": {
-    "no-var": "error",
-    "prefer-const": "error",
-    "eqeqeq": ["error", "always"],
-    "no-console": "warn",
-    "no-debugger": "error",
-    "no-unused-vars": "warn",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "correctness": "error",
+    "perf": "warn",
+    "style": "warn",
+    "typescript": "error"
   },
-  "categories": {
-    "correctness": "warn",
-    "react": "warn",
-    "react-hooks": "error"
-  },
-  "env": {
-    "browser": true,
-    "es2022": true
-  },
-  "ignorePatterns": [
-    "**/dist/**",
-    "**/node_modules/**",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.d.ts"
-  ]
+  "deny": ["no-unused-vars", "no-console"],
+  "import": {
+    "no-unused-modules": "warn"
+  }
 }
