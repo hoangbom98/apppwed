@@ -9,6 +9,26 @@
  *   import type { IBet } from '@lkvip/types/src/common.types';
  */
 
+// ── Portal & Store types ──────────────────────────────────────────────────
+export type {
+  PortalNewsArticle,
+  PortalEcosystemItem,
+  PortalCareerPosition,
+  PortalContactMessage,
+} from './portal';
+
+export type {
+  ProductType,
+  ProductCategory,
+  StoreProduct,
+  StoreProductReview,
+  StoreOrder,
+  StoreOrderItem,
+  StoreDigitalAsset,
+  StoreSubscription,
+  StoreApiKey,
+} from './store';
+
 // ── Project IDs, device, build, health ────────────────────────────────────
 export type {
   ProjectId,
@@ -78,10 +98,6 @@ export type {
   IMoMoIpnPayload, IZaloPayCallback, IVNPayReturnData,
   IVietQRBank, IVietQRBankListResponse,
 } from './payment.types';
-
-// ── Additional type modules ────────────────────────────────────────────────
-export * from './api.types';
-export * from './common.types';
 
 // ── New domain types (enum-based, additive) ────────────────────────────────
 // user.ts        → Role, UserStatus (enum), User (simplified interface)

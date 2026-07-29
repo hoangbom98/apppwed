@@ -43,11 +43,7 @@ export const createAuthClient = (
   baseURL?: string,
   project?: string,
 ): AxiosInstance => {
-  const base = baseURL ?? (
-    typeof import.meta !== 'undefined'
-      ? (import.meta as Record<string, Record<string, string>>).env?.VITE_API_URL
-      : process.env.VITE_API_URL
-  ) ?? 'http://localhost:5000';
+  const base = baseURL ?? process.env.VITE_API_URL ?? 'http://localhost:5000';
 
   const client = axios.create({
     baseURL: base,

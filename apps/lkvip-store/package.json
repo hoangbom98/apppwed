@@ -1,0 +1,40 @@
+{
+  "name": "@lkvip/store",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lkvip/types": "workspace:*",
+    "@lkvip/ui": "workspace:*",
+    "@tanstack/react-query": "*",
+    "axios": "*",
+    "lucide-react": "*",
+    "next": "^15.3.0",
+    "react": "*",
+    "react-dom": "*",
+    "react-hot-toast": "*",
+    "react-hook-form": "*",
+    "recharts": "*",
+    "yup": "*",
+    "zustand": "*"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "*",
+    "@types/node": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "eslint": "*",
+    "eslint-config-next": "^15.3.0",
+    "oxlint": "*",
+    "postcss": "*",
+    "tailwindcss": "^4.0.0",
+    "typescript": "*"
+  }
+}

@@ -23,8 +23,11 @@
 | Error tracking | Sentry (@sentry/node + @sentry/react) | ^8.x |
 | Logging | Winston | ^3.x |
 | Process manager | PM2 (cluster, name: `lkvip-api`) | — |
+| Portal | Next.js 15 + pg (standalone, PM2 `lkvip-portal`) | ^15.5 |
 
-> **Not in codebase**: Vant UI, Zod, @iconify/react, crypto-js, Video.js. Do not suggest these.
+> **Not in codebase**: Vant UI, Zod (backend/SPA), @iconify/react, crypto-js, Video.js. Do not suggest these.
+> **Exception**: `apps/lkvipgroup-portal` uses Next.js 15 with Zod for server-side validation only — it is an isolated app.
+> **Backend `tsconfig.json`**: `strict: false` is intentional — the backend uses CommonJS + legacy patterns. Do not change to `true` without a dedicated migration PR.
 
 ---
 
@@ -58,23 +61,35 @@
 │   │   │   ├── dating/schema.prisma
 │   │   │   └── sports/schema.prisma
 │   │   └── package.json
-│   ├── hub/               ← @lkvip/hub (Tailwind + Lucide, Capacitor)
-│   ├── game/              ← @lkvip/game (Tailwind + Lucide + recharts + framer-motion, Capacitor)
-│   ├── trading/           ← @lkvip/trade (Tailwind + Lucide, Capacitor)
-│   ├── dating/            ← @lkvip/dating (Tailwind + Lucide + framer-motion, Capacitor)
-│   ├── sports/            ← @lkvip/sports (Tailwind + Lucide + hls.js, Capacitor)
-│   ├── admin-dashboard/   ← @lkvip/admin (Ant Design v6 + Tailwind, Desktop only, PWA)
-│   └── mobile/            ← @lkvip/mobile (Capacitor wrapper)
+│   ├── hub/               ← @lkvip/hub (Tailwind + Lucide, Capacitor, port 5173)
+│   ├── game/              ← @lkvip/game (Tailwind + Lucide + recharts + framer-motion, Capacitor, port 5174)
+│   ├── trading/           ← @lkvip/trade (Tailwind + Lucide + recharts, Capacitor, port 5175)
+│   ├── dating/            ← @lkvip/dating (Tailwind + Lucide + framer-motion, Capacitor, port 5176)
+│   ├── sports/            ← @lkvip/sports (Tailwind + Lucide + hls.js, Capacitor, port 5177)
+│   ├── admin-dashboard/   ← @lkvip/admin (Ant Design v6 + Tailwind, Desktop PWA, port 5180)
+│   ├── banking/           ← @lkvip/banking (Tailwind + Lucide + Yup, port 5181)
+│   ├── invest/            ← @lkvip/invest (Tailwind + Lucide + recharts, port 5182)
+│   ├── lkvip-store/       ← @lkvip/store (Tailwind + Lucide + RHF + Yup, port 5185)
+│   ├── academy/           ← @lkvip/academy (Tailwind + Lucide, port 5184)
+│   ├── lkvipgroup-portal/ ← @lkvip/portal (Next.js 15, standalone, port 3010)
+│   └── mobile/            ← @lkvip/mobile (Capacitor wrapper for admin-dashboard PWA)
 ├── packages/
-│   ├── constants/   ← @lkvip/constants  (enums, banks, currencies, roles, errors, projects)
-│   ├── types/       ← @lkvip/types      (shared TS interfaces)
-│   ├── ui/          ← @lkvip/ui         (shared React components, hooks, stores, pwa)
-│   └── utils/       ← @lkvip/utils      (crypto, date, format, money/decimal.js, otp, slugify)
+│   ├── constants/    ← @lkvip/constants   (enums, banks, currencies, roles, errors, projects)
+│   ├── types/        ← @lkvip/types       (shared TS interfaces — common, api, portal, store)
+│   ├── ui/           ← @lkvip/ui          (shared React components, hooks, stores, pwa, formatters)
+│   ├── utils/        ← @lkvip/utils       (crypto, date, format, money/decimal.js, otp, slugify)
+│   ├── api-client/   ← @lkvip/api-client  (Axios auth client factory with auto-refresh)
+│   ├── auth/         ← @lkvip/auth        (shared auth hooks, TokenManager)
+│   ├── config/       ← @lkvip/config      (shared ESLint flat configs: browser + node)
+│   └── paylock-sdk/  ← @lkvip/paylock-sdk (license verification SDK, UMD/ESM/CJS)
 ├── config/
-│   ├── nginx/       ← Nginx configs (tc-gaming.conf, group.conf, etc.)
-│   ├── pm2/         ← ecosystem.config.js
-│   └── monitoring/  ← prometheus.yml, grafana/
-└── scripts/         ← deploy.sh, ssl-setup.sh, vps-setup.sh, prisma-run.ts
+│   ├── nginx/        ← Nginx configs (group.conf, tc-gaming.conf, lkvip-http.conf)
+│   ├── pm2/          ← ecosystem.config.js (lkvip-api cluster + lkvip-portal fork)
+│   ├── mysql/        ← MySQL configuration
+│   ├── redis/        ← Redis configuration
+│   ├── vercel/       ← Vercel deployment guide (SETUP.md)
+│   └── monitoring/   ← prometheus.yml, grafana/
+└── scripts/          ← deploy.sh, ssl-setup.sh, vps-setup.sh, backup.sh, pre-prod-check.sh
 ```
 
 ---

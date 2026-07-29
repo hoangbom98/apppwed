@@ -35,11 +35,16 @@ else
   fail "Nginx — không chạy"
 fi
 
-if redis-cli ping 2>/dev/null | grep -q "PONG"; then
+# Load Redis password from .env if set
+_REDIS_PASS="$(grep -E '^REDIS_URL=' apps/backend/.env 2>/dev/null \
+  | sed 's|.*://:[^@]*@.*||;s|.*://:||;s|@.*||' | head -1 || true)"
+_REDIS_CLI_AUTH="${_REDIS_PASS:+-a $_REDIS_PASS --no-auth-warning}"
+if redis-cli ${_REDIS_CLI_AUTH} ping 2>/dev/null | grep -q "PONG"; then
   ok "Redis — PONG"
 else
-  fail "Redis — không phản hồi"
+  fail "Redis — không phản hồi (kiểm tra requirepass trong redis.conf)"
 fi
+unset _REDIS_PASS _REDIS_CLI_AUTH
 
 if mysqladmin ping --silent 2>/dev/null; then
   ok "MySQL — alive"

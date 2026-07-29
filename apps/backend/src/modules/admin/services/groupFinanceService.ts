@@ -6,7 +6,7 @@
 
 const logger = require('../../../shared/services/logger');
 const cache  = require('../../../shared/services/cacheService');
-const { Decimal } = require('@lkvip/utils');
+import Decimal from 'decimal.js';
 
 /** Cache TTL for fee configs (2 minutes) */
 const FEE_CACHE_TTL = 120;

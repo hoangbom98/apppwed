@@ -1,0 +1,85 @@
+# =============================================================================
+# lkvip-tuning.cnf — MySQL 8 tuning cho VPS 4 vCPU / 8 GB RAM
+# =============================================================================
+# Install:
+#   sudo cp /var/LKVIP/config/mysql/lkvip-tuning.cnf \
+#           /etc/mysql/mysql.conf.d/lkvip-tuning.cnf
+#   sudo systemctl restart mysql
+#
+# Verify:
+#   mysql -u root -p -e "SHOW VARIABLES LIKE 'innodb_buffer_pool_size';"
+#   mysql -u root -p -e "SHOW VARIABLES LIKE 'max_connections';"
+#
+# RAM budget giải thích:
+#   innodb_buffer_pool_size = 2G  ← 25% of 8 GB (standard rule: 50-75% cho dedicated DB)
+#   Giảm xuống 2G vì MySQL chia sẻ VPS với Node.js, Redis và Nginx.
+#   Tăng lên 3G nếu bạn nâng cấp VPS lên 16 GB.
+# =============================================================================
+
+[mysqld]
+
+# ── InnoDB Buffer Pool ────────────────────────────────────────────────────────
+# Đây là thông số quan trọng nhất — cache data + index pages trong RAM.
+# Rule of thumb: 50-75% RAM cho dedicated MySQL server.
+# Ở đây chia sẻ VPS → dùng 2G (25% of 8 GB).
+innodb_buffer_pool_size         = 2G
+innodb_buffer_pool_instances    = 2    # 1 instance per GB (2G → 2 instances)
+
+# ── InnoDB Logging ────────────────────────────────────────────────────────────
+innodb_log_file_size            = 256M
+innodb_log_buffer_size          = 64M
+# 0 = fastest (flush once/second), 1 = safest (flush per commit), 2 = balanced
+# Dùng 2 cho VPS: giảm disk I/O ~3x so với mặc định 1, vẫn an toàn hơn 0
+innodb_flush_log_at_trx_commit  = 2
+innodb_flush_method             = O_DIRECT  # bỏ qua OS cache cho InnoDB data files
+
+# ── Connection limits ─────────────────────────────────────────────────────────
+# 6 databases × 8 connection_limit/prisma × 2 PM2 instances = 96 max
+# Thêm 50% buffer → 150. Giữ 200 để dự phòng external apps.
+max_connections                 = 200
+max_connect_errors              = 1000
+connect_timeout                 = 10
+wait_timeout                    = 300       # close idle connections sau 5 phút
+interactive_timeout             = 300
+
+# ── Table cache ───────────────────────────────────────────────────────────────
+table_open_cache                = 1000      # 6 schemas × ~50 tables + buffer
+table_definition_cache          = 500
+
+# ── Temp tables ───────────────────────────────────────────────────────────────
+tmp_table_size                  = 64M
+max_heap_table_size             = 64M
+
+# ── Query cache (deprecated in MySQL 8 — disable explicitly) ──────────────────
+query_cache_type                = 0
+query_cache_size                = 0
+
+# ── Performance Schema ────────────────────────────────────────────────────────
+# Tắt để tiết kiệm ~400 MB RAM.
+# Bật lại tạm thời khi cần profile: SET GLOBAL performance_schema = ON;
+performance_schema              = OFF
+
+# ── Binary logging ────────────────────────────────────────────────────────────
+# Bật nếu cần point-in-time recovery hoặc read replica.
+# Tắt để tiết kiệm disk I/O.
+skip_log_bin                    = 1
+
+# ── Slow query log ────────────────────────────────────────────────────────────
+slow_query_log                  = 1
+slow_query_log_file             = /var/log/mysql/lkvip-slow.log
+long_query_time                 = 2          # log queries chậm hơn 2 giây
+log_queries_not_using_indexes   = 0          # tắt để tránh spam log
+
+# ── Character set ─────────────────────────────────────────────────────────────
+character-set-server            = utf8mb4
+collation-server                = utf8mb4_unicode_ci
+
+# ── Network ───────────────────────────────────────────────────────────────────
+bind-address                    = 127.0.0.1  # chỉ accept local connections
+max_allowed_packet              = 64M        # cho backup restore lớn
+
+# ── Disk I/O optimization ─────────────────────────────────────────────────────
+innodb_io_capacity              = 400        # SSD: 400-1000, HDD: 100-200
+innodb_io_capacity_max          = 800
+innodb_read_io_threads          = 4
+innodb_write_io_threads         = 4

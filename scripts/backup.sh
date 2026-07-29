@@ -4,6 +4,7 @@
 #
 # Backs up all 6 MySQL databases to /var/LKVIP/.backups/<YYYY-MM-DD>/
 # Compresses each dump with gzip, then removes backups older than RETAIN_DAYS.
+# Optionally uploads compressed backups to Cloudflare R2 (set ARCHIVE_ENABLED=true).
 # Sends a Telegram notification on success or failure.
 #
 # Schedule via cron (as user lkvip):
@@ -12,6 +13,16 @@
 # Manual restore test:
 #   bash /var/LKVIP/scripts/backup.sh --restore-test
 #   (Creates a temporary DB, restores latest backup, then drops the temp DB)
+#
+# R2 upload prerequisites (when ARCHIVE_ENABLED=true):
+#   apt-get install -y awscli   # or: pip3 install awscli
+#   Then set in apps/backend/.env:
+#     ARCHIVE_ENABLED=true
+#     ARCHIVE_BUCKET=lkvip-backups
+#     ARCHIVE_S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+#     ARCHIVE_S3_ACCESS_KEY_ID=<R2 Access Key>
+#     ARCHIVE_S3_SECRET_ACCESS_KEY=<R2 Secret Key>
+#     BACKUP_R2_RETENTION_DAYS=30   (optional, default 30)
 #
 # Required env vars (loaded from apps/backend/.env if not already set):
 #   MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD
@@ -51,11 +62,11 @@ done
 
 # ── Load env vars if not already set ─────────────────────────────────────────
 if [[ -f "$ENV_FILE" ]]; then
-  # Only load MYSQL_* and TELEGRAM_* variables; never eval the full .env
+  # Only load relevant prefixes; never eval the full .env
   while IFS='=' read -r key value; do
-    [[ "$key" =~ ^(MYSQL_|TELEGRAM_|DB_) ]] || continue
+    [[ "$key" =~ ^(MYSQL_|TELEGRAM_|DB_|ARCHIVE_|BACKUP_R2_) ]] || continue
     [[ -z "${!key+x}" ]] && export "$key"="${value//\"/}"
-  done < <(grep -E '^(MYSQL_|TELEGRAM_|DB_)' "$ENV_FILE" | sed 's/#.*//' | grep -v '^$')
+  done < <(grep -E '^(MYSQL_|TELEGRAM_|DB_|ARCHIVE_|BACKUP_R2_)' "$ENV_FILE" | sed 's/#.*//' | grep -v '^$')
 fi
 
 # ── MySQL connection params ───────────────────────────────────────────────────
@@ -154,9 +165,97 @@ Backup: <code>$(basename "$LATEST")</code>"
   exit 0
 fi
 
+# ── R2 upload helper ──────────────────────────────────────────────────────────
+# Uses the AWS CLI (s3api-compatible) pointed at the Cloudflare R2 endpoint.
+# Called once per dump file immediately after a successful mysqldump.
+upload_to_r2() {
+  local local_file="$1"       # e.g. /var/LKVIP/.backups/2025-07-29/lkvip_admin_…sql.gz
+  local r2_key="$2"           # e.g. backups/db/mysql/2025-07-29/lkvip_admin_…sql.gz
+
+  local bucket="${ARCHIVE_BUCKET:-}"
+  local endpoint="${ARCHIVE_S3_ENDPOINT:-}"
+  local access_key="${ARCHIVE_S3_ACCESS_KEY_ID:-}"
+  local secret_key="${ARCHIVE_S3_SECRET_ACCESS_KEY:-}"
+
+  if [[ -z "$bucket" || -z "$endpoint" || -z "$access_key" || -z "$secret_key" ]]; then
+    warn "  [R2] ARCHIVE_* vars not set — skipping upload for $(basename "$local_file")"
+    return 0
+  fi
+
+  if ! command -v aws &>/dev/null; then
+    warn "  [R2] aws CLI not found — skipping upload. Install: apt-get install -y awscli"
+    return 0
+  fi
+
+  AWS_ACCESS_KEY_ID="$access_key" \
+  AWS_SECRET_ACCESS_KEY="$secret_key" \
+  aws s3 cp "$local_file" "s3://${bucket}/${r2_key}" \
+    --endpoint-url "$endpoint" \
+    --region "${ARCHIVE_S3_REGION:-auto}" \
+    --no-progress \
+    --quiet 2>&1 && info "  [R2] ✓ uploaded → ${r2_key}" \
+                 || warn "  [R2] ✗ upload failed for $(basename "$local_file")"
+}
+
+# ── R2 remote retention cleanup ───────────────────────────────────────────────
+# Deletes R2 objects under backups/db/mysql/ older than BACKUP_R2_RETENTION_DAYS.
+purge_r2_old_backups() {
+  local bucket="${ARCHIVE_BUCKET:-}"
+  local endpoint="${ARCHIVE_S3_ENDPOINT:-}"
+  local access_key="${ARCHIVE_S3_ACCESS_KEY_ID:-}"
+  local secret_key="${ARCHIVE_S3_SECRET_ACCESS_KEY:-}"
+  local retention_days="${BACKUP_R2_RETENTION_DAYS:-30}"
+  local prefix="backups/db/mysql/"
+
+  [[ -z "$bucket" || -z "$endpoint" || -z "$access_key" || -z "$secret_key" ]] && return 0
+  ! command -v aws &>/dev/null && return 0
+
+  local cutoff_ts
+  cutoff_ts=$(date -d "-${retention_days} days" +%s 2>/dev/null \
+              || date -v "-${retention_days}d" +%s 2>/dev/null)  # Linux / macOS
+  [[ -z "$cutoff_ts" ]] && return 0
+
+  step "Purging R2 backups older than ${retention_days} days (prefix: ${prefix})"
+
+  local objects
+  objects=$(AWS_ACCESS_KEY_ID="$access_key" \
+            AWS_SECRET_ACCESS_KEY="$secret_key" \
+            aws s3api list-objects-v2 \
+              --bucket "$bucket" \
+              --prefix "$prefix" \
+              --endpoint-url "$endpoint" \
+              --region "${ARCHIVE_S3_REGION:-auto}" \
+              --query 'Contents[].{Key:Key,LastModified:LastModified}' \
+              --output text 2>/dev/null || true)
+
+  local deleted_count=0
+  while IFS=$'\t' read -r key last_modified; do
+    [[ -z "$key" ]] && continue
+    local obj_ts
+    obj_ts=$(date -d "$last_modified" +%s 2>/dev/null \
+             || date -j -f "%Y-%m-%dT%H:%M:%S" "${last_modified%%.*}" +%s 2>/dev/null || echo 0)
+    if [[ "$obj_ts" -lt "$cutoff_ts" ]]; then
+      AWS_ACCESS_KEY_ID="$access_key" \
+      AWS_SECRET_ACCESS_KEY="$secret_key" \
+      aws s3api delete-object \
+        --bucket "$bucket" \
+        --key "$key" \
+        --endpoint-url "$endpoint" \
+        --region "${ARCHIVE_S3_REGION:-auto}" \
+        --quiet 2>/dev/null && warn "  [R2] removed old backup: $key" \
+                             || warn "  [R2] failed to remove: $key"
+      (( deleted_count++ )) || true
+    fi
+  done <<< "$objects"
+
+  info "[R2] Remote purge done — ${deleted_count} object(s) removed."
+}
+
 # ── Normal backup mode ────────────────────────────────────────────────────────
 step "Starting backup — $TS"
 info "Target directory: $BACKUP_DIR"
+ARCHIVE_ENABLED="${ARCHIVE_ENABLED:-false}"
+[[ "$ARCHIVE_ENABLED" == "true" ]] && info "[R2] Upload enabled — bucket: ${ARCHIVE_BUCKET:-<not set>}"
 
 TOTAL_SIZE=0
 
@@ -172,6 +271,12 @@ for DB in "${DATABASES[@]}"; do
       "$DB" 2>/dev/null | gzip -9 > "$DUMP_FILE"; then
     FILE_SIZE=$(du -sh "$DUMP_FILE" | cut -f1)
     info "  ✓ $DB — $FILE_SIZE"
+
+    # ── Upload to R2 immediately after successful dump ──────────────────────
+    if [[ "$ARCHIVE_ENABLED" == "true" ]]; then
+      R2_KEY="backups/db/mysql/${TODAY}/$(basename "$DUMP_FILE")"
+      upload_to_r2 "$DUMP_FILE" "$R2_KEY"
+    fi
   else
     error "  ✗ $DB — dump FAILED"
     FAILED_DBS+=("$DB")
@@ -179,21 +284,26 @@ for DB in "${DATABASES[@]}"; do
   fi
 done
 
-# ── Purge old backups ─────────────────────────────────────────────────────────
-step "Purging backups older than $RETAIN_DAYS days"
+# ── Purge old local backups ───────────────────────────────────────────────────
+step "Purging local backups older than $RETAIN_DAYS days"
 DELETED=$(find "$BACKUP_BASE" -mindepth 1 -maxdepth 1 -type d -mtime "+$RETAIN_DAYS" -print)
 if [[ -n "$DELETED" ]]; then
   echo "$DELETED" | while read -r old_dir; do
-    warn "  Removing old backup: $(basename "$old_dir")"
+    warn "  Removing old local backup: $(basename "$old_dir")"
     rm -rf "$old_dir"
   done
 else
-  info "  No old backups to remove."
+  info "  No old local backups to remove."
+fi
+
+# ── Purge old remote backups on R2 ───────────────────────────────────────────
+if [[ "$ARCHIVE_ENABLED" == "true" ]]; then
+  purge_r2_old_backups
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 KEPT=$(find "$BACKUP_BASE" -mindepth 1 -maxdepth 1 -type d | wc -l)
-info "Backup directories retained: $KEPT"
+info "Local backup directories retained: $KEPT"
 
 if [[ ${#FAILED_DBS[@]} -gt 0 ]]; then
   exit 1

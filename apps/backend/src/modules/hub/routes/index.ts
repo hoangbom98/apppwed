@@ -6,6 +6,7 @@ const { httpCache } = require('../../../shared/middlewares/core/httpCache');
 const autocompleteCtrl = require('../controllers/autocompleteController');
 const authCtrl   = require('../controllers/authController');
 const cmsCtrl    = require('../controllers/cmsController');
+const portalCtrl = require('../controllers/portalController');
 const adminCtrl  = require('../controllers/adminController');
 const downloadCtrl    = require('../controllers/downloadController');
 const eventCtrl       = require('../controllers/eventController');
@@ -104,6 +105,13 @@ router.use('/', require('../../../shared/routes/user/campaign.routes'));
 
 // ── App Catalog (public — reads from admin_db, no auth required) ───
 router.get('/app-catalog',   httpCache(300), appCatalogCtrl.publicList);
+
+// ── Portal (lkvipgroup.com) ───────────────────────────────────────────────
+router.get('/portal/news',          httpCache(120), portalCtrl.getPortalNews);
+router.get('/portal/news/:slug',    httpCache(300), portalCtrl.getPortalNewsDetail);
+router.get('/portal/ecosystem',     httpCache(600), portalCtrl.getEcosystemItems);
+router.get('/portal/careers',       httpCache(300), portalCtrl.getCareers);
+router.post('/portal/contact',                      portalCtrl.submitContact);
 
 // ── Downloads ─────────────────────────────────────────────────────
 router.get('/downloads',              downloadCtrl.list);

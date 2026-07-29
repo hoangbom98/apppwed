@@ -23,6 +23,13 @@ pre-prod-check.sh  →  deploy.sh
 rollback.sh
 ```
 
+### Cron jobs (đăng ký tự động bởi vps-setup.sh step 13)
+```
+02:00 daily  → backup.sh        mysqldump × 6 + upload R2
+03:00 daily  → cleanup.sh       log purge + pnpm prune + disk alert
+*/5   min    → health-check.sh  API/MySQL/Redis/Nginx/disk/RAM
+```
+
 ---
 
 ## Shell Scripts (VPS/DevOps)
@@ -102,26 +109,73 @@ sudo -u lkvip bash /var/LKVIP/scripts/deploy.sh
 
 ---
 
-### `backup.sh` *(lkvip user, cron daily)*
+### `backup.sh` *(lkvip user, cron 02:00 daily)*
 
-Backup 6 databases MySQL vào `.backups/YYYY-MM-DD/`. Compress bằng gzip-9.
-Tự động xóa backup cũ hơn `RETAIN_DAYS` (mặc định 7 ngày).
-Gửi thông báo Telegram khi thành công hoặc thất bại.
+Backup 6 databases MySQL → gzip-9 → upload Cloudflare R2 (khi `ARCHIVE_ENABLED=true`).
+Local retention: `RETAIN_DAYS` ngày (mặc định 7). Remote R2 retention: `BACKUP_R2_RETENTION_DAYS` ngày (mặc định 30).
+Gửi Telegram khi thành công/thất bại.
 
 ```bash
 # Chạy thủ công
 sudo -u lkvip bash /var/LKVIP/scripts/backup.sh
 
-# Kiểm tra restore (không ảnh hưởng data thật)
+# Kiểm tra restore (tạo DB tạm, restore, xóa — không ảnh hưởng data thật)
 sudo -u lkvip bash /var/LKVIP/scripts/backup.sh --restore-test
-
-# Cài đặt cron (mỗi ngày 2:00 AM)
-# 0 2 * * * bash /var/LKVIP/scripts/backup.sh >> /var/LKVIP/logs/backup.log 2>&1
 ```
 
-**Env vars cần thiết (load từ `.env` tự động):**
-`MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`
-`TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALERT_CHAT_ID` *(tùy chọn)*
+**Env vars (load tự động từ `.env`):**
+```env
+MYSQL_HOST / MYSQL_PORT / MYSQL_USER / MYSQL_PASSWORD
+TELEGRAM_BOT_TOKEN / TELEGRAM_ADMIN_CHAT_ID      # tùy chọn
+ARCHIVE_ENABLED=true                              # bật upload R2
+ARCHIVE_BUCKET=lkvip-backups
+ARCHIVE_S3_ENDPOINT=https://<id>.r2.cloudflarestorage.com
+ARCHIVE_S3_ACCESS_KEY_ID / ARCHIVE_S3_SECRET_ACCESS_KEY
+BACKUP_R2_RETENTION_DAYS=30
+```
+
+---
+
+### `cleanup.sh` *(lkvip user, cron 03:00 daily)*
+
+Dọn dẹp tự động để giải phóng dung lượng disk:
+
+| Bước | Công việc | Mặc định |
+|------|-----------|----------|
+| 1 | Winston app logs cũ | > `LOG_RETAIN_DAYS` ngày (7) |
+| 2 | Nginx access/error logs | > 7 ngày |
+| 3 | PM2 log files | > `LOG_RETAIN_DAYS` ngày (7) |
+| 4 | Local MySQL backup dirs | > `BACKUP_RETAIN_DAYS` ngày (3) |
+| 5 | Upload temp files | > `UPLOAD_RETAIN_HOURS` giờ (24) |
+| 6 | `pnpm store prune` | mỗi ngày |
+| 7 | `pm2 flush` | clear in-memory buffer |
+| 8 | Disk alert | > `DISK_WARN_PCT`% (80%) → Telegram |
+
+```bash
+# Chạy thủ công
+bash /var/LKVIP/scripts/cleanup.sh
+
+# Preview không xóa thật
+bash /var/LKVIP/scripts/cleanup.sh --dry-run
+```
+
+---
+
+### `health-check.sh` *(cron mỗi 5 phút)*
+
+Kiểm tra 7 thứ: API `/health` · PM2 status · MySQL · Redis · Nginx · Disk · RAM.
+Cooldown 30 phút giữa các alert cùng loại (tránh spam Telegram).
+
+```bash
+bash /var/LKVIP/scripts/health-check.sh
+bash /var/LKVIP/scripts/health-check.sh --verbose
+```
+
+**Ngưỡng cảnh báo (tùy chỉnh qua env):**
+```env
+DISK_WARN_PCT=80    DISK_CRIT_PCT=90
+RAM_WARN_PCT=85     COOLDOWN_MINUTES=30
+```
 
 ---
 
@@ -346,15 +400,18 @@ node scripts/cleanup.mjs --run    # thực thi (có xác nhận)
 
 | Script | Cần cài trước | Ghi chú |
 |---|---|---|
-| `vps-setup.sh` | Ubuntu 22.04, root access | Chạy 1 lần |
+| `vps-setup.sh` | Ubuntu 22.04, root access | Chạy 1 lần — đăng ký cron tự động |
+| `setup-permissions.sh` | `vps-setup.sh` đã chạy | Chạy lại sau `git pull` |
 | `ssl-setup.sh` | `vps-setup.sh` đã chạy, DNS đã trỏ | — |
 | `deploy.sh` | `vps-setup.sh`, `.env` đã fill | `--skip-build` cho CI-built artifacts |
-| `backup.sh` | MySQL đang chạy, MYSQL_PASSWORD trong .env | Cron: 2 AM |
-| `pre-prod-check.sh` | PM2, Nginx, Redis, MySQL đang chạy | Chạy trước deploy |
+| `backup.sh` | MySQL, `awscli` (R2 upload) | Cron 02:00 — tự đăng ký |
+| `cleanup.sh` | `pnpm`, `pm2` | Cron 03:00 — tự đăng ký |
+| `health-check.sh` | `mysql-client`, `redis-tools` | Cron mỗi 5 phút — tự đăng ký |
+| `pre-prod-check.sh` | PM2, Nginx, Redis, MySQL running | Chạy trước deploy |
 | `rollback.sh` | `pnpm` installed | Dùng khi deploy thất bại |
 | `scan-repo.sh` | `cloc` (optional), `pnpm dlx` | Chạy thủ công khi cần |
-| `prisma-run.ts` | `tsx`, backend dependencies | — |
-| `health-check.ts` | `tsx` | Telegram optional |
+| `prisma-run.ts` | `tsx`, backend deps | — |
+| `health-check.ts` | `tsx` | TypeScript version — DNS+SSL+PM2 |
 | `daily-report.ts` | `tsx`, backend running | Cron: 7 AM |
 | `check-api.ts` | `tsx` | API server optional |
 | `check-routes.ts` | `tsx` | Dev servers optional |

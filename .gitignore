@@ -16,6 +16,9 @@ build/
 .nuxt/
 .output/
 *.tsbuildinfo
+vite.config.d.ts
+apps/*/vite.config.d.ts
+apps/*/vite.config.js
 
 # --- Environment / Secrets (NEVER commit real .env) ---
 .env
@@ -72,6 +75,8 @@ trading-old/
 # --- Auto-generated HTML reports ---
 *-codebase-overview.html
 *-architecture-report.html
+/reports/*
+!/reports/.gitkeep
 
 # --- Obsolete plan/draft files (auto-generated, do not commit) ---
 *-plan.md
@@ -111,3 +116,4 @@ gha-creds-*.json
 .claude.json
 *_credentials_*.txt
 router-config-*.zip
+.bob/mcp.json

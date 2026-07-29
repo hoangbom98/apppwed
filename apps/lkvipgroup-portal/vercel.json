@@ -8,6 +8,19 @@
     "FORTRESS_DATABASE_URL": "@fortress_database_url",
     "FORTRESS_DIRECT_URL": "@fortress_direct_url",
     "ADMIN_EMAIL": "@admin_email",
-    "ADMIN_PASSWORD": "@admin_password"
+    "ADMIN_USERNAME": "@admin_username",
+    "ADMIN_PASSWORD": "@admin_password",
+    "NEXT_PUBLIC_BASE_URL": "@next_public_base_url",
+    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
+    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
+    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
+    "SMTP_HOST": "@smtp_host",
+    "SMTP_PORT": "@smtp_port",
+    "SMTP_SECURE": "@smtp_secure",
+    "SMTP_USER": "@smtp_user",
+    "SMTP_PASS": "@smtp_pass",
+    "SMTP_FROM": "@smtp_from",
+    "NEXT_PUBLIC_GA_ID": "@next_public_ga_id",
+    "NEXT_PUBLIC_META_PIXEL_ID": "@next_public_meta_pixel_id"
   }
 }

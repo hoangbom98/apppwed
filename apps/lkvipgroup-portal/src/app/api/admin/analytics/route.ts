@@ -48,15 +48,15 @@ export async function GET() {
       // Blog articles grouped by category
       prisma.blog.groupBy({
         by: ["category"],
-        _count: { _all: true },
-        orderBy: { _count: { _all: "desc" } },
+        _count: true,
+        orderBy: { _count: { category: "desc" } },
         take: 10,
       }),
       // Enquiries grouped by type
       prisma.enquiry.groupBy({
         by: ["type"],
-        _count: { _all: true },
-        orderBy: { _count: { _all: "desc" } },
+        _count: true,
+        orderBy: { _count: { type: "desc" } },
       }),
     ]);
 
@@ -79,11 +79,11 @@ export async function GET() {
       trend,
       blogsByCategory: blogsByCategory.map((b) => ({
         category: b.category,
-        count: b._count._all,
+        count: typeof b._count === "object" ? (b._count as Record<string, number>)._all ?? 0 : 0,
       })),
       enquiriesByType: enquiriesByType.map((e) => ({
         type: e.type,
-        count: e._count._all,
+        count: typeof e._count === "object" ? (e._count as Record<string, number>)._all ?? 0 : 0,
       })),
     });
   } catch {

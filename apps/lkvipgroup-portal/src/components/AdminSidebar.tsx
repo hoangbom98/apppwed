@@ -15,11 +15,13 @@ import {
   BarChart3,
   Image as ImageIcon,
   Users,
+  ListTodo,
 } from "lucide-react";
 
 const links = [
   { label: "Dashboard",  icon: LayoutDashboard, href: "/admin" },
   { label: "Analytics",  icon: BarChart3,        href: "/admin/analytics" },
+  { label: "Workspace",  icon: ListTodo,         href: "/admin/workspace" },
   { label: "Content",    icon: FileText,          href: "/admin/content" },
   { label: "Blog Posts", icon: Newspaper,         href: "/admin/blog" },
   { label: "Enquiries",  icon: MessageCircle,     href: "/admin/enquiries", badge: true },

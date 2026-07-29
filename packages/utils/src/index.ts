@@ -5,10 +5,6 @@
  * Usage:
  *   import { slugify, formatVND, isEmail, addDays, parsePaginationQuery,
  *            generateOTP, formatCompact, pick, groupBy } from '@lkvip/utils';
- *
- * Note: `dates.ts` exports simple backend helpers (no base param).
- *       `date.ts` exports full-featured frontend-safe helpers with base param.
- *       Prefer `date.ts` exports for new code — they supersede `dates.ts`.
  */
 
 // ── Formatting ────────────────────────────────────────────────────────────────
@@ -53,20 +49,13 @@ export * from './money';
 //          isInHourRange, nextMidnightUtc, isoWeek
 export * from './date';
 
-// ── Date helpers — simple backend helpers (non-conflicting names only) ────────
-export { formatDuration } from './dates';
-
-// ── Validation — full-featured (preferred) ───────────────────────────────────
+// ── Validation ────────────────────────────────────────────────────────────────
 // Exports: isEmail, isViPhone, isPhone, isPassword, isStrongPassword,
 //          scorePassword, isUsername, isValidAmount, isPositiveInt,
 //          isNonEmpty, isLength, isUrl, isSlug, missingFields, firstError,
 //          isOtp, isViNationalId, isPassport, isViBankAccount,
 //          isEthAddress, isTronAddress
 export * from './validation';
-
-// ── Validators — simple backend helpers (non-conflicting names only) ──────────
-// (isEmail, isPassword, isUsername, isPhone, isValidAmount, missingFields
-//  are already provided by validation.ts above — only export new ones)
 
 // ── Object utilities ─────────────────────────────────────────────────────────
 export * from './object';

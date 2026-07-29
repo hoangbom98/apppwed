@@ -8,11 +8,40 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "typescript": "~6.0.2",
+      "@types/react": "^18.3.0",
+      "@types/react-dom": "^18.3.0"
+    }
+  },
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
-    "typecheck": "turbo typecheck"
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter=@lkvip/types --filter=@lkvip/utils --filter=@lkvip/constants --filter=@lkvip/api-client",
+    "build:frontends": "turbo run build --filter=@lkvip/hub --filter=@lkvip/game --filter=@lkvip/trade --filter=@lkvip/dating --filter=@lkvip/sports --filter=@lkvip/admin --filter=@lkvip/banking --filter=@lkvip/invest --filter=@lkvip/store --filter=@lkvip/academy",
+    "build:all": "pnpm build:packages && pnpm build:frontends",
+    "dev": "turbo run dev",
+    "dev:backend": "pnpm --filter lkvip-backend run dev",
+    "dev:hub": "pnpm --filter @lkvip/hub run dev",
+    "dev:game": "pnpm --filter @lkvip/game run dev",
+    "dev:trade": "pnpm --filter @lkvip/trade run dev",
+    "dev:dating": "pnpm --filter @lkvip/dating run dev",
+    "dev:sports": "pnpm --filter @lkvip/sports run dev",
+    "dev:admin": "pnpm --filter @lkvip/admin run dev",
+    "dev:banking": "pnpm --filter @lkvip/banking run dev",
+    "dev:invest": "pnpm --filter @lkvip/invest run dev",
+    "dev:store": "pnpm --filter @lkvip/store run dev",
+    "dev:academy": "pnpm --filter @lkvip/academy run dev",
+    "dev:portal": "pnpm --filter @lkvip/portal run dev",
+    "dev:frontend": "turbo run dev --filter=@lkvip/hub --filter=@lkvip/game --filter=@lkvip/trade --filter=@lkvip/dating --filter=@lkvip/sports --filter=@lkvip/admin",
+    "lint": "turbo run lint",
+    "lint:all": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "typecheck:all": "turbo run typecheck",
+    "test": "pnpm --filter lkvip-backend run test",
+    "prisma:generate": "pnpm --filter lkvip-backend run prisma:generate",
+    "prisma:migrate:all": "pnpm --filter lkvip-backend run prisma:migrate:all",
+    "prisma:deploy": "pnpm --filter lkvip-backend run prisma:deploy:all"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.0",

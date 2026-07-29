@@ -1,7 +1,7 @@
 import { Worker, Queue } from 'bullmq';
 import { redis } from '../../utils/redis';
 import { logger } from '../../shared/logger';
-import { Decimal } from '@lkvip/utils';
+import Decimal from 'decimal.js';
 
 const { getPrismaClient } = require('../../config/databases');
 const WalletService = require('../../shared/services/walletService');

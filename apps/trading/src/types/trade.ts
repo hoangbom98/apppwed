@@ -22,6 +22,18 @@ export interface TradePair {
   volume24h:    number;
   high24h:      number;
   low24h:       number;
+  status?:     string;
+  market?:     { code: string; name: string; type: string };
+}
+
+// ── OHLCV candle (dùng cho chart page) ────────────────────────────────────────
+export interface PriceCandle {
+  time:   string;
+  open:   number;
+  high:   number;
+  low:    number;
+  close:  number;
+  volume: number;
 }
 
 // WebSocket price-update payload (subset of TradePair)

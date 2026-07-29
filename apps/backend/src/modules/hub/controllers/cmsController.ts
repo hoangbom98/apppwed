@@ -44,7 +44,7 @@ exports.getGameBySlug = async (req, res) => {
 exports.getWebsites = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = { status: 'active' };
+    const where: Record<string, any> = { status: 'active' };
     if (req.query.category) where.categoryId = req.query.category;
     const [data, total] = await Promise.all([
       req.prisma.website.findMany({ where, skip, take, orderBy: { sortOrder: 'asc' }, include: { category: true } }),
@@ -58,7 +58,7 @@ exports.getWebsites = async (req, res) => {
 exports.getTools = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = { status: 'active' };
+    const where: Record<string, any> = { status: 'active' };
     if (req.query.category) where.categoryId = req.query.category;
     const [data, total] = await Promise.all([
       req.prisma.tool.findMany({ where, skip, take, orderBy: { sortOrder: 'asc' }, include: { category: true } }),
@@ -80,7 +80,7 @@ exports.getToolBySlug = async (req, res) => {
 exports.getNews = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = { status: 'published' };
+    const where: Record<string, any> = { status: 'published' };
     if (req.query.category) where.categoryId = req.query.category;
     if (req.query.search)   where.title = { contains: req.query.search };
     const [data, total] = await Promise.all([
@@ -126,7 +126,7 @@ exports.getPage = async (req, res) => {
 exports.getBanners = async (req, res) => {
   try {
     const now   = new Date();
-    const where = {
+    const where: Record<string, any> = {
       status: 'active',
       OR: [
         { startDate: null },
@@ -172,7 +172,7 @@ exports.search = async (req, res) => {
     const { q, type } = req.query;
     const query = { contains: q.trim() };
 
-    const results = {};
+    const results: Record<string, any> = {};
     if (!type || type === 'games') {
       results.games = await req.prisma.game.findMany({
         where: { status: 'active', OR: [{ name: query }, { description: query }] },

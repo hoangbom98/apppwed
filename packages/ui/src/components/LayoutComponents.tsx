@@ -1,8 +1,6 @@
 import React from 'react';
 import { Layout, Row, Col, Flex, Splitter, LayoutProps } from 'antd';
 
-const { Header, Sider, Content, Footer } = Layout;
-
 // 1. Wrapper Layout Standard
 export const LkvipLayout: React.FC<LayoutProps & { children: React.ReactNode }> = ({ children, ...props }) => {
   return (

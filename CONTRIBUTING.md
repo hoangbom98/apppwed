@@ -2,6 +2,17 @@
 
 Quy trình đóng góp cho monorepo LKVIP. Đọc `docs/ONBOARDING.md` và `docs/SETUP.md` trước khi bắt đầu.
 
+## `apps/external/` — Projects tham khảo
+
+Thư mục `apps/external/` chứa các project độc lập **không phải** phần của LKVIP platform.
+
+**Quy tắc bắt buộc:**
+- ❌ Không import code từ `apps/external/` vào bất kỳ LKVIP app hoặc package nào.
+- ❌ Không thêm bất kỳ `apps/external/*` entry nào vào `pnpm-workspace.yaml`.
+- ✅ Chỉ đọc để tham khảo kiến trúc và patterns.
+
+---
+
 ## Môi trường phát triển
 
 ```bash
@@ -9,16 +20,18 @@ git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
 pnpm install
 
-cp config/env/.env.example apps/backend/.env
+cp apps/backend/.env.example apps/backend/.env
 # Điền env local; không commit hoặc paste secret thật.
 
 pnpm prisma:generate
-pnpm --filter lkvip-backend run prisma:migrate:all
+pnpm prisma:migrate:all
 pnpm --filter lkvip-backend run seed:all
 
 pnpm dev:backend
 pnpm dev:admin
 ```
+
+---
 
 ## Branch và PR
 
@@ -32,6 +45,8 @@ pnpm dev:admin
 | `perf/` | Hiệu năng | `perf/reduce-bundle-size` |
 
 `main` là branch deploy production. Không push trực tiếp vào `main`; mở PR và chờ CI/review.
+
+---
 
 ## Commit
 
@@ -47,109 +62,72 @@ Ví dụ:
 feat(admin): thêm live preview cấu hình giao diện
 fix(dating): thay icon không tồn tại
 docs: chuẩn hóa onboarding LKVIP
+chore(deps): update prisma to 5.16
 ```
+
+---
 
 ## Code style
 
-### Frontend
+### Frontend SPAs (hub, game, trading, dating, sports, admin, banking, invest, store, academy)
 
-- React + TypeScript.
-- Tailwind CSS ưu tiên cho layout/style app H5.
-- Ant Design dùng nhiều ở admin/trading.
-- Icon mới ưu tiên `lucide-react`; `@ant-design/icons` vẫn được dùng ở app/admin hiện hữu.
-- Validation frontend dùng Yup. Không thêm Zod cho phần mới.
+- **Framework**: React 19 + TypeScript strict.
+- **Styling**: Tailwind CSS v4 cho tất cả SPAs. Ant Design v6 chỉ dùng ở `admin-dashboard`.
+- **Icons**: `lucide-react` — KHÔNG dùng `@iconify/react`, không dùng icon inline SVG.
+- **State management**: Zustand (global) + TanStack Query (server state).
+- **Routing**: React Router DOM v7.
+- **Forms**: React Hook Form + **Yup** validation. **KHÔNG dùng Zod** trong SPA.
+- **Lint**: **OXLint** (`oxlint src --config ../../oxlint.config.json`) — KHÔNG dùng ESLint cho SPAs.
+- **Shared code**: import từ `@lkvip/ui`, `@lkvip/types`, `@lkvip/utils`, `@lkvip/constants`.
 
-### Backend
+### Portal (apps/lkvipgroup-portal)
 
-- Backend nằm tại `apps/backend`.
-- Package/filter: `lkvip-backend`.
-- Prisma schema: `apps/backend/prisma/<project>/schema.prisma`.
-- Response/helper/middleware nên theo pattern hiện có trong `apps/backend/src/shared`.
-- Không hardcode credential, token, API key.
+- **Framework**: Next.js 15 + TypeScript.
+- Portal là standalone app — có Prisma/pg riêng, không dùng shared packages.
+- Lint: `next lint` (ESLint).
+- Zod được dùng ở portal (Next.js server-side validation).
 
-### Shared packages
+### Backend (apps/backend)
 
-- UI/hooks dùng chung: `packages/ui`.
-- Types dùng chung: `packages/types`.
-- Helpers pure: `packages/utils`.
-- Constants/enums/project IDs: `packages/constants`.
+- **Framework**: Express.js + TypeScript (CommonJS).
+- **Prisma**: mỗi project có schema riêng (`prisma/<project>/schema.prisma`).
+- **Validation**: **Joi** cho request body/query. **KHÔNG dùng Zod** trong backend.
+- **Response**: wrap tất cả responses trong `ApiResponse` envelope `{ success, data, message }`.
+- **Middleware thứ tự**: `authenticate` → `projectAccessGuard` → `rateLimiter`.
+- **Business logic**: KHÔNG đặt trong controller — chỉ ở service layer.
+- **Lint**: ESLint flat config (`ESLINT_USE_FLAT_CONFIG=true`).
+- **Workers**: Long-running jobs → BullMQ queue, KHÔNG dùng `setTimeout`.
 
-Không tạo package shared mới nếu bốn package hiện có đủ dùng.
+---
 
-## Checks trước PR
+## Quy tắc tạo file
 
-```bash
-pnpm lint:all
-pnpm typecheck:all
-pnpm test
-pnpm build:frontends
-pnpm --filter lkvip-backend run build
-```
+| Quy tắc | Mô tả |
+|---------|-------|
+| **F1** | Luôn sửa file hiện có trước khi tạo file mới. |
+| **F2** | Tối đa 2 file mới mỗi feature. Nếu cần nhiều hơn, chia nhỏ feature. |
+| **F3** | Mỗi module mới phải có `index.ts` export public surface. |
+| **F4** | File naming: kebab-case (`wallet-service.ts`). Component/class: PascalCase. |
+| **F5** | Kiểm tra file tương tự đã tồn tại trước khi tạo mới. |
 
-Nếu chỉ sửa docs, không cần chạy full build; vẫn cần kiểm tra link/nội dung tài liệu đã đổi.
+---
 
-## Database schema
+## Thêm dependency mới
 
-Khi đổi Prisma schema:
+1. Kiểm tra xem `@lkvip/ui`, `@lkvip/utils`, hoặc package workspace có giải quyết được không.
+2. Nếu dependency cần cho nhiều apps → thêm vào package workspace tương ứng.
+3. Nếu dependency chỉ cho 1 app → thêm vào `devDependencies`/`dependencies` của app đó.
+4. **Không thêm**: Vant UI, Zod (cho SPA/backend mới), `@iconify/react`, `crypto-js`, Video.js.
 
-1. Sửa đúng schema trong `apps/backend/prisma/<project>/schema.prisma`.
-2. Tạo migration bằng Prisma cho schema tương ứng.
-3. Commit cả schema và migration.
-4. Không dùng `prisma db push` cho staging/production.
-5. Cập nhật docs nếu đổi env/API/luồng dữ liệu.
+---
 
-## Dependencies
+## Prisma & Database
 
-- Không thêm dependency mới nếu dependency hiện có giải quyết được.
-- Nếu thêm dependency, nêu rõ lý do trong PR.
-- Ưu tiên dùng catalog trong `pnpm-workspace.yaml` cho version shared.
-- Không xóa dependency chỉ dựa trên depcheck; xác minh import/build/runtime trước.
-
-## Docs checklist
-
-Cập nhật tài liệu cùng PR nếu thay đổi:
-
-- App path/package/script: `README.md`, `docs/ONBOARDING.md`, `docs/SETUP.md`.
-- Kiến trúc/backend/runtime config: `docs/ARCHITECTURE.md`.
-- API route/response: `docs/API_ENDPOINTS.md`.
-- Deploy/health/domain/PM2/Nginx: `docs/DEPLOYMENT.md`.
-- Scan/tối ưu/shared packages: `docs/CODEBASE_SCAN.md`.
-
-## Security checklist
-
-- [ ] Không commit `.env`, private key, credential, token.
-- [ ] Không paste secret thật vào docs/log/issue/chat.
-- [ ] Không log PII hoặc secrets.
-- [ ] Public endpoint không trả config secret.
-- [ ] Production health/deploy không mở port nội bộ trực tiếp.
-
-## Optimization checklist
-
-Khi refactor giảm trùng lặp:
-
-- [ ] Chạy scan theo `docs/CODEBASE_SCAN.md` nếu phạm vi lớn.
-- [ ] Không đổi behavior UI/API ngoài phạm vi.
-- [ ] Shared extraction chỉ làm khi có reuse thật.
-- [ ] Build/typecheck app bị ảnh hưởng.
-
-## Backup cron setup (DevOps)
-
-Sau khi deploy lần đầu hoặc setup VPS mới, cài đặt cron backup tự động:
-
-```bash
-# Đăng nhập với user lkvip
-sudo -u lkvip crontab -e
-
-# Thêm dòng sau — chạy backup lúc 2:00 AM mỗi ngày
-0 2 * * * bash /var/LKVIP/scripts/backup.sh >> /var/LKVIP/logs/backup.log 2>&1
-
-# Chạy restore test hàng tuần (Chủ nhật 3:00 AM) để verify backup khả dụng
-0 3 * * 0 bash /var/LKVIP/scripts/backup.sh --restore-test >> /var/LKVIP/logs/backup.log 2>&1
-```
-
-Đặt `TELEGRAM_BOT_TOKEN` và `TELEGRAM_ALERT_CHAT_ID` trong `apps/backend/.env` để nhận thông báo backup qua Telegram.
-
-## Incident Response
-
-Khi xảy ra sự cố production, làm theo `docs/INCIDENT_RESPONSE.md`.
-Ghi lại mọi sự cố vào `docs/incidents/YYYY-MM-DD-<slug>.md` sau khi xử lý xong.
+- Mỗi project có schema riêng: `apps/backend/prisma/<project>/schema.prisma`.
+- **KHÔNG trộn schema** giữa các project.
+- Migration:
+  ```bash
+  npx prisma migrate dev --name <desc> --schema=prisma/<project>/schema.prisma
+  ```
+- Seeds phải idempotent — dùng `upsert`, không dùng bare `create`.
+- Luôn thêm index cho: `userId`, `status`, `createdAt`, `orderId`, `referralCode`.

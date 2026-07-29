@@ -11,6 +11,7 @@ import {
   Share2,
   FileText,
   Image as ImageIcon,
+  BarChart3,
 } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import AdminNavbar from "@/components/AdminNavbar";
@@ -36,11 +37,12 @@ interface SiteSettingsData {
 const socialPlatforms = ["LinkedIn", "Instagram", "Facebook", "X (Twitter)", "YouTube", "TikTok", "Threads"];
 
 const sections = [
-  { key: "company", icon: Building2, label: "Company Information" },
-  { key: "whatsapp", icon: MessageCircle, label: "WhatsApp" },
-  { key: "social", icon: Share2, label: "Social Media Links" },
-  { key: "footer", icon: FileText, label: "Footer Content" },
-  { key: "media", icon: ImageIcon, label: "Logo & Favicon" },
+  { key: "company",   icon: Building2,    label: "Company Information" },
+  { key: "whatsapp",  icon: MessageCircle, label: "WhatsApp" },
+  { key: "social",    icon: Share2,        label: "Social Media Links" },
+  { key: "footer",    icon: FileText,      label: "Footer Content" },
+  { key: "media",     icon: ImageIcon,     label: "Logo & Favicon" },
+  { key: "analytics", icon: BarChart3,     label: "Analytics" },
 ];
 
 export default function SettingsPage() {
@@ -284,6 +286,39 @@ export default function SettingsPage() {
                   <div>
                     <label className="block text-fortress-silver text-xs font-medium mb-1.5 tracking-wide">Footer Description</label>
                     <textarea value={data.footer} onChange={(e) => update("footer", e.target.value)} rows={4} className="w-full bg-fortress-deep border border-white/10 text-fortress-ivory text-sm px-4 py-3 focus:outline-none focus:border-fortress-gold/50 resize-none rounded-lg" />
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "analytics" && (
+                <div className="bg-fortress-navy border-t-2 border-t-fortress-gold/30 p-5 rounded-lg">
+                  <div className="flex items-center gap-3 mb-5">
+                    <BarChart3 className="w-5 h-5 text-fortress-gold" />
+                    <h2 className="text-sm font-bold text-fortress-ivory tracking-wide">Analytics & Tracking</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-fortress-silver text-xs font-medium mb-1.5 tracking-wide">Google Analytics 4 ID</label>
+                      <p className="text-fortress-silver/40 text-[10px] mb-2">e.g. G-XXXXXXXXXX</p>
+                      <input
+                        type="text"
+                        value={(data as SiteSettingsData & { googleAnalyticsId?: string }).googleAnalyticsId ?? ""}
+                        onChange={(e) => update("googleAnalyticsId" as keyof SiteSettingsData, e.target.value as never)}
+                        placeholder="G-XXXXXXXXXX"
+                        className="w-full bg-fortress-deep border border-white/10 text-fortress-ivory text-sm px-4 py-3 focus:outline-none focus:border-fortress-gold/50 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-fortress-silver text-xs font-medium mb-1.5 tracking-wide">Meta Pixel ID</label>
+                      <p className="text-fortress-silver/40 text-[10px] mb-2">e.g. 1234567890</p>
+                      <input
+                        type="text"
+                        value={(data as SiteSettingsData & { metaPixelId?: string }).metaPixelId ?? ""}
+                        onChange={(e) => update("metaPixelId" as keyof SiteSettingsData, e.target.value as never)}
+                        placeholder="1234567890"
+                        className="w-full bg-fortress-deep border border-white/10 text-fortress-ivory text-sm px-4 py-3 focus:outline-none focus:border-fortress-gold/50 rounded-lg"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

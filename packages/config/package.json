@@ -2,11 +2,21 @@
   "name": "@lkvip/config",
   "version": "1.0.0",
   "private": true,
+  "description": "Shared ESLint configs for LKVIP GROUP monorepo",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {
-    "./eslint": "./src/eslint.js",
-    "./vitest": "./src/vitest.js",
-    "./tsconfig": "./src/tsconfig.json"
+    ".":                "./src/index.js",
+    "./eslint-browser": "./src/eslint-browser.js",
+    "./eslint-node":    "./src/eslint-node.js"
+  },
+  "peerDependencies": {
+    "@eslint/js": ">=8",
+    "@typescript-eslint/eslint-plugin": ">=7",
+    "@typescript-eslint/parser": ">=7",
+    "eslint": ">=8",
+    "eslint-plugin-react-hooks": ">=4",
+    "globals": ">=13"
   }
 }

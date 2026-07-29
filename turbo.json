@@ -1,19 +1,38 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "clean": {
-      "cache": false,
-      "dependsOn": []
-    },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", ".next/**", ".next/standalone/**", ".vite/**", "*.tsbuildinfo"],
+      "env": [
+        "NODE_ENV",
+        "PORT",
+        "VITE_API_URL",
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_ANON_KEY",
+        "VITE_APP_VERSION",
+        "VITE_SENTRY_DSN",
+        "CAPACITOR_BUILD",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_APP_VERSION",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": [],
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "lint": {
+    "type-check": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "dev": {
@@ -32,6 +51,14 @@
     "DATABASE_URL",
     "REDIS_URL",
     "VITE_API_URL",
-    "VITE_SENTRY_DSN"
+    "VITE_SUPABASE_URL",
+    "VITE_SUPABASE_ANON_KEY",
+    "VITE_APP_VERSION",
+    "CAPACITOR_BUILD",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_APP_VERSION",
+    "NEXT_PUBLIC_BASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
   ]
 }

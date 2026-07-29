@@ -150,21 +150,29 @@ fi
 step "6 — Thư mục logs (chỉ PM2/app ghi)"
 # =============================================================================
 
-# PM2 logs trong /var/LKVIP/logs/
-LOG_DIR="$PROJECT_DIR/logs"
-mkdir -p "$LOG_DIR"
-chown -R "$APP_USER:$APP_USER" "$LOG_DIR"
-chmod 755 "$LOG_DIR"
-find "$LOG_DIR" -type f -exec chmod 644 {} \; 2>/dev/null || true
-info "logs/: $APP_USER:$APP_USER 755"
-
-# data/logs
+# PM2 logs (ecosystem.config.js now points to data/logs/)
 DATA_LOG_DIR="$PROJECT_DIR/data/logs"
 mkdir -p "$DATA_LOG_DIR"
 chown -R "$APP_USER:$APP_USER" "$DATA_LOG_DIR"
 chmod 755 "$DATA_LOG_DIR"
 find "$DATA_LOG_DIR" -type f -exec chmod 644 {} \; 2>/dev/null || true
 info "data/logs/: $APP_USER:$APP_USER 755"
+
+# Legacy logs/ dir — keep if it exists, don't create fresh
+LOG_DIR="$PROJECT_DIR/logs"
+if [[ -d "$LOG_DIR" ]]; then
+  chown -R "$APP_USER:$APP_USER" "$LOG_DIR"
+  chmod 755 "$LOG_DIR"
+  find "$LOG_DIR" -type f -exec chmod 644 {} \; 2>/dev/null || true
+  info "logs/: $APP_USER:$APP_USER 755"
+fi
+
+# data/.health-cooldown — health-check.sh writes alert timestamps here
+COOLDOWN_DIR="$PROJECT_DIR/data/.health-cooldown"
+mkdir -p "$COOLDOWN_DIR"
+chown -R "$APP_USER:$APP_USER" "$COOLDOWN_DIR"
+chmod 700 "$COOLDOWN_DIR"
+info "data/.health-cooldown/: $APP_USER:$APP_USER 700"
 
 # Backend app logs (nếu có)
 BACKEND_LOGS="$PROJECT_DIR/apps/backend/logs"
@@ -279,10 +287,12 @@ _show "$PROJECT_DIR/apps/backend/.env"
 _show "$PROJECT_DIR/config/.db-pass"
 _show "$PROJECT_DIR/data/uploads"
 _show "$PROJECT_DIR/data/logs"
-_show "$PROJECT_DIR/logs"
+_show "$PROJECT_DIR/data/.health-cooldown"
 _show "$PROJECT_DIR/.backups"
 _show "$PROJECT_DIR/apps/backend/dist"
 _show "$PROJECT_DIR/apps/hub/dist"
+_show "$PROJECT_DIR/apps/game/dist"
+_show "$PROJECT_DIR/apps/dating/dist"
 
 echo ""
 info "✅ Phân quyền hoàn tất!"

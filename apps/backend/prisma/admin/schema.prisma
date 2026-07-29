@@ -34,10 +34,12 @@ model AdminUser {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  logs        SystemLog[]
-  assignedTasks OpsTask[]  @relation("AssignedTasks")
-  adminRole   AdminRole?   @relation("AdminUserRole", fields: [roleId], references: [id])
-  roleId      Int?
+  logs              SystemLog[]
+  assignedTasks     OpsTask[]          @relation("AssignedTasks")
+  workspaceTasks    WorkspaceTask[]    @relation("WorkspaceTasks")
+  workspaceComments WorkspaceComment[] @relation("WorkspaceComments")
+  adminRole         AdminRole?         @relation("AdminUserRole", fields: [roleId], references: [id])
+  roleId            Int?
 
   @@index([tenant], map: "idx_tenant_config")
   @@index([status])
@@ -1540,4 +1542,73 @@ model SmsLog {
   @@index([phone, createdAt])
   @@index([status, createdAt])
   @@map("sms_logs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKSPACE TRACKER — Team task & sprint management
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Sprint / milestone grouping for workspace tasks
+model WorkspaceSprint {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(150)   // "Sprint tháng 7", "Q3 2025"
+  project     String   @default("all")    @db.VarChar(20)   // hub|game|trade|dating|sports|all
+  startDate   DateTime
+  endDate     DateTime
+  goal        String?  @db.VarChar(500)
+  status      String   @default("active") @db.VarChar(20)   // active|completed|cancelled
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tasks WorkspaceTask[]
+
+  @@index([status])
+  @@index([project, status])
+  @@map("workspace_sprints")
+}
+
+/// Core task entity for team workspace tracker
+model WorkspaceTask {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(500)
+  description String?   @db.Text
+  project     String    @default("hub")   @db.VarChar(30)   // hub|game|trade|dating|sports|admin|all
+  status      String    @default("todo")  @db.VarChar(20)   // todo|in_progress|done|cancelled
+  priority    String    @default("medium") @db.VarChar(20)  // critical|high|medium|low
+  assigneeId  Int?                                           // FK → AdminUser.id
+  assignee    AdminUser? @relation("WorkspaceTasks", fields: [assigneeId], references: [id])
+  sprintId    Int?
+  sprint      WorkspaceSprint? @relation(fields: [sprintId], references: [id])
+  dueDate     DateTime?
+  completedAt DateTime?
+  completedBy Int?
+  tags        Json?                                          // string[]
+  result      String?   @db.Text                            // kết quả / ghi chú sau hoàn thành
+  createdBy   Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  comments WorkspaceComment[]
+
+  @@index([status, priority])
+  @@index([assigneeId, status])
+  @@index([project, status])
+  @@index([sprintId])
+  @@index([dueDate])
+  @@map("workspace_tasks")
+}
+
+/// Thread comments / notes on a workspace task
+model WorkspaceComment {
+  id        Int           @id @default(autoincrement())
+  taskId    Int
+  task      WorkspaceTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  Int?
+  author    AdminUser?    @relation("WorkspaceComments", fields: [authorId], references: [id])
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([taskId])
+  @@map("workspace_comments")
 }

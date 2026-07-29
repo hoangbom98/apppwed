@@ -2,10 +2,21 @@
   "name": "@lkvip/api-client",
   "version": "1.0.0",
   "private": true,
+  "description": "Axios-based API client factory with auto token refresh for LKVIP SPAs",
   "main": "src/index.ts",
   "module": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "axios": "^1.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "~6.0.2"
   }
 }

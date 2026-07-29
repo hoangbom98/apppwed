@@ -41,6 +41,8 @@ const vipConfigCtrl        = require('../controllers/vipConfigController');
 const groupFinanceCtrl     = require('../controllers/groupFinanceController');
 // ── Telegram Broadcast & Auto-Reply ──────────────────────────────────────────
 const telegramCtrl         = require('../controllers/telegramBroadcastController');
+// ── Workspace Tracker ─────────────────────────────────────────────────────────
+const workspaceCtrl        = require('../controllers/workspaceController');
 
 const requirePermission = require('../../../shared/middlewares/auth/requirePermission');
 
@@ -340,6 +342,22 @@ router.post('/telegram/auto-replies',            telegramCtrl.createAutoReply);
 router.patch('/telegram/auto-replies/:id',       telegramCtrl.updateAutoReply);
 router.delete('/telegram/auto-replies/:id',      telegramCtrl.deleteAutoReply);
 router.post('/telegram/auto-replies/:id/test',   telegramCtrl.testAutoReply);
+
+// ── Workspace Tracker ─────────────────────────────────────────────────────────
+router.get('/workspace/stats',                      workspaceCtrl.getStats);
+// Sprints
+router.get('/workspace/sprints',                    workspaceCtrl.listSprints);
+router.post('/workspace/sprints',                   workspaceCtrl.createSprint);
+router.patch('/workspace/sprints/:id',              workspaceCtrl.updateSprint);
+// Tasks
+router.get('/workspace/tasks',                      workspaceCtrl.listTasks);
+router.get('/workspace/tasks/:id',                  workspaceCtrl.getTask);
+router.post('/workspace/tasks',                     workspaceCtrl.createTask);
+router.patch('/workspace/tasks/:id',                workspaceCtrl.updateTask);
+router.delete('/workspace/tasks/:id',               workspaceCtrl.deleteTask);
+// Comments
+router.post('/workspace/tasks/:id/comments',        workspaceCtrl.addComment);
+router.delete('/workspace/tasks/:id/comments/:commentId', workspaceCtrl.deleteComment);
 
 // ── Cron Jobs ─────────────────────────────────────────────────────────────────
 router.post('/cron/seed',          cronCtrl.seed);

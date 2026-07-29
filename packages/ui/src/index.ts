@@ -1,4 +1,3 @@
-// @ts-nocheck
 // packages/shared-ui/src/index.ts
 // Barrel export for @lkvip/ui / @ui alias
 
@@ -32,8 +31,6 @@ export { LkvipGrid } from './components/GridComponents';
 export {
   LkvipStatusTag, LkvipStatCard, LkvipTable, LkvipForm, LkvipInput, LkvipSelect,
   LkvipInputNumber, LkvipSidebarItem, LkvipSidebarGroup,
-  LkvipPageHeader, LkvipFormModal,
-  STATUS_COLOR, STATUS_LABEL_VI, PRIORITY_COLOR,
 } from './components/AdminComponents';
 export { TicketForm }                from './components/TicketForm';
 export { TicketList }                from './components/TicketList';

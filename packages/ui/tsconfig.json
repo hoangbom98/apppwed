@@ -5,7 +5,7 @@
    * Source-direct package — không build ra dist, các SPA import trực tiếp từ src.
    * Chỉ dùng cho editor type-checking và tsc --noEmit.
    */
-  "extends": "../../tsconfig.frontend.base.json",
+  "extends": "../../config/typescript/tsconfig.frontend.base.json",
   "compilerOptions": {
     "typeRoots": ["./node_modules/@types"],
     "paths": {

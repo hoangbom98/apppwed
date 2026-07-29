@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DesktopLayout from '@/components/layout/DesktopLayout';
+import CryptoLayout  from '@/components/layout/CryptoLayout';
 import { useAuthStore } from '@/store/authStore';
 import { useSocket } from '@ui/hooks/useSocket';
 import { useTradeWebSocket } from '@/hooks/useTradeWebSocket';
@@ -34,6 +35,11 @@ const SettingsPage        = lazy(() => import('@/pages/Settings'));
 const YuebaoPage          = lazy(() => import('@/pages/Yuebao'));
 const MiningPage          = lazy(() => import('@/pages/Mining'));
 const PrizeDrawPage       = lazy(() => import('@/pages/PrizeDraw'));
+
+// ── Crypto tracker pages ───────────────────────────────────────────────────────
+const CryptoMarketPage    = lazy(() => import('@/pages/CryptoMarket'));
+const CryptoChartPage     = lazy(() => import('@/pages/CryptoChart'));
+const CryptoWatchlistPage = lazy(() => import('@/pages/CryptoWatchlist'));
 
 // ── Spinner ────────────────────────────────────────────────────────────────────
 function Spinner() {
@@ -99,6 +105,15 @@ export default function App() {
           <Route path="yuebao"        element={<ProtectedRoute><YuebaoPage /></ProtectedRoute>} />
           <Route path="mining"        element={<ProtectedRoute><MiningPage /></ProtectedRoute>} />
           <Route path="prize"         element={<ProtectedRoute><PrizeDrawPage /></ProtectedRoute>} />
+        </Route>
+
+        {/* Crypto tracker — layout riêng */}
+        <Route path="crypto" element={<CryptoLayout />}>
+          <Route index                   element={<CryptoMarketPage />} />
+          <Route path="watchlist"        element={<ProtectedRoute><CryptoWatchlistPage /></ProtectedRoute>} />
+          <Route path="chart"            element={<CryptoChartPage />} />
+          <Route path="chart/:symbol"    element={<CryptoChartPage />} />
+          <Route path="profile"          element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

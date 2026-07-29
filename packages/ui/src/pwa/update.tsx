@@ -1,3 +1,4 @@
+"use client";
 // @ts-nocheck
 // packages/shared-ui/src/pwa/update.tsx
 // PWA update notification banner

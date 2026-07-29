@@ -1,13 +1,28 @@
 {
-  "$schema": "https://oxc.rs/docs/schema/oxlint.schema.json",
-  "rules": {
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "categories": {
     "correctness": "error",
     "perf": "warn",
-    "style": "warn",
-    "typescript": "error"
+    "suspicious": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off"
   },
-  "deny": ["no-unused-vars", "no-console"],
-  "import": {
-    "no-unused-modules": "warn"
-  }
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-var": "error",
+    "prefer-const": "warn",
+    "eqeqeq": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "warn"
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/*.d.ts",
+    "**/coverage/**",
+    "**/.next/**"
+  ]
 }

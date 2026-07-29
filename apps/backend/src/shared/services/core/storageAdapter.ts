@@ -10,16 +10,23 @@
  *
  * S3 env vars (required when STORAGE_PROVIDER=s3):
  *   S3_BUCKET         — bucket name
- *   S3_REGION         — region (e.g. ap-southeast-1)
+ *   S3_REGION         — region ("auto" for Cloudflare R2)
  *   S3_ACCESS_KEY     — access key ID
  *   S3_SECRET_KEY     — secret access key
- *   S3_ENDPOINT       — optional: custom endpoint (Cloudflare R2, MinIO)
+ *   S3_ENDPOINT       — custom endpoint (Cloudflare R2: https://<id>.r2.cloudflarestorage.com)
  *   CDN_BASE_URL      — public URL prefix for uploaded files
  *
  * Supabase env vars (required when STORAGE_PROVIDER=supabase):
  *   SUPABASE_URL               — Project URL from Supabase dashboard
  *   SUPABASE_SERVICE_ROLE_KEY  — service_role key (server-only, bypasses RLS)
  *   SUPABASE_STORAGE_BUCKET    — bucket name (default: lkvip-uploads)
+ *
+ * Public API on every adapter:
+ *   upload(buffer, relativePath, contentType?)  → Promise<string>  public URL
+ *   delete(publicUrlOrKey)                       → Promise<void>
+ *   getUrl(relativePath)                         → string           public URL (no expiry)
+ *   getSignedUrl(relativePath, expiresIn?)       → Promise<string>  pre-signed URL (private files)
+ *     expiresIn: seconds until URL expires (default: 3600 = 1 h)
  */
 
 const path   = require('path');
@@ -68,6 +75,30 @@ const LocalAdapter = {
   getUrl(relativePath) {
     const base = (process.env.CDN_BASE_URL || '').replace(/\/$/, '');
     return base ? `${base}/uploads/${relativePath}` : `/uploads/${relativePath}`;
+  },
+
+  /**
+   * Return a time-limited URL for a private local file.
+   * Local storage has no real signed-URL mechanism; we return the public path
+   * with a plain HMAC token so the backend can optionally verify it.
+   * For production private files, switch STORAGE_PROVIDER=s3 (Cloudflare R2).
+   *
+   * @param {string} relativePath  e.g. 'receipts/bankapp/receipt_abc.pdf'
+   * @param {number} [expiresIn=3600]  seconds
+   * @returns {Promise<string>}
+   */
+  async getSignedUrl(relativePath, expiresIn = 3600) {
+    const crypto = require('crypto');
+    const secret = process.env.JWT_SECRET || 'local-dev-secret';
+    const expires = Math.floor(Date.now() / 1000) + expiresIn;
+    const hmac = crypto
+      .createHmac('sha256', secret)
+      .update(`${relativePath}:${expires}`)
+      .digest('hex')
+      .slice(0, 16);
+    const base = (process.env.CDN_BASE_URL || '').replace(/\/$/, '');
+    const fileUrl = base ? `${base}/uploads/${relativePath}` : `/uploads/${relativePath}`;
+    return `${fileUrl}?expires=${expires}&token=${hmac}`;
   },
 };
 
@@ -132,6 +163,32 @@ const S3Adapter = (() => {
       ).replace(/\/$/, '');
       return `${base}/${relativePath}`;
     },
+
+    /**
+     * Generate a pre-signed GET URL for a private S3/R2 object.
+     * Requires @aws-sdk/s3-request-presigner (installed alongside @aws-sdk/client-s3).
+     *
+     * @param {string} relativePath  e.g. 'receipts/bankapp/receipt_abc.pdf'
+     * @param {number} [expiresIn=3600]  seconds until URL expires (max 604800 = 7 days)
+     * @returns {Promise<string>}
+     */
+    async getSignedUrl(relativePath, expiresIn = 3600) {
+      const s3 = getS3();
+      if (!s3) throw new Error('S3 adapter not available — install @aws-sdk/client-s3');
+      try {
+        const { getSignedUrl: awsGetSignedUrl } = require('@aws-sdk/s3-request-presigner');
+        const { GetObjectCommand } = require('@aws-sdk/client-s3');
+        const command = new GetObjectCommand({ Bucket: s3.bucket, Key: relativePath });
+        return await awsGetSignedUrl(s3.client, command, { expiresIn });
+      } catch (err) {
+        if (err.code === 'MODULE_NOT_FOUND') {
+          throw new Error(
+            'getSignedUrl requires @aws-sdk/s3-request-presigner. Run: pnpm add @aws-sdk/s3-request-presigner'
+          );
+        }
+        throw err;
+      }
+    },
   };
 })();
 
@@ -187,6 +244,26 @@ const SupabaseAdapter = (() => {
       const { data } = client.storage.from(bucket).getPublicUrl(relativePath);
       return data.publicUrl;
     },
+
+    /**
+     * Generate a time-limited signed URL for a private Supabase Storage object.
+     * The file must be in a private bucket (public access disabled in dashboard).
+     *
+     * @param {string} relativePath  e.g. 'receipts/bankapp/receipt_abc.pdf'
+     * @param {number} [expiresIn=3600]  seconds until URL expires
+     * @returns {Promise<string>}
+     */
+    async getSignedUrl(relativePath, expiresIn = 3600) {
+      const { client, bucket } = getClient();
+      if (!client) throw new Error('Supabase adapter not available — install @supabase/supabase-js');
+      const { data, error } = await client.storage
+        .from(bucket)
+        .createSignedUrl(relativePath, expiresIn);
+      if (error || !data?.signedUrl) {
+        throw new Error(`[Storage:Supabase] getSignedUrl failed: ${error?.message ?? 'unknown error'}`);
+      }
+      return data.signedUrl;
+    },
   };
 })();
 
@@ -200,4 +277,20 @@ function getStorageAdapter() {
   return LocalAdapter;
 }
 
-module.exports = { getStorageAdapter, LocalAdapter, S3Adapter, SupabaseAdapter };
+/**
+ * Convenience helper — resolves a pre-signed URL using the configured provider.
+ *
+ * @example
+ * const { getSignedUrl } = require('./storageAdapter');
+ * const url = await getSignedUrl('receipts/bankapp/receipt_abc.pdf', 1800);
+ * res.redirect(url);
+ *
+ * @param {string} relativePath
+ * @param {number} [expiresIn=3600]
+ * @returns {Promise<string>}
+ */
+async function getSignedUrl(relativePath, expiresIn = 3600) {
+  return getStorageAdapter().getSignedUrl(relativePath, expiresIn);
+}
+
+module.exports = { getStorageAdapter, getSignedUrl, LocalAdapter, S3Adapter, SupabaseAdapter };

@@ -2,7 +2,6 @@
   "name": "@lkvip/constants",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "description": "LKVIP shared constants — project IDs, roles, error codes, currencies, banks",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

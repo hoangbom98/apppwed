@@ -2,12 +2,14 @@
 const Decimal = require('decimal.js');
 
 class AcademyService {
-  constructor(prisma) {
+  prisma: any;
+
+  constructor(prisma: any) {
     this.prisma = prisma;
   }
 
-  async getCourses(filters = {}) {
-    const where = { status: 'published' };
+  async getCourses(filters: Record<string, any> = {}) {
+    const where: Record<string, any> = { status: 'published' };
     if (filters.level) where.level = filters.level;
     return await this.prisma.course.findMany({ where, orderBy: { createdAt: 'desc' } });
   }

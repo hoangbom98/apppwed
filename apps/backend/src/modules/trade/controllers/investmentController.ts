@@ -139,7 +139,7 @@ exports.adminDeletePackage = async (req, res) => {
 exports.myInvestments = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = { userId: req.user.id };
+    const where: Record<string, any> = { userId: req.user.id };
     if (req.query.status) where.status = req.query.status;
     const [data, total] = await Promise.all([
       req.prisma.investment.findMany({
@@ -248,7 +248,7 @@ exports.buyInvestment = async (req, res) => {
 exports.adminListInvestments = async (req, res) => {
   try {
     const { skip, take, page, limit } = paginate(req.query.page, req.query.limit);
-    const where = {};
+    const where: Record<string, any> = {};
     if (req.query.status) where.status = req.query.status;
     if (req.query.userId) where.userId = req.query.userId;
 

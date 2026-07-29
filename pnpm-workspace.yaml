@@ -1,40 +1,10 @@
 packages:
-  # Các dự án hiện tại
+  # ── Core platform apps (hub, game, trading, dating, sports, admin-dashboard,
+  #    backend, mobile, academy, banking, invest, lkvip-store, lkvipgroup-portal)
   - "apps/*"
-  - "apps/core-apps/*"
   - "packages/*"
-  # New SPAs — Trade module extensions
-  - "apps/banking"
-  - "apps/invest"
-  - "apps/crypto"
-  
-  # Các dự án từ nurmandev
-  - "apps/external/prodevs"
-  - "apps/external/fortress"
-  - "apps/external/market-api"
-  - "apps/external/graph-ai/Frontend"
-  - "apps/external/graph-ai/Backend"
-  - "apps/external/nurman-backend"
-  - "apps/external/innovatics"
-  - "apps/external/academy"
-  - "apps/external/landing/backend"
-  - "apps/external/landing/frontend"
-  - "apps/external/social"
-  - "apps/external/chat"
-  - "apps/external/market-admin"
-  - "apps/external/expenses"
-  - "apps/external/paylock"
-  - "apps/external/shammarianas/functions"
-  - "apps/external/shammarianas"
-  - "apps/external/event"
-  - "apps/external/invest-backend"
-  - "apps/external/todo/backend"
-  - "apps/external/todo/frontend"
-  - "apps/external/anonymous-voice/anonymous-voice-server"
-  - "apps/external/anonymous-voice/anonymous-voice"
-  - "apps/external/academy-backend"
-  - "apps/external/crypto"
-  - "apps/external/bank-app-frontend"
-  - "apps/external/invest-frontend/investment-client"
-  - "apps/external/invest-frontend/investment-backend"
-  - 'packages/scripts-utils'
+
+  # ── External projects ─────────────────────────────────────────────────────
+  # Các project trong apps/external/ là ISOLATED — không phải phần của LKVIP
+  # platform build. Chúng KHÔNG được hoist vào workspace này.
+  # Xem apps/external/README.md để biết thêm chi tiết.

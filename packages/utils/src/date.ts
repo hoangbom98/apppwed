@@ -213,3 +213,18 @@ export function isoWeek(d: DateInput = Date.now()): number {
   const jan4 = new Date(thu.getFullYear(), 0, 4);
   return 1 + Math.round((thu.getTime() - jan4.getTime()) / (7 * 86_400_000));
 }
+
+/**
+ * Format a duration (seconds) as HH:MM:SS or MM:SS.
+ * Migrated from dates.ts (now removed).
+ */
+export function formatDuration(seconds: number): string {
+  const s   = Math.floor(seconds);
+  const h   = Math.floor(s / 3600);
+  const m   = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return h > 0
+    ? `${pad(h)}:${pad(m)}:${pad(sec)}`
+    : `${pad(m)}:${pad(sec)}`;
+}

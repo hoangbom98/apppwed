@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --ac-primary:    #6366f1;
+  --ac-primary-dk: #4f46e5;
+  --ac-bg:         #eef2ff;
+  --ac-surface:    #ffffff;
+  --ac-border:     #c7d2fe;
+  --ac-text:       #1e1b4b;
+  --ac-muted:      #6b7280;
+  --ac-gold:       #f59e0b;
+  --ac-danger:     #ef4444;
+  --ac-card-bg:    linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: var(--ac-bg);
+  color: var(--ac-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input, textarea, select { user-select: text; }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }

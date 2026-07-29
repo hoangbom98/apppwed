@@ -198,6 +198,7 @@ app.use('/api/dating', require('./src/modules/dating/routes/index'));
 app.use('/api/sports', require('./src/modules/sports/routes/index'));
 app.use('/api/admin',  require('./src/modules/admin/routes/index'));
 app.use('/api/lkvip',  require('./src/modules/lkvip/routes/index'));
+app.use('/api/store',  require('./src/modules/store/routes'));
 
 // ── Core event listeners ───────────────────────────────────────────────────
 // Wire CampaignService event-driven triggers (welcome email, first-deposit push,

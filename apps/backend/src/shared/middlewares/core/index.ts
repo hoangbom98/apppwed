@@ -9,3 +9,4 @@ export * from './projectResolver';
 export * from './prismaBridge';
 export * from './requestLogger';
 export * from './riskMiddleware';
+export * from './verifySignedUrl';
