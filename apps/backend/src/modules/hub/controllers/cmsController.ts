@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use strict';
 /**
  * hub/controllers/cmsController.js
@@ -8,6 +7,7 @@
 const { success, created, error, notFound } = require('../../../shared/utils/network/response');
 const { paginate } = require('../../../shared/utils/core/helpers');
 const HubService = require('../services/hubService');
+const Joi = require('joi');
 
 const svc = (req) => new HubService(req.prisma);
 
@@ -23,7 +23,7 @@ exports.getCategories = async (req, res) => {
 exports.getGames = async (req, res) => {
   try {
     const result = await svc(req).getGames(req.query);
-    return res.json({ success: true, ...result });
+    return success(res, result);
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -50,7 +50,7 @@ exports.getWebsites = async (req, res) => {
       req.prisma.website.findMany({ where, skip, take, orderBy: { sortOrder: 'asc' }, include: { category: true } }),
       req.prisma.website.count({ where }),
     ]);
-    return res.json({ success: true, data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
+    return success(res, { data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -64,7 +64,7 @@ exports.getTools = async (req, res) => {
       req.prisma.tool.findMany({ where, skip, take, orderBy: { sortOrder: 'asc' }, include: { category: true } }),
       req.prisma.tool.count({ where }),
     ]);
-    return res.json({ success: true, data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
+    return success(res, { data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -97,7 +97,7 @@ exports.getNews = async (req, res) => {
       }),
       req.prisma.news.count({ where }),
     ]);
-    return res.json({ success: true, data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
+    return success(res, { data, meta: { total, page, limit, pages: Math.ceil(total / take) } });
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -161,9 +161,15 @@ exports.getMenu = async (req, res) => {
 
 // ── Search ────────────────────────────────────────────────────────────────────
 exports.search = async (req, res) => {
+  const schema = Joi.object({
+    q: Joi.string().trim().min(2).required(),
+    type: Joi.string().valid('games', 'news', 'tools', 'websites').optional()
+  });
+  const { error: valError } = schema.validate(req.query);
+  if (valError) return error(res, valError.details[0].message, 400);
+
   try {
     const { q, type } = req.query;
-    if (!q || q.trim().length < 2) return error(res, 'Từ khóa tìm kiếm quá ngắn', 400);
     const query = { contains: q.trim() };
 
     const results = {};
@@ -197,9 +203,17 @@ exports.search = async (req, res) => {
 
 // ── Feedback ──────────────────────────────────────────────────────────────────
 exports.submitFeedback = async (req, res) => {
+  const schema = Joi.object({
+    name: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    subject: Joi.string().required(),
+    message: Joi.string().required()
+  });
+  const { error: valError } = schema.validate(req.body);
+  if (valError) return error(res, valError.details[0].message, 400);
+
   try {
     const { name, email, subject, message } = req.body;
-    if (!subject || !message) return error(res, 'subject và message là bắt buộc', 400);
     const fb = await req.prisma.feedback.create({
       data: {
         userId:  req.user?.id ?? null,
@@ -224,7 +238,7 @@ exports.getNotifications = async (req, res) => {
       req.prisma.notification.count({ where }),
       req.prisma.notification.count({ where: { userId: req.user.id, isRead: false } }),
     ]);
-    return res.json({ success: true, data, meta: { total, unread, page, limit, pages: Math.ceil(total / take) } });
+    return success(res, { data, meta: { total, unread, page, limit, pages: Math.ceil(total / take) } });
   } catch (e) { return error(res, e.message, 500); }
 };
 
@@ -250,9 +264,15 @@ exports.getFavorites = async (req, res) => {
 };
 
 exports.addFavorite = async (req, res) => {
+  const schema = Joi.object({
+    targetType: Joi.string().required(),
+    targetId: Joi.string().required()
+  });
+  const { error: valError } = schema.validate(req.body);
+  if (valError) return error(res, valError.details[0].message, 400);
+
   try {
     const { targetType, targetId } = req.body;
-    if (!targetType || !targetId) return error(res, 'targetType và targetId là bắt buộc', 400);
     const fav = await req.prisma.favorite.upsert({
       where:  { userId_targetType_targetId: { userId: req.user.id, targetType, targetId: String(targetId) } },
       create: { userId: req.user.id, targetType, targetId: String(targetId) },

@@ -1,0 +1,616 @@
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LKVIP Group — Tổng Quan Hệ Sinh Thái</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    background: #ffffff; color: #1f2328;
+    padding: 24px 16px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    border-bottom: 2px solid #3b82d4;
+    padding-bottom: 16px; margin-bottom: 28px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; color: #1f2328; }
+  .header .sub { font-size: 13px; color: #57606a; margin-top: 4px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 600;
+    background: #f0f4ff; color: #3b82d4; border: 1px solid #bfcfee;
+  }
+  .badge.green { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+  .badge.purple { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
+  .badge.orange { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+
+  /* Section */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 15px; font-weight: 700; color: #1f2328;
+    border-left: 3px solid #3b82d4; padding-left: 10px;
+    margin-bottom: 14px;
+  }
+  .section-sub {
+    font-size: 13px; font-weight: 600; color: #57606a;
+    margin: 14px 0 8px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  /* Cards grid */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .card {
+    background: #f7f8fa; border: 1px solid #e5e7eb;
+    border-radius: 6px; padding: 12px;
+  }
+  .card h4 { font-size: 13px; font-weight: 700; color: #1f2328; margin-bottom: 6px; }
+  .card p, .card li { font-size: 12px; color: #57606a; line-height: 1.5; }
+  .card ul { padding-left: 14px; }
+  .card .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 1px 7px; border-radius: 3px;
+    background: #e8f0fe; color: #3b82d4; margin-bottom: 5px;
+  }
+  .card .tag.g { background: #dcfce7; color: #15803d; }
+  .card .tag.o { background: #ffedd5; color: #c2410c; }
+  .card .tag.p { background: #ede9fe; color: #7c3aed; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: #f7f8fa; border: 1px solid #e5e7eb;
+    padding: 7px 10px; text-align: left; font-weight: 600;
+    color: #57606a; font-size: 12px;
+  }
+  td { border: 1px solid #e5e7eb; padding: 7px 10px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  td code, th code {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 11px; background: #f0f4ff;
+    padding: 1px 4px; border-radius: 3px; color: #3b82d4;
+  }
+
+  /* Flow diagram */
+  .flow {
+    background: #f7f8fa; border: 1px solid #e5e7eb;
+    border-radius: 6px; padding: 14px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px; color: #1f2328; line-height: 1.8;
+    overflow-x: auto;
+  }
+  .flow .arrow { color: #3b82d4; }
+  .flow .node { color: #7c3aed; font-weight: 700; }
+  .flow .comment { color: #57606a; font-style: italic; }
+
+  /* Stat strip */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 10px;
+  }
+  .stat {
+    background: #f7f8fa; border: 1px solid #e5e7eb;
+    border-radius: 6px; padding: 12px; text-align: center;
+  }
+  .stat .num { font-size: 24px; font-weight: 800; color: #3b82d4; }
+  .stat .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+
+  /* Stack list */
+  .stack-row { display: flex; align-items: baseline; gap: 8px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+  .stack-row:last-child { border-bottom: none; }
+  .stack-key { font-size: 12px; font-weight: 600; color: #57606a; min-width: 140px; }
+  .stack-val { font-size: 13px; color: #1f2328; }
+  .stack-ver { font-size: 11px; color: #57606a; }
+
+  /* Tag list */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tg {
+    display: inline-block; font-size: 11px;
+    padding: 2px 8px; border-radius: 3px;
+    background: #f0f4ff; color: #3b82d4; border: 1px solid #dbeafe;
+  }
+  .tg.db { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
+  .tg.be { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+  .tg.fe { background: #ede9fe; color: #7c3aed; border-color: #ddd6fe; }
+  .tg.red { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+
+  .warn {
+    background: #fff7ed; border: 1px solid #fed7aa; border-radius: 5px;
+    padding: 10px 14px; font-size: 12px; color: #9a3412;
+    margin-top: 10px;
+  }
+
+  footer {
+    margin-top: 40px; padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center; font-size: 12px; color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="header">
+    <h1>LKVIP Group — Tổng Quan Hệ Sinh Thái</h1>
+    <div class="sub">Monorepo · /var/LKVIP · Ubuntu 22.04 VPS · Production domain: <strong>tc-gaming.live</strong></div>
+    <div class="badge-row">
+      <span class="badge">Node.js 20 LTS</span>
+      <span class="badge">TypeScript 6 strict</span>
+      <span class="badge green">Express 4 + Prisma 5</span>
+      <span class="badge green">MySQL 8 × 6 DB</span>
+      <span class="badge purple">React 19 + Vite 8</span>
+      <span class="badge purple">Tailwind v4 + Ant Design v6</span>
+      <span class="badge orange">BullMQ · Socket.IO · Redis 7</span>
+    </div>
+  </div>
+
+  
+  <div class="stats">
+    <div class="stat"><div class="num">12</div><div class="lbl">Core Apps</div></div>
+    <div class="stat"><div class="num">26</div><div class="lbl">External Apps</div></div>
+    <div class="stat"><div class="num">6</div><div class="lbl">MySQL Schemas</div></div>
+    <div class="stat"><div class="num">13</div><div class="lbl">BullMQ Workers</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num">44</div><div class="lbl">Shared Services</div></div>
+    <div class="stat"><div class="num">10</div><div class="lbl">Packages</div></div>
+    <div class="stat"><div class="num">6</div><div class="lbl">Payment Adapters</div></div>
+    <div class="stat"><div class="num">8</div><div class="lbl">Subdomains SSL</div></div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <div class="section">
+    <div class="section-title">1. Kiến Trúc Monorepo</div>
+    <div class="flow">
+<span class="node">/var/LKVIP/</span>
+├── <span class="node">apps/</span>
+│   ├── backend/          <span class="comment">← Express 4 + Prisma 5 + BullMQ (lkvip-api)</span>
+│   │   ├── src/config/   <span class="comment">DB factory, Redis, Socket.IO, Cron, i18n, Swagger</span>
+│   │   ├── src/modules/  <span class="comment">admin | auth | game | hub | trade | dating | sports | lkvip | workers</span>
+│   │   ├── src/shared/   <span class="comment">44 cross-cutting services (Auth, Wallet, Payment…)</span>
+│   │   ├── src/risk/     <span class="comment">Fraud, Bot, DDoS, Brute-force, AML, Compliance</span>
+│   │   └── prisma/       <span class="comment">6 schema files (admin|game|hub|trade|dating|sports)</span>
+│   ├── hub/              <span class="comment">@lkvip/hub — Tailwind + Lucide + Capacitor</span>
+│   ├── game/             <span class="comment">@lkvip/game — Tailwind + recharts + framer-motion + Capacitor</span>
+│   ├── trading/          <span class="comment">@lkvip/trade — Tailwind + Lucide + Capacitor</span>
+│   ├── dating/           <span class="comment">@lkvip/dating — Tailwind + framer-motion + Capacitor</span>
+│   ├── sports/           <span class="comment">@lkvip/sports — Tailwind + hls.js + Capacitor</span>
+│   ├── admin-dashboard/  <span class="comment">@lkvip/admin — Ant Design v6 + Tailwind (Desktop + PWA)</span>
+│   ├── banking/          <span class="comment">Banking module (internal)</span>
+│   ├── mobile/           <span class="comment">@lkvip/mobile — Capacitor wrapper</span>
+│   ├── mobile-native/    <span class="comment">React Native mobile app</span>
+│   └── external/         <span class="comment">26 external apps (NurmanDev)</span>
+├── <span class="node">packages/</span>
+│   ├── ui/          <span class="comment">@lkvip/ui — Shared React components, hooks, stores, PWA</span>
+│   ├── types/       <span class="comment">@lkvip/types — Shared TypeScript interfaces</span>
+│   ├── constants/   <span class="comment">@lkvip/constants — Enums, banks, currencies, roles, errors</span>
+│   ├── utils/       <span class="comment">@lkvip/utils — decimal.js, crypto, date, format, otp</span>
+│   ├── api-client/  <span class="comment">@lkvip/api-client — Axios instance + interceptors</span>
+│   ├── auth/        <span class="comment">@lkvip/auth — Auth utilities</span>
+│   ├── config/      <span class="comment">@lkvip/config — Shared config</span>
+│   ├── ai-skills/   <span class="comment">@lkvip/ai-skills — AI utility skills</span>
+│   ├── tsconfig/    <span class="comment">@lkvip/tsconfig — TypeScript base configs</span>
+│   └── scripts-utils/ <span class="comment">@lkvip/scripts-utils — Build &amp; deploy helpers</span>
+└── <span class="node">config/</span>
+    ├── nginx/       <span class="comment">Nginx server blocks (tc-gaming.conf, group.conf)</span>
+    ├── pm2/         <span class="comment">ecosystem.config.js (name: lkvip-api, cluster mode)</span>
+    └── monitoring/  <span class="comment">prometheus.yml + grafana dashboards</span>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">2. Tech Stack Thực Tế (2025)</div>
+    <div class="card-grid">
+      <div>
+        <div class="section-sub">Backend</div>
+        <div class="stack-row"><span class="stack-key">Runtime</span><span class="stack-val">Node.js 20 LTS</span></div>
+        <div class="stack-row"><span class="stack-key">Language</span><span class="stack-val">TypeScript ~6.0.2 <span class="stack-ver">(strict)</span></span></div>
+        <div class="stack-row"><span class="stack-key">Framework</span><span class="stack-val">Express.js ^4.22.2</span></div>
+        <div class="stack-row"><span class="stack-key">ORM</span><span class="stack-val">Prisma ^5.15.0</span></div>
+        <div class="stack-row"><span class="stack-key">Database</span><span class="stack-val">MySQL 8.x (6 schemas)</span></div>
+        <div class="stack-row"><span class="stack-key">Cache/Queue</span><span class="stack-val">Redis 7.x</span></div>
+        <div class="stack-row"><span class="stack-key">Job Queue</span><span class="stack-val">BullMQ ^5.80.10</span></div>
+        <div class="stack-row"><span class="stack-key">WebSocket</span><span class="stack-val">Socket.IO ^4.8.3</span></div>
+        <div class="stack-row"><span class="stack-key">Validation</span><span class="stack-val">Joi ^17.13.4</span></div>
+        <div class="stack-row"><span class="stack-key">Error Tracking</span><span class="stack-val">Sentry @sentry/node ^8.x</span></div>
+        <div class="stack-row"><span class="stack-key">Logging</span><span class="stack-val">Winston ^3.x</span></div>
+        <div class="stack-row"><span class="stack-key">Process Manager</span><span class="stack-val">PM2 cluster (lkvip-api)</span></div>
+      </div>
+      <div>
+        <div class="section-sub">Frontend</div>
+        <div class="stack-row"><span class="stack-key">Framework</span><span class="stack-val">React ^19.2.7</span></div>
+        <div class="stack-row"><span class="stack-key">Build Tool</span><span class="stack-val">Vite ^8.1.1</span></div>
+        <div class="stack-row"><span class="stack-key">Styling (SPAs)</span><span class="stack-val">Tailwind CSS v4 ^4.3.3</span></div>
+        <div class="stack-row"><span class="stack-key">Admin/Trade UI</span><span class="stack-val">Ant Design ^6.5.1</span></div>
+        <div class="stack-row"><span class="stack-key">Icons</span><span class="stack-val">Lucide React ^0.525.0</span></div>
+        <div class="stack-row"><span class="stack-key">State (global)</span><span class="stack-val">Zustand</span></div>
+        <div class="stack-row"><span class="stack-key">State (server)</span><span class="stack-val">TanStack Query 5</span></div>
+        <div class="stack-row"><span class="stack-key">Routing</span><span class="stack-val">React Router DOM v7</span></div>
+        <div class="stack-row"><span class="stack-key">Forms</span><span class="stack-val">React Hook Form + Yup</span></div>
+        <div class="stack-row"><span class="stack-key">Animation</span><span class="stack-val">framer-motion (Game, Dating)</span></div>
+        <div class="stack-row"><span class="stack-key">Video/HLS</span><span class="stack-val">hls.js (Sports only)</span></div>
+        <div class="stack-row"><span class="stack-key">Linting</span><span class="stack-val">OXLint (FE) · ESLint (BE)</span></div>
+        <div class="stack-row"><span class="stack-key">Mobile</span><span class="stack-val">Capacitor v7</span></div>
+        <div class="stack-row"><span class="stack-key">PWA</span><span class="stack-val">vite-plugin-pwa (all 6 SPAs)</span></div>
+      </div>
+    </div>
+    <div class="warn">⚠ Không dùng: Vant UI · Zod · @iconify/react · crypto-js · Video.js — không có trong codebase.</div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">3. Core Apps (6 SPAs + 1 Backend)</div>
+    <table>
+      <tr>
+        <th>App</th>
+        <th>Package</th>
+        <th>Giao diện</th>
+        <th>Tính năng chính</th>
+        <th>Đặc biệt</th>
+      </tr>
+      <tr>
+        <td><strong>Hub</strong></td>
+        <td><code>@lkvip/hub</code></td>
+        <td>H5 Mobile-first</td>
+        <td>CMS, bài viết, bình luận, thông báo, tìm kiếm, i18n</td>
+        <td>Full i18next/react-i18next</td>
+      </tr>
+      <tr>
+        <td><strong>Game</strong></td>
+        <td><code>@lkvip/game</code></td>
+        <td>H5 Mobile-first</td>
+        <td>Slot/bắn cá/bài/xổ số/live casino, VIP, jackpot, check-in, nhiệm vụ, rebate</td>
+        <td>recharts + framer-motion</td>
+      </tr>
+      <tr>
+        <td><strong>Trading</strong></td>
+        <td><code>@lkvip/trade</code></td>
+        <td>Full responsive</td>
+        <td>Market/limit/stop order, ví, copy trading, AI Quant, KYC, 2FA, price feed WS</td>
+        <td>Ant Design + TradingView widget</td>
+      </tr>
+      <tr>
+        <td><strong>Dating</strong></td>
+        <td><code>@lkvip/dating</code></td>
+        <td>H5 Mobile-first</td>
+        <td>Hồ sơ, swipe, ghép đôi, chat WS, quà tặng ảo, video call, VIP</td>
+        <td>framer-motion, Socket.IO</td>
+      </tr>
+      <tr>
+        <td><strong>Sports</strong></td>
+        <td><code>@lkvip/sports</code></td>
+        <td>Full responsive</td>
+        <td>Live scores, lịch thi đấu, bảng XH, cược, streaming HLS, tin tức</td>
+        <td>hls.js + ApiFootball API</td>
+      </tr>
+      <tr>
+        <td><strong>Admin</strong></td>
+        <td><code>@lkvip/admin</code></td>
+        <td>Desktop + PWA</td>
+        <td>Quản lý user/agent, tài chính, game, xổ số, trade, dating, sports, cài đặt, audit</td>
+        <td>Ant Design v6 (chỉ admin)</td>
+      </tr>
+      <tr>
+        <td><strong>Backend</strong></td>
+        <td><code>lkvip-api</code></td>
+        <td>API Server :5000</td>
+        <td>9 modules, 44 shared services, 13 workers, 6 payment adapters, risk engine</td>
+        <td>PM2 cluster mode</td>
+      </tr>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">4. Database — 6 MySQL Schemas</div>
+    <table>
+      <tr>
+        <th>Database</th>
+        <th>Schema Path</th>
+        <th>Tables Chính</th>
+        <th>Ghi Chú</th>
+      </tr>
+      <tr>
+        <td><code>admin_db</code></td>
+        <td><code>prisma/admin/schema.prisma</code></td>
+        <td>User, Wallet, Transaction, DepositOrder, WithdrawOrder, Referral, Commission, VipConfig, RebateRule, AuditLog, RiskScore, AmlAlert, SupportTicket, CronJob…</td>
+        <td>Master user record; immutable ledger</td>
+      </tr>
+      <tr>
+        <td><code>game_db</code></td>
+        <td><code>prisma/game/schema.prisma</code></td>
+        <td>User, Agent, LotteryType, LotteryDraw, LotteryBet, GameAggregator, GameSession, Rebate, SavingsVaultProduct, MiningMachine, GiftCode, Promotion, LuckyWheelConfig, CheckinConfig, MissionTemplate…</td>
+        <td>Aggregators: GSC, Goldgate, TCGaming</td>
+      </tr>
+      <tr>
+        <td><code>hub_db</code></td>
+        <td><code>prisma/hub/schema.prisma</code></td>
+        <td>Post, Comment, Category, Like, Notification, Banner, Article, CMS…</td>
+        <td>CMS + notifications</td>
+      </tr>
+      <tr>
+        <td><code>trade_db</code></td>
+        <td><code>prisma/trade/schema.prisma</code></td>
+        <td>Asset, Order, Wallet, InvestmentPackage, SavingsVault, PriceHistory…</td>
+        <td>DECIMAL(19,8) cho qty; hỗ trợ sharding khi &gt;100M rows</td>
+      </tr>
+      <tr>
+        <td><code>dating_db</code></td>
+        <td><code>prisma/dating/schema.prisma</code></td>
+        <td>Profile, Match, Swipe, Gift, Message, VipMembership…</td>
+        <td>Chat real-time qua Socket.IO</td>
+      </tr>
+      <tr>
+        <td><code>sports_db</code></td>
+        <td><code>prisma/sports/schema.prisma</code></td>
+        <td>League, Season, Team, Match, Player, Standing, BetSlip, Odds…</td>
+        <td>Tích hợp ApiFootball + TheSportsDB</td>
+      </tr>
+    </table>
+    <div class="section-sub" style="margin-top:14px">Chuẩn tài chính bắt buộc</div>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Số tiền / số dư</h4>
+        <p><code>DECIMAL(19,4)</code> — tránh lỗi floating-point, hỗ trợ VND lớn</p>
+      </div>
+      <div class="card">
+        <h4>Crypto / số lượng</h4>
+        <p><code>DECIMAL(19,8)</code> — dùng cho trade_db Order/Position</p>
+      </div>
+      <div class="card">
+        <h4>Timestamp</h4>
+        <p><code>TIMESTAMP(6)</code> — microsecond precision cho sự kiện tài chính</p>
+      </div>
+      <div class="card">
+        <h4>Optimistic Lock</h4>
+        <p>Trường <code>version Int</code> trên mọi bảng Wallet — ngăn race condition</p>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">5. Backend Modules &amp; Shared Services</div>
+    <div class="section-sub">9 Modules trong src/modules/</div>
+    <div class="card-grid-3">
+      <div class="card"><span class="tag p">admin</span><p>Users, finance, lottery, agents, risk, ops, RBAC</p></div>
+      <div class="card"><span class="tag g">auth</span><p>JWT (HTTP-only cookie), refresh token, 2FA TOTP</p></div>
+      <div class="card"><span class="tag">game</span><p>Sessions, lottery, VIP, rebate, gifts, aggregators</p></div>
+      <div class="card"><span class="tag">hub</span><p>CMS, news, banners, notifications</p></div>
+      <div class="card"><span class="tag">trade</span><p>Investments, price feed, orders, savings vault</p></div>
+      <div class="card"><span class="tag">dating</span><p>Profiles, matches, chat, gifts, video call</p></div>
+      <div class="card"><span class="tag">sports</span><p>Matches, scores, leagues, bet slips</p></div>
+      <div class="card"><span class="tag o">lkvip</span><p>LKvip internal payment gateway</p></div>
+      <div class="card"><span class="tag p">workers</span><p>13 BullMQ workers (xem bảng bên dưới)</p></div>
+    </div>
+
+    <div class="section-sub">13 BullMQ Workers</div>
+    <table>
+      <tr><th>Worker</th><th>Trigger</th><th>Chức năng</th></tr>
+      <tr><td><code>deposit-auto</code></td><td>Webhook / Cron</td><td>Auto-process pending deposits, credit wallet</td></tr>
+      <tr><td><code>withdraw-auto</code></td><td>Cron</td><td>Auto-approve/reject withdrawals below threshold</td></tr>
+      <tr><td><code>lottery-settlement</code></td><td>After draw closes</td><td>Settle bets, calculate payouts, credit winners</td></tr>
+      <tr><td><code>agent-settlement</code></td><td>Cron daily/weekly</td><td>Calculate &amp; pay agent commissions</td></tr>
+      <tr><td><code>rebate</code></td><td>Cron daily</td><td>Calculate rebate per user, write claimable records</td></tr>
+      <tr><td><code>robot-bet</code></td><td>Cron 30s</td><td>Simulate robot bets (liquidity, khi ENABLE_ROBOT_BETS=true)</td></tr>
+      <tr><td><code>fraud-auto</code></td><td>Risk event bus</td><td>Auto-flag / suspend fraudulent accounts</td></tr>
+      <tr><td><code>interest-payout</code></td><td>Cron daily</td><td>Pay interest on savings vault holdings</td></tr>
+      <tr><td><code>savingsVault-interest</code></td><td>Cron</td><td>Compound interest for savings vault</td></tr>
+      <tr><td><code>ticket-auto</code></td><td>Ticket events</td><td>Auto-respond / route support tickets</td></tr>
+      <tr><td><code>health-monitor</code></td><td>Cron</td><td>Check DB/Redis/queue health, alert on failure</td></tr>
+      <tr><td><code>lkvip-webhook-retry</code></td><td>Failed webhook queue</td><td>Retry failed outbound webhook calls</td></tr>
+      <tr><td><code>test</code></td><td>Manual</td><td>Development / testing only</td></tr>
+    </table>
+
+    <div class="section-sub">6 Payment Adapters</div>
+    <div class="tag-list">
+      <span class="tg be">MoMo</span>
+      <span class="tg be">USDT</span>
+      <span class="tg be">OKPay</span>
+      <span class="tg be">Pay818</span>
+      <span class="tg be">GoPay</span>
+      <span class="tg red">LKvipInternal</span>
+    </div>
+    <p style="font-size:12px;color:#57606a;margin-top:6px">Factory: <code>src/shared/payment/PaymentFactory.ts</code> · Interface: <code>src/shared/payment/BasePaymentAdapter.ts</code></p>
+
+    <div class="section-sub">Third-Party Integrations</div>
+    <div class="tag-list">
+      <span class="tg">GSC (Game)</span>
+      <span class="tg">Goldgate (Game)</span>
+      <span class="tg">TCGaming (Game)</span>
+      <span class="tg db">Binance (Trade)</span>
+      <span class="tg db">CoinGecko (Trade)</span>
+      <span class="tg p">ApiFootball (Sports)</span>
+      <span class="tg p">TheSportsDB (Sports)</span>
+      <span class="tg p">GNews (Sports/Hub)</span>
+      <span class="tg red">Firebase Admin (Push)</span>
+      <span class="tg red">Sentry (Error)</span>
+      <span class="tg">DeepSeek / OpenAI (AI)</span>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">6. Luồng Dữ Liệu Quan Trọng</div>
+
+    <div class="section-sub">Auth Flow</div>
+    <div class="flow">
+[Frontend] <span class="arrow">→</span> POST /api/auth/login
+  <span class="arrow">→</span> <span class="node">authenticate</span> middleware (JWT HTTP-only cookie)
+  <span class="arrow">→</span> <span class="node">projectAccessGuard</span> (lấy projectKey từ subdomain/header)
+  <span class="arrow">→</span> <span class="node">rateLimiter</span>
+  <span class="arrow">→</span> AuthController <span class="arrow">→</span> AuthService.login(username, password, ip, ua)
+  <span class="arrow">→</span> admin_db.User lookup <span class="arrow">→</span> bcrypt compare
+  <span class="arrow">→</span> JWT (access 15m + refresh 7d) <span class="arrow">→</span> Redis session
+  <span class="arrow">→</span> Set HTTP-only cookie <span class="arrow">→</span> { success: true, data: TokenPair }
+    </div>
+
+    <div class="section-sub" style="margin-top:14px">Wallet Credit/Debit Flow</div>
+    <div class="flow">
+WalletService.credit(userId, amount, walletType, description)
+  <span class="arrow">→</span> decimal.js arithmetic <span class="comment">(KHÔNG dùng Number/BigInt)</span>
+  <span class="arrow">→</span> Prisma $transaction {
+        UPDATE Wallet WHERE id=$id AND version=$old  <span class="comment">(optimistic lock)</span>
+        INSERT Transaction (immutable ledger)
+     }
+  <span class="arrow">→</span> NotificationService.send() <span class="arrow">→</span> Socket.IO emit (realtime)
+    </div>
+
+    <div class="section-sub" style="margin-top:14px">BullMQ Job Flow</div>
+    <div class="flow">
+Cron / Event <span class="arrow">→</span> Queue.add(jobName, payload)
+  <span class="arrow">→</span> BullMQ Worker picks up
+  <span class="arrow">→</span> Process: lottery-settlement | rebate | agent-commission | interest-payout…
+  <span class="arrow">→</span> WalletService.credit() for winners
+  <span class="arrow">→</span> NotificationService.send()
+  <span class="comment">  ↳ Retry logic built-in (lkvip-webhook-retry worker for failed outbound)</span>
+    </div>
+
+    <div class="section-sub" style="margin-top:14px">API Response Envelope</div>
+    <div class="flow">
+<span class="comment">// Success</span>
+{ "success": true, "data": T, "message"?: string }
+<span class="comment">// Error</span>
+{ "success": false, "error": { "code": string, "message": string } }
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">7. External Apps (26 — NurmanDev)</div>
+    <table>
+      <tr><th>Nhóm</th><th>Apps</th><th>Stack</th></tr>
+      <tr>
+        <td><strong>Tài chính &amp; Ngân hàng</strong></td>
+        <td>bank-app, bank-app-frontend, java-bank, invest-frontend, invest-backend, crypto, paylock</td>
+        <td>React, Node.js/Express, Java Swing</td>
+      </tr>
+      <tr>
+        <td><strong>Học tập (LMS)</strong></td>
+        <td>academy, academy-backend, innovatics</td>
+        <td>Next.js + Prisma, Node.js + Express, Node.js + EJS</td>
+      </tr>
+      <tr>
+        <td><strong>Thương mại điện tử</strong></td>
+        <td>market-admin, market-api, shammarianas</td>
+        <td>React, Node.js + Express, Static</td>
+      </tr>
+      <tr>
+        <td><strong>Truyền thông &amp; Xã hội</strong></td>
+        <td>social, chat</td>
+        <td>React Native, Socket.io Web</td>
+      </tr>
+      <tr>
+        <td><strong>Công cụ &amp; Tiện ích</strong></td>
+        <td>counter, todo, event, expenses, graph-ai, ssl-monitor, anonymous-voice, nurman-backend</td>
+        <td>React (MERN), Node.js, misc</td>
+      </tr>
+      <tr>
+        <td><strong>Landing &amp; Corporate</strong></td>
+        <td>landing, fortress, prodevs</td>
+        <td>Static HTML/CSS/JS</td>
+      </tr>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">8. Vận Hành &amp; Infrastructure</div>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Server</h4>
+        <ul>
+          <li>Ubuntu 22.04 VPS</li>
+          <li>Nginx reverse proxy + SSL</li>
+          <li>PM2 cluster mode (name: <code>lkvip-api</code>)</li>
+          <li>GitHub Actions CI/CD → SCP + SSH</li>
+          <li>PM2 logrotate (50M, 14 days)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Subdomains (tc-gaming.live)</h4>
+        <ul>
+          <li><code>api</code> → :5000 (Backend)</li>
+          <li><code>hub</code> → apps/hub/dist</li>
+          <li><code>game</code> → apps/game/dist</li>
+          <li><code>trade</code> → apps/trading/dist</li>
+          <li><code>dating</code> → apps/dating/dist</li>
+          <li><code>sports</code> → apps/sports/dist</li>
+          <li><code>admin</code> → apps/admin-dashboard/dist</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Monitoring</h4>
+        <ul>
+          <li>Sentry @sentry/node + @sentry/react</li>
+          <li>Prometheus → <code>GET /metrics</code></li>
+          <li>Grafana dashboards</li>
+          <li>Health check → <code>GET /health</code></li>
+          <li>pm2 monit / pm2 logs</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Security Layers</h4>
+        <ul>
+          <li>Helmet + rate limiting</li>
+          <li>JWT HTTP-only cookie</li>
+          <li>2FA TOTP</li>
+          <li>Field-level AES-256-GCM (PII)</li>
+          <li>Risk Engine: Fraud/Bot/DDoS/AML</li>
+          <li>IpBlacklist + RiskScore</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-sub">Routine Deploy Command</div>
+    <div class="flow">
+cd /var/LKVIP
+git pull
+pnpm install --frozen-lockfile
+pnpm run build:packages
+pnpm run build:frontends
+pnpm --filter lkvip-backend run build
+pnpm run prisma:deploy          <span class="comment"># migrate all 6 schemas</span>
+pm2 reload lkvip-api --update-env
+nginx -t &amp;&amp; nginx -s reload
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">9. Quy Tắc Code (Bắt Buộc)</div>
+    <table>
+      <tr><th>Quy tắc</th><th>Chi tiết</th></tr>
+      <tr><td>Prisma Client</td><td>Luôn dùng <code>getPrismaClient('admin'|'game'|...)</code> từ <code>src/config/databases.ts</code> — không <code>new PrismaClient()</code></td></tr>
+      <tr><td>Money Arithmetic</td><td>Dùng <code>decimal.js</code> từ <code>@lkvip/utils</code> — không dùng <code>Number</code> hay <code>BigInt</code></td></tr>
+      <tr><td>Backend Validation</td><td><strong>Joi</strong> cho tất cả request body/query — không Zod</td></tr>
+      <tr><td>Frontend Forms</td><td><strong>Yup</strong> + React Hook Form — không Zod</td></tr>
+      <tr><td>Enums</td><td>Import từ <code>@lkvip/constants</code> — không raw string literals</td></tr>
+      <tr><td>Async Background</td><td>BullMQ queue — không <code>setTimeout</code> cho side effects</td></tr>
+      <tr><td>API Response</td><td>Luôn dùng <code>ApiResponse</code> envelope (success/error)</td></tr>
+      <tr><td>Route Middleware</td><td><code>authenticate</code> → <code>projectAccessGuard</code> → <code>rateLimiter</code></td></tr>
+      <tr><td>No any</td><td>TypeScript strict, không <code>any</code>. Dùng <code>unknown</code> + type guard</td></tr>
+      <tr><td>File naming</td><td>kebab-case files, PascalCase classes/components, camelCase functions</td></tr>
+      <tr><td>Linting</td><td>OXLint cho frontend SPAs; ESLint cho admin-dashboard + backend</td></tr>
+      <tr><td>Shared components</td><td>Import từ <code>@lkvip/ui</code> — không duplicate across SPAs</td></tr>
+    </table>
+  </div>
+
+  <footer>
+    <p>Made with IBM Bob · LKVIP Group Platform — Senior Architect Reference · © 2025–2026</p>
+  </footer>
+</div>
+</body>
+</html>

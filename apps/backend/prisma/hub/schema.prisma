@@ -14,6 +14,82 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ACADEMY LMS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String       @db.VarChar(200)
+  slug        String       @unique @db.VarChar(200)
+  description String?      @db.Text
+  thumbnail   String?      @db.VarChar(500)
+  price       Decimal      @default(0) @db.Decimal(19, 4)
+  currency    String       @default("VND") @db.VarChar(10)
+  status      String       @default("draft") @db.VarChar(20)  // draft|published|archived
+  level       String       @default("beginner") @db.VarChar(20)
+  instructorId String      @db.VarChar(36)  // FK to admin_db User.id
+  totalLessons Int         @default(0)
+  totalDuration Int        @default(0)  // seconds
+  createdAt   DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime     @updatedAt
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  @@index([status])
+  @@index([instructorId])
+  @@index([createdAt])
+  @@map("courses")
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String   @db.VarChar(200)
+  content   String?  @db.LongText
+  videoUrl  String?  @db.VarChar(500)
+  duration  Int      @default(0)  // seconds
+  order     Int      @default(0)
+  isFree    Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress  CourseProgress[]
+  @@index([courseId])
+  @@index([order])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(36)
+  courseId    String
+  referenceId String   @unique @db.VarChar(64)  // idempotency key
+  paidAmount  Decimal  @db.Decimal(19, 4)
+  status      String   @default("active") @db.VarChar(20)  // active|completed|refunded
+  completedAt DateTime?
+  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  course      Course   @relation(fields: [courseId], references: [id])
+  progress    CourseProgress[]
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+model CourseProgress {
+  id           String     @id @default(cuid())
+  enrollmentId String
+  lessonId     String
+  userId       String     @db.VarChar(36)
+  completed    Boolean    @default(false)
+  watchedSecs  Int        @default(0)
+  updatedAt    DateTime   @updatedAt
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+  @@unique([enrollmentId, lessonId])
+  @@index([userId])
+  @@map("course_progress")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // USERS
 // ═══════════════════════════════════════════════════════════════════════════
 

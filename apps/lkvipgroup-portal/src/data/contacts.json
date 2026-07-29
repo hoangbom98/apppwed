@@ -1,0 +1,38 @@
+[
+  {
+    "id": "c_1700000000001",
+    "name": "Ahmed Al Maktoum",
+    "email": "ahmed@example.com",
+    "phone": "+971 50 123 4567",
+    "subject": "investment",
+    "message": "Interested in learning more about real estate investment opportunities in Dubai.",
+    "createdAt": "2026-07-10T08:30:00.000Z"
+  },
+  {
+    "id": "c_1700000000002",
+    "name": "Sarah Johnson",
+    "email": "sarah.j@email.com",
+    "phone": "+1 555 123 4567",
+    "subject": "partnership",
+    "message": "We are a US-based private equity firm looking for strategic partnerships in the MENA region.",
+    "createdAt": "2026-07-09T14:15:00.000Z"
+  },
+  {
+    "id": "c_1700000000003",
+    "name": "Raj Patel",
+    "email": "raj.patel@company.com",
+    "phone": "+91 98765 43210",
+    "subject": "general",
+    "message": "I would like to schedule a call to discuss potential collaboration opportunities.",
+    "createdAt": "2026-07-08T10:00:00.000Z"
+  },
+  {
+    "id": "c_1700000000004",
+    "name": "Maria Garcia",
+    "email": "maria@investgroup.com",
+    "phone": "+34 612 345 678",
+    "subject": "investment",
+    "message": "Our institutional investment group is interested in your hospitality sector portfolio.",
+    "createdAt": "2026-07-07T16:45:00.000Z"
+  }
+]

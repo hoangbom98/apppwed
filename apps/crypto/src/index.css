@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --cr-primary:    #6366f1;
+  --cr-primary-dk: #4f46e5;
+  --cr-accent:     #a78bfa;
+  --cr-bg:         #0f0f1a;
+  --cr-surface:    #1a1a2e;
+  --cr-surface-2:  #16213e;
+  --cr-border:     #2d2d4a;
+  --cr-text:       #e2e8f0;
+  --cr-muted:      #94a3b8;
+  --cr-green:      #10b981;
+  --cr-red:        #ef4444;
+  --cr-gold:       #f59e0b;
+  --cr-card-bg:    linear-gradient(135deg, #6366f1 0%, #312e81 100%);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: var(--cr-bg);
+  color: var(--cr-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input, textarea, select { user-select: text; }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+
+/* Scrollbar ẩn */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Animated price flash */
+@keyframes flash-green { 0%,100% { background: transparent; } 50% { background: rgba(16,185,129,0.15); } }
+@keyframes flash-red   { 0%,100% { background: transparent; } 50% { background: rgba(239,68,68,0.15); } }
+.flash-green { animation: flash-green 0.5s ease; }
+.flash-red   { animation: flash-red   0.5s ease; }

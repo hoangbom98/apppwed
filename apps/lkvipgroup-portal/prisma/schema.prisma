@@ -1,0 +1,140 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// prisma/schema.prisma  —  Fortress Portal Database
+// Provider : PostgreSQL (Supabase — schema: fortress)
+// ═══════════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/fortress-client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("FORTRESS_DATABASE_URL")
+  directUrl = env("FORTRESS_DIRECT_URL")
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────
+
+model Admin {
+  id        String    @id @default(cuid())
+  name      String    @db.VarChar(100)
+  email     String    @unique @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  role      String    @default("admin") @db.VarChar(20)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("fortress_admins")
+}
+
+// ── Blog Articles ─────────────────────────────────────────────────────────
+
+model Blog {
+  id            String    @id @default(cuid())
+  title         String    @db.VarChar(500)
+  slug          String    @unique @db.VarChar(500)
+  excerpt       String    @default("") @db.VarChar(1000)
+  content       String    @default("") @db.Text
+  featuredImage String    @default("") @db.VarChar(1000)
+  category      String    @default("General") @db.VarChar(100)
+  tags          String[]  @default([])
+  status        String    @default("draft") @db.VarChar(20)
+  featured      Boolean   @default(false)
+  readTime      Int       @default(5)
+  publishedAt   DateTime?
+  seoTitle      String    @default("") @db.VarChar(200)
+  seoDesc       String    @default("") @db.VarChar(500)
+  seoKeywords   String    @default("") @db.VarChar(500)
+  seoOgImage    String    @default("") @db.VarChar(1000)
+  seoCanonical  String    @default("") @db.VarChar(1000)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+  @@map("fortress_blogs")
+}
+
+// ── Enquiries ─────────────────────────────────────────────────────────────
+
+model Enquiry {
+  id        String   @id @default(cuid())
+  type      String   @db.VarChar(100)
+  name      String   @db.VarChar(200)
+  email     String   @db.VarChar(255)
+  phone     String   @default("") @db.VarChar(50)
+  company   String   @default("") @db.VarChar(200)
+  subject   String   @default("") @db.VarChar(500)
+  message   String   @default("") @db.Text
+  document  String   @default("") @db.VarChar(1000)
+  status    String   @default("new") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt(sort: Desc)])
+  @@map("fortress_enquiries")
+}
+
+// ── Page Content ──────────────────────────────────────────────────────────
+
+model Page {
+  id           String   @id @default(cuid())
+  slug         String   @unique @db.VarChar(200)
+  title        String   @db.VarChar(500)
+  content      String   @default("") @db.Text
+  hero         Json     @default("{}")
+  sections     Json     @default("[]")
+  seoTitle     String   @default("") @db.VarChar(200)
+  seoDesc      String   @default("") @db.VarChar(500)
+  seoKeywords  String   @default("") @db.VarChar(500)
+  seoOgImage   String   @default("") @db.VarChar(1000)
+  seoCanonical String   @default("") @db.VarChar(1000)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([slug])
+  @@map("fortress_pages")
+}
+
+// ── Site Settings ─────────────────────────────────────────────────────────
+
+model Settings {
+  id                String   @id @default(cuid())
+  companyName       String   @default("LKVIP Group") @db.VarChar(200)
+  logo              String   @default("/large-logo.png") @db.VarChar(1000)
+  favicon           String   @default("") @db.VarChar(1000)
+  email             String   @default("info@lkvip.group") @db.VarChar(255)
+  phone             String   @default("") @db.VarChar(50)
+  address           String   @default("") @db.VarChar(500)
+  whatsapp          String   @default("") @db.VarChar(30)
+  googleMap         String   @default("") @db.Text
+  socialLinks       Json     @default("[]")
+  googleAnalyticsId String   @default("") @db.VarChar(50)
+  metaPixelId       String   @default("") @db.VarChar(50)
+  footer            String   @default("") @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("fortress_settings")
+}
+
+// ── Media Uploads ─────────────────────────────────────────────────────────
+
+model Upload {
+  id           String   @id @default(cuid())
+  publicId     String   @unique @db.VarChar(500)
+  secureUrl    String   @db.VarChar(1000)
+  folder       String   @default("fortress") @db.VarChar(200)
+  resourceType String   @db.VarChar(20)
+  fileName     String   @db.VarChar(500)
+  fileSize     Int
+  createdAt    DateTime @default(now())
+
+  @@index([folder])
+  @@map("fortress_uploads")
+}

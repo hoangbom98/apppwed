@@ -1,44 +1,12 @@
-// @ts-nocheck
 'use strict';
 /**
  * GroupFinanceService — Engine for "Gộp Vốn, Tách Lợi Nhuận"
  * (Pool Capital, Split Profit)
- *
- * This is the single authoritative service for all cross-project financial flows.
- * Sub-projects (game, sports, trade, dating) call this instead of managing
- * their own wallet mutations when they need Group-level accounting.
- *
- * Core responsibilities
- * ─────────────────────
- *  1. Apply dynamic transaction fees and route them to the Group Wallet.
- *  2. Maintain per-project balance books (ProjectBalance).
- *  3. Record fee logs (FeeLog) for easy reconciliation.
- *  4. Expose debit / credit helpers that wrap LedgerService with fee logic.
- *
- * GROUP_WALLET_USER_ID
- * ────────────────────
- *  The "Group Wallet" is a virtual user in admin_db whose ID is stored in
- *  the environment variable GROUP_WALLET_USER_ID.  All fees collected are
- *  credited to this user's wallet.  Seed this user via:
- *    npx ts-node prisma/seeds/admin.seed.ts
- *
- * USAGE
- * ─────
- *  const gf = new GroupFinanceService(adminPrisma);
- *
- *  // When a user places a BET in the game module:
- *  const result = await gf.debitWithFee(userId, amount, 'GAME', 'bet', refId, adminWalletId);
- *  // result.netAmount  — amount actually deducted from user (= amount, fee added on top for debit)
- *  // result.fee        — fee deducted and sent to group
- *
- *  // When a user WINs in the game module:
- *  const result = await gf.creditWithFee(userId, amount, 'GAME', 'win', refId, adminWalletId);
- *  // result.netAmount  — amount the user actually receives (= gross - fee)
- *  // result.fee        — fee retained by group
  */
 
 const logger = require('../../../shared/services/logger');
 const cache  = require('../../../shared/services/cacheService');
+const { Decimal } = require('@lkvip/utils');
 
 /** Cache TTL for fee configs (2 minutes) */
 const FEE_CACHE_TTL = 120;
@@ -58,22 +26,22 @@ type FeeTxType = 'BET' | 'WIN' | 'WITHDRAW' | 'DEPOSIT';
 
 interface FeeConfigRow {
   feeType:   string;
-  value:     number;
-  minAmount: number | null;
-  maxAmount: number | null;
-  maxFee:    number | null;
+  value:     Decimal;
+  minAmount: Decimal | null;
+  maxAmount: Decimal | null;
+  maxFee:    Decimal | null;
 }
 
 interface FeeResult {
-  grossAmount: number;
-  fee:         number;
-  netAmount:   number;
+  grossAmount: Decimal;
+  fee:         Decimal;
+  netAmount:   Decimal;
   feeApplied:  boolean;
 }
 
 export interface FinancialMoveResult extends FeeResult {
   txId:     string;
-  balance:  number;
+  balance:  Decimal;
 }
 
 class GroupFinanceService {
@@ -118,10 +86,10 @@ class GroupFinanceService {
       if (!row) return null;
       return {
         feeType:   row.feeType,
-        value:     Number(row.value),
-        minAmount: row.minAmount ? Number(row.minAmount) : null,
-        maxAmount: row.maxAmount ? Number(row.maxAmount) : null,
-        maxFee:    row.maxFee    ? Number(row.maxFee)    : null,
+        value:     new Decimal(row.value.toString()),
+        minAmount: row.minAmount ? new Decimal(row.minAmount.toString()) : null,
+        maxAmount: row.maxAmount ? new Decimal(row.maxAmount.toString()) : null,
+        maxFee:    row.maxFee    ? new Decimal(row.maxFee.toString())    : null,
       };
     });
   }
@@ -134,41 +102,42 @@ class GroupFinanceService {
     source:  TransactionSource,
     txType:  FeeTxType,
   ): Promise<FeeResult> {
+    const amtDec = new Decimal(amount);
     const cfg = await this.getFeeConfig(source, txType);
 
     if (!cfg) {
-      return { grossAmount: amount, fee: 0, netAmount: amount, feeApplied: false };
+      return { grossAmount: amtDec, fee: new Decimal(0), netAmount: amtDec, feeApplied: false };
     }
 
     // Check min/max amount gates
-    if (cfg.minAmount !== null && amount < cfg.minAmount) {
-      return { grossAmount: amount, fee: 0, netAmount: amount, feeApplied: false };
+    if (cfg.minAmount !== null && amtDec.lt(cfg.minAmount)) {
+      return { grossAmount: amtDec, fee: new Decimal(0), netAmount: amtDec, feeApplied: false };
     }
-    if (cfg.maxAmount !== null && amount > cfg.maxAmount) {
-      return { grossAmount: amount, fee: 0, netAmount: amount, feeApplied: false };
+    if (cfg.maxAmount !== null && amtDec.gt(cfg.maxAmount)) {
+      return { grossAmount: amtDec, fee: new Decimal(0), netAmount: amtDec, feeApplied: false };
     }
 
-    let fee: number;
+    let fee: Decimal;
     if (cfg.feeType === 'PERCENTAGE') {
-      fee = Math.round((amount * cfg.value) / 100);
+      fee = amtDec.times(cfg.value).div(100).toDecimalPlaces(4);
     } else {
       // FIXED
-      fee = Math.round(cfg.value);
+      fee = cfg.value;
     }
 
     // Apply fee cap
-    if (cfg.maxFee !== null && fee > cfg.maxFee) {
-      fee = Math.round(cfg.maxFee);
+    if (cfg.maxFee !== null && fee.gt(cfg.maxFee)) {
+      fee = cfg.maxFee;
     }
 
     // Fee cannot exceed the transaction amount
-    fee = Math.min(fee, amount);
+    fee = Decimal.min(fee, amtDec);
 
     return {
-      grossAmount: amount,
+      grossAmount: amtDec,
       fee,
-      netAmount: amount - fee,
-      feeApplied: fee > 0,
+      netAmount: amtDec.minus(fee),
+      feeApplied: fee.gt(0),
     };
   }
 
@@ -176,8 +145,6 @@ class GroupFinanceService {
 
   /**
    * Credit a user (WIN scenario).
-   * Gross amount is paid out; fee is deducted and routed to Group Wallet.
-   * User receives: grossAmount - fee
    */
   async creditWithFee(
     userWalletId:  string,
@@ -189,12 +156,13 @@ class GroupFinanceService {
     adminWalletId: string,
   ): Promise<FinancialMoveResult> {
     const { fee, netAmount } = await this.calculateFee(grossAmount, source, txType);
+    const grossDec = new Decimal(grossAmount);
 
     const result = await this.prisma.$transaction(async (tx: any) => {
       // 1. Credit net amount to user wallet
       const userWallet = await tx.wallet.update({
         where: { id: userWalletId },
-        data:  { balance: { increment: netAmount } },
+        data:  { balance: { increment: netAmount.toNumber() } },
         select: { balance: true },
       });
 
@@ -205,19 +173,19 @@ class GroupFinanceService {
           walletId:     userWalletId,
           type:         txType.toLowerCase(),
           source,
-          amount:       netAmount,
-          fee,
+          amount:       netAmount.toNumber(),
+          fee:          fee.toNumber(),
           status:       'completed',
           referenceId,
-          description:  `${source} ${txType} (phí: ${fee.toLocaleString('vi-VN')}đ)`,
+          description:  `${source} ${txType} (phí: ${fee.toString()}đ)`,
         },
       });
 
       // 3. If there is a fee, route it to Group Wallet
-      if (fee > 0) {
+      if (fee.gt(0)) {
         await tx.wallet.update({
           where: { id: adminWalletId },
-          data:  { balance: { increment: fee } },
+          data:  { balance: { increment: fee.toNumber() } },
         });
 
         await tx.transaction.create({
@@ -226,7 +194,7 @@ class GroupFinanceService {
             walletId:    adminWalletId,
             type:        'fee',
             source:      'ADMIN',
-            amount:      fee,
+            amount:      fee.toNumber(),
             status:      'completed',
             referenceId,
             description: `Fee from ${source} ${txType} (userId: ${userId})`,
@@ -239,9 +207,9 @@ class GroupFinanceService {
             userId,
             source,
             txType,
-            grossAmount,
-            feeAmount:  fee,
-            netAmount,
+            grossAmount: grossDec.toNumber(),
+            feeAmount:   fee.toNumber(),
+            netAmount:   netAmount.toNumber(),
             referenceId,
           },
         });
@@ -250,28 +218,26 @@ class GroupFinanceService {
       // 5. Update ProjectBalance book
       await tx.projectBalance.upsert({
         where:  { source },
-        create: { source, balance: -grossAmount, totalWin: grossAmount, totalFee: fee },
+        create: { source, balance: grossDec.neg().toNumber(), totalWin: grossDec.toNumber(), totalFee: fee.toNumber() },
         update: {
-          balance:  { decrement: grossAmount },
-          totalWin: { increment: grossAmount },
-          totalFee: { increment: fee },
+          balance:  { decrement: grossDec.toNumber() },
+          totalWin: { increment: grossDec.toNumber() },
+          totalFee: { increment: fee.toNumber() },
         },
       });
 
-      return { balance: Number(userWallet.balance), txId: userTx.id };
+      return { balance: new Decimal(userWallet.balance.toString()), txId: userTx.id };
     });
 
     logger.info(
-      `[GroupFinance] CREDIT userId=${userId} source=${source} gross=${grossAmount} fee=${fee} net=${netAmount}`,
+      `[GroupFinance] CREDIT userId=${userId} source=${source} gross=${grossDec.toString()} fee=${fee.toString()} net=${netAmount.toString()}`,
     );
 
-    return { grossAmount, fee, netAmount, feeApplied: fee > 0, ...result };
+    return { grossAmount: grossDec, fee, netAmount, feeApplied: fee.gt(0), ...result };
   }
 
   /**
    * Debit a user (BET scenario).
-   * Full amount is debited; an additional fee may be collected on top.
-   * Throws if balance is insufficient (amount + fee > balance).
    */
   async debitWithFee(
     userWalletId:  string,
@@ -283,19 +249,20 @@ class GroupFinanceService {
     adminWalletId: string,
   ): Promise<FinancialMoveResult> {
     const { fee } = await this.calculateFee(amount, source, txType);
-    const totalDeduct = amount + fee;
+    const amtDec = new Decimal(amount);
+    const totalDeduct = amtDec.plus(fee);
 
     const result = await this.prisma.$transaction(async (tx: any) => {
       // Atomic debit — fails if balance insufficient
       const affected = await tx.$executeRaw`
         UPDATE wallets
-        SET balance = balance - ${totalDeduct}, updatedAt = NOW()
-        WHERE id = ${userWalletId} AND balance >= ${totalDeduct}
+        SET balance = balance - ${totalDeduct.toNumber()}, updatedAt = NOW()
+        WHERE id = ${userWalletId} AND balance >= ${totalDeduct.toNumber()}
       `;
       if (affected === 0) {
         const w = await tx.wallet.findUnique({ where: { id: userWalletId }, select: { balance: true } });
         throw Object.assign(
-          new Error(`Số dư không đủ (hiện có: ${Number(w?.balance ?? 0).toLocaleString('vi-VN')}đ)`),
+          new Error(`Số dư không đủ (hiện có: ${new Decimal(w?.balance?.toString() ?? 0).toString()}đ)`),
           { status: 400, code: 'INSUFFICIENT_BALANCE' },
         );
       }
@@ -312,19 +279,19 @@ class GroupFinanceService {
           walletId:    userWalletId,
           type:        txType.toLowerCase(),
           source,
-          amount:      -amount,
-          fee,
+          amount:      amtDec.neg().toNumber(),
+          fee:         fee.toNumber(),
           status:      'completed',
           referenceId,
-          description: `${source} ${txType}${fee > 0 ? ` (phí: ${fee.toLocaleString('vi-VN')}đ)` : ''}`,
+          description: `${source} ${txType}${fee.gt(0) ? ` (phí: ${fee.toString()}đ)` : ''}`,
         },
       });
 
       // Route fee to Group Wallet
-      if (fee > 0) {
+      if (fee.gt(0)) {
         await tx.wallet.update({
           where: { id: adminWalletId },
-          data:  { balance: { increment: fee } },
+          data:  { balance: { increment: fee.toNumber() } },
         });
 
         await tx.transaction.create({
@@ -333,7 +300,7 @@ class GroupFinanceService {
             walletId:    adminWalletId,
             type:        'fee',
             source:      'ADMIN',
-            amount:      fee,
+            amount:      fee.toNumber(),
             status:      'completed',
             referenceId,
             description: `Fee from ${source} ${txType} (userId: ${userId})`,
@@ -345,9 +312,9 @@ class GroupFinanceService {
             userId,
             source,
             txType,
-            grossAmount: amount,
-            feeAmount:   fee,
-            netAmount:   amount,  // user pays full amount; fee is on top
+            grossAmount: amtDec.toNumber(),
+            feeAmount:   fee.toNumber(),
+            netAmount:   amtDec.toNumber(),  // user pays full amount; fee is on top
             referenceId,
           },
         });
@@ -356,27 +323,26 @@ class GroupFinanceService {
       // Update ProjectBalance book
       await tx.projectBalance.upsert({
         where:  { source },
-        create: { source, balance: amount, totalBet: amount, totalFee: fee },
+        create: { source, balance: amtDec.toNumber(), totalBet: amtDec.toNumber(), totalFee: fee.toNumber() },
         update: {
-          balance:  { increment: amount },
-          totalBet: { increment: amount },
-          totalFee: { increment: fee },
+          balance:  { increment: amtDec.toNumber() },
+          totalBet: { increment: amtDec.toNumber() },
+          totalFee: { increment: fee.toNumber() },
         },
       });
 
-      return { balance: Number(updatedWallet?.balance ?? 0), txId: userTx.id };
+      return { balance: new Decimal(updatedWallet?.balance.toString() ?? 0), txId: userTx.id };
     });
 
     logger.info(
-      `[GroupFinance] DEBIT userId=${userId} source=${source} amount=${amount} fee=${fee} total=${totalDeduct}`,
+      `[GroupFinance] DEBIT userId=${userId} source=${source} amount=${amtDec.toString()} fee=${fee.toString()} total=${totalDeduct.toString()}`,
     );
 
-    return { grossAmount: amount, fee, netAmount: amount, feeApplied: fee > 0, ...result };
+    return { grossAmount: amtDec, fee, netAmount: amtDec, feeApplied: fee.gt(0), ...result };
   }
 
   /**
    * Invalidate cached fee config for a given source+type pair.
-   * Call this after admin updates a FeeConfig row.
    */
   async invalidateFeeCache(source: TransactionSource, txType: FeeTxType): Promise<void> {
     await cache.del(`feeconfig:${source}:${txType}`);

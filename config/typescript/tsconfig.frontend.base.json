@@ -1,13 +1,18 @@
 {
   /**
-   * tsconfig.frontend.base.json
-   * ────────────────────────────
-   * Base TypeScript config dùng chung cho tất cả React SPA (frontend/*).
-   * Mỗi SPA extend từ file này và chỉ khai báo thêm `paths`, `baseUrl`,
-   * `typeRoots`, `types`, `include`, `references` theo nhu cầu riêng.
+   * tsconfig.frontend.base.json — LKVIP GROUP
+   * ─────────────────────────────────────────────────────────────────────────
+   * Base TypeScript config dùng chung cho tất cả React SPA (apps/hub, apps/game,
+   * apps/trading, apps/dating, apps/sports, apps/admin-dashboard).
    *
-   * KHÔNG dùng file này cho: backend, shared-types, @lkvip/cli.
-   * Các dự án đó extend từ tsconfig.base.json (root).
+   * Mỗi SPA extend từ file này và chỉ khai báo thêm:
+   *   - paths / baseUrl  (alias @/ → src/)
+   *   - typeRoots / types (nếu cần thêm type package riêng)
+   *   - include / references (file scope)
+   *
+   * KHÔNG dùng cho: backend, shared-types, @lkvip/cli
+   * Các package đó extend tsconfig.base.json
+   * ─────────────────────────────────────────────────────────────────────────
    */
   "compilerOptions": {
     "target":                     "ES2020",
@@ -15,20 +20,24 @@
     "lib":                        ["ES2020", "DOM", "DOM.Iterable"],
     "module":                     "ESNext",
     "moduleResolution":           "bundler",
-    "skipLibCheck":                true,
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule":          true,
+
+    "jsx":                        "react-jsx",
+    "noEmit":                     true,
     "isolatedModules":            true,
     "moduleDetection":            "force",
-    "noEmit":                     true,
-    "jsx":                        "react-jsx",
 
-    "strict":               false,
-    "noUnusedLocals":       false,
-    "noUnusedParameters":   false,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule":          true,
+    "skipLibCheck":               true,
+
+    "strict":                     true,
+    "noUnusedLocals":             false,
+    "noUnusedParameters":         false,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitAny":              true,
 
-    "allowJs":  false,
-    "checkJs":  false
-  }
+    "allowJs":                    false,
+    "checkJs":                    false
+  },
+  "exclude": ["node_modules", "dist", "build", "coverage"]
 }

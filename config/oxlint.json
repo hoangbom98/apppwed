@@ -1,23 +1,38 @@
 {
-  "rules": {
-    "no-var": "error",
-    "prefer-const": "error",
-    "eqeqeq": ["error", "always"],
-    "no-console": "warn",
-    "no-debugger": "error",
-    "no-unused-vars": "warn"
-  },
-  "plugins": ["react", "react-hooks"],
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "env": {
     "browser": true,
     "es2022": true
   },
+  "plugins": ["react", "react-hooks", "typescript", "unicorn"],
+  "rules": {
+    "no-var":                "error",
+    "prefer-const":          "error",
+    "eqeqeq":               ["error", "always"],
+    "no-console":           "warn",
+    "no-debugger":          "error",
+    "no-unused-vars":       "warn",
+    "no-duplicate-imports": "error",
+    "no-shadow":            "warn",
+
+    "typescript/no-explicit-any":       "error",
+    "typescript/no-unused-vars":       ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/ban-ts-comment":        "error",
+
+    "react-hooks/rules-of-hooks":  "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
   "ignorePatterns": [
     "**/dist/**",
     "**/node_modules/**",
+    "**/build/**",
+    "**/coverage/**",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.d.ts"
+    "**/*.spec.tsx",
+    "**/*.d.ts",
+    "**/.prisma/**"
   ]
 }

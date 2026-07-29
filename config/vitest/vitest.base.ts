@@ -1,28 +1,47 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 
 /**
- * Base Vitest config — extend per-app with correct path aliases.
- * Usage in app:
+ * vitest.base.ts — LKVIP GROUP
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Base Vitest config dùng chung cho tất cả frontend SPA.
+ *
+ * Usage trong mỗi app (apps/hub/vitest.config.ts):
  *   import { mergeConfig } from 'vite';
  *   import baseConfig from '../../config/vitest/vitest.base.ts';
- *   export default mergeConfig(baseConfig, defineConfig({ resolve: { alias: { '@': ... } } }));
+ *   export default mergeConfig(baseConfig, defineConfig({
+ *     resolve: { alias: { '@': new URL('./src', import.meta.url).pathname } },
+ *   }));
+ *
+ * IMPORTANT: Mỗi app phải có file src/test/setup.ts riêng (hoặc overide setupFiles).
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    globals: true,
-    // IMPORTANT: This assumes the setup file is located at ./src/test/setup.ts
-    // relative to the root of the project consuming this base config.
-    setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', 'dist', 'src/test/setup.ts'],
+    globals:     true,
+    setupFiles:  ['./src/test/setup.ts'],
+    include:     ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude:     ['node_modules', 'dist', 'src/test/setup.ts'],
+    reporters:   ['verbose'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'lcov'],
-      exclude: ['node_modules', 'dist', 'src/test', '**/*.d.ts', '**/*.config.*'],
+      reporter: ['text', 'json', 'lcov', 'html'],
+      exclude: [
+        'node_modules',
+        'dist',
+        'src/test',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/index.ts',
+      ],
+      thresholds: {
+        lines:      60,
+        functions:  60,
+        branches:   50,
+        statements: 60,
+      },
     },
   },
 });

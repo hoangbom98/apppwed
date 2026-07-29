@@ -1,12 +1,12 @@
 {
-  "semi": true,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 100,
-  "endOfLine": "auto",
-  "arrowParens": "always",
-  "bracketSpacing": true,
+  "semi":            true,
+  "singleQuote":     true,
+  "tabWidth":        2,
+  "trailingComma":   "es5",
+  "printWidth":      100,
+  "endOfLine":       "lf",
+  "arrowParens":     "always",
+  "bracketSpacing":  true,
   "bracketSameLine": false,
   "overrides": [
     {
@@ -15,7 +15,11 @@
     },
     {
       "files": "*.md",
-      "options": { "proseWrap": "preserve" }
+      "options": { "proseWrap": "preserve", "printWidth": 80 }
+    },
+    {
+      "files": "*.prisma",
+      "options": { "printWidth": 120 }
     }
   ]
 }

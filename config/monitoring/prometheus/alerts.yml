@@ -1,4 +1,4 @@
-﻿# Prometheus Alert Rules — LKVIP GROUP
+# Prometheus Alert Rules — LKVIP GROUP
 #
 # Copy to /etc/prometheus/alerts.yml
 #
@@ -64,6 +64,18 @@ groups:
             Heap used / total = {{ humanizePercentage $value }}.
             Node.js may GC more aggressively or OOM soon.
 
+      # High request rate — more than 500 req/sec
+      - alert: LKVIPHighRequestRate
+        expr: rate(lkvip_requests_total[1m]) > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LKVIP API is receiving unusually high traffic"
+          description: >
+            Request rate is {{ humanize $value }} req/sec (threshold: 500/sec).
+            Possible DDoS or traffic spike — check Nginx rate limit logs.
+
   # ── VPS Host Alerts (Node Exporter) ─────────────────────────────────────────
   - name: vps_host
     rules:
@@ -92,7 +104,21 @@ groups:
           summary: "Low disk space on VPS root partition"
           description: >
             Only {{ humanizePercentage $value }} disk space remaining on /.
-            Clean up logs or backups: /var/backups/lkvip-db, /var/log/pm2/
+            Clean up logs or backups: /var/LKVIP/data/logs/, pm2 flush
+
+      # Critical disk space (< 5% — imminent failure)
+      - alert: DiskSpaceCritical
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint="/"} /
+           node_filesystem_size_bytes{mountpoint="/"}) * 100 < 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Disk space near full on VPS root partition"
+          description: >
+            Only {{ humanizePercentage $value }} disk space remaining on /.
+            Immediate action required — server may stop functioning.
 
       # High CPU load (> 85% for 15 minutes)
       - alert: HighCPULoad
@@ -106,3 +132,47 @@ groups:
           description: >
             CPU usage is above 85% for 15 minutes.
             Check: top, htop, or pm2 monit
+
+      # High memory usage (> 90% of total RAM)
+      - alert: HighMemoryUsage
+        expr: >
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on VPS"
+          description: >
+            Memory usage is above 90% for 10 minutes.
+            Available: {{ humanizeSI node_memory_MemAvailable_bytes }}B.
+            Check: pm2 status, consider pm2 reload lkvip-api
+
+  # ── Database Alerts (MySQL Exporter) ─────────────────────────────────────────
+  - name: mysql
+    rules:
+
+      # MySQL is down
+      - alert: MySQLDown
+        expr: up{job="mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MySQL is DOWN"
+          description: >
+            MySQL exporter at localhost:9104 is not responding.
+            Check: systemctl status mysql
+
+      # Too many MySQL connections (> 80% of max_connections)
+      - alert: MySQLHighConnections
+        expr: >
+          mysql_global_status_threads_connected /
+          mysql_global_variables_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MySQL connection count above 80% of max_connections"
+          description: >
+            {{ humanizePercentage $value }} of max_connections in use.
+            Consider increasing max_connections or checking for connection leaks.

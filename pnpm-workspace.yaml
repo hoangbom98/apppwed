@@ -3,6 +3,10 @@ packages:
   - "apps/*"
   - "apps/core-apps/*"
   - "packages/*"
+  # New SPAs — Trade module extensions
+  - "apps/banking"
+  - "apps/invest"
+  - "apps/crypto"
   
   # Các dự án từ nurmandev
   - "apps/external/prodevs"

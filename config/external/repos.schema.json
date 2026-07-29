@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lkvip.dev/config/external/repos.schema.json",
+  "title": "LKVIP External Repos Registry",
+  "description": "Defines external reference repositories mirrored under apps/external/",
+  "type": "object",
+  "required": ["version", "source", "mirrorRoot", "repositories"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "integer",
+      "description": "Schema version"
+    },
+    "source": {
+      "type": "string",
+      "description": "GitHub base URL of the source org/user"
+    },
+    "mirrorRoot": {
+      "type": "string",
+      "description": "Relative path in monorepo where repos are cloned"
+    },
+    "workspaceEligibleByDefault": {
+      "type": "boolean",
+      "description": "Whether repos are included in pnpm workspace by default"
+    },
+    "repositories": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Repository" }
+    }
+  },
+  "definitions": {
+    "Repository": {
+      "type": "object",
+      "required": ["id", "sourceRepo", "destination", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (kebab-case)"
+        },
+        "sourceRepo": {
+          "type": "string",
+          "description": "Repository name on the source host"
+        },
+        "destination": {
+          "type": "string",
+          "description": "Directory name under mirrorRoot"
+        },
+        "commitSha": {
+          "type": ["string", "null"],
+          "description": "Pinned commit SHA (null if not cloned)"
+        },
+        "subprojects": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Subproject" }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "reference-only",
+            "blocked-secret",
+            "unsupported-toolchain",
+            "missing-clone",
+            "active"
+          ],
+          "description": "Integration status of this repo"
+        },
+        "workspaceEligible": {
+          "type": "boolean",
+          "description": "Whether this repo is included in pnpm workspace"
+        },
+        "deployable": {
+          "type": "boolean",
+          "description": "Whether this repo can be deployed as part of LKVIP platform"
+        },
+        "ports": {
+          "type": "string",
+          "description": "Ports exposed by this service (or 'unknown')"
+        },
+        "healthcheck": {
+          "type": "string",
+          "description": "Health check endpoint or 'unknown'"
+        },
+        "envFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of .env example files in the repo"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Subproject": {
+      "type": "object",
+      "required": ["path", "kind"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Relative path within the repository"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "node-api",
+            "node-frontend",
+            "node-realtime",
+            "node-library",
+            "node-cli",
+            "vite-frontend",
+            "cra-frontend",
+            "next-frontend",
+            "nestjs-api",
+            "firebase-functions",
+            "react-native",
+            "java",
+            "android",
+            "node-api-or-admin"
+          ],
+          "description": "Type of subproject"
+        },
+        "packageManager": {
+          "type": "string",
+          "enum": ["npm", "yarn", "pnpm"],
+          "description": "Package manager used"
+        },
+        "buildTool": {
+          "type": "string",
+          "enum": ["maven", "gradle"],
+          "description": "Build tool for Java projects"
+        },
+        "scripts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relevant npm/yarn scripts"
+        },
+        "files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Key build files (e.g. pom.xml, build.gradle.kts)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

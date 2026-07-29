@@ -1,11 +1,12 @@
 // @ts-nocheck
 'use strict';
 /**
- * Storage Adapter — abstraction for local filesystem vs S3-compatible storage.
+ * Storage Adapter — abstraction for local filesystem, S3-compatible, or Supabase Storage.
  *
  * Config:
- *   STORAGE_PROVIDER=local  — local filesystem (default, current behavior)
- *   STORAGE_PROVIDER=s3     — AWS S3 / Cloudflare R2 / MinIO
+ *   STORAGE_PROVIDER=local     — local filesystem (default)
+ *   STORAGE_PROVIDER=s3        — AWS S3 / Cloudflare R2 / MinIO
+ *   STORAGE_PROVIDER=supabase  — Supabase Storage
  *
  * S3 env vars (required when STORAGE_PROVIDER=s3):
  *   S3_BUCKET         — bucket name
@@ -14,6 +15,11 @@
  *   S3_SECRET_KEY     — secret access key
  *   S3_ENDPOINT       — optional: custom endpoint (Cloudflare R2, MinIO)
  *   CDN_BASE_URL      — public URL prefix for uploaded files
+ *
+ * Supabase env vars (required when STORAGE_PROVIDER=supabase):
+ *   SUPABASE_URL               — Project URL from Supabase dashboard
+ *   SUPABASE_SERVICE_ROLE_KEY  — service_role key (server-only, bypasses RLS)
+ *   SUPABASE_STORAGE_BUCKET    — bucket name (default: lkvip-uploads)
  */
 
 const path   = require('path');
@@ -129,13 +135,69 @@ const S3Adapter = (() => {
   };
 })();
 
+// ── Supabase Storage adapter ───────────────────────────────────────────────────
+const SupabaseAdapter = (() => {
+  let _client = null;
+  let _bucket  = null;
+
+  const getClient = () => {
+    if (_client) return { client: _client, bucket: _bucket };
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      _bucket = process.env.SUPABASE_STORAGE_BUCKET || 'lkvip-uploads';
+      _client = createClient(
+        process.env.SUPABASE_URL || '',
+        process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
+    } catch {
+      logger.error('[Storage:Supabase] @supabase/supabase-js not installed. Run: pnpm add @supabase/supabase-js');
+    }
+    return { client: _client, bucket: _bucket };
+  };
+
+  return {
+    async upload(buffer, relativePath, contentType = 'application/octet-stream') {
+      const { client, bucket } = getClient();
+      if (!client) throw new Error('Supabase adapter not available — install @supabase/supabase-js');
+      const { error } = await client.storage
+        .from(bucket)
+        .upload(relativePath, buffer, { contentType, upsert: true });
+      if (error) throw new Error(`[Storage:Supabase] upload failed: ${error.message}`);
+      const { data } = client.storage.from(bucket).getPublicUrl(relativePath);
+      return data.publicUrl;
+    },
+
+    async delete(publicUrlOrKey) {
+      const { client, bucket } = getClient();
+      if (!client) return;
+      // Strip the public URL prefix to get the storage path
+      const { data: urlData } = client.storage.from(bucket).getPublicUrl('');
+      const prefix = urlData.publicUrl.replace(/\/$/, '');
+      const key = publicUrlOrKey.startsWith(prefix)
+        ? publicUrlOrKey.slice(prefix.length + 1)
+        : publicUrlOrKey.replace(/^\//, '');
+      const { error } = await client.storage.from(bucket).remove([key]);
+      if (error) logger.warn(`[Storage:Supabase] delete failed: ${error.message}`);
+    },
+
+    getUrl(relativePath) {
+      const { client, bucket } = getClient();
+      if (!client) return `/${relativePath}`;
+      const { data } = client.storage.from(bucket).getPublicUrl(relativePath);
+      return data.publicUrl;
+    },
+  };
+})();
+
 // ── Factory ────────────────────────────────────────────────────────────────────
 function getStorageAdapter() {
-  if (PROVIDER === 's3') return S3Adapter;
+  if (PROVIDER === 's3')       return S3Adapter;
+  if (PROVIDER === 'supabase') return SupabaseAdapter;
   if (PROVIDER !== 'local') {
     logger.warn(`[Storage] Unknown STORAGE_PROVIDER="${PROVIDER}" — using local`);
   }
   return LocalAdapter;
 }
 
-module.exports = { getStorageAdapter, LocalAdapter, S3Adapter };
+module.exports = { getStorageAdapter, LocalAdapter, S3Adapter, SupabaseAdapter };

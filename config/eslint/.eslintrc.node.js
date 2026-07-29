@@ -1,16 +1,15 @@
 /**
  * .eslintrc.node.js — LKVIP GROUP
- * ─────────────────────────────────
- * Base ESLint config cho Node.js / CommonJS projects (backend).
- *
- * Khác với .eslintrc.base.js (React/TypeScript/browser):
- *   - Không dùng TypeScript parser (backend chủ yếu là .js CommonJS)
- *   - Không có React hooks plugin
- *   - Node environment thay vì browser
- *   - ecmaVersion 2021 (CommonJS compat)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Legacy (.eslintrc style) ESLint config cho Node.js / CommonJS backend.
+ * TypeScript backend dùng parser @typescript-eslint khi files là .ts.
  *
  * Usage — trong apps/backend/.eslintrc.js:
- *   module.exports = { extends: ['../../.eslintrc.node.js'], rules: { ... } }
+ *   module.exports = {
+ *     extends: ['../../config/eslint/.eslintrc.node.js'],
+ *     rules:   { ... project overrides ... }
+ *   }
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 'use strict';
@@ -18,31 +17,46 @@
 module.exports = {
   env: {
     node:   true,
-    es2021: true,
+    es2022: true,
   },
+
+  parser: '@typescript-eslint/parser',
 
   parserOptions: {
-    ecmaVersion: 2021,
-    sourceType:  'commonjs',
+    ecmaVersion: 2022,
+    sourceType:  'module',
   },
 
-  extends: ['eslint:recommended'],
+  plugins: ['@typescript-eslint'],
+
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
 
   rules: {
-    // ── Must-fix (always error) ─────────────────────────────────────────────
-    'no-var':       'error',
-    'prefer-const': 'error',
-    'eqeqeq':       ['error', 'always', { null: 'ignore' }],
-    'no-debugger':  'error',
+    // ── Must-fix (always error) ────────────────────────────────────────────
+    'no-var':               'error',
+    'prefer-const':         'error',
+    'eqeqeq':              ['error', 'always', { null: 'ignore' }],
+    'no-debugger':          'error',
     'no-duplicate-imports': 'error',
+    'no-shadow':            'warn',
 
-    // ── Error (enforced for code quality) ──────────────────────────────────
-    'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    // ── Console: backend cho phép .info() ─────────────────────────────────
     'no-console':     ['error', { allow: ['warn', 'error', 'info'] }],
-    'no-empty':       'error',
-    'no-extra-semi':  'error',
 
-    // ── Off — too noisy on existing patterns ────────────────────────────────
+    // ── Code quality ──────────────────────────────────────────────────────
+    'no-empty':      'error',
+    'no-extra-semi': 'error',
+
+    // ── TypeScript ────────────────────────────────────────────────────────
+    '@typescript-eslint/no-explicit-any':       'error',
+    '@typescript-eslint/no-unused-vars':        ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/ban-ts-comment':        'error',
+
+    // ── Off — too noisy on existing patterns ──────────────────────────────
     'no-prototype-builtins': 'off',
     'no-useless-escape':     'off',
   },

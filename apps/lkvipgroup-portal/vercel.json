@@ -1,0 +1,13 @@
+{
+  "buildCommand": "prisma generate --schema=prisma/schema.prisma && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["sin1"],
+  "env": {
+    "FORTRESS_DATABASE_URL": "@fortress_database_url",
+    "FORTRESS_DIRECT_URL": "@fortress_direct_url",
+    "ADMIN_EMAIL": "@admin_email",
+    "ADMIN_PASSWORD": "@admin_password"
+  }
+}

@@ -1,0 +1,38 @@
+@font-face {
+  font-family: 'Rency';
+  src: url('/Rency-Regular.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import "tailwindcss";
+
+@theme {
+  --color-fortress-navy: #07111D;
+  --color-fortress-deep: #0B1B2E;
+  --color-fortress-charcoal: #111827;
+  --color-fortress-gold: #C9A24A;
+  --color-fortress-champagne: #E6C879;
+  --color-fortress-ivory: #F4F1EA;
+  --color-fortress-silver: #AEB6C1;
+
+  --font-sans: "Rency", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Rency", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin gold section dividers */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,162,74,0.3), transparent);
+}

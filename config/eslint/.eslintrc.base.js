@@ -1,14 +1,13 @@
 /**
  * .eslintrc.base.js — LKVIP GROUP
- * ─────────────────────────────────
- * Base ESLint config shared by all sub-projects (React/TypeScript/browser).
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Base ESLint config LEGACY (.eslintrc style) — dùng cho backend Node.js/TS.
  *
- * Usage — in each package's eslint.config.js (flat config):
- *   import base from '../../.eslintrc.base.js';  // adjust relative path
- *   export default [...base, { ... project overrides ... }];
+ * Frontend SPAs dùng OXLint (config/oxlint.json), không dùng file này.
  *
- * Or for legacy .eslintrc.js (non-flat):
- *   module.exports = { extends: ['../../.eslintrc.base.js'], ... }
+ * Usage — trong apps/backend/.eslintrc.js:
+ *   module.exports = { extends: ['../../config/eslint/.eslintrc.base.js'] }
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 'use strict';
@@ -37,22 +36,23 @@ module.exports = {
   ],
 
   rules: {
-    // ── TypeScript ──────────────────────────────────────────────────────────
+    // ── TypeScript ─────────────────────────────────────────────────────────
     '@typescript-eslint/no-explicit-any':       'error',
     '@typescript-eslint/no-unused-vars':        ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/ban-ts-comment':        'error',
 
-    // ── React Hooks ─────────────────────────────────────────────────────────
+    // ── React Hooks (for Hub/Game/etc frontend if this base is reused) ─────
     'react-hooks/rules-of-hooks':  'error',
     'react-hooks/exhaustive-deps': 'warn',
 
-    // ── General ─────────────────────────────────────────────────────────────
-    'no-console':   ['warn', { allow: ['warn', 'error'] }],
-    'no-debugger':  'error',
+    // ── General ────────────────────────────────────────────────────────────
+    'no-console':           ['warn', { allow: ['warn', 'error'] }],
+    'no-debugger':          'error',
     'no-duplicate-imports': 'error',
-    'prefer-const': 'warn',
-    'eqeqeq':       ['error', 'always', { null: 'ignore' }],
+    'no-shadow':            'warn',
+    'prefer-const':         'warn',
+    'eqeqeq':               ['error', 'always', { null: 'ignore' }],
   },
 
   settings: {
@@ -63,8 +63,9 @@ module.exports = {
     'node_modules/',
     'dist/',
     'build/',
-    '*.min.js',
     'coverage/',
+    '*.min.js',
     '.prisma/',
+    '**/*.d.ts',
   ],
 };

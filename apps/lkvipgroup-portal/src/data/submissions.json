@@ -1,0 +1,41 @@
+[
+  {
+    "id": "s_1700000000001",
+    "firstName": "James",
+    "lastName": "Mitchell",
+    "email": "james@mitchellcapital.com",
+    "phone": "+44 7700 123456",
+    "company": "Mitchell Capital Partners",
+    "opportunityType": "investment",
+    "investmentRange": "5m-25m",
+    "message": "We have a compelling investment opportunity in the fintech space.",
+    "fileName": "pitch-deck-2026.pdf",
+    "createdAt": "2026-07-11T09:00:00.000Z"
+  },
+  {
+    "id": "s_1700000000002",
+    "firstName": "Lisa",
+    "lastName": "Chen",
+    "email": "lisa@chenholdings.com",
+    "phone": "+65 9123 4567",
+    "company": "Chen Holdings Pte Ltd",
+    "opportunityType": "joint-venture",
+    "investmentRange": "1m-5m",
+    "message": "Proposing a JV for a logistics and distribution center in Dubai South.",
+    "fileName": "",
+    "createdAt": "2026-07-09T11:30:00.000Z"
+  },
+  {
+    "id": "s_1700000000003",
+    "firstName": "Omar",
+    "lastName": "Al Rashid",
+    "email": "omar@alrashidgroup.com",
+    "phone": "+971 55 555 5555",
+    "company": "Al Rashid Group",
+    "opportunityType": "partnership",
+    "investmentRange": "25m-100m",
+    "message": "Seeking a strategic partnership to co-invest in large-scale real estate developments.",
+    "fileName": "partnership-proposal.docx",
+    "createdAt": "2026-07-06T13:20:00.000Z"
+  }
+]

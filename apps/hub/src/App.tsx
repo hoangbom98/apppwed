@@ -57,6 +57,7 @@ const AboutPage      = lazy(() => import('@/pages/AboutPage'));
 const PolicyPage     = lazy(() => import('@/pages/PolicyPage'));
 const FaqPage        = lazy(() => import('@/pages/FaqPage'));
 const FavoritesPage  = lazy(() => import('@/pages/FavoritesPage'));
+const AcademyPage    = lazy(() => import('@/pages/AcademyPage'));
 
 function Loading() {
   return (
@@ -94,6 +95,7 @@ export default function App() {
           <Route path="policy"      element={<PolicyPage />} />
           <Route path="faq"         element={<FaqPage />} />
           <Route path="favorites"   element={<FavoritesPage />} />
+          <Route path="academy"     element={<AcademyPage />} />
           <Route path="*"           element={<NotFoundPage />} />
         </Route>
 

@@ -1,6 +1,7 @@
 import { Worker, Queue } from 'bullmq';
 import { redis } from '../../utils/redis';
 import { logger } from '../../shared/logger';
+import { Decimal } from '@lkvip/utils';
 
 const { getPrismaClient } = require('../../config/databases');
 const WalletService = require('../../shared/services/walletService');
@@ -16,40 +17,49 @@ export const interestPayoutQueue = new Queue('interest-payout', {
 export const interestPayoutWorker = new Worker(
   'interest-payout',
   async (job) => {
-    const { payoutId, type } = job.data; // type: 'normal' | 'mall'
+    const { payoutId, type } = job.data;
 
     await prisma.$transaction(async (tx: any) => {
       // 1. Lấy dữ liệu và khóa row (SELECT FOR UPDATE)
-      const payout = type === 'normal'
-        ? await tx.lcInvestList.findUnique({ where: { id: payoutId } })
-        : await tx.lcMallInvestList.findUnique({ where: { id: payoutId } });
+      let payout;
+      if (type === 'normal') {
+          payout = await tx.lcInvestList.findUnique({ where: { id: payoutId } });
+      } else {
+          payout = await tx.lcMallInvestList.findUnique({ where: { id: payoutId } });
+      }
 
       if (!payout || payout.status !== 0) return;
 
-      // 2. Cập nhật status
+      // Lock row
+      if (type === 'normal') {
+          await tx.lcInvestList.update({ where: { id: payoutId }, data: { status: 1 } });
+      } else {
+          await tx.lcMallInvestList.update({ where: { id: payoutId }, data: { status: 1 } });
+      }
+
+      // 2. Cộng tiền với Decimal.js
+      const pay1 = new Decimal(payout.pay1);
+      
+      if (pay1.gt(0)) {
+          if (type === 'normal') {
+            await walletService.credit(tx, payout.uid, pay1.toNumber(), 'interest', `payout_${payoutId}`);
+          } else {
+            // Xử lý Mall
+            await walletService.credit(tx, payout.uid, pay1.toNumber(), 'interest_mall', `mall_payout_${payoutId}`);
+          }
+      }
+      
+      // 3. Finalize update
       if (type === 'normal') {
         await tx.lcInvestList.update({
           where: { id: payoutId },
-          data: { status: 1, time2: new Date(), pay2: payout.pay1 }
+          data: { time2: new Date(), pay2: pay1.toNumber() }
         });
-
-        // 3. Cộng tiền
-        if (payout.pay1 > 0) {
-          await walletService.credit(tx, payout.uid, payout.pay1, 'interest', `payout_${payoutId}`);
-        }
       } else {
         await tx.lcMallInvestList.update({
           where: { id: payoutId },
-          data: { status: 1, time2: new Date(), pay2: payout.pay1 }
+          data: { time2: new Date(), pay2: pay1.toNumber() }
         });
-
-        // Xử lý Mall (BTC/Conversion)
-        if (payout.pay1 > 0) {
-          // TODO: Lấy tỷ giá BTC và convert pay1 (VND) → BTC trước khi credit
-          // Implement: const btcRate = await getBTCRate() — nên cache tỷ giá 5 phút trong Redis
-          // Xem: src/shared/services/finance/currencyService.ts để tích hợp
-          await walletService.credit(tx, payout.uid, payout.pay1, 'interest_mall', `mall_payout_${payoutId}`);
-        }
       }
     });
 
@@ -57,16 +67,3 @@ export const interestPayoutWorker = new Worker(
   },
   { connection: redis, concurrency: 3 }
 );
-
-// Schedule: quét các gói cần trả lãi
-setInterval(async () => {
-  const now = Math.floor(Date.now() / 1000);
-
-  // Quét normal
-  const normal = await prisma.lcInvestList.findMany({ where: { status: 0, time1: { lte: new Date(now * 1000) } } });
-  for (const item of normal) await interestPayoutQueue.add('payout', { payoutId: item.id, type: 'normal' });
-
-  // Quét mall
-  const mall = await prisma.lcMallInvestList.findMany({ where: { status: 0, time1: { lte: new Date(now * 1000) } } });
-  for (const item of mall) await interestPayoutQueue.add('payout', { payoutId: item.id, type: 'mall' });
-}, 60000); // 1 phút/lần
