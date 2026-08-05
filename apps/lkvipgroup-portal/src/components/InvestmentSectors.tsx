@@ -80,7 +80,7 @@ export default function InvestmentSectors() {
                     />
                   </motion.div>
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-fortress-navy via-fortress-navy/80 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-90" />
-                  
+
                   <motion.div
                     className="relative z-20"
                     whileHover={{ y: -4 }}

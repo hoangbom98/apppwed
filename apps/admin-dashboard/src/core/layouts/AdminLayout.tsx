@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/layouts/AdminLayout.tsx
 // Full sidebar + header layout for the admin panel.
 // Menu is driven entirely by the Module Registry — no hard-coded NAV_GROUPS.
 // To add a new sub-project: create modules/newproject/index.ts and call registerModule().
@@ -22,6 +21,8 @@ import '@admin/modules/hub/index';
 import '@admin/modules/ops/index';
 import '@admin/modules/settings/index';
 import '@admin/modules/finance/index';
+import '@admin/modules/social/index';
+import '@admin/modules/prodevs/index';
 
 import { getVisibleMenuGroups, type MenuGroup } from '@admin/modules/registry';
 

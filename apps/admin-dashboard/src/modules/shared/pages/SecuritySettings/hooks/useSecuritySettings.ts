@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useSecuritySettings.js
  * Custom hook — loads, caches, and saves security settings.

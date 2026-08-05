@@ -1,9 +1,7 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/index.ts
-// Settings module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';
 import {
   Settings2, PlugZap, Bell, Clock4, ToggleLeft, Layers, Send, Bot,
+  Flag, Headphones,
 } from 'lucide-react';
 
 registerModule({
@@ -20,6 +18,8 @@ registerModule({
         { to: '/settings/notification-tpl',   icon: Bell,       label: 'Template thông báo' },
         { to: '/settings/cron-jobs',          icon: Clock4,     label: 'Cron Jobs' },
         { to: '/settings/widgets',            icon: ToggleLeft, label: 'Widgets & Addons' },
+        { to: '/settings/feature-flags',      icon: Flag,       label: 'Feature Flags' },
+        { to: '/settings/cskh',               icon: Headphones, label: 'CSKH Editor' },
       ],
     },
     {

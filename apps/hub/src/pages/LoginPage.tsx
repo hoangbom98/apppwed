@@ -92,8 +92,9 @@ export default function LoginPage() {
       setAuth(d.data?.user ?? d.user, d.data?.access_token ?? d.access_token, d.data?.refresh_token ?? d.refresh_token);
       toast.success('Đăng nhập thành công!');
       navigate(redirect);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Email hoặc mật khẩu không đúng');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error?.response?.data?.message || 'Email hoặc mật khẩu không đúng');
     } finally {
       setLoading(false);
     }

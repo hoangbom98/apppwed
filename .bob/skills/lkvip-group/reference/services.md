@@ -1,4 +1,4 @@
-# Service Layer Patterns — LKVIP Group
+# Service Layer Patterns & Background Workers — LKVIP Group
 
 ## AuthService
 
@@ -115,35 +115,58 @@ Workers live in `src/modules/workers/`. Each file is a self-contained BullMQ wor
 | `fraud-auto.worker.ts` | Risk event bus | Auto-flag / suspend fraudulent accounts |
 | `interest-payout.worker.ts` | Cron: daily | Pay interest on savings vault holdings |
 | `savingsVault-interest.worker.ts` | Cron | Compound interest for savings vault |
+| `telegram-bot.worker.ts` | Queue / events | Send Telegram notifications and alert messages |
 | `ticket-auto.worker.ts` | Ticket events | Auto-respond / route support tickets |
 | `health-monitor.worker.ts` | Cron | Check DB/Redis/queue health, alert on failure |
 | `lkvip-webhook-retry.worker.ts` | Failed webhook queue | Retry failed outbound webhook calls |
 | `test.worker.ts` | Manual trigger | Development/testing only |
 
-## Shared Services (44 services in `src/shared/services/`)
+## Shared Services (`src/shared/services/`)
 
-Key services available across all modules:
+Key services available across all modules. File layout: top-level files + subdirs `aggregators/`, `ai/`, `analytics/`, `auth/`, `communication/`, `content/`, `core/`, `finance/`, `support/`, `user/`.
 
-| Service | Purpose |
+| Service file | Purpose |
 |---|---|
-| `authService` | Registration, login, JWT, 2FA |
-| `walletService` | Balance CRUD, credit/debit, transfer |
-| `paymentService` | Deposit/withdraw orchestration |
-| `ledgerService` | Immutable transaction ledger |
-| `transactionService` | Transaction history, search |
-| `settlementService` | Game/lottery settlement |
-| `rebateService` | Rebate calculation and payout |
-| `loyaltyService` | Loyalty points management |
-| `vipEngineService` | VIP tier upgrades and benefits |
-| `referralService` | Referral chain, commission distribution |
-| `notificationService` | In-app, push, email, SMS notifications |
-| `cacheService` | Redis cache abstraction |
-| `configService` | Dynamic system config from DB |
-| `kycService` | KYC verification flow |
-| `twoFactorService` | TOTP 2FA setup and verification |
-| `uploadService` | File upload (local or S3) via `storageAdapter` |
-| `aiService` | DeepSeek/OpenAI translation and AI tasks |
-| `analyticsService` | Business analytics and reporting |
-| `auditService` | Admin action audit trail |
-| `riskService` / `riskCheck.service` | Risk scoring, AML, compliance checks |
-| `whiteLabelService` | Multi-brand / white-label support |
+| `authService.ts` | Registration, login, JWT, 2FA |
+| `walletService.ts` | Balance CRUD, credit/debit, transfer |
+| `paymentService.ts` | Deposit/withdraw orchestration |
+| `ledgerService.ts` | Immutable transaction ledger |
+| `transactionService.ts` | Transaction history, search |
+| `settlementService.ts` | Game/lottery settlement |
+| `rebateService.ts` | Rebate calculation and payout |
+| `loyaltyService.ts` | Loyalty points management |
+| `vipEngineService.ts` | VIP tier upgrades and benefits |
+| `referralService.ts` | Referral chain, commission distribution |
+| `notificationService.ts` | In-app, push, email, SMS notifications |
+| `pushService.ts` | Firebase push notifications (VAPID) |
+| `emailService.ts` | Transactional email (SMTP / Google) |
+| `smsService.ts` | SMS delivery (Twilio or provider) |
+| `telegramAlertService.ts` | Telegram alerts to admin channels |
+| `cacheService.ts` | Redis cache abstraction |
+| `configService.ts` | Dynamic system config from DB |
+| `kycService.ts` | KYC verification flow |
+| `twoFactorService.ts` | TOTP 2FA setup and verification |
+| `uploadService.ts` | File upload (local or S3) via `storageAdapter` |
+| `storageAdapter.ts` | Storage backend abstraction (local / S3 / Supabase Storage) |
+| `aiService.ts` | DeepSeek / OpenAI / Groq AI tasks |
+| `translationService.ts` | Google Translate / i18n text translation |
+| `analyticsService.ts` | Business analytics and reporting |
+| `auditService.ts` / `auditLogger.service.ts` | Admin action audit trail |
+| `riskService.ts` / `riskCheck.service.ts` | Risk scoring, AML, compliance checks |
+| `whiteLabelService.ts` | Multi-brand / white-label support |
+| `supportService.ts` / `supportChatService.ts` | Live chat and ticket management |
+| `ticketService.ts` | Support ticket CRUD |
+| `cmsService.ts` | CMS articles, banners, announcements |
+| `bannerService.ts` | Banner CRUD across projects |
+| `avatarService.ts` | User avatar upload & resize (Dicebear fallback) |
+| `sessionService.ts` | User session tracking |
+| `currencyService.ts` | Currency conversion utilities |
+| `emailGuardService.ts` | Disposable email detection (HIBP) |
+| `ipGuardService.ts` | IP reputation / AbuseIPDB blocking |
+| `contentModerationService.ts` | AI-assisted content moderation (Perspective API) |
+| `exportService.ts` | CSV/Excel export of reports |
+| `archiveService.ts` | Data archiving for old records (S3/R2) |
+| `taskService.ts` | Internal task/job scheduling helpers |
+| `socketService.ts` | Socket.IO room/event helpers |
+| `queueService.ts` | BullMQ queue management helpers |
+| `supabaseClient.ts` | Supabase admin client (for external app operations) |

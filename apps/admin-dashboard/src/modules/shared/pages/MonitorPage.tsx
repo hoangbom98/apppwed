@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/MonitorPage.jsx
 // Realtime Monitor — live alerts, admin activity logs, online stats, system health.
 // Route: /monitor
 import React, { useState, useEffect } from 'react';

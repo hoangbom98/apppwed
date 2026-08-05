@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * ProjectConfigPanel.jsx — antd version
  * Reusable admin panel for per-project dynamic config.

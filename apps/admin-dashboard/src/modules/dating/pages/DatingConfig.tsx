@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * code/frontend/admin-dashboard/src/modules/dating/pages/DatingConfig.jsx
  *

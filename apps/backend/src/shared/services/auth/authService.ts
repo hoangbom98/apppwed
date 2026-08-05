@@ -271,3 +271,108 @@ export class AuthService {
 }
 
 export default AuthService;
+
+// ── Device / Session utilities (migrated from landing server) ─────────────────
+
+/**
+ * Parse request headers to extract a human-readable device description and IP.
+ * Falls back gracefully when ua-parser-js is not installed (optional dependency).
+ *
+ * @param req  Express Request object
+ * @returns    { deviceName: string, ip: string, userAgent: string }
+ */
+export function getDeviceInfo(req: any): { deviceName: string; ip: string; userAgent: string } {
+  const ua  = req.headers['user-agent'] || '';
+  const ip  = (
+    (req.headers['x-forwarded-for'] as string || '').split(',')[0].trim() ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  );
+
+  let deviceName = 'Unknown Device';
+  try {
+    // ua-parser-js is optional — install separately if needed
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { UAParser } = require('ua-parser-js');
+    const parser = new UAParser(ua);
+    const { browser, os, device } = parser.getResult();
+    const parts = [
+      device.vendor, device.model,
+      os.name, os.version,
+      browser.name ? `(${browser.name})` : '',
+    ].filter(Boolean);
+    deviceName = parts.join(' ') || 'Unknown Device';
+  } catch {
+    // ua-parser-js not installed — use a simple raw UA excerpt
+    deviceName = ua.slice(0, 80) || 'Unknown Device';
+  }
+
+  return { deviceName, ip, userAgent: ua };
+}
+
+/**
+ * Check whether an account is locked due to too many failed login attempts.
+ * Mirrors the lockout logic from landing server (5 attempts → 30-min lock).
+ *
+ * @param user  User object with `failedLoginAttempts` and `lockUntil` fields.
+ *              These fields are optional — the function is a no-op if absent.
+ * @returns     `{ locked: boolean, unlocksAt: Date | null }`
+ */
+export function getAccountLockStatus(user: any): { locked: boolean; unlocksAt: Date | null } {
+  if (!user) return { locked: false, unlocksAt: null };
+
+  // Support both admin_db field name (lockedUntil) and legacy alias (lockUntil)
+  const rawLock = user.lockedUntil ?? user.lockUntil ?? null;
+  const lockUntil = rawLock ? new Date(rawLock) : null;
+  if (lockUntil && lockUntil > new Date()) {
+    return { locked: true, unlocksAt: lockUntil };
+  }
+  return { locked: false, unlocksAt: null };
+}
+
+/**
+ * Increment failedLoginAttempts on a prisma user record.
+ * Locks the account for 30 minutes after `maxAttempts` (default 5).
+ *
+ * @param prisma        Prisma client instance
+ * @param userId        User ID to update
+ * @param maxAttempts   Max failures before lock (default 5)
+ * @returns             Updated `{ failedLoginAttempts, lockUntil }` fields
+ */
+export async function recordFailedLogin(
+  prisma: any,
+  userId: string | number,
+  maxAttempts = 5,
+): Promise<{ loginAttempts: number; lockedUntil: Date | null }> {
+  const user = await prisma.user.findUnique({
+    where:  { id: userId },
+    select: { loginAttempts: true },
+  });
+
+  const attempts    = ((user?.loginAttempts) || 0) + 1;
+  const lockedUntil = attempts >= maxAttempts
+    ? new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
+    : null;
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data:  { loginAttempts: attempts, lockedUntil },
+    select: { loginAttempts: true, lockedUntil: true },
+  });
+
+  return updated;
+}
+
+/**
+ * Reset loginAttempts and lockedUntil after a successful login.
+ * Matches admin_db User schema field names.
+ *
+ * @param prisma    Prisma client instance (admin project)
+ * @param userId    User ID to reset
+ */
+export async function resetFailedLogin(prisma: any, userId: string | number): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data:  { loginAttempts: 0, lockedUntil: null },
+  });
+}

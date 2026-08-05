@@ -1,15 +1,11 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/ops/pages/ReportsPage.jsx
-// View historical daily reports + trigger new ones + cash flow forecast
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Button, Card, Alert, App, Typography, Row, Col, Statistic } from 'antd';
 import { ReloadOutlined, RiseOutlined } from '@ant-design/icons';
 import { opsApi } from '../api';
+import { fmtNum as fmt, fmtVND as fmtM } from '@admin/modules/shared/utils/formatters';
 
 const { Title, Text } = Typography;
-const fmt  = n => Number(n || 0).toLocaleString('vi-VN');
-const fmtM = n => `${fmt(n)}đ`;
 
 // Simple SVG bar chart (no external dep)
 function ForecastChart({ data }) {

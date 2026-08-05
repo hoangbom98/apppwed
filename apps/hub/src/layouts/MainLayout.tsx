@@ -44,6 +44,10 @@ const FOOTER_PARTNERS = [
   { name: 'C168',    img: '/assets/alliance/c168.png' },
 ];
 
+// antd-mini: active class pattern — use CSS token .hub-nav-link--active
+const navCls = ({ isActive }: { isActive: boolean }) =>
+  `hub-nav-link${isActive ? ' hub-nav-link--active' : ''}`;
+
 export default function MainLayout() {
   const { user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -55,12 +59,12 @@ export default function MainLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // ── antd-mini ConfigProvider pattern: load server colours → CSS vars ──
-  const { data: brand }   = useAppConfig('brand')   as { data: any };
-  const { data: colors }  = useAppConfig('colors')  as { data: any };
-  const { data: social }  = useAppConfig('social')  as { data: any };
-  const { data: feature } = useAppConfig('feature') as { data: any };
+  const { data: brand }   = useAppConfig('brand')   as { data: unknown };
+  const { data: colors }  = useAppConfig('colors')  as { data: unknown };
+  const { data: social }  = useAppConfig('social')  as { data: unknown };
+  const { data: feature } = useAppConfig('feature') as { data: unknown };
 
-  useEffect(() => { applyColorConfig(colors); }, [colors]);
+  useEffect(() => { applyColorConfig(colors as Record<string, unknown>); }, [colors]);
 
   // ── Close menus on outside click ─────────────────────────────────────
   useEffect(() => {
@@ -73,23 +77,19 @@ export default function MainLayout() {
     return () => document.removeEventListener('mousedown', close);
   }, [userMenuOpen]);
 
-  const siteName   = brand?.site_name    ?? 'LKVIP Hub';
-  const logoUrl    = brand?.logo_url     ?? '/assets/gif/header-logo.gif';
-  const copyright  = brand?.copyright_text ?? `© ${new Date().getFullYear()} LKVIP Hub`;
-  const fbUrl      = social?.facebook_url   ?? '';
-  const tgUrl      = social?.telegram_url   ?? '';
-  const hotline    = social?.hotline         ?? '';
-  const showDl     = feature?.download_app_enabled !== false;
+  const siteName   = (brand as { site_name?: string })?.site_name    ?? 'LKVIP Hub';
+  const logoUrl    = (brand as { logo_url?: string })?.logo_url     ?? '/assets/gif/header-logo.gif';
+  const copyright  = (brand as { copyright_text?: string })?.copyright_text ?? `© ${new Date().getFullYear()} LKVIP Hub`;
+  const fbUrl      = (social as { facebook_url?: string })?.facebook_url   ?? '';
+  const tgUrl      = (social as { telegram_url?: string })?.telegram_url   ?? '';
+  const hotline    = (social as { hotline?: string })?.hotline         ?? '';
+  const showDl     = (feature as { download_app_enabled?: boolean })?.download_app_enabled !== false;
 
   const handleLogout = () => {
     clearAuth();
     setUserMenuOpen(false);
     navigate('/login');
   };
-
-  // antd-mini: active class pattern — use CSS token .hub-nav-link--active
-  const navCls = ({ isActive }: { isActive: boolean }) =>
-    `hub-nav-link${isActive ? ' hub-nav-link--active' : ''}`;
 
   return (
     <div className="hub-root">
@@ -166,7 +166,7 @@ export default function MainLayout() {
               >
                 {/* antd-mini: avatar circle with primary colour */}
                 <span className="hub-avatar">
-                  {user.username[0]?.toUpperCase()}
+                  {user.username?.[0]?.toUpperCase()}
                 </span>
               </button>
 

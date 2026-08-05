@@ -1,0 +1,36 @@
+{
+  /**
+   * tsconfig.nextjs.json — LKVIP GROUP
+   * ─────────────────────────────────────────────────────────────────────────
+   * Base TypeScript config dùng chung cho các Next.js App Router apps:
+   *   - apps/academy
+   *   - apps/invest
+   *   - apps/lkvip-store
+   *
+   * Mỗi app chỉ cần khai báo thêm:
+   *   - baseUrl, paths (alias @/ → src/, @ui → packages/ui, v.v.)
+   *   - include (next-env.d.ts, src/, app/)
+   *   - plugins: [{ "name": "next" }]
+   *
+   * KHÔNG dùng cho: Vite SPAs (dùng tsconfig.frontend.base.json)
+   * KHÔNG dùng cho: backend / packages (dùng tsconfig.base.json)
+   * ─────────────────────────────────────────────────────────────────────────
+   */
+  "compilerOptions": {
+    "target":             "ES2017",
+    "lib":                ["dom", "dom.iterable", "esnext"],
+    "allowJs":            true,
+    "skipLibCheck":       true,
+    "strict":             true,
+    "noEmit":             true,
+    "esModuleInterop":    true,
+    "module":             "esnext",
+    "moduleResolution":   "bundler",
+    "resolveJsonModule":  true,
+    "isolatedModules":    true,
+    "jsx":                "preserve",
+    "incremental":        true,
+    "ignoreDeprecations": "6.0",
+    "types":              ["node"]
+  }
+}

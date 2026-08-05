@@ -2,7 +2,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { Button, message, Tag, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import * as hubApi from '@/modules/hub/api';
+import * as hubApi from '../api';
 
 export default function AdminAcademyCoursesPage() {
   const { data, isLoading, refetch } = useQuery({

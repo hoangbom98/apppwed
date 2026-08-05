@@ -15,11 +15,11 @@ export default function DownloadPage() {
       androidUrl="https://play.google.com/store/apps/details?id=com.lkvip.gamex"
       apkUrl={
         (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_APK
-        || 'https://yourdomain.com/downloads/gamex.apk'
+        || 'https://tc-gaming.live/downloads/gamex.apk'
       }
       iosUrl={
         (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_IOS
-        || 'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/gamex.plist'
+        || 'itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/gamex.plist'
       }
       config={{
         primaryColor:   '#194C38',

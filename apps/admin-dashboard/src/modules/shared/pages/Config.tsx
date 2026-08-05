@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/Config.jsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Modal, Input, Typography, Button, App } from 'antd';

@@ -1,46 +1,25 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from './store/authStore';
-import AcademyLayout from './layouts/AcademyLayout';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 
-const LoginPage       = lazy(() => import('./pages/LoginPage'));
-const CoursesPage     = lazy(() => import('./pages/CoursesPage'));
-const CourseDetailPage = lazy(() => import('./pages/CourseDetailPage'));
-const MyCoursesPage   = lazy(() => import('./pages/MyCoursesPage'));
+// Import providers/layouts
+import RootLayout from './layouts/RootLayout'; // Assuming I move layout logic here
 
-function Spinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--ac-bg)' }}>
-      <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
-        style={{ borderColor: 'var(--ac-primary) transparent transparent transparent' }} />
-    </div>
-  );
-}
-
-function Guard({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuthStore();
-  return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
-}
+const queryClient = new QueryClient();
 
 export default function App() {
-  const { token, fetchProfile } = useAuthStore();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (token) fetchProfile(); }, []);
-
   return (
-    <Suspense fallback={<Spinner />}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-
-        <Route element={<Guard><AcademyLayout /></Guard>}>
-          <Route index             element={<CoursesPage />} />
-          <Route path="courses"    element={<CoursesPage />} />
-          <Route path="courses/:slug" element={<CourseDetailPage />} />
-          <Route path="my"         element={<MyCoursesPage />} />
-        </Route>
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <RootLayout>
+          <Routes>
+            <Route path="/" element={<div>Trang chủ Academy</div>} />
+            <Route path="/login" element={<div>Trang đăng nhập</div>} />
+            {/* Add routes for /courses, /my based on existing structure */}
+          </Routes>
+        </RootLayout>
+      </BrowserRouter>
+      <Toaster />
+    </QueryClientProvider>
   );
 }

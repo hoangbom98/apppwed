@@ -10,7 +10,7 @@ for (const file of images) {
   const path = join(dir, file);
   const info = await sharp(path).metadata();
   const sizeMB = Math.round((await import('fs')).statSync(path).size / 1024 / 1024);
-  
+
   if (sizeMB <= 2) {
     console.log(`Skip ${file} (${sizeMB}MB) - already small`);
     continue;

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/IntegrationSettings.jsx
 // Route: /settings/integrations
 // Cấu hình tập trung: API tích hợp, bảo mật, tính năng — lưu thẳng vào DB, không cần restart.
 import React from 'react';

@@ -15,6 +15,7 @@ export const getPage         = (slug: string)     => api.get(`/hub/pages/${slug}
 export const getBanners      = (p: object)  => api.get('/hub/banners', { params: p });
 export const getMenu         = (location: string) => api.get(`/hub/menus/${location}`);
 export const search          = (q: string)        => api.get('/hub/search', { params: { q } });
+export const getCourses        = (p: object)  => api.get('/hub/courses', { params: p });
 export const submitFeedback  = (body: object)     => api.post('/hub/feedback', body);
 
 /* ── Auth ─────────────────────────────────── */

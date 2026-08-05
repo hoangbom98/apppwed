@@ -11,7 +11,7 @@ export const verifyOtp     = (phone: string, otp: string) => api.post('/dating/a
 export const login         = (data: LoginPayload) => api.post('/dating/auth/login', data).then(r => r.data);
 export const register      = (data: RegisterPayload) => api.post('/dating/auth/register', data).then(r => r.data);
 export const getProfile    = () => api.get('/dating/auth/me').then(r => r.data);
-export const updateProfile = (data: any) => api.put('/dating/auth/profile', data).then(r => r.data);
+export const updateProfile = (data: Partial<import('@lkvip/types').DatingUser>) => api.put('/dating/auth/profile', data).then(r => r.data);
 export const uploadAvatar  = (form: FormData) => api.post('/dating/auth/avatar', form, {
   headers: { 'Content-Type': 'multipart/form-data' }
 }).then(r => r.data);

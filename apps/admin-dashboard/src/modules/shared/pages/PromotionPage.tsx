@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/PromotionPage.jsx
 // Promotion management: list, create, edit, toggle status, participant view.
 // Route: /promotions
 import React, { useState } from 'react';

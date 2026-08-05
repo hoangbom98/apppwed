@@ -13,6 +13,6 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!body.content?.trim())
     return NextResponse.json({ error: "content is required" }, { status: 400 });
   const actorId   = typeof user.id === "number" ? user.id : undefined;
-  const comment   = db.addComment(Number(id), body.content, actorId, user.name);
+  const comment   = await db.addComment(Number(id), body.content, actorId, user.name);
   return NextResponse.json(comment, { status: 201 });
 }

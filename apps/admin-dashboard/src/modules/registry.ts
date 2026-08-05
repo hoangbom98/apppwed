@@ -1,8 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/registry.ts
-// Central Module Registry — each sub-project module self-registers here.
-// AdminLayout reads from `modules` instead of hard-coding NAV_GROUPS.
-// To add a new project: create modules/newproject/index.ts and call registerModule().
 import type { ComponentType } from 'react';
 
 // ── Types ──────────────────────────────────────────────────────────────────────

@@ -26,8 +26,8 @@ const TRADE_APP: Record<string, any> = {
   updatedAt:    'Tháng 7 năm 2026',
 
   // ── Download links ───────────────────────────────────────────────────
-  androidLink: 'https://yourdomain.com/downloads/tradepro.apk',
-  iosLink:     'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/tradepro-manifest.plist',
+  androidLink: 'https://tc-gaming.live/downloads/tradepro.apk',
+  iosLink:     'itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/tradepro-manifest.plist',
   qrCodeUrl:   '',
 
   // ── Feature badges ───────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getLiveMatches, getTodayMatches, getHighlights, getArticles, getStreams } from '../api/sports';
@@ -7,7 +7,7 @@ import HighlightCard from '../components/HighlightCard';
 import NewsCard from '../components/NewsCard';
 import { useAuthStore } from '../store/authStore';
 
-function Section({ title, to, children }: { title: string; to?: string; children: React.ReactNode }) {
+function Section({ title, to, children }: { title: string; to?: string; children: ReactNode }) {
   return (
     <section className="mb-4">
       <div className="flex items-center justify-between px-4 mb-2">

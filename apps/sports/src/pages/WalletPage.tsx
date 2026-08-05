@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { Link } from 'react-router-dom';

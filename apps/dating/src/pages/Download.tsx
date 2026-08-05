@@ -26,8 +26,8 @@ const DATING_APP: Record<string, any> = {
   updatedAt:    'Tháng 7 năm 2026',
 
   // ── Download links ───────────────────────────────────────────────────
-  androidLink: 'https://yourdomain.com/downloads/applive18.apk',
-  iosLink:     'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/applive18-manifest.plist',
+  androidLink: 'https://tc-gaming.live/downloads/applive18.apk',
+  iosLink:     'itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/applive18-manifest.plist',
   qrCodeUrl:   '',
 
   // ── Feature badges ───────────────────────────────────────────────────

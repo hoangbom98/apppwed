@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStreams } from '../api/sports';
 import { Link } from 'react-router-dom';
@@ -28,7 +27,7 @@ export default function StreamsPage() {
           <Link key={s.id} to={`/streams/${s.id}`} className="block">
             <div className="relative aspect-video bg-gray-700 rounded-xl overflow-hidden">
               {s.thumbnail
-                ? <img src={s.thumbnail} alt={s.title} className="w-full h-full object-cover" />
+                ? <img src={s.thumbnail} alt={s.title} className="w-full h-full object-cover" loading="lazy" width="320" height="180" />
                 : <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">Live</div>}
               {s.status === 'live' && (
                 <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded animate-pulse">LIVE</span>

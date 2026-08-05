@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/AuditLogPage.jsx
 // Route: /logs — Lịch sử hoạt động admin (audit trail)
 // Upgraded: user filter, action type pills, expandable details row
 import React, { useState } from 'react';

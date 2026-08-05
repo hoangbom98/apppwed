@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/TelegramBroadcastPage.jsx
 // Route: /settings/telegram-broadcast
 // Soạn & gửi tin nhắn Telegram tới channel / group / admin
 import React from 'react';

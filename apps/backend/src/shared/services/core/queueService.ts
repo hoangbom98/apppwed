@@ -113,10 +113,19 @@ export function getPaymentQueue(): Queue | null {
         logger.info(`[PaymentQueue] Processing webhook job=${job.id} provider=${provider} tx=${transactionId}`);
 
         try {
-          // Load the appropriate payment adapter
-          const { PaymentFactory } = require('../payment/PaymentFactory');
-          const adapter = PaymentFactory.getAdapter(provider);
-          await adapter.handleWebhook(transactionId, webhookData, project);
+          // PaymentFactory là instance class — cần khởi tạo với admin prisma client
+          const PaymentFactory = require('../payment/PaymentFactory');
+          const { getPrismaClient } = require('../../config/databases');
+          const adminPrisma = getPrismaClient('admin');
+          const projectPrisma = getPrismaClient(project || 'game');
+          const factory = new PaymentFactory(adminPrisma);
+          const adapter = await factory.getAdapter(provider, projectPrisma);
+          // Adapter có thể có verifyPayment (webhook) thay vì handleWebhook
+          if (typeof adapter.verifyPayment === 'function') {
+            await adapter.verifyPayment(webhookData);
+          } else {
+            logger.warn(`[PaymentQueue] Adapter ${provider} has no verifyPayment method`);
+          }
           logger.info(`[PaymentQueue] Webhook processed job=${job.id} tx=${transactionId}`);
         } catch (err: any) {
           logger.error(`[PaymentQueue] Webhook failed job=${job.id} attempt=${job.attemptsMade}: ${err.message}`);

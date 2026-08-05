@@ -9,7 +9,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { commentId } = await params;
-  const ok = db.deleteComment(Number(commentId));
+  const ok = await db.deleteComment(Number(commentId));
   if (!ok) return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 }

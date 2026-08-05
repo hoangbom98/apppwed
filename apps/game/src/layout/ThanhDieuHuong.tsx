@@ -14,9 +14,9 @@ import {
 
 // Download links
 const ANDROID_LINK = (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_APK
-  || 'https://yourdomain.com/downloads/gamex.apk';
+  || 'https://tc-gaming.live/downloads/gamex.apk';
 const IOS_LINK     = (import.meta as any).env?.VITE_DOWNLOAD_GAMEX_IOS
-  || 'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/gamex.plist';
+  || 'itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/gamex.plist';
 
 const BASE_ITEMS = [
   { path: '/',           label: 'Trang chủ', icon: <HomeOutlined     style={{ fontSize: 18 }} /> },

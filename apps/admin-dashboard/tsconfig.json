@@ -1,16 +1,11 @@
 {
   "extends": "../../tsconfig.frontend.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
     "paths": {
-      "@/*":      ["./src/*"],
-      "@admin/*": ["./src/*"],
-      "@ui":      ["../../packages/ui/src/index.ts"],
-      "@ui/*":    ["../../packages/ui/src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
-  "exclude": ["src/test", "src/__tests__", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/**/*"]
 }

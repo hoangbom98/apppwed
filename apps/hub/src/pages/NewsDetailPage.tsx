@@ -9,13 +9,13 @@ import Spinner from '../components/Spinner';
  * dompurify is listed in package.json — run `pnpm install` to activate.
  * Falls back to returning raw HTML only until the module loads (<100ms).
  */
-let _dp: { sanitize: (h: string, opts?: object) => string } | null = null;
+let dp: { sanitize: (h: string, opts?: object) => string } | null = null;
 import('dompurify')
-  .then(m => { _dp = m.default ?? (m as unknown as typeof _dp); })
+  .then(m => { dp = m.default ?? (m as unknown as typeof dp); })
   .catch(() => { /* dompurify not installed yet — run pnpm install */ });
 
 function sanitize(html: string): string {
-  return _dp ? _dp.sanitize(html, { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li','h1','h2','h3','h4','h5','h6','img','table','thead','tbody','tr','th','td','code','pre','blockquote'], ALLOWED_ATTR: ['href','src','alt','title','class','target','rel'] }) : html;
+  return dp ? dp.sanitize(html, { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li','h1','h2','h3','h4','h5','h6','img','table','thead','tbody','tr','th','td','code','pre','blockquote'], ALLOWED_ATTR: ['href','src','alt','title','class','target','rel'] }) : html;
 }
 
 export default function NewsDetailPage() {
@@ -24,7 +24,8 @@ export default function NewsDetailPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['news-detail', slug],
-    queryFn: () => getNewsBySlug(slug!),
+    queryFn: () => slug ? getNewsBySlug(slug) : Promise.reject('No slug'),
+    enabled: !!slug,
   });
   const article = data?.data?.data;
 
@@ -34,7 +35,7 @@ export default function NewsDetailPage() {
   return (
     <article className="max-w-3xl mx-auto space-y-6">
       <button onClick={() => navigate(-1)} className="text-indigo-400 text-sm">← Quay lại</button>
-      {article.image && <img src={article.image} alt={article.title} className="w-full rounded-xl h-64 object-cover" />}
+      {article.image && <img src={article.image} alt={article.title} className="w-full rounded-xl h-64 object-cover" loading="lazy" width="800" height="256" />}
       <h1 className="text-3xl font-bold text-white">{article.title}</h1>
       <div className="flex gap-4 text-sm text-gray-400">
         {article.author && <span>Tác giả: {article.author}</span>}

@@ -25,7 +25,6 @@ export { default as Card }          from './components/Card';
 export { default as Modal }         from './components/Modal';
 export { default as Toast }         from './components/Toast';
 export { default as Pagination }    from './components/Pagination';
-// export { default as Skeleton }      from './components/Skeleton'; // <-- Đã xóa dòng trùng
 export { default as Badge }         from './components/Badge';
 export { default as Spinner }       from './components/Spinner';
 export { default as BackToTop }     from './components/BackToTop';

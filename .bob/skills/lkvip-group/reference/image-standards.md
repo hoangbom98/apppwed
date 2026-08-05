@@ -1,7 +1,6 @@
 # Image Standards — LKVIP Group Ecosystem
 
-> **Status**: Official — applies to all 6 SPAs (Hub, Game, Trading, Dating, Sports, Admin Dashboard)
-> and the shared `@lkvip/ui` component library.
+> **Status**: Official — applies to all Vite SPAs (Hub, Game, Trading, Dating, Sports, Admin Dashboard, Banking, Store, Academy) and the shared `@lkvip/ui` component library.
 > Last updated: 2025
 
 ---

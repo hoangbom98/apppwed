@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { TrendingUp, LayoutDashboard, Briefcase, User } from 'lucide-react';
+import { TrendingUp, LayoutDashboard, Briefcase } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 

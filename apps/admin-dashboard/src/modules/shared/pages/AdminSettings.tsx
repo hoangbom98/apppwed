@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * AdminSettings.jsx  —  Route: /settings
  *
@@ -319,7 +318,7 @@ function TabEmail() {
           <Input
             value={merged.smtp_from}
             onChange={e => set('smtp_from', e.target.value)}
-            placeholder="noreply@yourdomain.com"
+            placeholder="noreply@tc-gaming.live"
           />
         </FieldRow>
       </Section>

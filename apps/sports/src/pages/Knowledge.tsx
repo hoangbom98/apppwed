@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { ArticleList } from '@ui/index';

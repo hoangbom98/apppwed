@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GroupFinanceDashboard.tsx — Tổng quan tài chính tập đoàn
  *
@@ -23,11 +22,11 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { groupFinanceApi } from './api';
+import { fmtVNDCompact as vnd, fmtVND as vndFull } from '@admin/modules/shared/utils/formatters';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-// ── Palette per project source ────────────────────────────────────────────────
 const SOURCE_COLOR: Record<string, string> = {
   GAME:   '#3b82f6',
   SPORTS: '#10b981',
@@ -42,13 +41,6 @@ const SOURCE_LABEL: Record<string, string> = {
   DATING: 'Dating',
   HUB:    'Hub',
 };
-
-function vnd(n: number) {
-  return new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(n) + 'đ';
-}
-function vndFull(n: number) {
-  return Number(n).toLocaleString('vi-VN') + 'đ';
-}
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({

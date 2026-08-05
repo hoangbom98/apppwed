@@ -25,11 +25,12 @@ const STORAGE_KEY = 'hub_hideNotification';
 export default function NotificationModal({ isOpen, onClose }: Props) {
   const [checked, setChecked] = useState(false);
   const [slide, setSlide]     = useState(0);
-  const { data: popups }      = useAppConfig('popups') as { data: any };
+  const { data: popups }      = useAppConfig('popups') as { data: unknown };
 
   // slides come from CMS config: popups.welcome_slides (array)
-  const slides: Slide[] = Array.isArray(popups?.welcome_slides)
-    ? popups.welcome_slides
+  const popupData = popups as { welcome_slides?: Slide[] } | undefined;
+  const slides: Slide[] = Array.isArray(popupData?.welcome_slides)
+    ? popupData.welcome_slides
     : [];
 
   // Nothing to show → don't render

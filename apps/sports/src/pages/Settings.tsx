@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Bell, Moon, Globe, Shield, Trash2, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';

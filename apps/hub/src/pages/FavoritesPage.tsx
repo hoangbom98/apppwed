@@ -20,6 +20,19 @@ const TYPE_META: Record<string, { label: string; icon: React.ReactNode; color: s
   news:    { label: 'Tin tức', icon: <Newspaper size={14} />, color: 'text-yellow-400', base: '/news' },
 };
 
+interface FavItem {
+  name?: string;
+  title?: string;
+  image?: string;
+  thumbnail?: string;
+  logo?: string;
+  cover?: string;
+  publisher?: string;
+  link?: string;
+  slug?: string;
+  id?: string;
+}
+
 export default function FavoritesPage() {
   const { token } = useAuthStore();
   if (!token) return <Navigate to="/login" state={{ from: '/favorites' }} replace />;
@@ -30,7 +43,7 @@ export default function FavoritesPage() {
     queryKey: ['hub-favorites'],
     queryFn:  getFavorites,
   });
-  const favorites: any[] = data?.data ?? [];
+  const favorites = (data?.data as unknown[]) ?? [];
 
   const removeMutation = useMutation({
     mutationFn: removeFav,
@@ -38,8 +51,9 @@ export default function FavoritesPage() {
   });
 
   // Group by type
-  const grouped = favorites.reduce<Record<string, any[]>>((acc, fav) => {
-    const t = fav.targetType ?? 'game';
+  const grouped = favorites.reduce<Record<string, unknown[]>>((acc, fav) => {
+    const f = fav as { targetType?: string };
+    const t = f.targetType ?? 'game';
     if (!acc[t]) acc[t] = [];
     acc[t].push(fav);
     return acc;
@@ -90,15 +104,16 @@ export default function FavoritesPage() {
                   <span className="ml-1 text-xs text-gray-500">({items.length})</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {items.map((fav: any) => {
-                    const item = fav.game ?? fav.website ?? fav.tool ?? fav.news ?? {};
-                    const slug = item.slug ?? item.id ?? fav.targetId;
+                  {items.map((fav: unknown) => {
+                    const f = fav as { id: string; targetId: string; game?: FavItem; website?: FavItem; tool?: FavItem; news?: FavItem; };
+                    const item: FavItem = f.game ?? f.website ?? f.tool ?? f.news ?? {};
+                    const slug = item.slug ?? item.id ?? f.targetId;
                     const href = `${meta.base}/${slug}`;
                     return (
-                      <DarkCard key={fav.id} className="group relative overflow-hidden rounded-2xl">
+                      <DarkCard key={f.id} className="group relative overflow-hidden rounded-2xl">
                         {/* Remove button */}
                         <button
-                          onClick={() => removeMutation.mutate(fav.id)}
+                          onClick={() => removeMutation.mutate(f.id)}
                           className="absolute top-2 right-2 z-10 w-7 h-7 bg-gray-900/80 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
                           title="Xoá khỏi yêu thích"
                         >
@@ -111,7 +126,7 @@ export default function FavoritesPage() {
                             {(item.image || item.thumbnail || item.logo || item.cover) ? (
                               <img
                                 src={item.image ?? item.thumbnail ?? item.logo ?? item.cover}
-                                alt={item.name ?? item.title}
+                                alt={item.name ?? item.title ?? 'N/A'}
                                 className="w-full h-full object-cover"
                               />
                             ) : (

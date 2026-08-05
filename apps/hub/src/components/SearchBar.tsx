@@ -31,14 +31,14 @@ export default function SearchBar({ className = '', placeholder, onSearch }: Sea
 
   const handleSelect = useCallback((item: AutoCompleteItem) => {
     // Determine route from item id prefix: "game_123" → /games/slug
-    const [src] = item.id.split('_');
-    const base  = SOURCE_ROUTES[src];
-    const slug  = (item.value as any)?.slug ?? item.slug;
+    const src = item.id?.split('_')[0];
+    const base  = src ? SOURCE_ROUTES[src] : undefined;
+    const slug  = (item.value as { slug?: string })?.slug ?? (item as { slug?: string })?.slug;
 
     if (base && slug) {
       navigate(`${base}/${slug}`);
     } else {
-      navigate(`/search?q=${encodeURIComponent(item.label)}`);
+      navigate(`/search?q=${encodeURIComponent(item.label ?? '')}`);
     }
     setQuery('');
   }, [navigate]);

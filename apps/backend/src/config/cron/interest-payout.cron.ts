@@ -13,21 +13,21 @@ export const registerInterestPayoutCron = () => {
     const now = Math.floor(Date.now() / 1000);
 
     // Scan normal
-    const normal = await prisma.lcInvestList.findMany({ 
-      where: { status: 0, time1: { lte: new Date(now * 1000) } } 
+    const normal = await prisma.lcInvestList.findMany({
+      where: { status: 0, time1: { lte: new Date(now * 1000) } }
     });
     for (const item of normal) {
       await interestPayoutQueue.add('payout', { payoutId: item.id, type: 'normal' });
     }
 
     // Scan mall
-    const mall = await prisma.lcMallInvestList.findMany({ 
-      where: { status: 0, time1: { lte: new Date(now * 1000) } } 
+    const mall = await prisma.lcMallInvestList.findMany({
+      where: { status: 0, time1: { lte: new Date(now * 1000) } }
     });
     for (const item of mall) {
       await interestPayoutQueue.add('payout', { payoutId: item.id, type: 'mall' });
     }
-    
+
     logger.info(`[InterestPayoutCron] Enqueued ${normal.length + mall.length} payouts`);
   });
 };

@@ -12,7 +12,8 @@ export default function GameDetailPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['game', slug],
-    queryFn: () => getGameBySlug(slug!),
+    queryFn: () => slug ? getGameBySlug(slug) : Promise.reject('No slug'),
+    enabled: !!slug,
   });
   const game = data?.data?.data;
 
@@ -29,7 +30,7 @@ export default function GameDetailPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <button onClick={() => navigate(-1)} className="text-indigo-400 text-sm hover:text-indigo-300">← {t('common.back')}</button>
       <div className="bg-gray-800 rounded-xl overflow-hidden">
-        {game.image && <img src={game.image} alt={game.name} className="w-full h-56 object-cover" />}
+        {game.image && <img src={game.image} alt={game.name} className="w-full h-56 object-cover" loading="lazy" width="800" height="224" />}
         <div className="p-6 space-y-4">
           <h1 className="text-2xl font-bold text-white">{game.name}</h1>
           {game.publisher && <p className="text-gray-400 text-sm">Publisher: {game.publisher}</p>}

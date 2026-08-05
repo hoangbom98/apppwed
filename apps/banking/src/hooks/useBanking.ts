@@ -84,7 +84,7 @@ export function useWithdrawals(page = 1) {
 export function useCreateWithdrawal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { amount: number; fee?: number; method: string; bankInfo?: object }) =>
+    mutationFn: (payload: { amount: number; fee?: number; method: string; address?: string; bankInfo?: object }) =>
       api.post('/trade/wallet/withdraw', payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bank', 'wallet'] });

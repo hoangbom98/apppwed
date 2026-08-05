@@ -138,3 +138,73 @@ model Upload {
   @@index([folder])
   @@map("fortress_uploads")
 }
+
+// ── Workspace Management ───────────────────────────────────────────────────
+// Migrated từ workspace-db.ts (JSON flat-file) sang PostgreSQL Prisma.
+// Giữ nguyên API shape — chỉ thay đổi storage layer.
+
+model WorkspaceSprint {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  /// Project slug (e.g. "hub", "game", "all")
+  project   String   @default("all") @db.VarChar(100)
+  startDate String   @db.VarChar(20)   // ISO date string "YYYY-MM-DD"
+  endDate   String   @db.VarChar(20)
+  goal      String?  @db.Text
+  /// active | completed | cancelled
+  status    String   @default("active") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks WorkspaceTask[]
+
+  @@index([status])
+  @@index([project])
+  @@map("fortress_workspace_sprints")
+}
+
+model WorkspaceTask {
+  id           Int                @id @default(autoincrement())
+  title        String             @db.VarChar(500)
+  description  String?            @db.Text
+  project      String             @default("hub") @db.VarChar(100)
+  /// todo | in_progress | done | cancelled
+  status       String             @default("todo") @db.VarChar(20)
+  /// critical | high | medium | low
+  priority     String             @default("medium") @db.VarChar(20)
+  assigneeId   Int?
+  assigneeName String?            @db.VarChar(200)
+  sprintId     Int?
+  sprint       WorkspaceSprint?   @relation(fields: [sprintId], references: [id])
+  dueDate      String?            @db.VarChar(20)
+  completedAt  DateTime?
+  completedBy  Int?
+  tags         String[]           @default([])
+  result       String?            @db.Text
+  createdBy    Int?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  comments WorkspaceComment[]
+
+  @@index([status])
+  @@index([project])
+  @@index([sprintId])
+  @@index([priority])
+  @@index([assigneeId])
+  @@map("fortress_workspace_tasks")
+}
+
+model WorkspaceComment {
+  id         Int           @id @default(autoincrement())
+  taskId     Int
+  task       WorkspaceTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId   Int?
+  authorName String?       @db.VarChar(200)
+  content    String        @db.Text
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([taskId])
+  @@map("fortress_workspace_comments")
+}

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/AdminUserManagement.jsx
 // Route: /settings/admins
 // Quản lý tài khoản Admin: tạo / sửa / khoá / xoá admin accounts.
 import React, { useState } from 'react';

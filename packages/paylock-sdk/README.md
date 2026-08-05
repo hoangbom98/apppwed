@@ -153,8 +153,8 @@ Before the SDK initializes, you must define a global config object in the browse
 
 > This sends retrieved injectables (if any) to your backend for secure use.
 
-> 💡 **Tip:** You can name your global config variable anything — the SDK will automatically detect it  
-> as long as it contains a `license` or `lk` property. This helps you keep the SDK integration hidden  
+> 💡 **Tip:** You can name your global config variable anything — the SDK will automatically detect it
+> as long as it contains a `license` or `lk` property. This helps you keep the SDK integration hidden
 > or embedded in an existing namespace.
 
 #### 🔧 Examples of custom config variable names
@@ -227,7 +227,7 @@ global.paylock = {
 
 ## 💡 Notes
 
-- 🧩 The global config key can be **named anything** (e.g., `window.myapp`, `window.licenseSettings`, etc.).  
+- 🧩 The global config key can be **named anything** (e.g., `window.myapp`, `window.licenseSettings`, etc.).
   The SDK will automatically find the first object with a `license` or `lk` property.
 
 - 🚫 The SDK **only runs once** and gracefully exits if license validation fails. Whenever an error is encountered, it will display the modal

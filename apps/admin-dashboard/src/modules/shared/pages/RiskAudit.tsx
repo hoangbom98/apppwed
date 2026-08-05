@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/RiskAudit.jsx
 // Risk monitoring — 7 tabs: Summary, Suspicious Users, Risk Alerts, AML Alerts,
 // Security Logs, IP Blacklist, Audit Log; backed by /admin/risk/* endpoints.
 import React, { useState } from 'react';

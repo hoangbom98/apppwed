@@ -44,7 +44,7 @@ export default function Discovery() {
             <div key={u.id} className="relative rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform aspect-[3/4]"
               onClick={() => navigate(`/profile/${u.id}`)}>
               {u.avatar
-                ? <img src={u.avatar} alt={u.full_name} className="w-full h-full object-cover" />
+                ? <img src={u.avatar} alt={u.full_name} className="w-full h-full object-cover" loading="lazy" width="200" height="267" />
                 : <div className="w-full h-full bg-gradient-to-b from-pink-300 to-rose-400" />}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * BruteForceProtection.jsx
  * Tab 1 — Brute Force Protection settings.

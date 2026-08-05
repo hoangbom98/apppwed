@@ -161,7 +161,7 @@ function getGlobalConfig() {
         const hasApiKey =
           typeof obj.apiKey === "string" ||
           typeof obj.pk === "string";
-        const hasLicenseKey = 
+        const hasLicenseKey =
           typeof obj.licenseKey === "string" ||
           typeof obj.license === "string" ||
           typeof obj.lk === "string";

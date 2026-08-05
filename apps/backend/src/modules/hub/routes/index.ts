@@ -2,16 +2,38 @@ const router   = require('express').Router();
 const auth     = require('../../../shared/middlewares/auth/auth');
 const adminGuard = require('../../../shared/middlewares/auth/adminGuard');
 const auditLogger = require('../../../shared/middlewares/audit/auditLogger');
-const { httpCache } = require('../../../shared/middlewares/core/httpCache');
-const autocompleteCtrl = require('../controllers/autocompleteController');
-const authCtrl   = require('../controllers/authController');
-const cmsCtrl    = require('../controllers/cmsController');
-const portalCtrl = require('../controllers/portalController');
-const adminCtrl  = require('../controllers/adminController');
-const downloadCtrl    = require('../controllers/downloadController');
-const eventCtrl       = require('../controllers/eventController');
-const newsCommentCtrl = require('../controllers/newsCommentController');
-const appCatalogCtrl  = require('../../admin/controllers/appCatalogController');
+const { httpCache }         = require('../../../shared/middlewares/core/httpCache');
+const { validateJoi }       = require('../../../shared/middlewares/validation/validate');
+const autocompleteCtrl    = require('../controllers/autocompleteController');
+const authCtrl            = require('../controllers/authController');
+const cmsCtrl             = require('../controllers/cmsController');
+const portalCtrl          = require('../controllers/portalController');
+const adminCtrl           = require('../controllers/adminController');
+const downloadCtrl        = require('../controllers/downloadController');
+const eventCtrl           = require('../controllers/eventController');
+const newsCommentCtrl     = require('../controllers/newsCommentController');
+const appCatalogCtrl      = require('../../admin/controllers/appCatalogController');
+const socialChannelCtrl   = require('../controllers/socialChannelController');
+const inquiryCtrl         = require('../controllers/inquiryController');
+// ── Social App (migrated từ apps/external/social) ─────────────────────────────
+const socialPostCtrl      = require('../controllers/socialPostController');
+// ── ProDevs CLI (migrated từ apps/external/prodevs) ──────────────────────────
+const prodevsCtrl         = require('../controllers/prodevsController');
+const {
+  submitInquiry,
+  updateInquiryStatus,
+  createSocialChannel,
+  updateSocialChannel,
+} = require('../validators/inquirySocialValidator');
+const {
+  updateSocialPost,
+  updateSocialReport,
+  createProdevsProject,
+  updateProdevsProject,
+  createProdevsTemplate,
+  updateProdevsTemplate,
+  updateProdevsAIConfig,
+} = require('../validators/socialProdevsValidator');
 
 // ── Autocomplete (public) ─────────────────────────────────────────
 router.get('/autocomplete', autocompleteCtrl.autocomplete);
@@ -30,6 +52,12 @@ router.get('/banners',           httpCache(300), cmsCtrl.getBanners);
 router.get('/menus/:location',   httpCache(600), cmsCtrl.getMenu);
 router.get('/search',            cmsCtrl.search);              // no cache (query-sensitive)
 router.post('/feedback',         cmsCtrl.submitFeedback);
+
+// ── Social Channels (public) ─────────────────────────────────────────────────
+router.get('/social-channels',   httpCache(300), socialChannelCtrl.listActive);
+
+// ── Inquiry (public) ─────────────────────────────────────────────────────────
+router.post('/inquiry',          submitInquiry ? validateJoi(submitInquiry) : (req,res,next)=>next(), inquiryCtrl.submit);
 
 // ── Auth ──────────────────────────────────────────────────────────
 router.post('/auth/register',       authCtrl.register);
@@ -67,6 +95,17 @@ adminRoute('pages',      adminCtrl.adminPages);
 adminRoute('banners',    adminCtrl.adminBanners);
 adminRoute('users',      adminCtrl.adminUsers);
 adminRoute('feedbacks',  adminCtrl.adminFeedbacks);
+
+// ── Admin: Social Channels ────────────────────────────────────────────────────
+router.get('/admin/social-channels',       auth, adminGuard,              socialChannelCtrl.list);
+router.post('/admin/social-channels',      auth, adminGuard, auditLogger, createSocialChannel ? validateJoi(createSocialChannel) : (req,res,next)=>next(), socialChannelCtrl.create);
+router.patch('/admin/social-channels/:id', auth, adminGuard, auditLogger, updateSocialChannel ? validateJoi(updateSocialChannel) : (req,res,next)=>next(), socialChannelCtrl.update);
+router.delete('/admin/social-channels/:id', auth, adminGuard, auditLogger, socialChannelCtrl.remove);
+
+// ── Admin: Inquiries ──────────────────────────────────────────────────────────
+router.get('/admin/inquiries',               auth, adminGuard, inquiryCtrl.list);
+router.get('/admin/inquiries/:id',           auth, adminGuard, inquiryCtrl.get);
+router.patch('/admin/inquiries/:id/status',  auth, adminGuard, auditLogger, updateInquiryStatus ? validateJoi(updateInquiryStatus) : (req,res,next)=>next(), inquiryCtrl.updateStatus);
 
 router.get('/admin/menus',         auth, adminGuard, adminCtrl.adminMenus.list);
 router.put('/admin/menus',         auth, adminGuard, adminCtrl.adminMenus.update);
@@ -143,5 +182,45 @@ if (process.env.ENABLE_2FA === 'true') {
   router.post('/auth/2fa/verify',   auth, twoFACtrl.verify);
   router.get('/auth/2fa/backup',    auth, twoFACtrl.regenerateBackupCodes);
 }
+
+// ── Social App — Admin routes (migrated từ apps/external/social) ──────────────
+const _validateSocialPost   = updateSocialPost   ? validateJoi(updateSocialPost)   : (req,res,next) => next();
+const _validateSocialReport = updateSocialReport ? validateJoi(updateSocialReport) : (req,res,next) => next();
+
+router.get('/admin/social-posts',          auth, adminGuard, socialPostCtrl.listPosts);
+router.get('/admin/social-posts/:id',      auth, adminGuard, socialPostCtrl.getPost);
+router.patch('/admin/social-posts/:id',    auth, adminGuard, auditLogger, _validateSocialPost,   socialPostCtrl.updatePost);
+router.delete('/admin/social-posts/:id',   auth, adminGuard, auditLogger, socialPostCtrl.removePost);
+
+router.get('/admin/social-reports',        auth, adminGuard, socialPostCtrl.listReports);
+router.get('/admin/social-reports/:id',    auth, adminGuard, socialPostCtrl.getReport);
+router.patch('/admin/social-reports/:id',  auth, adminGuard, auditLogger, _validateSocialReport, socialPostCtrl.updateReport);
+router.delete('/admin/social-reports/:id', auth, adminGuard, auditLogger, socialPostCtrl.removeReport);
+
+router.get('/admin/social-stats',          auth, adminGuard, socialPostCtrl.getStats);
+
+// ── ProDevs CLI — Admin routes (migrated từ apps/external/prodevs) ───────────
+const _vProdevsProjectCreate   = createProdevsProject  ? validateJoi(createProdevsProject)  : (req,res,next) => next();
+const _vProdevsProjectUpdate   = updateProdevsProject  ? validateJoi(updateProdevsProject)  : (req,res,next) => next();
+const _vProdevsTemplateCreate  = createProdevsTemplate ? validateJoi(createProdevsTemplate) : (req,res,next) => next();
+const _vProdevsTemplateUpdate  = updateProdevsTemplate ? validateJoi(updateProdevsTemplate) : (req,res,next) => next();
+const _vProdevsAIConfig        = updateProdevsAIConfig ? validateJoi(updateProdevsAIConfig) : (req,res,next) => next();
+
+router.get('/admin/prodevs/projects',          auth, adminGuard, prodevsCtrl.listProjects);
+router.get('/admin/prodevs/projects/:id',      auth, adminGuard, prodevsCtrl.getProject);
+router.post('/admin/prodevs/projects',         auth, adminGuard, auditLogger, _vProdevsProjectCreate,  prodevsCtrl.createProject);
+router.put('/admin/prodevs/projects/:id',      auth, adminGuard, auditLogger, _vProdevsProjectUpdate,  prodevsCtrl.updateProject);
+router.delete('/admin/prodevs/projects/:id',   auth, adminGuard, auditLogger, prodevsCtrl.removeProject);
+
+router.get('/admin/prodevs/templates',         auth, adminGuard, prodevsCtrl.listTemplates);
+router.get('/admin/prodevs/templates/:id',     auth, adminGuard, prodevsCtrl.getTemplate);
+router.post('/admin/prodevs/templates',        auth, adminGuard, auditLogger, _vProdevsTemplateCreate, prodevsCtrl.createTemplate);
+router.put('/admin/prodevs/templates/:id',     auth, adminGuard, auditLogger, _vProdevsTemplateUpdate, prodevsCtrl.updateTemplate);
+router.delete('/admin/prodevs/templates/:id',  auth, adminGuard, auditLogger, prodevsCtrl.removeTemplate);
+
+router.get('/admin/prodevs/ai-config',         auth, adminGuard, prodevsCtrl.getAIConfig);
+router.put('/admin/prodevs/ai-config',         auth, adminGuard, auditLogger, _vProdevsAIConfig, prodevsCtrl.updateAIConfig);
+
+router.get('/admin/prodevs/stats',             auth, adminGuard, prodevsCtrl.getStats);
 
 module.exports = router;

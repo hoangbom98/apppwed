@@ -11,13 +11,27 @@ class AdminService {
   }
 
   async getDashboardStats() {
-    const [users, games, news, feedbacks] = await Promise.all([
+    const [
+      users, games, news, feedbacks, newInquiries, socialChannels,
+      socialPosts, pendingSocialReports, prodevsProjects,
+    ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.game.count(),
       this.prisma.news.count(),
       this.prisma.feedback.count({ where: { status: 'pending' } }),
+      this.prisma.inquiry.count({ where: { status: 'new' } }),
+      this.prisma.socialChannel.count(),
+      // Social App stats (integrated from apps/external/social)
+      this.prisma.socialPost.count({ where: { status: 'active' } }),
+      this.prisma.socialReport.count({ where: { status: 'pending' } }),
+      // ProDevs stats (integrated from apps/external/prodevs)
+      this.prisma.prodevsProject.count(),
     ]);
-    return { users, games, news, pendingFeedbacks: feedbacks };
+    return {
+      users, games, news,
+      pendingFeedbacks: feedbacks, newInquiries, socialChannels,
+      socialPosts, pendingSocialReports, prodevsProjects,
+    };
   }
 
   async listResource(modelKey, query) {

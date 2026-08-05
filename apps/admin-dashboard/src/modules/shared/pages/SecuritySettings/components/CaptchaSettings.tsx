@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * CaptchaSettings.jsx
  * Tab 3 — Captcha configuration: enable/disable, provider, keys, modules.

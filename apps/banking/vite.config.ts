@@ -64,8 +64,8 @@ export default defineConfig({
   server: {
     port: 5181,
     proxy: {
-      '/api':       { target: 'http://localhost:5000', changeOrigin: true },
-      '/socket.io': { target: 'http://localhost:5000', changeOrigin: true, ws: true },
+      '/api':       { target: process.env.VITE_API_URL || 'http://localhost:5000', changeOrigin: true },
+      '/socket.io': { target: process.env.VITE_API_URL || 'http://localhost:5000', changeOrigin: true, ws: true },
     },
   },
 

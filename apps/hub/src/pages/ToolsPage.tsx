@@ -30,16 +30,19 @@ export default function ToolsPage() {
 
       {isLoading ? <Spinner /> : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {data?.data?.data?.map((tool: any) => (
-            <Link key={tool.id} to={`/tools/${tool.slug}`} className="bg-gray-800 rounded-lg p-4 hover:ring-1 hover:ring-indigo-500 transition-all no-underline flex gap-3 items-start">
-              {tool.logo && <img src={tool.logo} alt={tool.name} className="w-12 h-12 object-cover rounded" />}
-              <div>
-                <div className="text-gray-100 font-medium">{tool.name}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{tool.version} · {tool.os}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{tool.file_size}</div>
-              </div>
-            </Link>
-          ))}
+          {(data?.data?.data as unknown[])?.map((t: unknown) => {
+            const tool = t as { id: string; slug: string; name: string; logo?: string; version?: string; os?: string; file_size?: string };
+            return (
+              <Link key={tool.id} to={`/tools/${tool.slug}`} className="bg-gray-800 rounded-lg p-4 hover:ring-1 hover:ring-indigo-500 transition-all no-underline flex gap-3 items-start">
+                {tool.logo && <img src={tool.logo} alt={tool.name} className="w-12 h-12 object-cover rounded" />}
+                <div>
+                  <div className="text-gray-100 font-medium">{tool.name}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">{tool.version} · {tool.os}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{tool.file_size}</div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
 

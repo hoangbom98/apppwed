@@ -7,7 +7,9 @@ import { Heart, X, Star, Zap } from 'lucide-react';
 import { CheckOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 
-function MatchPopup({ user, onClose }: { user: any; onClose: () => void }) {
+import { Profile } from '@/types';
+
+function MatchPopup({ user, onClose }: { user: Profile; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-pink-500/90 to-rose-600/90 z-50 flex flex-col items-center justify-center px-8">
       <div className="text-center">
@@ -32,7 +34,7 @@ function MatchPopup({ user, onClose }: { user: any; onClose: () => void }) {
 }
 
 function SwipeCard({ profile, onLike, onNope, onSuperLike, isTop }: {
-  profile: any; onLike: () => void; onNope: () => void; onSuperLike: () => void; isTop: boolean;
+  profile: Profile; onLike: () => void; onNope: () => void; onSuperLike: () => void; isTop: boolean;
 }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 0, 200], [-20, 0, 20]);
@@ -40,7 +42,7 @@ function SwipeCard({ profile, onLike, onNope, onSuperLike, isTop }: {
   const nopeOpacity = useTransform(x, [-150, -50], [1, 0]);
   const navigate = useNavigate();
 
-  const handleDragEnd = (_: any, info: any) => {
+  const handleDragEnd = (unusedEvent: any, info: any) => {
     if (info.offset.x > 120) onLike();
     else if (info.offset.x < -120) onNope();
     else if (info.offset.y < -80) onSuperLike();
@@ -57,7 +59,7 @@ function SwipeCard({ profile, onLike, onNope, onSuperLike, isTop }: {
     >
       {/* Background photo */}
       {profile.photos?.[0] || profile.avatar
-        ? <img src={profile.photos?.[0] || profile.avatar} alt="" className="w-full h-full object-cover" />
+        ? <img src={profile.photos?.[0] || profile.avatar} alt="" className="w-full h-full object-cover" loading="lazy" width="400" height="600" />
         : <div className="w-full h-full bg-gradient-to-b from-pink-300 to-rose-500" />}
 
       {/* Like overlay */}
@@ -132,7 +134,7 @@ export default function Swipe() {
             </button>
           </div>
         ) : (
-          deck.slice(0, 3).reverse().map((profile, idx, arr) => (
+          deck.slice(0, 3).toReversed().map((profile, idx, arr) => (
             <SwipeCard key={profile.id} profile={profile}
               isTop={idx === arr.length - 1}
               onLike={() => top && likeMut.mutate(top.id)}

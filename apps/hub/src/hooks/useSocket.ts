@@ -27,11 +27,10 @@ export function useSocket() {
     // ── Connection lifecycle ────────────────────────────────────────────────
     socket.on('connect', () => {
       socket.emit('join:project', 'hub');
-      if (import.meta.env.DEV) console.log('[Hub Socket] connected:', socket.id);
     });
 
-    socket.on('disconnect', (reason: string) => {
-      if (import.meta.env.DEV) console.log('[Hub Socket] disconnected:', reason);
+    socket.on('disconnect', () => {
+      // Intentionally silent
     });
 
     // ── Notification ────────────────────────────────────────────────────────

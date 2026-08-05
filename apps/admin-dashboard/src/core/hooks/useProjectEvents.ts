@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/hooks/useProjectEvents.ts
 // Lightweight hook for individual admin pages to subscribe to real-time events
 // for their specific project without needing to touch useAdminSocket directly.
 //

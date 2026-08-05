@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/components/SchemaForm.jsx
 // Schema-driven dynamic form renderer.
 //
 // Usage:

@@ -48,10 +48,11 @@ export default function WebsitesPage() {
         <Spinner />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {data?.data?.data?.map((w: any) => (
-            <Card key={w.id} title={w.name} subtitle={w.description} image={w.logo} href={w.link} />
-          ))}
-          {!isLoading && data?.data?.data?.length === 0 && (
+          {(data?.data?.data as unknown[])?.map((w: unknown) => {
+            const website = w as { id: string; name: string; description?: string; logo?: string; link?: string };
+            return <Card key={website.id} title={website.name} subtitle={website.description} image={website.logo} href={website.link} />;
+          })}
+          {!isLoading && (data?.data?.data as unknown[])?.length === 0 && (
             <p className="col-span-full text-center text-gray-400 py-10">Không tìm thấy website nào.</p>
           )}
         </div>

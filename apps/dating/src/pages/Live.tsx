@@ -54,7 +54,7 @@ export default function Live() {
             <div key={s.id} className="relative rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform aspect-[3/4]"
               onClick={() => navigate(`/live/${s.id}`)}>
               {s.thumbnail
-                ? <img src={s.thumbnail} alt="" className="w-full h-full object-cover" />
+                ? <img src={s.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" width="200" height="267" />
                 : <div className="w-full h-full bg-gradient-to-b from-purple-500 to-pink-500" />}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               {/* LIVE badge */}

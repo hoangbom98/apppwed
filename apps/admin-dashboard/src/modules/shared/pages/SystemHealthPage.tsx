@@ -1,5 +1,3 @@
-// @ts-nocheck
-// apps/admin-dashboard/src/modules/shared/pages/SystemHealthPage.tsx
 // Route: /settings/health
 // Hiển thị real-time health status: services, PM2, DNS, Redis, DB
 import React from 'react';

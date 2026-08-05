@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/hub/pages/AdminGamesPage.jsx
 import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
 import { adminGames } from '../api';

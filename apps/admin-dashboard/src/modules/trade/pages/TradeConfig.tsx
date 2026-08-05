@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * admin-dashboard/src/modules/trade/pages/TradeConfig.tsx
  * Route: /trade/config

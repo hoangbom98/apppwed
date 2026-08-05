@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/AgentsPage.jsx
 // Agent management: list, detail modal with team stats, commission calculator + payout.
 // Route: /agents
 import React, { useState } from 'react';

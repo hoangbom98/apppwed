@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/sports/pages/SportsMatchesPage.tsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Space, Select, Modal, Form, Input, App, Typography, Flex } from 'antd';

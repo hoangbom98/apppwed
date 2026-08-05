@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/Finance.jsx
 // Ant Design — Tabs, Table, Button, Modal, Tag, Form, Input, DatePicker
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Alert, Button, Card, ConfigProvider, Space, Table, Tag, Typography } from 'antd';
 

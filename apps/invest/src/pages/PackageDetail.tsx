@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, Shield, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { usePackages, useWallet, useBuyInvestment, type InvestPackage } from '../hooks/useInvest';
+import { usePackages, useWallet, useBuyInvestment } from '../hooks/useInvest';
 
 const QUICK_AMOUNTS = [100, 200, 500, 1000, 5000];
 

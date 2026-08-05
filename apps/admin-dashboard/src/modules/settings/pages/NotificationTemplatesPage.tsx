@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/NotificationTemplatesPage.jsx
 // Route: /settings/notification-tpl
 // Quản lý template nội dung thông báo (Telegram + Email)
 import React from 'react';

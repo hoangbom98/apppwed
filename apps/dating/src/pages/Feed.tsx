@@ -8,7 +8,9 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Plus, Video, Image as Ima
 import { formatTime } from '@/utils/formatters';
 import BottomSheet from '@/components/common/BottomSheet';
 
-function PostCard({ post, onLike, onComment }: { post: any; onLike: () => void; onComment: () => void }) {
+import { Post } from '@/types';
+
+function PostCard({ post, onLike, onComment }: { post: Post; onLike: () => void; onComment: () => void }) {
   const navigate = useNavigate();
   return (
     <div className="bg-white border-b border-gray-50 pb-2">
@@ -75,9 +77,9 @@ export default function Feed() {
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery({
     queryKey: ['feed'],
-    queryFn: ({ pageParam = 0 }) => getFeed({ offset: pageParam, limit: 10 }),
+    queryFn: ({ pageParam = 0 }) => getFeed({ offset: pageParam as number, limit: 10 }),
     initialPageParam: 0,
-    getNextPageParam: (last: any, all) => last.has_more ? all.length * 10 : undefined,
+    getNextPageParam: (lastPage: { has_more?: boolean; posts?: Post[] }, allPages) => lastPage.has_more ? allPages.length * 10 : undefined,
   });
 
   const likeMut = useMutation({
@@ -85,7 +87,7 @@ export default function Feed() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['feed'] }),
   });
 
-  const posts = data?.pages.flatMap((p: any) => p.posts || []) || [];
+  const posts: Post[] = data?.pages.flatMap((p: any) => p.posts || []) || [];
 
   return (
     <div>

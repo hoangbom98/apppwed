@@ -10,7 +10,7 @@ export default function ToolDetailPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['tool', slug],
-    queryFn: () => getToolBySlug(slug!),
+    queryFn: () => getToolBySlug(slug ?? ""),
   });
   const tool = data?.data?.data;
 

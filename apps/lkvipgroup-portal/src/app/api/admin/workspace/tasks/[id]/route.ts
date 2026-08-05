@@ -9,7 +9,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const task = db.getTask(Number(id));
+  const task = await db.getTask(Number(id));
   if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   return NextResponse.json(task);
 }
@@ -21,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { id }  = await params;
   const body    = await req.json();
   const actorId = typeof user.id === "number" ? user.id : undefined;
-  const task    = db.updateTask(Number(id), { ...body, actorId });
+  const task    = await db.updateTask(Number(id), { ...body, actorId });
   if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   return NextResponse.json(task);
 }
@@ -31,7 +31,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const ok = db.deleteTask(Number(id));
+  const ok = await db.deleteTask(Number(id));
   if (!ok) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 }

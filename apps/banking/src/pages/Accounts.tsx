@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Star, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBankAccounts, useAddBankAccount, useSetDefaultAccount } from '../hooks/useBanking';
 import { useForm } from 'react-hook-form';
@@ -96,9 +96,11 @@ export default function Accounts() {
               <input
                 {...register('accountName', { required: 'Nhập tên chủ tài khoản' })}
                 placeholder="NGUYEN VAN A"
-                style={{ textTransform: 'uppercase' } as React.CSSProperties}
-                className="w-full py-2.5 px-3 rounded-lg text-sm outline-none"
-                style={{ background: 'var(--bank-bg)', border: '1px solid var(--bank-border)' } as React.CSSProperties}
+                style={{
+                  textTransform: 'uppercase',
+                  background: 'var(--bank-bg)',
+                  border: '1px solid var(--bank-border)'
+                } as React.CSSProperties}
               />
               {errors.accountName && <p className="text-xs mt-1" style={{ color: 'var(--bank-danger)' }}>{errors.accountName.message}</p>}
             </div>

@@ -141,8 +141,7 @@ exports.getBalance = async (req, res) => {
       const gameDb   = getPrismaClient('game');
       const gameUser = await gameDb.user.findFirst({ where: { email: req.user.email } });
       if (gameUser) balance = Number(gameUser.balance || 0);
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getBalance] game DB unavailable: ${err.message}`); }
     return ok(res, { balance });
   } catch (e) { return serverError(res, e.message); }
 };
@@ -168,8 +167,7 @@ exports.getVip = async (req, res) => {
         vipLevel = Number(gameUser.vipLevel || 0);
         totalBet = Number(gameUser.totalBet || 0);
       }
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getVip] game DB unavailable: ${err.message}`); }
 
     const vipInfo = computeVipProgress(vipConfigs, vipLevel, totalBet);
 
@@ -204,8 +202,7 @@ exports.getTransactions = async (req, res) => {
           gameDb.transaction.count({ where }),
         ]);
       }
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getTransactions] game DB unavailable: ${err.message}`); }
 
     return paginate(res, items, { total, page: Number(page), limit: take });
   } catch (e) { return serverError(res, e.message); }
@@ -231,15 +228,13 @@ exports.getReferrals = async (req, res) => {
           include: { referee: { select: { username: true, email: true, createdAt: true } } },
           orderBy: { createdAt: 'desc' },
         });
-        // sum bonus from referrals
         const agg = await gameDb.referral.aggregate({
           where: { referrerId: gameUser.id },
           _sum:  { bonus: true },
         });
         totalCommission = Number(agg._sum.bonus || 0);
       }
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getReferrals] game DB unavailable: ${err.message}`); }
 
     return ok(res, { referralCode, referrals, totalCommission });
   } catch (e) { return serverError(res, e.message); }
@@ -274,10 +269,9 @@ exports.getNotifications = async (req, res) => {
           gameDb.notification.count({ where }),
         ]);
       }
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getNotifications] game DB unavailable: ${err.message}`); }
 
-    // Also pull from admin DB notifications if they exist
+    // Gộp thêm notification từ admin DB
     try {
       const adminDb = getPrismaClient('admin');
       const adminWhere = {
@@ -288,10 +282,9 @@ exports.getNotifications = async (req, res) => {
         adminDb.notification.findMany({ where: adminWhere, orderBy: { createdAt: 'desc' }, take }),
         adminDb.notification.count({ where: adminWhere }),
       ]);
-      items = [...adminItems, ...items].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, take);
+      items = [...adminItems, ...items].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, take);
       total += adminTotal;
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:getNotifications] admin DB unavailable: ${err.message}`); }
 
     return paginate(res, items, { total, page: Number(page), limit: take });
   } catch (e) { return serverError(res, e.message); }
@@ -318,8 +311,7 @@ exports.markNotificationRead = async (req, res) => {
         });
         if (n.count > 0) updated = true;
       }
-    // eslint-disable-next-line no-empty
-    } catch (_) {}
+    } catch (err: any) { logger.warn(`[Mine:markNotificationRead] game DB unavailable: ${err.message}`); }
 
     if (!updated) {
       const adminDb = getPrismaClient('admin');

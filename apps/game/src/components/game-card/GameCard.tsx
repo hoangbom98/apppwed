@@ -47,8 +47,8 @@ export const GamePreviewModal: React.FC<{
           {/* Thumbnail */}
           <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
             {game.thumbnail
-              ? <img src={game.thumbnail} alt={game.name} className="w-full h-full object-cover" />
-              : <img src="/wap/img/home_muen.png" alt="game" className="w-16 h-16 object-contain opacity-30" />
+              ? <img src={game.thumbnail} alt={game.name} className="w-full h-full object-cover" loading="lazy" width="400" height="225" />
+              : <img src="/wap/img/home_muen.png" alt="game" className="w-16 h-16 object-contain opacity-30" width="64" height="64" />
             }
             <button
               onClick={onClose}

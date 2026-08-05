@@ -7,8 +7,10 @@ const WalletService       = require('../../shared/services/walletService');
 const notif               = require('../../shared/services/notificationService');
 const riskService         = require('../../shared/services/riskService');
 const tg                  = require('../../shared/services/telegramAlertService');
+const PaymentFactory      = require('../../shared/payment/PaymentFactory');
 
-const prisma = getPrismaClient('game');
+const prisma      = getPrismaClient('game');
+const adminPrisma = getPrismaClient('admin');
 const walletService = new WalletService(prisma);
 
 // Queue xử lý rút tiền
@@ -70,20 +72,63 @@ export const withdrawWorker = new Worker(
   { connection: redis, concurrency: 5 }
 );
 
+/**
+ * Tự động xử lý lệnh rút cho user low-risk.
+ * Gọi PaymentAdapter tương ứng với phương thức rút của user.
+ */
 async function processAutomatedWithdrawal(withdraw: any) {
-  // TODO: Tích hợp payment gateway để thực hiện chuyển tiền tự động
-  // Implement: chọn adapter theo withdraw.method (USDT, ngân hàng...)
-  // const adapter = PaymentAdapterFactory.getAdapter(withdraw.method)
-  // await adapter.withdraw(withdraw.amount, withdraw.bankAccount)
-  // Xem: src/shared/payment/adapters/ và PaymentAdapter interface trong src/shared/payment/
-  logger.info(`Processing automated withdrawal for ${withdraw.id}`);
+  try {
+    const factory = new PaymentFactory(adminPrisma);
+    const adapter = await factory.getAdapter(withdraw.method ?? 'lkvip', prisma);
+
+    const result = await adapter.processWithdraw({
+      id:          withdraw.id,
+      amount:      withdraw.amount,
+      currency:    withdraw.currency ?? 'VND',
+      address:     withdraw.address ?? null,
+      bankInfo:    withdraw.bankInfo ?? null,
+      processedBy: null, // automated
+    });
+
+    if (result.success) {
+      await prisma.withdraw.update({
+        where: { id: withdraw.id },
+        data:  { status: 'completed', txId: result.txId ?? null, completedAt: new Date() },
+      });
+      notif.sendToUser(withdraw.userId, 'withdraw_success', {
+        username: withdraw.user.username,
+        amount:   withdraw.amount,
+        time:     new Date(),
+      });
+      logger.info(`Withdraw ${withdraw.id} auto-processed via ${withdraw.method ?? 'lkvip'}`);
+    } else {
+      // Nếu adapter trả về lỗi, đẩy lên manual review
+      await prisma.withdraw.update({
+        where: { id: withdraw.id },
+        data:  { status: 'manual_review', reason: result.error ?? 'Adapter returned failure' },
+      });
+      logger.warn(`Withdraw ${withdraw.id} fallback to manual_review: ${result.error}`);
+    }
+  } catch (err: any) {
+    logger.error(`Withdraw ${withdraw.id} automated processing error: ${err.message}`);
+    await prisma.withdraw.update({
+      where: { id: withdraw.id },
+      data:  { status: 'manual_review', reason: `System error: ${err.message}` },
+    });
+  }
 }
 
+/**
+ * Gửi yêu cầu xác thực bổ sung (OTP / Email) cho lệnh rút medium-risk.
+ */
 async function requestAdditionalVerification(withdraw: any) {
-  // Logic gửi OTP/Email xác thực
-  logger.info(`Requesting additional verification for withdrawal ${withdraw.id}`);
   await prisma.withdraw.update({
     where: { id: withdraw.id },
-    data: { status: 'pending_verification' },
+    data:  { status: 'pending_verification' },
   });
+  notif.sendToUser(withdraw.userId, 'withdraw_verify_required', {
+    username: withdraw.user.username,
+    amount:   withdraw.amount,
+  });
+  logger.info(`Requesting additional verification for withdrawal ${withdraw.id}`);
 }

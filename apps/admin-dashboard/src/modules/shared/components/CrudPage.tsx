@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/components/CrudPage.jsx
 // Ant Design — Table, Modal, Form, Input, Select, Button, Space
 // Drop-in replacement: same props interface as original.
 import React, { useState } from 'react';

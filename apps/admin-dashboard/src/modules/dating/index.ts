@@ -1,6 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/dating/index.ts
-// Dating module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';
 import {
   Users, Heart, CreditCard, Image, Shield, SlidersHorizontal,

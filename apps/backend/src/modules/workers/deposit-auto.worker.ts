@@ -5,8 +5,10 @@ import { logger } from '../../shared/logger';
 const { getPrismaClient } = require('../../config/databases');
 const WalletService = require('../../shared/services/walletService');
 const notif = require('../../shared/services/notificationService');
+const PaymentFactory = require('../../shared/payment/PaymentFactory');
 
 const prisma = getPrismaClient('game');
+const adminPrisma = getPrismaClient('admin');
 const walletService = new WalletService(prisma);
 
 // Queue xử lý deposit
@@ -24,11 +26,18 @@ export const depositWorker = new Worker(
     });
     if (!deposit || deposit.status !== 'pending') return;
 
-    // TODO: Implement checkExternalTransaction — kiểm tra giao dịch với payment gateway thực tế
-    // Khi implement: gọi PaymentAdapter.verify(deposit.txRef) theo interface PaymentAdapter
-    // Xem: src/shared/payment/adapters/ để chọn adapter phù hợp (USDT, ngân hàng...)
-    // const matched = await checkExternalTransaction(deposit);
-    const matched = null; // Placeholder — thay bằng kết quả từ payment gateway
+    // Xác minh giao dịch qua PaymentAdapter tương ứng
+    let matched: { success: boolean; txId?: string; amount?: number } | null = null;
+    try {
+      const factory = new PaymentFactory(adminPrisma);
+      const adapter = await factory.getAdapter(deposit.method ?? 'lkvip', prisma);
+      const result  = await adapter.checkStatus(deposit.txRef ?? deposit.id);
+      if (result.status === 'completed' || result.status === 'success' || result.status === 'paid') {
+        matched = { success: true, txId: result.txId ?? deposit.txRef };
+      }
+    } catch (err: any) {
+      logger.warn(`Deposit ${depositId}: payment adapter check failed — ${err.message}`);
+    }
 
     if (!matched) {
       if (deposit.createdAt < new Date(Date.now() - 30 * 60 * 1000)) {
@@ -48,7 +57,7 @@ export const depositWorker = new Worker(
         data: {
           status: 'completed',
           completedAt: new Date(),
-          txId: (matched as any).txId,
+          txId: matched!.txId ?? null,
         },
       });
 
@@ -60,7 +69,7 @@ export const depositWorker = new Worker(
         `deposit_${depositId}`,
       );
 
-      // Check bonus
+      // Check bonus nạp lần đầu
       const isFirstDeposit = await tx.deposit.count({
         where: { userId: deposit.userId, status: 'completed' },
       }) <= 1;

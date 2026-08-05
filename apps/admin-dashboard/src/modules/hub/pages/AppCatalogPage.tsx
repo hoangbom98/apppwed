@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/hub/pages/AppCatalogPage.jsx
 // Quản lý App Catalog — CRUD các app được hiển thị trên trang tải app của Hub.
 // Route: /app-catalog
 import React, { useState } from 'react';

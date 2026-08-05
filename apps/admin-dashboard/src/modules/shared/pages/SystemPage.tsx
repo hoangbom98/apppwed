@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/SystemPage.jsx
 // Route: /settings/system
 // Upgraded: disk usage, PM2 process list, one-click restart
 import React, { useState } from 'react';

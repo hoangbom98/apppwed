@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * RealtimeLayout.jsx  —  Route: /realtime
  *
@@ -15,35 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Activity, Wifi, WifiOff, Users, Zap, Server, BarChart2 } from 'lucide-react';
 import { useAdminSocket } from '../../core/hooks/useAdminSocket';
 import api from '@admin/api/client';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-function fmtTime(s) {
-  if (!s) return '—';
-  return new Date(s).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-function fmtMB(bytes) {
-  if (!bytes) return '—';
-  return (bytes / 1024 / 1024).toFixed(0) + ' MB';
-}
-
-function fmtUptime(seconds) {
-  if (!seconds) return '—';
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h ${m}m`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
-function fmtVND(n) {
-  if (n == null) return '—';
-  return Number(n).toLocaleString('vi-VN') + ' ₫';
-}
+import { fmtTime, fmtUptime, fmtVND, fmtBytes as fmtMB } from '@admin/modules/shared/utils/formatters';
 
 const LEVEL_STYLE = {
   CRITICAL: { bg: 'bg-red-900/50 border-red-800',    dot: 'bg-red-400',    text: 'text-red-400',    icon: '!' },

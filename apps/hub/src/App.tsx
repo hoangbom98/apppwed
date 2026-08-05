@@ -9,9 +9,8 @@ interface EBState { error: Error | null }
 class AppErrorBoundary extends Component<{ children: ReactNode }, EBState> {
   state: EBState = { error: null };
   static getDerivedStateFromError(error: Error): EBState { return { error }; }
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  componentDidCatch(_error: Error, _info: ErrorInfo) {
     // In production this could ship to Sentry via SENTRY_DSN
-    if (import.meta.env.DEV) console.error('[AppErrorBoundary]', error, info);
   }
   render() {
     if (this.state.error) {

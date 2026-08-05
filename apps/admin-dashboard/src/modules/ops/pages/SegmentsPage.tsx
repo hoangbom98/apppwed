@@ -1,11 +1,9 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/ops/pages/SegmentsPage.jsx
-// Customer segmentation (RFM + CLV) — view + trigger analysis
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Input, Space, Card, App, Typography, Flex, Row, Col } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { opsApi } from '../api';
+import { fmtNum as fmt, fmtVND as fmtM } from '@admin/modules/shared/utils/formatters';
 
 const { Text, Title } = Typography;
 
@@ -20,9 +18,6 @@ const SEG_LABEL = {
   champion: 'Champion', gold: 'Gold', silver: 'Silver',
   at_risk: 'At Risk',   bronze: 'Bronze',
 };
-
-const fmt  = n => Number(n || 0).toLocaleString('vi-VN');
-const fmtM = n => `${fmt(n)}đ`;
 
 export default function SegmentsPage() {
   const { message } = App.useApp();

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Wallet, ChevronRight, ShieldCheck } from 'lucide-react';
+import { TrendingUp, ShieldCheck } from 'lucide-react';
 import { useWallet, useMyInvestments } from '../hooks/useInvest';
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/dating/pages/DatingProfilesPage.jsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Input, Select, Space, App, Typography, Flex } from 'antd';

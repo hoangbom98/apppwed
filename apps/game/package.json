@@ -10,7 +10,7 @@
     "lint": "oxlint src --config ../../oxlint.config.json",
     "lint:fix": "oxlint src --config ../../oxlint.config.json --fix",
     "typecheck": "tsc --noEmit",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "cap:build": "cross-env CAPACITOR_BUILD=true tsc -b && cross-env CAPACITOR_BUILD=true vite build",
     "cap:sync": "npm run cap:build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",

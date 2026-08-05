@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/ConnectionsPage.jsx
 // Route: /settings/connections
 // Cấu hình: SMTP, Telegram Bot, Google Login, ChatGPT / AI
 import React from 'react';
@@ -111,7 +109,7 @@ function TabSMTP({ settings }) {
         }
         name="from"
       >
-        <LkvipInput placeholder="noreply@yourdomain.com" />
+        <LkvipInput placeholder="noreply@tc-gaming.live" />
       </Form.Item>
       <Form.Item label="Mật khẩu SMTP" name="password">
         <LkvipInput.Password placeholder="App password hoặc mật khẩu SMTP" />

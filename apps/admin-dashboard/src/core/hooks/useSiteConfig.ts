@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/hooks/useSiteConfig.ts
 // Reads brand/site config from env vars with sensible defaults.
 // Used by Login, AdminLayout, Dashboard header.
 export function useSiteConfig() {

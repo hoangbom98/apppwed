@@ -10,13 +10,13 @@ import Spinner from '../components/Spinner';
  * dompurify is listed in package.json — run `pnpm install` to activate.
  * Falls back to returning raw HTML only until the module loads (<100ms).
  */
-let _dp: { sanitize: (h: string, opts?: object) => string } | null = null;
+let dp: { sanitize: (h: string, opts?: object) => string } | null = null;
 import('dompurify')
-  .then(m => { _dp = m.default ?? (m as unknown as typeof _dp); })
+  .then(m => { dp = m.default ?? (m as unknown as typeof dp); })
   .catch(() => { /* dompurify not installed yet — run pnpm install */ });
 
 function sanitize(html: string): string {
-  return _dp ? _dp.sanitize(html, { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li','h1','h2','h3','h4','h5','h6','img','table','thead','tbody','tr','th','td','code','pre','blockquote'], ALLOWED_ATTR: ['href','src','alt','title','class','target','rel'] }) : html;
+  return dp ? dp.sanitize(html, { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li','h1','h2','h3','h4','h5','h6','img','table','thead','tbody','tr','th','td','code','pre','blockquote'], ALLOWED_ATTR: ['href','src','alt','title','class','target','rel'] }) : html;
 }
 
 export default function CmsPage() {
@@ -25,7 +25,7 @@ export default function CmsPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['page', slug],
-    queryFn: () => getPage(slug!),
+    queryFn: () => getPage(slug ?? ""),
   });
   const page = data?.data?.data;
 

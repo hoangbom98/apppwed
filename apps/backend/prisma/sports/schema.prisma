@@ -64,7 +64,6 @@ model User {
 
   @@index([email])
   @@index([status])
-  @@index([tenant])
   @@index([createdAt])
   @@map("users")
 }
@@ -114,7 +113,6 @@ model League {
   standings  Standing[]
   favorites  Favorite[]
 
-  @@index([tenant])
   @@index([status])
   @@map("leagues")
 }
@@ -142,7 +140,6 @@ model Team {
   standings   Standing[]
   favorites   Favorite[]
 
-  @@index([tenant])
   @@index([leagueId])
   @@map("teams")
 }
@@ -197,7 +194,6 @@ model LiveScore {
   eventDetail String?  @db.VarChar(255)
   timestamp   DateTime @default(now())
 
-  @@index([tenant])
   @@index([matchId])
   @@map("live_scores")
 }
@@ -217,7 +213,6 @@ model LiveUpdate {
   description String?  @db.Text
   createdAt   DateTime @default(now())
 
-  @@index([tenant])
   @@index([matchId, createdAt])
   @@map("live_updates")
 }
@@ -244,7 +239,6 @@ model Standing {
   updatedAt    DateTime @updatedAt
 
   @@unique([leagueId, teamId, season])
-  @@index([tenant])
   @@index([leagueId, season, rank])
   @@map("standings")
 }
@@ -275,9 +269,7 @@ model BetMarket {
   betItems    BetSlipItem[]
 
   @@unique([providerCode, providerEventId])
-  @@index([tenant])
   @@index([matchId, status])
-  @@index([tenant])
   @@index([matchId, marketType])
   @@map("bet_markets")
 }
@@ -299,7 +291,6 @@ model BetOdds {
   updatedAt   DateTime  @updatedAt
 
   @@unique([marketId, selection])
-  @@index([tenant])
   @@index([marketId, status])
   @@map("bet_odds")
 }
@@ -324,9 +315,7 @@ model BetSlip {
 
   items        BetSlipItem[]
 
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([userId, createdAt])
   @@map("bet_slips")
 }
@@ -347,9 +336,7 @@ model BetSlipItem {
   settledAt  DateTime?
   createdAt  DateTime  @default(now())
 
-  @@index([tenant])
   @@index([slipId])
-  @@index([tenant])
   @@index([marketId])
   @@map("bet_slip_items")
 }
@@ -378,7 +365,6 @@ model Highlight {
 
   tags        HighlightTag[]
 
-  @@index([tenant])
   @@index([status, sortOrder])
   @@map("highlights")
 }
@@ -413,9 +399,7 @@ model ShortVideo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([status, createdAt])
   @@map("short_videos")
 }
@@ -447,9 +431,7 @@ model News {
 
   comments    NewsComment[]
 
-  @@index([tenant])
   @@index([category, status])
-  @@index([tenant])
   @@index([status, publishedAt])
   @@map("news")
 }
@@ -470,7 +452,6 @@ model NewsComment {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  @@index([tenant])
   @@index([newsId, parentId, createdAt])
   @@map("news_comments")
 }
@@ -524,7 +505,6 @@ model PostComment {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  @@index([tenant])
   @@index([postId, createdAt])
   @@map("post_comments")
 }
@@ -549,7 +529,6 @@ model Comment {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@index([tenant])
   @@index([matchId, createdAt])
   @@map("comments")
 }
@@ -580,9 +559,7 @@ model LiveStream {
 
   chatMessages LiveChat[]
 
-  @@index([tenant])
   @@index([streamerId, status])
-  @@index([tenant])
   @@index([status, startTime])
   @@map("live_streams")
 }
@@ -598,9 +575,7 @@ model LiveChat {
   type      String     @default("text") @db.VarChar(20)
   createdAt DateTime   @default(now())
 
-  @@index([tenant])
   @@index([streamId, createdAt])
-  @@index([tenant])
   @@index([userId, createdAt])
   @@map("live_chats")
 }
@@ -649,9 +624,7 @@ model Notification {
   metadata  Json?
   createdAt DateTime @default(now())
 
-  @@index([tenant])
   @@index([userId, isRead])
-  @@index([tenant])
   @@index([userId, createdAt])
   @@map("notifications")
 }
@@ -677,11 +650,8 @@ model Transaction {
   metadata      Json?
   createdAt     DateTime @default(now())
 
-  @@index([tenant])
   @@index([userId, type])
-  @@index([tenant])
   @@index([userId, createdAt])
-  @@index([tenant])
   @@index([referenceType, referenceId])
   @@map("transactions")
 }
@@ -702,9 +672,7 @@ model DepositOrder {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([status, createdAt])
   @@map("deposit_orders")
 }
@@ -725,9 +693,7 @@ model WithdrawOrder {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([status, createdAt])
   @@map("withdraw_orders")
 }
@@ -751,7 +717,6 @@ model AdBanner {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@index([tenant])
   @@index([position, status])
   @@map("ad_banners")
 }
@@ -789,7 +754,6 @@ model SupportParticipant {
   createdAt  DateTime    @default(now())
 
   @@unique([roomId, userId])
-  @@index([tenant])
   @@index([userId])
   @@map("support_participants")
 }
@@ -810,7 +774,6 @@ model SupportMessage {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
-  @@index([tenant])
   @@index([roomId, createdAt])
   @@map("support_messages")
 }
@@ -833,9 +796,7 @@ model SupportTicket {
 
   replies     SupportTicketReply[]
 
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([status, createdAt])
   @@map("support_tickets")
 }
@@ -850,7 +811,6 @@ model SupportTicketReply {
   attachments Json?
   createdAt   DateTime      @default(now())
 
-  @@index([tenant])
   @@index([ticketId])
   @@map("support_ticket_replies")
 }
@@ -873,7 +833,6 @@ model KnowledgeArticle {
 
   translations KnowledgeTranslation[]
 
-  @@index([tenant])
   @@index([category, status])
   @@map("knowledge_articles")
 }
@@ -916,7 +875,6 @@ model TranslationLog {
   tokenCount     Int?
   createdAt      DateTime @default(now())
 
-  @@index([tenant])
   @@index([createdAt])
   @@map("translation_logs")
 }
@@ -932,7 +890,6 @@ model FileUpload {
   type         String   @default("general") @db.VarChar(30)
   createdAt    DateTime @default(now())
 
-  @@index([tenant])
   @@index([userId, type])
   @@map("file_uploads")
 }
@@ -960,9 +917,7 @@ model Promotion {
 
   claims      PromotionClaim[]
 
-  @@index([tenant])
   @@index([isActive, startDate, endDate])
-  @@index([tenant])
   @@index([type, isActive])
   @@map("promotions")
 }
@@ -980,11 +935,8 @@ model PromotionClaim {
   processedAt DateTime?
   metadata    Json?
 
-  @@index([tenant])
   @@index([userId, promotionId])
-  @@index([tenant])
   @@index([userId, status])
-  @@index([tenant])
   @@index([promotionId, status])
   @@map("promotion_claims")
 }

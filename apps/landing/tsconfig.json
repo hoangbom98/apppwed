@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.frontend.base.json",{
+  "extends": "../../config/typescript/tsconfig.frontend.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*":               ["./src/*"],
+      "@shared/*":         ["../../packages/shared/src/*"],
+      "@lkvip/shared":     ["../../packages/shared/src/index.ts"],
+      "@lkvip/shared/*":   ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

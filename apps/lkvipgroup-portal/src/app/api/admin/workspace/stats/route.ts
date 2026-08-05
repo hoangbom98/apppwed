@@ -6,5 +6,5 @@ import * as db from "@/lib/workspace-db";
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json(db.getDashboardStats());
+  return NextResponse.json(await db.getDashboardStats());
 }

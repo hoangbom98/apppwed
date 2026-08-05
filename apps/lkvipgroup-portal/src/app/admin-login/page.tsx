@@ -61,9 +61,9 @@ export default function AdminLoginPage() {
       <div className="hidden md:flex md:w-1/2 lg:w-[55%] bg-fortress-navy relative flex-col justify-between p-12 lg:p-24 border-r border-fortress-gold/10 overflow-hidden">
         {/* Subtle background decoration */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-fortress-deep to-fortress-navy" />
-        <div className="absolute -left-[10%] -top-[10%] w-[120%] h-[120%] opacity-[0.03] pointer-events-none" 
+        <div className="absolute -left-[10%] -top-[10%] w-[120%] h-[120%] opacity-[0.03] pointer-events-none"
              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        
+
         <div className="relative z-10">
           <Image
             src="/large-logo.png"
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
             Access internal systems, manage enquiries, and oversee investment operations through our secure administrative interface.
           </p>
         </div>
-        
+
         <div className="relative z-10 flex items-center gap-3 text-fortress-silver/50 text-sm font-medium tracking-wide">
           <Shield className="w-5 h-5 text-fortress-gold/70" />
           <span>Secured with Enterprise-Grade Encryption</span>

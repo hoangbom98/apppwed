@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/ops/pages/TasksPage.jsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Space, Select, Modal, Form, Input, Tabs, App, Typography, Flex } from 'antd';

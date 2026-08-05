@@ -86,7 +86,7 @@ export const BannerSlider: React.FC<BannerSliderProps> = ({
           className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}
         >
           {active.image ? (
-            <img src={active.image} alt={active.title} className="w-full h-full object-cover" />
+            <img src={active.image} alt={active.title} className="w-full h-full object-cover" loading="eager" fetchPriority="high" width="800" height="120" />
           ) : (
             <div className="text-center px-4 z-10">
               <p className="text-accent font-black text-2xl tracking-wider drop-shadow">{active.title || 'GAMEX'}</p>

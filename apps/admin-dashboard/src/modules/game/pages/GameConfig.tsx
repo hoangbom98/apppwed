@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/game/pages/GameConfig.jsx
 // Route: /game/config
 import React, { useState } from 'react';
 import { Segmented, Typography, Flex } from 'antd';

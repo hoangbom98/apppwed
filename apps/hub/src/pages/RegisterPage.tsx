@@ -42,14 +42,14 @@ export default function RegisterPage() {
 
   const mut = useMutation({
     mutationFn: register,
-    onSuccess: (res: any) => {
-      const d = res.data;
+    onSuccess: (res: unknown) => {
+      const d = (res as { data: { user: { username: string }, access_token: string, refresh_token: string } }).data;
       setAuth(d.user, d.access_token, d.refresh_token);
       toast.success('Đăng ký thành công! Chào mừng bạn!');
       navigate('/');
     },
-    onError: (e: any) => {
-      setErr(e.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại');
+    onError: (e: unknown) => {
+      setErr((e as { response?: { data?: { message?: string } } }).response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại');
     },
   });
 

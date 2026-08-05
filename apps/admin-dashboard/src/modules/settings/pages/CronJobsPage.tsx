@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/CronJobsPage.jsx
 // Route: /settings/cron-jobs
 // Quản lý danh sách Cron Jobs và trạng thái thực thi
 import React from 'react';
@@ -305,7 +303,7 @@ function CronJobsInner() {
         description={
           <div>
             <p>Thiết lập các Cron Jobs sau trên hosting / server (cPanel → Cron Jobs hoặc Linux <Text code>crontab -e</Text>).</p>
-            <p>Mỗi lệnh gọi URL: <Text code>curl "https://yourdomain.com{'{command}'}?key={'{cron_secret}'}"</Text></p>
+            <p>Mỗi lệnh gọi URL: <Text code>curl "https://tc-gaming.live{'{command}'}?key={'{cron_secret}'}"</Text></p>
           </div>
         }
       />

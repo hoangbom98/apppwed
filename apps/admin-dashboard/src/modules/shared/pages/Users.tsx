@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/Users.jsx
 // Ant Design — Table, Drawer, Form, Tag, Select, Input, Button, Space, Avatar
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/FinanceSummary.jsx
 // Finance overview: summary cards + 7-day trend chart + channel breakdown.
 // Route: accessible from Finance.jsx as a tab.
 import React, { useState } from 'react';

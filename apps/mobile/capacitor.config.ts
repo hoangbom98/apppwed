@@ -1,69 +1,107 @@
-// packages/mobile/capacitor.config.ts
-// Capacitor configuration cho LKVIP Admin mobile app.
+// apps/mobile/capacitor.config.ts
+// Capacitor configuration cho LKVIP Mobile — wrapper cho tất cả SPA apps.
 //
-// webDir trỏ đến bản build của admin-dashboard.
-// Khi phát hành production, chạy `pnpm run build` từ packages/mobile
-// để build web trước, rồi cap sync sẽ copy vào ios/ và android/.
+// webDir trỏ đến bản build của SPA được chọn.
+// Để chuyển đổi target app, set biến môi trường MOBILE_TARGET trước khi build:
+//   MOBILE_TARGET=hub pnpm run build
+//   MOBILE_TARGET=game pnpm run build
+//   MOBILE_TARGET=admin pnpm run build  (default)
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// ── Target SPA map ────────────────────────────────────────────────────────────
+// Mỗi entry: MOBILE_TARGET → { appId, appName, webDir, scheme, themeColor }
+const TARGETS: Record<string, {
+  appId: string;
+  appName: string;
+  webDir: string;
+  androidScheme: 'https' | 'http';
+  statusBarColor: string;
+}> = {
+  admin: {
+    appId:          'com.lkvip.admin',
+    appName:        'LKVIP Admin',
+    webDir:         '../admin-dashboard/dist',
+    androidScheme:  'https',
+    statusBarColor: '#0a0e17',
+  },
+  hub: {
+    appId:          'com.lkvip.hub',
+    appName:        'LKVIP Hub',
+    webDir:         '../hub/dist',
+    androidScheme:  'https',
+    statusBarColor: '#0f172a',
+  },
+  game: {
+    appId:          'com.lkvip.game',
+    appName:        'LKVIP Game',
+    webDir:         '../game/dist',
+    androidScheme:  'https',
+    statusBarColor: '#0f0f1a',
+  },
+  trading: {
+    appId:          'com.lkvip.trading',
+    appName:        'LKVIP Trade',
+    webDir:         '../trading/dist',
+    androidScheme:  'https',
+    statusBarColor: '#061015',
+  },
+  dating: {
+    appId:          'com.lkvip.dating',
+    appName:        'LKVIP Dating',
+    webDir:         '../dating/dist',
+    androidScheme:  'https',
+    statusBarColor: '#1a0a1a',
+  },
+  sports: {
+    appId:          'com.lkvip.sports',
+    appName:        'LKVIP Sports',
+    webDir:         '../sports/dist',
+    androidScheme:  'https',
+    statusBarColor: '#071a0a',
+  },
+};
+
+const target = process.env.MOBILE_TARGET ?? 'admin';
+const cfg = TARGETS[target];
+if (!cfg) {
+  throw new Error(
+    `Unknown MOBILE_TARGET="${target}". Valid values: ${Object.keys(TARGETS).join(', ')}`
+  );
+}
+
 const config: CapacitorConfig = {
-  appId: 'com.lkvip.admin',
-  appName: 'LKVIP Admin',
-
-  // Trỏ đến thư mục dist của admin-dashboard (build output)
-  webDir: '../admin-dashboard/dist',
-
-  // Tắt bundled webruntime để dùng WebView gốc của thiết bị (nhỏ hơn)
+  appId:             cfg.appId,
+  appName:           cfg.appName,
+  webDir:            cfg.webDir,
   bundledWebRuntime: false,
 
   server: {
-    // Dùng HTTPS scheme trên Android để tránh lỗi mixed-content
-    androidScheme: 'https',
-
-    // ── Development livereload ──────────────────────────────────────────────
-    // Bỏ comment dòng dưới khi dev để trỏ thẳng vào Vite dev server.
-    // Nhớ comment lại trước khi build production.
-    // url: 'http://192.168.1.x:5180',
-    // cleartext: true,  // Cần cho HTTP trong dev trên Android
+    androidScheme: cfg.androidScheme,
+    // ── Development livereload ────────────────────────────────────────────────
+    // Bỏ comment và set IP máy local khi cần livereload:
+    // url:       'http://192.168.1.x:5173',
+    // cleartext: true,
   },
 
   plugins: {
-    // ── Splash Screen ──────────────────────────────────────────────────────
     SplashScreen: {
-      launchShowDuration: 2000,
-      launchAutoHide: true,
-      backgroundColor: '#0a0e17',
+      launchShowDuration:       2000,
+      launchAutoHide:           true,
+      backgroundColor:          cfg.statusBarColor,
       androidSplashResourceName: 'splash',
-      androidScaleType: 'CENTER_CROP',
-      showSpinner: false,
-      iosSpinnerStyle: 'small',
-      spinnerColor: '#2563eb',
+      androidScaleType:         'CENTER_CROP',
+      showSpinner:              false,
+      spinnerColor:             '#2563eb',
     },
-
-    // ── Status Bar ────────────────────────────────────────────────────────
     StatusBar: {
-      style: 'DARK',
-      backgroundColor: '#0a0e17',
+      style:           'DARK',
+      backgroundColor: cfg.statusBarColor,
     },
-
-    // ── Keyboard ──────────────────────────────────────────────────────────
     Keyboard: {
-      resize: 'body',
-      style: 'DARK',
-      resizeOnFullScreen: true,
+      resize:              'body',
+      style:               'DARK',
+      resizeOnFullScreen:  true,
     },
-
-    // ── Push Notifications (cần @capacitor/push-notifications) ───────────
-    // PushNotifications: {
-    //   presentationOptions: ['badge', 'sound', 'alert'],
-    // },
-
-    // ── Local Notifications ───────────────────────────────────────────────
-    // LocalNotifications: {
-    //   smallIcon: 'ic_stat_icon_config_sample',
-    //   iconColor: '#2563eb',
-    //   sound: 'beep.wav',
-    // },
   },
 };
 

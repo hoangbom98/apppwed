@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * SecuritySettings/index.jsx
  * Route: /settings/security

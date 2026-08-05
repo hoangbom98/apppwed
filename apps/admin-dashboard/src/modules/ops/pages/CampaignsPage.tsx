@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/ops/pages/CampaignsPage.jsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Space, App, Typography, Flex, Card, Statistic, Row, Col } from 'antd';

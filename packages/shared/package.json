@@ -1,0 +1,27 @@
+{
+  "name": "@lkvip/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".":              { "types": "./src/index.ts",              "default": "./src/index.ts" },
+    "./lib/api":      { "types": "./src/lib/api.ts",            "default": "./src/lib/api.ts" },
+    "./lib/utils":    { "types": "./src/lib/utils.ts",          "default": "./src/lib/utils.ts" },
+    "./store/authStore": { "types": "./src/store/authStore.ts", "default": "./src/store/authStore.ts" },
+    "./types":        { "types": "./src/types/index.ts",        "default": "./src/types/index.ts" },
+    "./lib/*":        "./src/lib/*.ts",
+    "./store/*":      "./src/store/*.ts",
+    "./types/*":      "./src/types/*.ts"
+  },
+  "dependencies": {
+    "axios": "*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0",
+    "zustand": "*"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}

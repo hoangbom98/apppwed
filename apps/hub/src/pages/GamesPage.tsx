@@ -8,13 +8,14 @@ import { Search } from 'lucide-react';
 import { PlayCircleOutlined } from '@ant-design/icons';
 import * as hubApi from '@/api/hub';
 import { useGameStore } from '@/store/gameStore';
+import type { Category, Game } from '../types/game';
 
 export default function GamesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [search, setSearch]           = useState(searchParams.get('search') || '');
   const [page, setPage]               = useState(1);
-  const [allGames, setAllGames]       = useState<any[]>([]);
+  const [allGames, setAllGames]       = useState<Game[]>([]);
 
   const { categories, setActiveCategory, setCategories } = useGameStore();
   const catId = searchParams.get('category') || '';
@@ -34,7 +35,7 @@ export default function GamesPage() {
     },
     staleTime: 300_000,
   });
-  const cats = categories.length ? categories : (catData?.data?.data || []);
+  const cats: Category[] = categories.length ? categories : (catData?.data?.data || []);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['games', catId, search, page],
@@ -44,13 +45,13 @@ export default function GamesPage() {
 
   useEffect(() => {
     if (!data?.data?.data) return;
-    const incoming = data.data.data as any[];
+    const incoming = data.data.data as Game[];
     if (page === 1) {
       setAllGames(incoming);
     } else {
       setAllGames(prev => {
-        const ids = new Set(prev.map((g: any) => g.id));
-        return [...prev, ...incoming.filter((g: any) => !ids.has(g.id))];
+        const ids = new Set(prev.map(g => g.id));
+        return [...prev, ...incoming.filter(g => !ids.has(g.id))];
       });
     }
   }, [data, page]);
@@ -95,7 +96,7 @@ export default function GamesPage() {
             color: !catId ? '#111' : 'var(--hub-text-muted)' }}>
           Tất cả
         </button>
-        {(cats as any[]).map((c: any) => (
+        {cats.map((c: Category) => (
           <button key={c.id} onClick={() => handleCat(String(c.id))}
             style={{ padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap',
               background: catId === String(c.id) ? 'var(--hub-primary)' : 'var(--hub-bg-secondary)',
@@ -114,7 +115,7 @@ export default function GamesPage() {
         </div>
       ) : (
         <div className="hub-games-grid">
-          {allGames.map((g: any) => (
+          {allGames.map((g: Game) => (
             <a key={g.id}
               href={g.link || `/games/${g.slug}`}
               target={g.link ? '_blank' : '_self'} rel="noreferrer"

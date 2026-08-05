@@ -31,7 +31,7 @@ vercel --cwd apps/sports    --name lkvip-sports    --yes
 vercel --cwd apps/admin-dashboard --name lkvip-admin --yes
 ```
 
-After each command, Vercel writes a `.vercel/project.json` in the app directory.  
+After each command, Vercel writes a `.vercel/project.json` in the app directory.
 **Note:** `.vercel/` is gitignored — copy the `projectId` values to GitHub Secrets.
 
 ### Get project IDs

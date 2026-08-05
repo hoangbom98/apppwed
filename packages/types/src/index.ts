@@ -108,6 +108,7 @@ export type {
 // agent.ts       → IAgent, IAgentCommission, IAgentTreeNode, IAgentStats
 // rebate.ts      → IVipRebateRate, IRebate, IRebateSummary, DEFAULT_VIP_REBATE_RATES
 // giftcode.ts    → IGiftCode, IGiftCodeRedemption, IRedeemGiftCodeRequest
+// dating.ts      → DatingUser, DatingMessage, DatingConversation, etc.
 export * from './user';
 export * from './transaction';
 export * from './game';
@@ -116,3 +117,4 @@ export * from './lottery';
 export * from './agent';
 export * from './rebate';
 export * from './giftcode';
+export * from './dating';

@@ -85,8 +85,8 @@ pnpm dev:hub           # http://localhost:5173
 pnpm dev:admin         # http://localhost:5180
 ```
 
-Backend local: `http://localhost:5000`  
-Swagger API docs: `http://localhost:5000/api/docs`  
+Backend local: `http://localhost:5000`
+Swagger API docs: `http://localhost:5000/api/docs`
 Health check: `http://localhost:5000/health`
 
 ## Scripts gốc
@@ -127,7 +127,7 @@ Health check: `http://localhost:5000/health`
 | sports | `sports_db` | `SPORTS_DATABASE_URL` |
 | admin | `admin_db` | `ADMIN_DATABASE_URL` |
 
-Schema: `apps/backend/prisma/<project>/schema.prisma`.  
+Schema: `apps/backend/prisma/<project>/schema.prisma`.
 Mỗi project có schema riêng biệt — **không trộn lẫn schema**.
 
 ## Public deploy

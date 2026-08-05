@@ -19,7 +19,7 @@ git clone <repo-url> /var/LKVIP
 cd /var/LKVIP
 
 # 2. Install all workspace dependencies (pnpm v9+ required)
-pnpm install
+pnpm install --frozen-lockfile
 
 # 3. Create your local .env
 copy apps\backend\.env.example apps\backend\.env
@@ -62,22 +62,24 @@ pnpm run prisma:migrate:all
 pnpm --filter lkvip-backend run seed:all
 
 # 8. Build shared packages first
-pnpm run build:packages   # types → constants → utils
+pnpm run build:packages   # types → constants → utils → api-client
 
-# 9. Start development servers (all in one — uses concurrently)
+# 9. Start development servers (all in one — uses turbo)
 pnpm run dev:all
-# Or individually:
-pnpm run dev:backend
-pnpm run dev:hub
-pnpm run dev:game
-pnpm run dev:admin
-# etc.
 ```
 
 ## .env Format (`apps/backend/.env`)
 
+> The full template with all 136 keys lives at `apps/backend/.env.example`. Below are the minimum required keys to run locally. **Always copy `.env.example` first** — do not write `.env` from scratch.
+
 ```dotenv
-# Database URLs — connection_limit=8 per schema on 8-core VPS
+# ── Server
+NODE_ENV=development
+PORT=5000
+APP_URL=http://localhost:5000
+LOG_LEVEL=debug
+
+# ── Database URLs (connection_limit=8 per schema on 8-core VPS)
 HUB_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/hub_db?connection_limit=8"
 GAME_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/game_db?connection_limit=8"
 TRADE_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/trade_db?connection_limit=8"
@@ -85,19 +87,46 @@ DATING_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/dating_db?connec
 SPORTS_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/sports_db?connection_limit=8"
 ADMIN_DATABASE_URL="mysql://lkvip_db:<password>@127.0.0.1:3306/admin_db?connection_limit=8"
 
+# ── Redis
 REDIS_URL="redis://127.0.0.1:6379"
 
+# ── JWT
 JWT_SECRET="<random 48+ char hex>"
 JWT_REFRESH_SECRET="<random 48+ char hex, different from above>"
 JWT_EXPIRES_IN="2h"
 JWT_REFRESH_EXPIRES_IN="30d"
 
+# ── Encryption (field-level, AES-256-GCM)
 ENCRYPTION_KEY="<random 64 hex chars>"
 
-PORT=5000
-NODE_ENV=development
-APP_URL=http://localhost:5000
+# ── CORS (add all frontend origins)
+CORS_ORIGINS="http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177,http://localhost:5180"
+
+# ── Supabase (required if external apps are used)
+SUPABASE_URL=""
+SUPABASE_ANON_KEY=""
+SUPABASE_SERVICE_ROLE_KEY=""
+
+# ── Storage (local dev uses 'local' provider)
+STORAGE_PROVIDER=local
+UPLOAD_DIR=./uploads
+CDN_BASE_URL=http://localhost:5000/uploads
+
+# ── Security
+OTP_EXPIRE_MINUTES=5
+MAX_LOGIN_ATTEMPTS=5
+LOCKOUT_MINUTES=15
+
+# ── Features (set to false to disable on dev)
+ENABLE_AI=false
+ENABLE_2FA=true
+ENABLE_QUEUE=true
+MAINTENANCE_MODE=false
+ENABLE_ROBOT_BETS=false
+ENABLE_PRICE_FEED=false
 ```
+
+> Optional for local dev (leave blank to disable features): `TELEGRAM_BOT_TOKEN`, `SENTRY_DSN`, `SMTP_*`, `FIREBASE_SERVICE_ACCOUNT`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, payment gateway keys (MOMO, ZALOPAY, GSC, etc.).
 
 ## Common Windows Issues
 

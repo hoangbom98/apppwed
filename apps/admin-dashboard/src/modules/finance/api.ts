@@ -1,8 +1,3 @@
-// @ts-nocheck
-/**
- * finance/api.ts — Group Finance API helpers
- * Tất cả calls đến /api/admin/group-finance/*
- */
 import api from '@admin/api/client';
 import type { AxiosResponse } from 'axios';
 
@@ -31,3 +26,6 @@ export const groupFinanceApi = {
     r(api.get('/admin/group-finance/fee-logs', { params })),
   runInterest:      ()             => r(api.post('/admin/group-finance/interest/run')),
 };
+
+export const getFinanceSummary = (params: { start: string; end: string }) =>
+  api.get('/admin/group-finance/summary', { params }).then(res => res.data?.data ?? res.data);

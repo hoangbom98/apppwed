@@ -186,4 +186,136 @@ function renderEmail(template, vars) {
   return out;
 }
 
-module.exports = { send, sendOtp, sendEmail, renderEmail, reloadConfig };
+// ── Email templates ───────────────────────────────────────────────────────────
+
+/**
+ * Alert user of a new device / new IP login.
+ * @param {string} to         Recipient email
+ * @param {string} device     Device description (OS + Browser)
+ * @param {string} ip         IP address
+ * @param {string} time       Human-readable timestamp (caller formats)
+ */
+async function sendNewDeviceLoginAlert(to, device, ip, time) {
+  const subject = '⚠️ Đăng nhập từ thiết bị mới — LKVIP';
+  const html = `
+    <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <h2 style="color:#dc2626">Cảnh báo bảo mật</h2>
+      <p>Tài khoản của bạn vừa đăng nhập từ một thiết bị mới:</p>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0">
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold;width:120px">Thiết bị</td>
+            <td style="padding:8px;background:#f9fafb">${device}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">IP</td>
+            <td style="padding:8px;background:#f9fafb">${ip}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Thời gian</td>
+            <td style="padding:8px;background:#f9fafb">${time}</td></tr>
+      </table>
+      <p>Nếu đây không phải bạn, hãy <strong>đổi mật khẩu ngay</strong> và liên hệ hỗ trợ.</p>
+      <p style="color:#6b7280;font-size:12px;margin-top:20px">
+        Email này được gửi tự động — vui lòng không trả lời.
+      </p>
+    </div>`;
+  return send(to, subject, html);
+}
+
+/**
+ * Notify admin of a new inquiry submission.
+ * @param {string} adminEmail  Admin recipient
+ * @param {{ name, email, phone, message, budget, resourceTitle }} inquiry
+ */
+async function sendInquiryNotification(adminEmail, inquiry) {
+  const subject = `📬 Yêu cầu mới từ ${inquiry.name} — LKVIP`;
+  const resourceLine = inquiry.resourceTitle
+    ? `<tr><td style="padding:8px;background:#f3f4f6;font-weight:bold;width:120px">Tài nguyên</td>
+           <td style="padding:8px;background:#f9fafb">${inquiry.resourceTitle}</td></tr>`
+    : '';
+  const budgetLine = inquiry.budget
+    ? `<tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Ngân sách</td>
+           <td style="padding:8px;background:#f9fafb">${inquiry.budget}</td></tr>`
+    : '';
+  const html = `
+    <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <h2 style="color:#1a56db">Yêu cầu liên hệ mới</h2>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0">
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold;width:120px">Tên</td>
+            <td style="padding:8px;background:#f9fafb">${inquiry.name}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Email</td>
+            <td style="padding:8px;background:#f9fafb">${inquiry.email}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Điện thoại</td>
+            <td style="padding:8px;background:#f9fafb">${inquiry.phone || '—'}</td></tr>
+        ${resourceLine}
+        ${budgetLine}
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold;vertical-align:top">Tin nhắn</td>
+            <td style="padding:8px;background:#f9fafb">${inquiry.message}</td></tr>
+      </table>
+      <p style="color:#6b7280;font-size:12px">Hãy vào Dashboard để xử lý yêu cầu này.</p>
+    </div>`;
+  return send(adminEmail, subject, html);
+}
+
+/**
+ * Notify admin of a new KYC submission.
+ * @param {string} adminEmail
+ * @param {{ fullName, email, phone, nationality, idType }} kyc
+ */
+async function sendKycSubmissionNotification(adminEmail, kyc) {
+  const subject = `🪪 KYC mới từ ${kyc.fullName} — LKVIP`;
+  const html = `
+    <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <h2 style="color:#1a56db">Hồ sơ KYC mới cần xét duyệt</h2>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0">
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold;width:120px">Họ tên</td>
+            <td style="padding:8px;background:#f9fafb">${kyc.fullName}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Email</td>
+            <td style="padding:8px;background:#f9fafb">${kyc.email}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Điện thoại</td>
+            <td style="padding:8px;background:#f9fafb">${kyc.phone || '—'}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Quốc tịch</td>
+            <td style="padding:8px;background:#f9fafb">${kyc.nationality}</td></tr>
+        <tr><td style="padding:8px;background:#f3f4f6;font-weight:bold">Loại giấy tờ</td>
+            <td style="padding:8px;background:#f9fafb">${kyc.idType}</td></tr>
+      </table>
+      <p style="color:#6b7280;font-size:12px">Truy cập Admin Dashboard để xem tài liệu và cập nhật trạng thái.</p>
+    </div>`;
+  return send(adminEmail, subject, html);
+}
+
+/**
+ * Notify user that their KYC was approved or rejected.
+ * @param {string} to          User email
+ * @param {'approved'|'rejected'} result
+ * @param {string} [reason]    Rejection reason (required when result='rejected')
+ */
+async function sendKycResult(to, result, reason) {
+  const approved = result === 'approved';
+  const subject  = approved ? '✅ KYC được xét duyệt — LKVIP' : '❌ KYC bị từ chối — LKVIP';
+  const html = `
+    <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <h2 style="color:${approved ? '#16a34a' : '#dc2626'}">
+        Kết quả xét duyệt KYC
+      </h2>
+      ${approved
+        ? '<p>Hồ sơ KYC của bạn đã được <strong>xét duyệt thành công</strong>. Bạn có thể sử dụng đầy đủ tính năng nền tảng.</p>'
+        : `<p>Hồ sơ KYC của bạn <strong>không được chấp thuận</strong> vì lý do sau:</p>
+           <blockquote style="border-left:3px solid #dc2626;margin:12px 0;padding:8px 12px;background:#fef2f2;color:#991b1b">
+             ${reason || 'Tài liệu không hợp lệ.'}
+           </blockquote>
+           <p>Vui lòng nộp lại hồ sơ với tài liệu hợp lệ.</p>`
+      }
+      <p style="color:#6b7280;font-size:12px;margin-top:20px">
+        Email này được gửi tự động — vui lòng không trả lời.
+      </p>
+    </div>`;
+  return send(to, subject, html);
+}
+
+module.exports = {
+  send,
+  sendOtp,
+  sendEmail,
+  renderEmail,
+  reloadConfig,
+  sendNewDeviceLoginAlert,
+  sendInquiryNotification,
+  sendKycSubmissionNotification,
+  sendKycResult,
+};

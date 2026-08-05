@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/Dashboard.jsx
 // Ant Design — Statistic, Card, Row, Col, Table, Spin, Segmented
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';

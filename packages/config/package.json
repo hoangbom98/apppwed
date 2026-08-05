@@ -9,7 +9,8 @@
   "exports": {
     ".":                "./src/index.js",
     "./eslint-browser": "./src/eslint-browser.js",
-    "./eslint-node":    "./src/eslint-node.js"
+    "./eslint-node":    "./src/eslint-node.js",
+    "./vite-config":    "./src/vite.config.base.js"
   },
   "peerDependencies": {
     "@eslint/js": ">=8",

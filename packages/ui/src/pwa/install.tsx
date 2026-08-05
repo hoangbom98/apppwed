@@ -14,7 +14,7 @@ interface InstallPromptProps {
   appIcon?: string;
 }
 
-export const InstallPrompt: React.FC<InstallPromptProps> = ({ appName, appIcon }) => {
+export const InstallPrompt: React.FC<InstallPromptProps> = ({ appName: _appName, appIcon: _appIcon }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 

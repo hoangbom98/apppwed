@@ -1,8 +1,19 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, Search, GraduationCap, ChevronRight, Lock } from 'lucide-react';
+import { BookOpen, Search, GraduationCap, ChevronRight } from 'lucide-react';
 // @ts-ignore
 import * as hubApi from '@/api/hub';
+
+interface Course {
+  id: string | number;
+  title: string;
+  description: string;
+  thumbnail?: string;
+  level: string;
+  price: number;
+  currency: string;
+  slug: string;
+}
 
 export default function AcademyPage() {
   const [level, setLevel] = useState('');
@@ -61,7 +72,7 @@ export default function AcademyPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: any) => (
+          {courses.map((course: Course) => (
             <div key={course.id} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-indigo-500 transition-all flex flex-col group">
               <div className="h-40 bg-gray-700 relative">
                 {course.thumbnail ? (

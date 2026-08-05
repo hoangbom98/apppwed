@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/hub/pages/AdminBannersPage.jsx
 import React from 'react';
 import CrudPage from '@admin/modules/shared/components/CrudPage';
 import { adminBanners } from '../api';

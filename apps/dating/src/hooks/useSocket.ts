@@ -19,7 +19,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore, useWalletStore } from '@ui';
 import toast from 'react-hot-toast';
 
-let _socket: Socket | null = null;
+let socketInstance: Socket | null = null;
 
 export function useSocket() {
   const { token, user } = useAuthStore();
@@ -31,24 +31,23 @@ export function useSocket() {
 
     const wsUrl = import.meta.env.VITE_WS_URL;
     if (!wsUrl) {
-      console.error('VITE_WS_URL is not defined! WebSocket connection will fail.');
       return;
     }
 
-    _socket = io(wsUrl, {
+    socketInstance = io(wsUrl, {
       auth:       { token },
       path:       '/socket.io',
       transports: ['polling', 'websocket'], // Allow fallback
     });
-    socketRef.current = _socket;
+    socketRef.current = socketInstance;
 
     // ── Presence ───────────────────────────────────────────────────
-    _socket.on('connect', () => {
-      if (user?.id) _socket!.emit('subscribe_notifications', user.id);
+    socketInstance.on('connect', () => {
+      if (user?.id) socketInstance?.emit('subscribe_notifications', user.id);
     });
 
     // ── Wallet / Coins ─────────────────────────────────────────────
-    _socket.on('balance:update', (data: { coins?: number; diamonds?: number; balance?: number }) => {
+    socketInstance.on('balance:update', (data: { coins?: number; diamonds?: number; balance?: number }) => {
       if (data.coins !== undefined && data.diamonds !== undefined) {
         setCoinsAndDiamonds(data.coins, data.diamonds);
       } else if (data.coins !== undefined) {
@@ -57,7 +56,7 @@ export function useSocket() {
     });
 
     // ── Notifications ───────────────────────────────────────────────
-    _socket.on('notification', (data: { title?: string; content?: string; type?: string }) => {
+    socketInstance.on('notification', (data: { title?: string; content?: string; type?: string }) => {
       // Show toast for non-chat notifications only
       if (data.type !== 'message') {
         toast(data.title || data.content || 'Thông báo mới', { icon: '🔔' });
@@ -65,52 +64,52 @@ export function useSocket() {
       window.dispatchEvent(new CustomEvent('socket:notification', { detail: data }));
     });
 
-    _socket.on('announcement', (data: unknown) => {
+    socketInstance.on('announcement', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:announcement', { detail: data }));
     });
 
     // ── Match ───────────────────────────────────────────────────────
-    _socket.on('match:new', (data: { matchId?: string; user?: { fullName?: string; avatar?: string } }) => {
+    socketInstance.on('match:new', (data: { matchId?: string; user?: { fullName?: string; avatar?: string } }) => {
       toast.success(`Bạn có kết đôi mới với ${data.user?.fullName || 'ai đó'}! 💕`);
       window.dispatchEvent(new CustomEvent('socket:match_new', { detail: data }));
     });
 
     // ── Chat ────────────────────────────────────────────────────────
-    _socket.on('message:new', (data: unknown) => {
+    socketInstance.on('message:new', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:message_new', { detail: data }));
     });
-    _socket.on('message:seen', (data: unknown) => {
+    socketInstance.on('message:seen', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:message_seen', { detail: data }));
     });
-    _socket.on('typing:start', (data: unknown) => {
+    socketInstance.on('typing:start', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:typing_start', { detail: data }));
     });
-    _socket.on('typing:stop', (data: unknown) => {
+    socketInstance.on('typing:stop', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:typing_stop', { detail: data }));
     });
 
     // ── WebRTC Calls ────────────────────────────────────────────────
-    _socket.on('call:incoming', (data: unknown) => {
+    socketInstance.on('call:incoming', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:call_incoming', { detail: data }));
     });
-    _socket.on('call:answer', (data: unknown) => {
+    socketInstance.on('call:answer', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:call_answer', { detail: data }));
     });
-    _socket.on('call:ice-candidate', (data: unknown) => {
+    socketInstance.on('call:ice-candidate', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:ice_candidate', { detail: data }));
     });
-    _socket.on('call:end', (data: unknown) => {
+    socketInstance.on('call:end', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:call_end', { detail: data }));
     });
 
     // ── Live stream chat ─────────────────────────────────────────────
-    _socket.on('live:chat', (data: unknown) => {
+    socketInstance.on('live:chat', (data: unknown) => {
       window.dispatchEvent(new CustomEvent('socket:live_chat', { detail: data }));
     });
 
     return () => {
-      _socket?.disconnect();
-      _socket = null;
+      socketInstance?.disconnect();
+      socketInstance = null;
       socketRef.current = null;
     };
   }, [token, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps

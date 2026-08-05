@@ -39,7 +39,7 @@ export const interestPayoutWorker = new Worker(
 
       // 2. Cộng tiền với Decimal.js
       const pay1 = new Decimal(payout.pay1);
-      
+
       if (pay1.gt(0)) {
           if (type === 'normal') {
             await walletService.credit(tx, payout.uid, pay1.toNumber(), 'interest', `payout_${payoutId}`);
@@ -48,7 +48,7 @@ export const interestPayoutWorker = new Worker(
             await walletService.credit(tx, payout.uid, pay1.toNumber(), 'interest_mall', `mall_payout_${payoutId}`);
           }
       }
-      
+
       // 3. Finalize update
       if (type === 'normal') {
         await tx.lcInvestList.update({

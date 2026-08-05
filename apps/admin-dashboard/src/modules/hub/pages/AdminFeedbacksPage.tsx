@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/hub/pages/AdminFeedbacksPage.jsx
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * security.api.js
  * API service layer for Security Settings.

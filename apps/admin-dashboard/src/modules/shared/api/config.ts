@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/api/config.ts
 // Config API helper — uses the admin-specific API client.
 import client from '@admin/api/client';
 import type { AxiosResponse } from 'axios';

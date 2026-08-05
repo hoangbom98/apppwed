@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/auth/pages/Login.tsx
 // Admin login page — uses no user-facing sub-project imports.
 // Styled with inline Tailwind only. NO @/components/ui imports.
 import React, { useState } from 'react';

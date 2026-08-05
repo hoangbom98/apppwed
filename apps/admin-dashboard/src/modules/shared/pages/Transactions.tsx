@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/Transactions.jsx
 // Antd — Table, Tag, Button, DatePicker, Select, Space, Typography, Input
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';

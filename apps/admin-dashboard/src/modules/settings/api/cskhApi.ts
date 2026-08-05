@@ -1,4 +1,3 @@
-// @ts-nocheck
 // admin-dashboard/src/modules/settings/api/cskhApi.ts
 // API helpers cho CSKH config — đọc/lưu qua /admin/cskh/:projectSlug
 import client from '@admin/api/client';

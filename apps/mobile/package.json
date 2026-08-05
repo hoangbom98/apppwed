@@ -2,27 +2,41 @@
   "name": "@lkvip/mobile",
   "version": "1.0.0",
   "private": true,
-  "description": "LKVIP Mobile — Capacitor wrapper cho admin-dashboard PWA",
+  "description": "LKVIP Mobile — Capacitor wrapper cho tất cả SPA (admin, hub, game, trading, dating, sports). Chọn target bằng MOBILE_TARGET env.",
   "scripts": {
-    "build": "pnpm run build:web && npx cap sync",
-    "build:web": "pnpm --filter @lkvip/admin run build",
-    "sync": "npx cap sync",
-    "sync:ios": "npx cap sync ios",
-    "sync:android": "npx cap sync android",
-    "open:ios": "npx cap open ios",
-    "open:android": "npx cap open android",
-    "add:ios": "npx cap add ios",
-    "add:android": "npx cap add android",
-    "run:ios": "npx cap run ios",
-    "run:android": "npx cap run android",
-    "dev": "npx cap serve"
+    "build":           "pnpm run build:web && npx cap sync",
+    "build:admin":     "MOBILE_TARGET=admin   pnpm --filter @lkvip/admin   run build && npx cap sync",
+    "build:hub":       "MOBILE_TARGET=hub     pnpm --filter @lkvip/hub     run build && npx cap sync",
+    "build:game":      "MOBILE_TARGET=game    pnpm --filter @lkvip/game    run build && npx cap sync",
+    "build:trading":   "MOBILE_TARGET=trading pnpm --filter @lkvip/trade   run build && npx cap sync",
+    "build:dating":    "MOBILE_TARGET=dating  pnpm --filter @lkvip/dating  run build && npx cap sync",
+    "build:sports":    "MOBILE_TARGET=sports  pnpm --filter @lkvip/sports  run build && npx cap sync",
+    "build:web":       "pnpm --filter @lkvip/admin run build",
+    "sync":            "npx cap sync",
+    "sync:ios":        "npx cap sync ios",
+    "sync:android":    "npx cap sync android",
+    "open:ios":        "npx cap open ios",
+    "open:android":    "npx cap open android",
+    "add:ios":         "npx cap add ios",
+    "add:android":     "npx cap add android",
+    "run:ios":         "npx cap run ios",
+    "run:android":     "npx cap run android",
+    "dev":             "npx cap serve",
+    "dev:admin":       "MOBILE_TARGET=admin   npx cap serve",
+    "dev:hub":         "MOBILE_TARGET=hub     npx cap serve",
+    "dev:game":        "MOBILE_TARGET=game    npx cap serve"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.0"
+    "@capacitor/app":               "^7.0.0",
+    "@capacitor/core":              "^7.0.0",
+    "@capacitor/keyboard":          "^7.0.0",
+    "@capacitor/splash-screen":     "^7.0.0",
+    "@capacitor/status-bar":        "^7.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0",
-    "@capacitor/ios": "^7.0.0",
-    "@capacitor/android": "^7.0.0"
+    "@capacitor/cli":               "^7.0.0",
+    "@capacitor/ios":               "^7.0.0",
+    "@capacitor/android":           "^7.0.0",
+    "typescript":                   "^5.7.3"
   }
 }

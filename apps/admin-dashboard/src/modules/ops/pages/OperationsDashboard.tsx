@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/ops/pages/OperationsDashboard.jsx
 // Auto-Ops Platform — Main overview dashboard
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

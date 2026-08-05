@@ -5,10 +5,11 @@
 | Layer | Technology | Version |
 |---|---|---|
 | Runtime | Node.js | 20 LTS |
-| Language | TypeScript | ~6.0.2 (strict) |
+| Language | TypeScript | ~6.0.2 |
 | Backend framework | Express.js | ^4.22.2 |
 | ORM | Prisma | ^5.15.0 |
-| Database | MySQL | 8.x (6 schemas) |
+| Database (core) | MySQL | 8.x (6 schemas) |
+| Database (external apps) | Supabase / PostgreSQL | latest |
 | Cache / Queue broker | Redis | 7.x |
 | Job queue | BullMQ (+ Bull legacy) | ^5.80.10 / ^4.16.5 |
 | WebSocket | Socket.IO | ^4.8.3 |
@@ -24,10 +25,11 @@
 | Logging | Winston | ^3.x |
 | Process manager | PM2 (cluster, name: `lkvip-api`) | — |
 | Portal | Next.js 15 + pg (standalone, PM2 `lkvip-portal`) | ^15.5 |
+| Invest app | Next.js 15 (standalone, deployed on Vercel) | ^15.x |
 
-> **Not in codebase**: Vant UI, Zod (backend/SPA), @iconify/react, crypto-js, Video.js. Do not suggest these.
-> **Exception**: `apps/lkvipgroup-portal` uses Next.js 15 with Zod for server-side validation only — it is an isolated app.
-> **Backend `tsconfig.json`**: `strict: false` is intentional — the backend uses CommonJS + legacy patterns. Do not change to `true` without a dedicated migration PR.
+> **Not in codebase**: Vant UI, Zod (backend/SPA), @iconify/react, crypto-js, Video.js.
+> **Exception**: `apps/lkvipgroup-portal` and `apps/invest` use Zod for server-side / Next.js validation only.
+> **Backend `tsconfig.json`**: `strict: false` is intentional — the backend uses CommonJS + legacy patterns. Do **not** change to `true` without a dedicated migration PR.
 
 ---
 
@@ -38,28 +40,32 @@
 ├── apps/
 │   ├── backend/          ← lkvip-backend (Express + Prisma + BullMQ)
 │   │   ├── src/
-│   │   │   ├── config/          # DB factory, Redis, Socket.IO, Cron, i18n, Swagger, cookies
-│   │   │   ├── core/            # Event bus, lottery strategies (lo/de/xien/dau-duoi)
-│   │   │   ├── shared/          # Cross-cutting: Auth, Wallet, Payment, Notification, Queue, Socket
+│   │   │   ├── config/          # databases.ts, redis.ts, socket.ts, cron/, i18n.ts, swagger.ts, cookie.config.ts, prismaReplica.ts
+│   │   │   ├── core/            # events/, strategies/ (lo/de/xien/dau-duoi), gamification/, marketing/, rewards/, social/
+│   │   │   ├── shared/          # services/ (44+), middlewares/ (core/, auth/, audit/, security/, validation/), payment/, queue/, socket/
 │   │   │   ├── modules/
-│   │   │   │   ├── admin/       # Admin portal: users, finance, lottery, agents, risk, ops
+│   │   │   │   ├── admin/       # Admin portal: users, finance, lottery, agents, risk, workspace, ops
+│   │   │   │   ├── auth/        # Standalone auth module (JWT, 2FA, session)
 │   │   │   │   ├── game/        # Game sub-project: sessions, lottery, VIP, rebate, gifts
-│   │   │   │   ├── hub/         # Hub portal: CMS, news, banners
+│   │   │   │   ├── hub/         # Hub portal: CMS, news, banners, academy content
 │   │   │   │   ├── trade/       # Trading sub-project: investments, price feed, orders
 │   │   │   │   ├── dating/      # Dating sub-project: profiles, matches, chat
 │   │   │   │   ├── sports/      # Sports sub-project: matches, scores, leagues
 │   │   │   │   ├── lkvip/       # LKvip internal payment gateway
-│   │   │   │   └── workers/     # 13 BullMQ workers
-│   │   │   ├── risk/            # Risk engine: fraud, bot, DDoS, brute-force, compliance, AML
-│   │   │   ├── automation/      # depositSyncWorker, businessEvents
-│   │   │   └── third-parties/  # GSC, Goldgate, TCGaming, Binance, ApiFootball, GNews, TheSportsDB
+│   │   │   │   ├── store/       # LKVIP Store: products, orders, cart
+│   │   │   │   └── workers/     # 14 BullMQ workers
+│   │   │   ├── risk/            # Risk engine (15 detectors): fraud, bot, DDoS, brute-force, AML, compliance, geolocation, device-fingerprint, transactionMonitor, securityMonitor
+│   │   │   ├── automation/      # depositSyncWorker.ts, businessEvents.ts
+│   │   │   └── third-parties/  # core/, managers/, providers/, sports/ — GSC, Goldgate, TCGaming, Binance, ApiFootball, GNews, TheSportsDB, Sportmonks
 │   │   ├── prisma/
+│   │   │   ├── schema.prisma          ← Root schema (PostgreSQL, Admin Portal workspace)
 │   │   │   ├── admin/schema.prisma
 │   │   │   ├── game/schema.prisma
 │   │   │   ├── hub/schema.prisma
 │   │   │   ├── trade/schema.prisma
 │   │   │   ├── dating/schema.prisma
-│   │   │   └── sports/schema.prisma
+│   │   │   ├── sports/schema.prisma
+│   │   │   └── supabase/             ← RLS policies for external apps (rls-policies.sql)
 │   │   └── package.json
 │   ├── hub/               ← @lkvip/hub (Tailwind + Lucide, Capacitor, port 5173)
 │   ├── game/              ← @lkvip/game (Tailwind + Lucide + recharts + framer-motion, Capacitor, port 5174)
@@ -67,12 +73,14 @@
 │   ├── dating/            ← @lkvip/dating (Tailwind + Lucide + framer-motion, Capacitor, port 5176)
 │   ├── sports/            ← @lkvip/sports (Tailwind + Lucide + hls.js, Capacitor, port 5177)
 │   ├── admin-dashboard/   ← @lkvip/admin (Ant Design v6 + Tailwind, Desktop PWA, port 5180)
-│   ├── banking/           ← @lkvip/banking (Tailwind + Lucide + Yup, port 5181)
-│   ├── invest/            ← @lkvip/invest (Tailwind + Lucide + recharts, port 5182)
-│   ├── lkvip-store/       ← @lkvip/store (Tailwind + Lucide + RHF + Yup, port 5185)
-│   ├── academy/           ← @lkvip/academy (Tailwind + Lucide, port 5184)
-│   ├── lkvipgroup-portal/ ← @lkvip/portal (Next.js 15, standalone, port 3010)
-│   └── mobile/            ← @lkvip/mobile (Capacitor wrapper for admin-dashboard PWA)
+│   ├── banking/           ← @lkvip/banking (Tailwind + Lucide + Yup, port 5181, Vercel)
+│   ├── invest/            ← @lkvip/invest (Next.js 15 + Tailwind, port 5182, Vercel)
+│   ├── lkvip-store/       ← @lkvip/store (Tailwind + Lucide + RHF + Yup, port 5185, Vercel)
+│   ├── academy/           ← @lkvip/academy (Tailwind + Lucide, port 5184, Vercel)
+│   ├── lkvipgroup-portal/ ← @lkvip/portal (Next.js 15, standalone, port 3010, Vercel)
+│   ├── mobile/            ← @lkvip/mobile (Capacitor wrapper for admin-dashboard PWA)
+│   ├── mobile-native/     ← Native mobile shell
+│   └── mobile-native-enterprise/ ← Enterprise native shell
 ├── packages/
 │   ├── constants/    ← @lkvip/constants   (enums, banks, currencies, roles, errors, projects)
 │   ├── types/        ← @lkvip/types       (shared TS interfaces — common, api, portal, store)
@@ -81,15 +89,27 @@
 │   ├── api-client/   ← @lkvip/api-client  (Axios auth client factory with auto-refresh)
 │   ├── auth/         ← @lkvip/auth        (shared auth hooks, TokenManager)
 │   ├── config/       ← @lkvip/config      (shared ESLint flat configs: browser + node)
-│   └── paylock-sdk/  ← @lkvip/paylock-sdk (license verification SDK, UMD/ESM/CJS)
+│   ├── paylock-sdk/  ← @lkvip/paylock-sdk (license verification SDK, UMD/ESM/CJS)
+│   ├── ai-skills/    ← @lkvip/ai-skills   (AI-driven health check & auto-fix tooling)
+│   ├── scripts-utils/← @lkvip/scripts-utils (shared CLI/build utilities)
+│   └── tsconfig/     ← @lkvip/tsconfig    (shared tsconfig bases for all packages)
 ├── config/
 │   ├── nginx/        ← Nginx configs (group.conf, tc-gaming.conf, lkvip-http.conf)
 │   ├── pm2/          ← ecosystem.config.js (lkvip-api cluster + lkvip-portal fork)
 │   ├── mysql/        ← MySQL configuration
 │   ├── redis/        ← Redis configuration
+│   ├── database/     ← DB-level configs and init scripts
+│   ├── env/          ← Environment variable templates
+│   ├── eslint/       ← Shared ESLint configs
+│   ├── firebase/     ← Firebase Admin SDK config
+│   ├── monitoring/   ← prometheus.yml, grafana/
+│   ├── oxlint.json   ← OXLint root config
+│   ├── prettier/     ← Prettier config
+│   ├── storage/      ← Storage (S3/local) config
+│   ├── typescript/   ← Root tsconfig bases
 │   ├── vercel/       ← Vercel deployment guide (SETUP.md)
-│   └── monitoring/   ← prometheus.yml, grafana/
-└── scripts/          ← deploy.sh, ssl-setup.sh, vps-setup.sh, backup.sh, pre-prod-check.sh
+│   └── vitest/       ← Vitest config
+└── scripts/          ← deploy.sh, vps-setup.sh, backup.sh, pre-prod-check.sh, setup-permissions.sh
 ```
 
 ---
@@ -125,10 +145,16 @@ src/modules/<module>/
 
 ## TypeScript Rules
 
-- `strict: true` in `tsconfig.json` — TypeScript 6.0.2.
-- Never use `any`. Use `unknown` + type guard, or define a proper interface.
-- All function parameters and return types must be explicitly typed.
+- **Backend** (`apps/backend`): `strict: false`, `module: CommonJS` — intentional legacy setup. No new `any` unless forced by third-party types; prefer `unknown` + type guard.
+- **Frontend packages** (`packages/types`, `packages/utils`, etc.): `strict: true`.
+- All function parameters and return types should be explicitly typed wherever feasible.
 - Use `readonly` on DTO interfaces that should not be mutated.
+- Backend path aliases (defined in `apps/backend/tsconfig.json`):
+  ```json
+  "@lkvip/types":     ["../packages/types/src/index.ts"]
+  "@lkvip/constants": ["../packages/constants/src/index.ts"]
+  "@lkvip/utils":     ["../packages/utils/src/index.ts"]
+  ```
 
 ---
 
@@ -164,16 +190,26 @@ Factory: `src/shared/payment/PaymentFactory.ts`.
 - **Styling**: Tailwind CSS v4 for all SPAs. Ant Design v6 for Admin Dashboard. No Vant UI.
 - **Icons**: Lucide React (`lucide-react`). No @iconify/react.
 - **State management**: Zustand (global client state), TanStack Query (server state).
-- **Routing**: React Router DOM v7.
-- **Forms**: React Hook Form + Yup validation (Game, Dating, @lkvip/ui). No Zod.
+- **Routing**: React Router DOM v7 (SPAs); Next.js App Router (Portal, Invest).
+- **Forms**: React Hook Form + Yup validation. No Zod (except in Portal / Invest server components).
 - **Animation**: framer-motion (Game, Dating only).
 - **Video/HLS**: hls.js (Sports only). No Video.js.
 - **Mobile**: Capacitor v7 for Hub, Game, Trading, Dating, Sports.
-- **PWA**: vite-plugin-pwa on all 6 SPAs.
+- **PWA**: vite-plugin-pwa on all Vite SPAs (Hub, Game, Trade, Dating, Sports, Admin, Banking, Store, Academy).
 - **Shared components**: import from `@lkvip/ui` — never duplicate across SPAs.
 - **Shared types**: import from `@lkvip/types` — never redefine.
-- **Linting**: OXLint (`oxlint src`) for all frontend SPAs; ESLint for Admin Dashboard and backend.
+- **Linting**: OXLint (`oxlint src`) for all Vite SPAs; ESLint for Admin Dashboard and backend.
 - **i18n**: i18next + react-i18next (Hub has full i18n/; others use react-hot-toast for user messages).
+
+### Vercel-deployed apps
+The following apps have `vercel.json` and are deployed on Vercel (not VPS Nginx):
+- `apps/banking` (`@lkvip/banking`)
+- `apps/invest` (`@lkvip/invest`) — Next.js 15
+- `apps/lkvip-store` (`@lkvip/store`)
+- `apps/academy` (`@lkvip/academy`)
+- `apps/lkvipgroup-portal` (`@lkvip/portal`) — Next.js 15
+- `apps/admin-dashboard` (`@lkvip/admin`)
+- `apps/game`, `apps/hub`, `apps/dating`, `apps/sports`, `apps/trading` — also have `vercel.json`
 
 ---
 

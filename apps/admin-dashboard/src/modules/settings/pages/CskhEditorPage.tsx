@@ -1,4 +1,3 @@
-// @ts-nocheck
 // admin-dashboard/src/modules/settings/pages/CskhEditorPage.tsx
 // Route: /settings/cskh
 // Quản lý nội dung trang CSKH cho tất cả 5 project.

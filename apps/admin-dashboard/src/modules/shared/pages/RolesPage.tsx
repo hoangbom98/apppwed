@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/RolesPage.jsx
 // RBAC Role & Permission Management — học từ Boyue role.html + permission.js
 // Route: /settings/roles
 import React, { useState } from 'react';

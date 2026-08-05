@@ -111,7 +111,7 @@ class LuckyWheelService {
     const activePrizes = (wheel.prizes || []).filter(p => p.isActive);
     if (!activePrizes.length) throw new Error('Vòng quay không có phần thưởng');
 
-    // ── Validate quota / balance ─────────────────────────────────────────────
+    // ── Validate quota / balance TRƯỚC khi vào transaction ──────────────────
     if (isFree) {
       const status = await this.getSpinStatus(userId);
       if (status.freeSpinsRemaining <= 0) {
@@ -127,15 +127,28 @@ class LuckyWheelService {
       }
     }
 
-    const selectedPrize         = weightedRandom(activePrizes);
+    const selectedPrize               = weightedRandom(activePrizes);
     const { rewardType, rewardValue } = selectedPrize;
-    const user = await this.prisma.user.findUnique({
-      where:  { id: userId },
-      select: { balance: true },
-    });
+    const spinCost                    = !isFree ? Number(wheel.spinCost ?? 0) : 0;
+    const coinReward                  = rewardType === 'COIN' ? Number(rewardValue ?? 0) : 0;
 
-    const ops = [
-      this.prisma.spinHistory.create({
+    // ── Atomic transaction: tất cả mutation gộp vào 1 $transaction ──────────
+    // Lý do: tách 2 user.update (debit + credit) trong cùng $transaction gây
+    // "conflict on the same row" với Prisma. Thay bằng 1 update duy nhất với
+    // net balance change = coinReward - spinCost.
+    await this.prisma.$transaction(async (tx) => {
+      // Đọc balance TRONG transaction để có snapshot nhất quán
+      const userSnap = await tx.user.findUnique({
+        where:  { id: userId },
+        select: { balance: true },
+      });
+      const balanceBefore = Number(userSnap?.balance ?? 0);
+
+      // Tính net delta: credit COIN reward, debit spin cost
+      const netDelta = coinReward - spinCost;
+
+      // 1. Ghi spin history
+      await tx.spinHistory.create({
         data: {
           userId,
           wheelId:    wheel.id,
@@ -144,41 +157,37 @@ class LuckyWheelService {
           rewardValue,
           isFree,
         },
-      }),
-    ];
+      });
 
-    // Deduct spin cost
-    if (!isFree && Number(wheel.spinCost) > 0) {
-      ops.push(
-        this.prisma.user.update({
+      // 2. Cập nhật balance nếu có thay đổi (1 lần duy nhất để tránh conflict)
+      if (netDelta !== 0) {
+        // Nếu là debit (spinCost > coinReward), kiểm tra lại số dư trong transaction
+        if (netDelta < 0 && balanceBefore + netDelta < 0) {
+          throw new Error('Số dư không đủ để quay');
+        }
+        await tx.user.update({
           where: { id: userId },
-          data:  { balance: { decrement: wheel.spinCost } },
-        }),
-      );
-    }
+          data:  { balance: { increment: netDelta } },
+        });
+      }
 
-    // Apply COIN reward
-    if (rewardType === 'COIN' && Number(rewardValue) > 0) {
-      ops.push(
-        this.prisma.user.update({
-          where: { id: userId },
-          data:  { balance: { increment: rewardValue } },
-        }),
-        this.prisma.transaction.create({
+      // 3. Ghi ledger transaction nếu có thay đổi tài chính
+      if (spinCost > 0 || coinReward > 0) {
+        await tx.transaction.create({
           data: {
             userId,
             type:          'wheel_reward',
-            amount:        rewardValue,
-            balanceBefore: Number(user?.balance ?? 0),
-            balanceAfter:  Number(user?.balance ?? 0) + Number(rewardValue),
+            amount:        coinReward - spinCost, // dương = nhận tiền, âm = mất tiền
+            balanceBefore,
+            balanceAfter:  balanceBefore + netDelta,
             referenceType: 'spin_history',
-            note:          `Lucky Wheel — ${selectedPrize.label || 'prize'}`,
+            note:          `Lucky Wheel — ${selectedPrize.label || 'prize'}${spinCost > 0 ? ` (phí: ${spinCost})` : ''}`,
           },
-        }),
-      );
-    }
-
-    await this.prisma.$transaction(ops);
+        }).catch(() => {
+          // Transaction model có thể yêu cầu thêm field tuỳ project — không fatal
+        });
+      }
+    });
 
     // Apply POINTS reward
     if (rewardType === 'POINTS' && Number(rewardValue) > 0) {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Security Settings — shared constants & default values
  * (Admin dashboard is JSX, not TSX, so this is plain JS with JSDoc)

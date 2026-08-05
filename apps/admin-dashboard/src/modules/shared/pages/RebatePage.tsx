@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/RebatePage.jsx
 // Rebate (Hoàn trả) Management — học từ RebateService.php + RebateController.php Boyue
 // Route: /rebates
 // Tabs: Stats | Rules (Luật hoàn trả) | Claims (Yêu cầu chờ duyệt)

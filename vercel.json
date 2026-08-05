@@ -1,5 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "_comment": "Root vercel.json — chỉ dùng để Vercel CLI nhận diện đây là monorepo root. Mỗi app có vercel.json riêng trong thư mục của nó. Không deploy root repo trực tiếp.",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/ packages/"
-}

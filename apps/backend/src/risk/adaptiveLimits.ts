@@ -24,8 +24,9 @@ class AdaptiveLimits {
     try {
       const since30d = new Date(Date.now() - WINDOW_30D);
 
+      // Lưu ý: Transaction schema không có field 'status' — filter theo type
       const deposits = await this.prisma.transaction.findMany({
-        where: { userId, type: 'deposit', status: 'success', createdAt: { gte: since30d } },
+        where: { userId, type: 'deposit', createdAt: { gte: since30d } },
         select: { amount: true },
       });
 

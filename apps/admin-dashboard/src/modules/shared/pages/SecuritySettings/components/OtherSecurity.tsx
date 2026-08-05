@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * OtherSecurity.jsx
  * Tab 4 — Other security settings: admin path, session lifetime,

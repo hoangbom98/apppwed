@@ -1,6 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/trade/index.ts
-// Trade module self-registration — imported once by AdminLayout bootstrap.
 import { registerModule } from '../registry';
 import {
   Users, Search, ArrowDownUp, Coins, SlidersHorizontal,

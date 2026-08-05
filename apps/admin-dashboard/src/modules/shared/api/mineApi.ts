@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/api/mineApi.ts
 // All Mine (personal profile) API calls — maps to /api/admin/mine/*
 import api from '@admin/api/client';
 

@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/hooks/useAdminSocket.ts
 // Admin dashboard real-time Socket.IO hook — PROJECT-AWARE.
 //
 // Architecture:
@@ -184,7 +183,7 @@ export function useAdminSocket(): MutableRefObject<Socket | null> {
     });
 
     socket.on('reconnect_failed', () => {
-      console.error('[Admin Socket] Failed to reconnect — please refresh the page');
+      if (import.meta.env.DEV) console.warn('[Admin Socket] Failed to reconnect — please refresh the page');
       window.dispatchEvent(new CustomEvent('admin:socket_reconnect_failed'));
     });
 

@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/hooks/useHardwareShortcuts.ts
 // Bắt tổ hợp phím cứng (keyboard shortcuts) cho admin dashboard.
 //
 // Dùng trong bất kỳ component nào để đăng ký shortcut handler.

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArticleDetail } from '@ui/index';
 import api from '../api/client';

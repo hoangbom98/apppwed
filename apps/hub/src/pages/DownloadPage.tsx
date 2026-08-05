@@ -16,7 +16,7 @@ import { MobileOutlined, LaptopOutlined, InfoCircleOutlined, DownloadOutlined } 
 
 // ── Env-var fallback helpers ──────────────────────────────────────────────────
 function envUrl(fallback: string, key: string): string {
-  return (import.meta as any).env?.[key] || fallback;
+  return (import.meta as { env: Record<string, string> }).env?.[key] || fallback;
 }
 
 // ── Static fallback definitions (used when API unavailable) ──────────────────
@@ -49,8 +49,8 @@ const FALLBACK_APPS: AppCard[] = [
     rating:   4.6,
     downloads:'500 N+',
     primaryColor: '#194C38',
-    androidLink: envUrl('https://yourdomain.com/downloads/gamex.apk',  'VITE_DOWNLOAD_GAMEX_APK'),
-    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://yourdomain.com/ios/gamex.plist', 'VITE_DOWNLOAD_GAMEX_IOS'),
+    androidLink: envUrl('https://tc-gaming.live/downloads/gamex.apk',  'VITE_DOWNLOAD_GAMEX_APK'),
+    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/gamex.plist', 'VITE_DOWNLOAD_GAMEX_IOS'),
   },
   {
     key: 'sports',
@@ -62,8 +62,8 @@ const FALLBACK_APPS: AppCard[] = [
     rating:   4.7,
     downloads:'200 N+',
     primaryColor: '#16a34a',
-    androidLink: envUrl('https://yourdomain.com/downloads/sports.apk',  'VITE_DOWNLOAD_SPORTS_APK'),
-    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://yourdomain.com/ios/sports.plist', 'VITE_DOWNLOAD_SPORTS_IOS'),
+    androidLink: envUrl('https://tc-gaming.live/downloads/sports.apk',  'VITE_DOWNLOAD_SPORTS_APK'),
+    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/sports.plist', 'VITE_DOWNLOAD_SPORTS_IOS'),
   },
   {
     key: 'dating',
@@ -75,8 +75,8 @@ const FALLBACK_APPS: AppCard[] = [
     rating:   4.5,
     downloads:'1 Tr+',
     primaryColor: '#ec4899',
-    androidLink: envUrl('https://yourdomain.com/downloads/applive18.apk',  'VITE_DOWNLOAD_DATING_APK'),
-    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://yourdomain.com/ios/applive18.plist', 'VITE_DOWNLOAD_DATING_IOS'),
+    androidLink: envUrl('https://tc-gaming.live/downloads/applive18.apk',  'VITE_DOWNLOAD_DATING_APK'),
+    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/applive18.plist', 'VITE_DOWNLOAD_DATING_IOS'),
   },
   {
     key: 'trade',
@@ -88,25 +88,25 @@ const FALLBACK_APPS: AppCard[] = [
     rating:   4.4,
     downloads:'100 N+',
     primaryColor: '#F0B90B',
-    androidLink: envUrl('https://yourdomain.com/downloads/tradepro.apk',  'VITE_DOWNLOAD_TRADE_APK'),
-    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://yourdomain.com/ios/tradepro.plist', 'VITE_DOWNLOAD_TRADE_IOS'),
+    androidLink: envUrl('https://tc-gaming.live/downloads/tradepro.apk',  'VITE_DOWNLOAD_TRADE_APK'),
+    iosLink:     envUrl('itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/tradepro.plist', 'VITE_DOWNLOAD_TRADE_IOS'),
   },
 ];
 
 // ── Merge API data into fallback cards ───────────────────────────────────────
-function mergeWithApi(fallbacks: AppCard[], apiData: any[]): AppCard[] {
+function mergeWithApi(fallbacks: AppCard[], apiData: Record<string, unknown>[]): AppCard[] {
   return fallbacks.map(fb => {
-    const remote = apiData.find((a: any) => a.appId === fb.key);
+    const remote = apiData.find((a: Record<string, unknown>) => a.appId === fb.key);
     if (!remote) return fb;
     return {
       ...fb,
-      name:         remote.name        ?? fb.name,
-      androidLink:  remote.androidLink ?? fb.androidLink,
-      iosLink:      remote.iosLink     ?? fb.iosLink,
-      primaryColor: remote.primaryColor ?? fb.primaryColor,
-      rating:       parseFloat(remote.rating) || fb.rating,
-      downloads:    remote.downloads   ?? fb.downloads,
-      category:     remote.category    ?? fb.category,
+      name:         (remote.name as string)        ?? fb.name,
+      androidLink:  (remote.androidLink as string) ?? fb.androidLink,
+      iosLink:      (remote.iosLink as string)     ?? fb.iosLink,
+      primaryColor: (remote.primaryColor as string) ?? fb.primaryColor,
+      rating:       parseFloat(remote.rating as string) || fb.rating,
+      downloads:    (remote.downloads as string)   ?? fb.downloads,
+      category:     (remote.category as string)    ?? fb.category,
     };
   });
 }

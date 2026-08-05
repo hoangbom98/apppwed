@@ -4,10 +4,8 @@
    * ─────────────────────────────────────────────────────────────────────────
    * Root TypeScript config dùng chung cho:
    *   - apps/backend
-   *   - packages/shared-types
-   *   - packages/shared-utils
-   *   - packages/constants
-   *   - @lkvip/cli
+   *   - packages/types, packages/utils, packages/constants
+   *   - packages/auth, packages/api-client, packages/scripts-utils
    *
    * Frontend SPAs KHÔNG extend từ đây — chúng dùng tsconfig.frontend.base.json
    * ─────────────────────────────────────────────────────────────────────────
@@ -17,6 +15,8 @@
     "module":                           "ESNext",
     "moduleResolution":                 "bundler",
     "lib":                              ["ES2022"],
+
+    "ignoreDeprecations":               "6.0",
 
     "strict":                           true,
     "exactOptionalPropertyTypes":       false,

@@ -1,4 +1,3 @@
-// frontend/admin-dashboard/src/core/routes/ProtectedRoute.tsx
 // Route guard with three layers:
 //   1. Authentication — must have a valid token
 //   2. Role gate     — requiredRole must match (super_admin bypasses all)

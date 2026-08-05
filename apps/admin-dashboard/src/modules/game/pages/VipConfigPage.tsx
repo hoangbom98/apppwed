@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * VipConfigPage.tsx — Quản lý cấu hình VIP Tier
  * Route: /game/vip-config

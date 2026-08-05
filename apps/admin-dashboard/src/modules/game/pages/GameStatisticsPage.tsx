@@ -1,15 +1,7 @@
-// @ts-nocheck
-// admin-dashboard/src/modules/game/pages/GameStatisticsPage.jsx
-// Trang thống kê Game — Overview / Tài chính / Đại lý / Lợi nhuận / Người dùng
-// Ref: /var/www/ht/src/views/statistics/
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import client from '@admin/api/client';
-
-// ── format helpers ───────────────────────────────────────────────────────────
-const fmtVND  = (n) => (n == null ? '—' : Number(n).toLocaleString('vi-VN') + ' ₫');
-const fmtNum  = (n) => (n == null ? '—' : Number(n).toLocaleString('vi-VN'));
-const fmtPct  = (n) => (n == null ? '—' : Number(n).toFixed(1) + '%');
+import { fmtVND, fmtNum, fmtPct } from '@admin/modules/shared/utils/formatters';
 
 const COLOR = {
   green:  '#10b981',

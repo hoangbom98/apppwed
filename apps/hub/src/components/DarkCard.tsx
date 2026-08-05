@@ -25,7 +25,7 @@ export default function DarkCard({ image, title, subtitle, badge, href, onClick,
 
   const inner = (
     <div className={`bg-gray-800 rounded-lg overflow-hidden hover:ring-1 hover:ring-indigo-500 transition-all cursor-pointer ${className}`}>
-      {image && <img src={image} alt={title ?? ''} className="w-full h-36 object-cover" />}
+      {image && <img src={image} alt={title ?? ''} className="w-full h-36 object-cover" loading="lazy" width="400" height="144" />}
       <div className="p-3">
         {badge && <span className="text-xs bg-indigo-900 text-indigo-300 rounded px-1.5 py-0.5 mb-1 inline-block">{badge}</span>}
         {title && <div className="font-medium text-gray-100 text-sm truncate">{title}</div>}

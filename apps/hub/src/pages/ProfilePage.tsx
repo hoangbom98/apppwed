@@ -30,7 +30,10 @@ export default function ProfilePage() {
   const pwMut = useMutation({
     mutationFn: changePassword,
     onSuccess: () => { setMsg('Đã đổi mật khẩu!'); setPw({ current_password: '', new_password: '' }); },
-    onError: (e: any) => setMsg(e.response?.data?.message || 'Lỗi'),
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { message?: string } } };
+      setMsg(error?.response?.data?.message || 'Lỗi');
+    },
   });
 
   if (isLoading) return <Spinner />;

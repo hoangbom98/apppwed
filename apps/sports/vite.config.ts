@@ -72,8 +72,8 @@ export default defineConfig({
   server: {
     port: 5178,
     proxy: {
-      '/api':       { target: 'http://localhost:5000', changeOrigin: true },
-      '/socket.io': { target: 'http://localhost:5000', changeOrigin: true, ws: true },
+      '/api':       { target: process.env.VITE_API_URL || 'http://localhost:5000', changeOrigin: true },
+      '/socket.io': { target: process.env.VITE_API_URL || 'http://localhost:5000', changeOrigin: true, ws: true },
     },
   },
 
@@ -91,7 +91,8 @@ export default defineConfig({
           if (id.includes('@tanstack/react-query')) return 'query-vendor';
           if (id.includes('socket.io-client'))      return 'socket-vendor';
           if (id.includes('lucide-react'))           return 'ui-vendor';
-          if (id.includes('recharts') || id.includes('d3-')) return 'charts-vendor';
+          if (id.includes('recharts') || id.includes('/d3-')) return 'charts-vendor';
+          if (id.includes('hls.js'))                 return 'hls-vendor';
         },
       },
     },

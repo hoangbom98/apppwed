@@ -45,6 +45,23 @@ const Skeleton = ({ cls }: { cls: string }) => (
   <div className={`hub-skeleton ${cls}`} />
 );
 
+interface Game {
+  id: string;
+  name: string;
+  link?: string;
+  slug: string;
+  image?: string;
+  category?: { name: string };
+}
+
+interface NewsItem {
+  id: string;
+  slug: string;
+  title: string;
+  image?: string;
+  summary: string;
+}
+
 // ── Icon fallback cho activities ──────────────────────────────────────
 function ActivityIcon({ name }: { name: string }) {
   const map: Record<string, React.ReactElement> = {
@@ -73,9 +90,9 @@ export default function HomePage() {
     queryFn:  () => hubApi.getBanners({ position: 'home' }),
   });
 
-  const games   = (gamesData?.data?.data   as any[]) || [];
-  const news    = (newsData?.data?.data    as any[]) || [];
-  const banners = (bannerData?.data?.data  as any[]) || [];
+  const games   = (gamesData?.data?.data   as Game[]) || [];
+  const news    = (newsData?.data?.data    as NewsItem[]) || [];
+  const banners = (bannerData?.data?.data  as unknown[]) || [];
 
   return (
     <div className="hub-home">
@@ -83,7 +100,7 @@ export default function HomePage() {
       {/* ── Hero Banner ─────────────────────────────────────── */}
       <section className="hub-hero">
         {banners.length > 0 ? (
-          <img src={banners[0].image} alt={banners[0].title} className="hub-banner-img" />
+          <img src={banners[0].image} alt={banners[0].title} className="hub-banner-img" fetchPriority="high" width="800" height="300" />
         ) : (
           <div className="hub-banner-video-wrap">
             <video
@@ -148,7 +165,7 @@ export default function HomePage() {
           {gamesLoading
             ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} cls="hub-game-skeleton" />)
             : games.length > 0
-              ? games.map((g: any) => (
+              ? games.map((g: Game) => (
                   <a key={g.id} href={g.link || `/games/${g.slug}`}
                     target={g.link ? '_blank' : '_self'} rel="noreferrer"
                     className="hub-game-card">
@@ -234,7 +251,7 @@ export default function HomePage() {
           {newsLoading
             ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} cls="hub-news-skeleton" />)
             : news.length > 0
-              ? news.map((n: any, i: number) => (
+              ? news.map((n: NewsItem, i: number) => (
                   <button key={n.id} onClick={() => navigate(`/news/${n.slug}`)}
                     className="hub-news-card">
                     <img src={n.image || NEWS_IMGS[i % NEWS_IMGS.length]} alt={n.title}

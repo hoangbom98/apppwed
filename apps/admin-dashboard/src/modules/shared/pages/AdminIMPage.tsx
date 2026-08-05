@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/shared/pages/AdminIMPage.jsx
 // Admin IM / Chat Panel — học từ ImController.php + IMService.php Boyue
 // Route: /im
 // Tabs: Rooms (phòng chat) | Tickets (yêu cầu hỗ trợ) | Broadcast

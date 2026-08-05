@@ -1,6 +1,5 @@
 // @ts-nocheck
 // apps/sports/src/pages/CSKH.tsx
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CskhPage, api } from '@lkvip/ui';
 import { sportsCskhConfig } from '../configs/cskh.config';

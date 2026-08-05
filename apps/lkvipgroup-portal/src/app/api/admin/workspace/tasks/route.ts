@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const sp = req.nextUrl.searchParams;
-  const result = db.listTasks({
+  const result = await db.listTasks({
     status:     sp.get("status")     ?? undefined,
     project:    sp.get("project")    ?? undefined,
     assigneeId: sp.get("assigneeId") ? Number(sp.get("assigneeId")) : undefined,
@@ -29,6 +29,6 @@ export async function POST(req: NextRequest) {
   if (!body.title?.trim())
     return NextResponse.json({ error: "title is required" }, { status: 400 });
 
-  const task = db.createTask({ ...body, createdBy: typeof user.id === "number" ? user.id : null });
+  const task = await db.createTask({ ...body, createdBy: typeof user.id === "number" ? user.id : null });
   return NextResponse.json(task, { status: 201 });
 }

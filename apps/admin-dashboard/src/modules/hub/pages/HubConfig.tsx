@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * code/frontend/admin-dashboard/src/modules/hub/pages/HubConfig.jsx
  *

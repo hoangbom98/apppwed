@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/game/pages/GameWithdrawalsPage.jsx
 import React, { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, Tag, Button, Space, Select, Input, App, Typography, Flex } from 'antd';

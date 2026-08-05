@@ -1,8 +1,10 @@
-# Database Reference — LKVIP Group  (updated: 2027-01 standardization)
+# Database Reference — LKVIP Group
 
 ## Multi-Database Setup
 
-Six MySQL 8 databases, one per domain. Each has its own Prisma 5 schema file under `apps/backend/prisma/`.
+### Core stack — 6 MySQL 8 databases (LKVIP platform)
+
+Each has its own Prisma 5 schema file under `apps/backend/prisma/<module>/schema.prisma`.
 
 | Database | Schema path | Used by |
 |---|---|---|
@@ -12,6 +14,17 @@ Six MySQL 8 databases, one per domain. Each has its own Prisma 5 schema file und
 | `trade_db` | `prisma/trade/schema.prisma` | Investment packages, orders, price data |
 | `dating_db`| `prisma/dating/schema.prisma`| Profiles, matches, messages |
 | `sports_db`| `prisma/sports/schema.prisma`| Events, odds, bet slips |
+
+### Additional schemas
+
+| Schema | Path | Purpose |
+|---|---|---|
+| Root schema | `prisma/schema.prisma` | PostgreSQL — Admin Portal workspace: `Project`, `User`, `UserProject` (role-based multi-project membership) |
+| Supabase RLS | `prisma/supabase/rls-policies.sql` | Row-Level Security policies for 7 external apps (BankApp, Academy, Invest, Market, Chat, Todo, Expenses) |
+
+> The root `schema.prisma` uses `provider = "postgresql"` and `env("HUB_DATABASE_URL")`. It is managed separately — **do not** include it in `prisma:migrate:all`. Migrate it individually: `npx prisma migrate dev --schema=prisma/schema.prisma`.
+
+> Supabase external apps use Supabase auth (`auth.uid()` = current user). Tables follow convention: `id UUID PK`, `user_id UUID REFERENCES auth.users(id)`, `created_at / updated_at TIMESTAMPTZ`. Service role key bypasses all RLS.
 
 ## Financial Data Standards (MANDATORY)
 
@@ -103,6 +116,18 @@ CheckinConfig         — daily check-in reward configuration
 UserCheckin           — per-user per-date check-in record
 MissionTemplate       — daily/weekly mission definitions
 UserMission           — per-user mission progress
+```
+
+---
+
+## Core Tables — store (lkvip-store app)
+
+```
+StoreProduct          — product catalogue (name, price, stock, category)
+StoreCategory         — product categories
+StoreOrder            — user purchase orders (status, total)
+StoreOrderItem        — line items per order (productId, qty, price)
+StoreCart             — shopping cart per user (items JSON)
 ```
 
 ---

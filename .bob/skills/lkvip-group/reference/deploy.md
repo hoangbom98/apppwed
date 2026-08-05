@@ -4,7 +4,9 @@ Target: Ubuntu 22.04 VPS.
 Deploy path: `/var/LKVIP`
 Production domain: `tc-gaming.live`
 Subdomains: `api`, `hub`, `game`, `trade`, `dating`, `sports`, `admin` — all under `tc-gaming.live`.
-PM2 process name: **`lkvip-api`** (not `lkvip-backend`).
+PM2 process names: **`lkvip-api`** (backend cluster) · **`lkvip-portal`** (Next.js fork).
+
+> **Vercel-hosted apps** (do NOT deploy to VPS Nginx): `banking`, `invest`, `store`, `academy`, `lkvipgroup-portal`, `admin-dashboard`, `game`, `hub`, `dating`, `sports`, `trading`. These are deployed automatically via Vercel Git integration. See `config/vercel/SETUP.md`.
 
 ---
 
@@ -54,22 +56,22 @@ FLUSH PRIVILEGES;
 git clone <repo> /var/LKVIP
 cd /var/LKVIP
 
-pnpm install
+pnpm install --frozen-lockfile
 
 cp apps/backend/.env.example apps/backend/.env
-# Fill in production DATABASE_URL, JWT secrets, Redis URL, gateway keys
+# Fill in ALL 136 env vars — see .env.example for full reference
 nano apps/backend/.env
 
-# Build shared packages first (types → constants → utils)
+# Build shared packages first (types → constants → utils → api-client)
 pnpm run build:packages
 
-# Build all frontend SPAs
+# Build all frontend SPAs (Hub, Game, Trade, Dating, Sports, Admin, Banking, Invest, Store, Academy)
 pnpm run build:frontends
 
 # Build backend
 pnpm --filter lkvip-backend run build
 
-# Run all Prisma migrations
+# Run all Prisma migrations (6 MySQL schemas)
 pnpm run prisma:deploy
 
 # Seed data (first deploy only)
@@ -83,12 +85,19 @@ pnpm --filter lkvip-backend run seed:all
 File: `apps/backend/ecosystem.config.js` (already committed to repo)
 Also available at: `config/pm2/ecosystem.config.js`
 
+Two processes in production:
+
+| Process | Name | Mode | Port | Script |
+|---|---|---|---|---|
+| Backend API | `lkvip-api` | cluster (max) | 5000 | `dist/server.js` |
+| Portal (if VPS) | `lkvip-portal` | fork (1) | 3010 | `.next/standalone/server.js` |
+
 ```javascript
 module.exports = {
   apps: [{
-    name:      'lkvip-api',           // ← use this name in all pm2 commands
+    name:      'lkvip-api',
     script:    'dist/server.js',
-    cwd:       __dirname,             // apps/backend/
+    cwd:       '/var/LKVIP/apps/backend',
     instances: 'max',
     exec_mode: 'cluster',
     max_memory_restart: '400M',
@@ -99,6 +108,19 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 5000,
       APP_URL: 'https://api.tc-gaming.live',
+    },
+  }, {
+    name:      'lkvip-portal',
+    script:    '.next/standalone/server.js',
+    cwd:       '/var/LKVIP/apps/lkvipgroup-portal',
+    instances: 1,
+    exec_mode: 'fork',
+    max_memory_restart: '300M',
+    out_file: '/var/LKVIP/logs/lkvip-portal-out.log',
+    err_file: '/var/LKVIP/logs/lkvip-portal-err.log',
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3010,
     },
   }],
 };
@@ -142,7 +164,29 @@ server {
 server { listen 80; server_name api.tc-gaming.live; return 301 https://$host$request_uri; }
 ```
 
-### SPA Frontend (one block per subdomain)
+### Portal (Next.js reverse proxy — if running on VPS)
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name portal.tc-gaming.live;
+
+    ssl_certificate     /etc/letsencrypt/live/tc-gaming.live/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tc-gaming.live/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3010;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+server { listen 80; server_name portal.tc-gaming.live; return 301 https://$host$request_uri; }
+```
+
+### SPA Frontend (VPS-hosted only — skip if on Vercel)
 
 ```nginx
 server {
@@ -213,6 +257,7 @@ pnpm --filter lkvip-backend run build
 pnpm run prisma:deploy
 
 pm2 reload lkvip-api --update-env
+pm2 reload lkvip-portal --update-env 2>/dev/null || true   # only if portal runs on VPS
 nginx -t && nginx -s reload
 ```
 
@@ -290,3 +335,18 @@ Health check: `GET /health` — returns DB + Redis + queue status.
 
 Prometheus config: `config/monitoring/prometheus.yml`
 Grafana dashboards: `config/monitoring/grafana/`
+
+---
+
+## 9 — Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Vercel build fails: `cd../.. not found` | `vercel.json` `installCommand` or `buildCommand` missing space after `cd` | Change `"cd../.. && ..."` → `"cd ../.. && ..."` in the app's `vercel.json` |
+| Build fails: `Cannot find package @lkvip/types` | Root directory set incorrectly in Vercel dashboard | Set **Root Directory** to `apps/<name>` and **Install Command** to `cd ../.. && pnpm install --frozen-lockfile` |
+| `VITE_API_URL` is `undefined` in browser | Variable not prefixed `VITE_` or not set in Vercel dashboard | Must be prefixed `VITE_` and added in Vercel → Settings → Environment Variables |
+| Blank page on hard refresh (404) | Missing SPA rewrite rule | Verify `vercel.json` has `"rewrites": [{"source": "/(.*)", "destination": "/index.html"}]` |
+| API calls blocked by CORS | Vercel preview URL not in CORS allowlist | Add the Vercel deployment URL to `CORS_ORIGINS` in `apps/backend/.env` and run `pm2 reload lkvip-api --update-env` |
+| `CAPACITOR_BUILD=true` breaks routing | Base URL becomes `./` instead of `/` | Never set `CAPACITOR_BUILD=true` in Vercel env vars — it is for native Capacitor builds only |
+| PM2 process not found: `lkvip-backend` | Wrong process name | The correct PM2 name is **`lkvip-api`** (not `lkvip-backend`) |
+| `pm2 reload` not picking up new `.env` | Missing `--update-env` flag | Always run `pm2 reload lkvip-api --update-env` after changing env vars |

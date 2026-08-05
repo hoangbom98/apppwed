@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPosts, createPost, likePost } from '../api/sports';
 import PostCard from '../components/PostCard';

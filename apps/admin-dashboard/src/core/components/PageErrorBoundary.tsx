@@ -1,4 +1,3 @@
-// apps/admin-dashboard/src/core/components/PageErrorBoundary.tsx
 // Class-based ErrorBoundary for lazy-loaded route chunks.
 // Catches chunk-load failures and renders a recovery UI instead of a white screen.
 import React, { type ReactNode, type ErrorInfo } from 'react';

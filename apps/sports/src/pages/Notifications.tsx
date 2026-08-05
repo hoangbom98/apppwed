@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getNotifications, markNotifRead, markAllNotifsRead } from '../api/sports';
 import { useSportsStore } from '../store/sportsStore';

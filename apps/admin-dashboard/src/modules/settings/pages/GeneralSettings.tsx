@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/GeneralSettings.jsx
 // Route: /settings/general
 // Cài đặt chung: hiển thị dịch vụ, đơn hàng, đăng ký tài khoản
 import React from 'react';

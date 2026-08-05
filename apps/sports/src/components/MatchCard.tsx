@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { MATCH_STATUS } from '../utils/constants';
 import { formatMatchTime, formatScore } from '../utils/formatters';

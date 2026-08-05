@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GeneralConfig.jsx
  * Admin page for managing per-project UI / branding / social / feature configurations.

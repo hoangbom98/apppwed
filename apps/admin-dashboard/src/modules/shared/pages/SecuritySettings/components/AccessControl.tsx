@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * AccessControl.jsx
  * Tab 2 — Access Control: limit devices and IPs for admins/clients.

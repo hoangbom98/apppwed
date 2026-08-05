@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MessageCircle, PlusCircle, List } from 'lucide-react';
 import { ChatRoom, TicketForm, TicketList } from '@ui/index';
 import { useAuthStore } from '../store/authStore';

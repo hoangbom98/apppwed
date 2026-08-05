@@ -5,6 +5,16 @@ import * as hubApi from '@/api/hub';
 import { Eye } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 
+interface News {
+  id: string | number;
+  slug: string;
+  image?: string;
+  title: string;
+  summary: string;
+  author: string;
+  views: number;
+}
+
 export default function NewsPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
@@ -12,7 +22,7 @@ export default function NewsPage() {
     queryKey: ['news', page],
     queryFn: () => hubApi.getNewsList({ page, limit: 12 }),
   });
-  const news = data?.data?.data || [];
+  const news: News[] = data?.data?.data || [];
   const meta = data?.data?.meta;
 
   return (
@@ -22,7 +32,7 @@ export default function NewsPage() {
         <div className="grid md:grid-cols-3 gap-6">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-64 bg-gray-800 rounded-xl animate-pulse" />)}</div>
       ) : (
         <div className="grid md:grid-cols-3 gap-6">
-          {news.map((n: any) => (
+          {news.map((n: News) => (
             <button key={n.id} onClick={() => navigate(`/news/${n.slug}`)}
               className="text-left bg-gray-800 hover:bg-gray-750 rounded-xl overflow-hidden group transition-all hover:scale-[1.01]">
               {n.image && <img src={n.image} alt={n.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform" />}

@@ -13,7 +13,6 @@ const __dirname = path.dirname(__filename);
 const PORT = 3001;
 const LOG_FILE = path.join(__dirname, 'paylock_injectables_js.log');
 
-
 const server = http.createServer((req, res) => {
 
     // --- CORS (dev) ---
@@ -26,7 +25,6 @@ const server = http.createServer((req, res) => {
         res.writeHead(204);
         return res.end();
     }
-
 
     if (req.method !== 'POST') {
         res.writeHead(405, { 'Content-Type': 'application/json' });

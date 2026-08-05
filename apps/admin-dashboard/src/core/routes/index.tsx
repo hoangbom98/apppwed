@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/core/routes/index.tsx
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import React, { lazy, Suspense } from 'react';
 import AdminLayout    from '../layouts/AdminLayout';
@@ -146,6 +144,7 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'feedbacks',         element: lazyPage(() => import('@admin/modules/hub/pages/AdminFeedbacksPage')) },
   { path: 'seo',               element: lazyPage(() => import('@admin/modules/hub/pages/AdminSeoPage')) },
   { path: 'hub/config',        element: lazyPage(() => import('@admin/modules/hub/pages/HubConfig')) },
+  { path: 'hub/courses',       element: lazyPage(() => import('@admin/modules/hub/pages/AdminAcademyCoursesPage')) },
   { path: 'app-catalog',       element: lazyPage(() => import('@admin/modules/hub/pages/AppCatalogPage')) },
 
   // Game
@@ -189,6 +188,9 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'trade/packages',    element: lazyPage(() => import('@admin/modules/trade/pages/TradeInvestmentsPage').then(m => ({ default: m.PackagesList }))) },
   { path: 'trade/config',      element: lazyPage(() => import('@admin/modules/trade/pages/TradeConfig')) },
 
+  // Group Finance extended
+  { path: 'group-finance/analysis',        element: lazyPage(() => import('@admin/modules/finance/pages/FinancialAnalysisPage')) },
+
   // Settings extended
   { path: 'settings/integrations',        element: <IntegrationSettingsPage /> },
   { path: 'settings/general',             element: <GeneralSettingsPage /> },
@@ -198,6 +200,8 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'settings/widgets',             element: <WidgetsPage /> },
   { path: 'settings/telegram-broadcast',  element: <TelegramBroadcastPage /> },
   { path: 'settings/telegram-bot',        element: <TelegramAutoReplyPage /> },
+  { path: 'settings/feature-flags',       element: lazyPage(() => import('@admin/modules/settings/pages/FeatureFlagsPage')) },
+  { path: 'settings/cskh',                element: lazyPage(() => import('@admin/modules/settings/pages/CskhEditorPage')) },
 
   // Ops
   { path: 'ops',               element: lazyPage(() => import('@admin/modules/ops/pages/OperationsDashboard')) },
@@ -205,6 +209,18 @@ const ADMIN_CHILD_ROUTES = [
   { path: 'ops/segments',      element: lazyPage(() => import('@admin/modules/ops/pages/SegmentsPage')) },
   { path: 'ops/reports',       element: lazyPage(() => import('@admin/modules/ops/pages/ReportsPage')) },
   { path: 'ops/campaigns',     element: lazyPage(() => import('@admin/modules/ops/pages/CampaignsPage')) },
+
+  // Social App
+  { path: 'social',            element: lazyPage(() => import('@admin/modules/social/pages/SocialDashboard')) },
+  { path: 'social/posts',      element: lazyPage(() => import('@admin/modules/social/pages/SocialPostsPage')) },
+  { path: 'social/users',      element: lazyPage(() => import('@admin/modules/social/pages/SocialUsersPage')) },
+  { path: 'social/reports',    element: lazyPage(() => import('@admin/modules/social/pages/SocialReportsPage')) },
+
+  // ProDevs CLI
+  { path: 'prodevs',           element: lazyPage(() => import('@admin/modules/prodevs/pages/ProdevsDashboard')) },
+  { path: 'prodevs/projects',  element: lazyPage(() => import('@admin/modules/prodevs/pages/ProdevsProjectsPage')) },
+  { path: 'prodevs/templates', element: lazyPage(() => import('@admin/modules/prodevs/pages/ProdevsTemplatesPage')) },
+  { path: 'prodevs/ai-config', element: lazyPage(() => import('@admin/modules/prodevs/pages/ProdevsAIConfigPage')) },
 ];
 
 export const router = createBrowserRouter([

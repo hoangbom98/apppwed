@@ -28,7 +28,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ banners }) => {
       >
         {banners.map((banner) => (
           <SwiperSlide key={banner.id}>
-            <img src={banner.image} alt="banner" className="w-full h-full object-cover" />
+            <img src={banner.image} alt="banner" className="w-full h-full object-cover" loading="eager" fetchPriority="high" width="800" height="140" />
           </SwiperSlide>
         ))}
       </Swiper>

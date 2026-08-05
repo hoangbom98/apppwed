@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const body  = await req.json();
-  const result = db.updateSprint(Number(id), body);
+  const result = await db.updateSprint(Number(id), body);
   if (!result) return NextResponse.json({ error: "Sprint not found" }, { status: 404 });
   return NextResponse.json(result);
 }

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/FeatureFlagsPage.tsx
 // Route: /settings/feature-flags
 // Quản lý Feature Flags động — Super Admin bật/tắt tính năng theo từng project
 import React, { useState } from 'react';

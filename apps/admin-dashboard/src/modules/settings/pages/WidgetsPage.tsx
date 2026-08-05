@@ -1,5 +1,3 @@
-// @ts-nocheck
-// frontend/admin-dashboard/src/modules/settings/pages/WidgetsPage.jsx
 // Route: /settings/widgets
 // Cấu hình widget nhúng vào trang: Zalo OA, Facebook Messenger, Live Chat, Gọi điện,
 // Google Analytics, Facebook Pixel — lưu vào SystemSetting với group='widget'

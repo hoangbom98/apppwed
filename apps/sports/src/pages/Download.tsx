@@ -26,8 +26,8 @@ const SPORTS_APP: Record<string, any> = {
   updatedAt:    'Tháng 7 năm 2026',
 
   // ── Download links ───────────────────────────────────────────────────
-  androidLink: 'https://yourdomain.com/downloads/sports.apk',
-  iosLink:     'itms-services://?action=download-manifest&url=https://yourdomain.com/ios/sports-manifest.plist',
+  androidLink: 'https://tc-gaming.live/downloads/sports.apk',
+  iosLink:     'itms-services://?action=download-manifest&url=https://tc-gaming.live/ios/sports-manifest.plist',
   qrCodeUrl:   '',
 
   // ── Feature badges ───────────────────────────────────────────────────

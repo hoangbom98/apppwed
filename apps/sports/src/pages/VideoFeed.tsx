@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getShortVideos, likeVideo } from '../api/sports';
 import { Heart, Share2 } from 'lucide-react';
